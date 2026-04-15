@@ -1,0 +1,178 @@
+// 🔧 Prisma Configuration
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+//
+// 👕 Productos
+//
+model Product {
+  id          Int            @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  currency    String
+  imageUrl    String?
+  images      String[]
+  category    Category
+  sizes       String[]
+  colors      String[]
+  stock       Int
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // 🔗 Relaciones
+  orderItems OrderProduct[]
+  owner      User?          @relation(fields: [ownerId], references: [id])
+  ownerId     Int?
+}
+
+enum Category {
+  cilindros
+  llantas
+  frenos
+  aceites_lubricantes
+  filtros
+  baterias
+  transmision
+  kit_arrastre
+  suspension
+  escape
+  electrico
+  iluminacion
+  carenaje
+  accesorios
+}
+
+//
+// 🧾 Órdenes
+//
+model Order {
+  id              Int           @id @default(autoincrement())
+  referenceCode   String        @unique @default(uuid())
+  total           Float
+  currency        String        @default("COP")
+  status          OrderStatus   @default(PENDING)
+  transactionId   String?
+  paymentMethod   PaymentMethod @default(CONTRAENTREGA)
+  paymentNetwork  String?
+  signature       String?
+  rawResponse     Json?
+
+  // 👤 Información del clienteact
+  customerName    String
+  customerEmail   String
+  address         String
+  city            String
+  department      String?
+  postalCode      String?
+  phone           String
+  cedula          String?
+
+  // 🔗 Relación futura con usuario registrado
+  userId          Int?
+  user            User?         @relation(fields: [userId], references: [id])
+
+  // 🕒 Fechas
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // 🧩 Productos en la orden
+  products        OrderProduct[]
+
+  // --- 👇 LÓGICA HÍBRIDA (Correcto) ---
+  
+  // 💸 Código de promoción aplicado
+  promoCodeApplied String?
+
+  // 🔗 Relación opcional con vendedor (por código)
+  sellerId        String?
+  seller          Seller?       @relation(fields: [sellerId], references: [id])
+  // --- ---
+}
+
+//
+// 🔁 Relación N:M entre Órdenes y Productos
+//
+model OrderProduct {
+  id        Int      @id @default(autoincrement())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   Int
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  quantity  Int      @default(1)
+}
+
+//
+// 📊 Enums
+//
+enum OrderStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  SHIPPED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CONTRAENTREGA
+  PAYU
+}
+
+//
+// 👤 Usuarios (registro futuro)
+//
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      Role     @default(VENDEDOR)
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 🔗 Relaciones
+  orders    Order[]
+  products  Product[]
+  seller    Seller? // Relación 1:1 con Seller (opcional)
+}
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  VENDEDOR
+}
+
+//
+// 🧾 Vendedores (identificados por código)
+// ¡Este modelo es esencial para tu lógica!
+//
+model Seller {
+  id      String   @id @default(cuid())
+  name    String
+  code    String   @unique // El código que ingresará el vendedor
+  orders  Order[]
+
+  // 🔗 Relación 1:1 futura con usuario registrado
+  userId  Int?     @unique
+  user    User?    @relation(fields: [userId], references: [id])
+}
+
+//
+// 🎁 Promociones (códigos de descuento válidos)
+// ¡Este modelo también es esencial!
+//
+model Promotion {
+  id          String    @id @default(cuid())
+  code        String    @unique // El código que ingresará el cliente
+  discount    Float
+  description String
+  isActive    Boolean   @default(true)
+  expiresAt   DateTime?
+}
