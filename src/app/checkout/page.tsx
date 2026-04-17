@@ -687,7 +687,6 @@ const CheckoutPage: React.FC = () => {
                     <span className="font-semibold text-gray-800 dark:text-slate-200">
                       ${cartTotal.toLocaleString('es-CO')}
                     </span>
-
                   </div>
                   
                   {/* Descuento (si aplica) */}

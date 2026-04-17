@@ -245,7 +245,7 @@ async function flushQueuedEmailsForOrder(referenceCode: string): Promise<void> {
   await persistQueuedEmails(referenceCode, pending);
 }
 
-async function sendWithRetries(mailOptions: Parameters<typeof transporter.sendMail>[0], maxAttempts = 3): Promise<void> {
+async function sendWithRetries(mailOptions: Parameters<NonNullable<typeof transporter>["sendMail"]>[0], maxAttempts = 3): Promise<void> {
   let lastError: unknown;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
