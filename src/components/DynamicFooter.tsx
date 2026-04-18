@@ -72,14 +72,14 @@ export default function DynamicFooter() {
           {/* Redes sociales */}
           <div className="flex gap-4 justify-center md:justify-end">
             <Link
-              href="https://www.facebook.com/share/1ADF6KRMDB/?mibextid=wwXIfr"
+              href="https://www.facebook.com/ROBINSON.BOTERO.M/"
               target="_blank"
               className="p-2 rounded-full bg-slate-200 dark:bg-gray-700 hover:bg-[#0A2A66] hover:text-white transition-colors"
             >
               <Facebook className="w-5 h-5" />
             </Link>
             <Link
-              href="https://www.instagram.com/onelike.tienda"
+              href="https://www.instagram.com/motoservicioayr/"
               target="_blank"
               className="p-2 rounded-full bg-slate-200 dark:bg-gray-700 hover:bg-[#2E5FA7] hover:text-white transition-colors"
             >
@@ -90,7 +90,7 @@ export default function DynamicFooter() {
 
         {/* Línea divisoria */}
         <div className="border-t border-slate-200 dark:border-gray-700 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500 dark:text-gray-500">
-          <p>© {new Date().getFullYear()} TALLER DE MOTOS A&amp;R. Todos los derechos reservados.</p>
+          <p>© {new Date().getFullYear()} Almacén y Taller Motoservicio A&amp;R. Todos los derechos reservados.</p>
           <p className="mt-2 md:mt-0">
             Diseño web por <span className="text-[#0A2A66] font-semibold">FACRISCD</span>
           </p>

@@ -53,7 +53,7 @@ const organizationJsonLd = {
       closes: "18:00",
     },
   ],
-  sameAs: ["https://www.facebook.com/share/1ADF6KRMDB/"],
+  sameAs: ["https://www.facebook.com/ROBINSON.BOTERO.M/", "https://www.instagram.com/motoservicioayr/"],
 };
 
 const websiteJsonLd = {
