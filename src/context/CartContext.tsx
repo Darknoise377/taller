@@ -31,6 +31,35 @@ interface CartProviderProps {
 // ✅ URL del API, fallback seguro
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
+function isValidCartItem(value: unknown): value is CartItem {
+  if (!value || typeof value !== "object") return false;
+
+  const maybeItem = value as {
+    quantity?: unknown;
+    product?: { id?: unknown; price?: unknown; name?: unknown };
+  };
+
+  return (
+    typeof maybeItem.quantity === "number" &&
+    maybeItem.quantity > 0 &&
+    !!maybeItem.product &&
+    typeof maybeItem.product.id === "number" &&
+    typeof maybeItem.product.name === "string" &&
+    typeof maybeItem.product.price === "number"
+  );
+}
+
+function sanitizeCartItems(value: unknown): CartItem[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter(isValidCartItem)
+    .map((item) => ({
+      ...item,
+      quantity: Math.max(1, Math.floor(item.quantity)),
+    }));
+}
+
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
@@ -56,19 +85,29 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   useEffect(() => {
     const fetchCart = async () => {
       if (typeof window === "undefined") return;
+
       try {
-        const res = await fetch(`${API_URL}/cart`);
-        if (!res.ok) throw new Error("Error cargando carrito backend");
-        const data: CartItem[] = await res.json();
-        setItems(data.filter((i) => i && i.product));
-      } catch {
         const stored = localStorage.getItem("cart");
         if (stored) {
-          const parsed: CartItem[] = JSON.parse(stored);
-          setItems(parsed.filter((i) => i && i.product));
+          const parsed = sanitizeCartItems(JSON.parse(stored));
+          if (parsed.length > 0) {
+            setItems(parsed);
+            return;
+          }
         }
+      } catch {
+        localStorage.removeItem("cart");
       } finally {
         setIsCartLoaded(true);
+      }
+
+      try {
+        const res = await fetch(`${API_URL}/cart`, { cache: "no-store" });
+        if (!res.ok) throw new Error("Error cargando carrito backend");
+        const data = sanitizeCartItems(await res.json());
+        setItems(data);
+      } catch {
+        setItems([]);
       }
     };
     fetchCart();
@@ -77,7 +116,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   /** 💾 Guardar carrito en localStorage y backend */
   useEffect(() => {
     if (!isCartLoaded) return;
-    const sanitizedItems = items.filter((i) => i && i.product);
+    const sanitizedItems = sanitizeCartItems(items);
 
     if (typeof window !== "undefined") {
       localStorage.setItem("cart", JSON.stringify(sanitizedItems));
@@ -148,15 +187,24 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     selectedSize?: string,
     selectedColor?: string
   ) => {
-    setItems((prev) =>
-      prev.map((item) =>
+    setItems((prev) => {
+      if (newQuantity <= 0) {
+        return prev.filter(
+          (item) =>
+            item.product.id !== productId ||
+            item.selectedSize !== selectedSize ||
+            item.selectedColor !== selectedColor
+        );
+      }
+
+      return prev.map((item) =>
         item.product.id === productId &&
         item.selectedSize === selectedSize &&
         item.selectedColor === selectedColor
-          ? { ...item, quantity: newQuantity }
+          ? { ...item, quantity: Math.max(1, newQuantity) }
           : item
-      )
-    );
+      );
+    });
   };
 
   const clearCart = () => {

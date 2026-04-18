@@ -1,33 +1,44 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+
+function isValidCartPayload(value: unknown): boolean {
+  if (!Array.isArray(value)) return false;
+
+  return value.every((item) => {
+    if (!item || typeof item !== "object") return false;
+
+    const maybeItem = item as {
+      quantity?: unknown;
+      product?: { id?: unknown };
+    };
+
+    return (
+      typeof maybeItem.quantity === "number" &&
+      maybeItem.quantity > 0 &&
+      !!maybeItem.product &&
+      typeof maybeItem.product.id === "number"
+    );
+  });
+}
 
 /**
  * GET /api/cart
- * Obtiene todos los productos (lectura pública)
+ * El carrito vive en el cliente; aquí solo devolvemos un fallback vacío.
  */
 export async function GET() {
-  try {
-    const products = await prisma.product.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json(products, { status: 200 });
-  } catch (error) {
-    console.error("❌ Error al obtener productos:", error);
-    return NextResponse.json([], { status: 200 });
-  }
+  return NextResponse.json([], { status: 200 });
 }
 
 /**
  * PUT /api/cart
- * Sincroniza el carrito del cliente (solo validación, sin persistencia)
+ * Valida el carrito del cliente para sincronización ligera.
  */
 export async function PUT(req: Request) {
   try {
     const cartItems = await req.json();
 
-    if (!Array.isArray(cartItems)) {
+    if (!isValidCartPayload(cartItems)) {
       return NextResponse.json(
-        { message: "El formato del carrito es inválido. Se esperaba un array." },
+        { message: "El formato del carrito es inválido." },
         { status: 400 }
       );
     }
