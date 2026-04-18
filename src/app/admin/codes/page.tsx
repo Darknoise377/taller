@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, FormEvent, ChangeEvent } from 'react';
-import { Seller, Promotion } from '@prisma/client';
+import type { SellerCode as Seller, PromotionCode as Promotion } from '@/types/code';
 import * as codeService from '@/services/codeService';
 import { toast } from 'sonner';
 import { Pencil, Trash2, X } from 'lucide-react';

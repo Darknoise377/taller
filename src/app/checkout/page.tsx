@@ -14,11 +14,8 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
 import { CartItem as ICartItem } from '@/types/cart';
 import { orderService } from '@/services/orderService';
-import {
-  PaymentMethod,
-  Seller, // ✨ AÑADIDO: Tipo de Prisma
-  Promotion, // ✨ AÑADIDO: Tipo de Prisma
-} from '@prisma/client';
+import type { PaymentMethod } from '@/types/order';
+import type { PromotionCode, SellerCode } from '@/types/code';
 import colombia from '@/data/colombia.json';
 import {
   MapPinIcon,
@@ -47,7 +44,7 @@ interface ShippingInfo {
 // ✨ AÑADIDO: Tipo para el código validado
 type ValidatedCode = {
   type: 'seller' | 'promotion';
-  data: Seller | Promotion;
+  data: SellerCode | PromotionCode;
 } | null;
 
 type ColombiaDepartment = {
@@ -198,7 +195,7 @@ const CheckoutPage: React.FC = () => {
   // --- ✨ AÑADIDO: Cálculos de Totales Dinámicos (de V2) ---
   const { finalTotal, discountAmount } = useMemo(() => {
     if (validatedCode?.type === 'promotion') {
-      const promo = validatedCode.data as Promotion;
+      const promo = validatedCode.data as PromotionCode;
       return calculateDiscountedTotal(cartTotal, promo.discount);
     }
 
@@ -332,11 +329,11 @@ const CheckoutPage: React.FC = () => {
       // --- ✨ AÑADIDO: Lógica de Códigos Híbridos ---
       sellerId:
         validatedCode?.type === 'seller'
-          ? (validatedCode.data as Seller).id
+          ? (validatedCode.data as SellerCode).id
           : undefined,
       promoCodeApplied:
         validatedCode?.type === 'promotion'
-          ? (validatedCode.data as Promotion).code
+          ? (validatedCode.data as PromotionCode).code
           : undefined,
     };
 
@@ -658,14 +655,14 @@ const CheckoutPage: React.FC = () => {
                   {validatedCode?.type === 'seller' && (
                     <div className="mt-2 p-2 bg-blue-100 text-blue-800 rounded-lg text-sm">
                       Venta asignada a:{' '}
-                      <strong>{(validatedCode.data as Seller).name}</strong>
+                      <strong>{(validatedCode.data as SellerCode).name}</strong>
                     </div>
                   )}
                   {validatedCode?.type === 'promotion' && (
                     <div className="mt-2 p-2 bg-green-100 text-green-800 rounded-lg text-sm">
                       ¡Descuento aplicado!{' '}
                       <strong>
-                        {(validatedCode.data as Promotion).description}
+                        {(validatedCode.data as PromotionCode).description}
                       </strong>
                     </div>
                   )}
@@ -688,7 +685,7 @@ const CheckoutPage: React.FC = () => {
                     <div className="flex justify-between text-green-600 font-medium">
                       <span>
                         Descuento (
-                        {(validatedCode.data as Promotion).discount}%)
+                        {(validatedCode.data as PromotionCode).discount}%)
                       </span>
                       <span>
                         -{formatCurrency(discountAmount)}

@@ -2,6 +2,7 @@
 
 // --- Importaciones de Librerías ---
 import React, { useEffect, useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import dayjs, { Dayjs } from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
@@ -39,11 +40,12 @@ import { orderService } from '@/services/orderService';
 import { Order, OrderStatus } from '@/types/order';
 import type { TableProps } from 'antd';
 import { useOrderExporter } from '@/hooks/useOrderExporter';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 // --- Importaciones de Componentes Modulares ---
-import OrdersFilters from './components/OrdersFilters'; // <-- Componente de filtros (MODIFICADO)
-import OrdersStats from './components/OrdersStats';
-import OrdersTable from './components/OrdersTable';
+const OrdersFilters = dynamic(() => import('./components/OrdersFilters'));
+const OrdersStats = dynamic(() => import('./components/OrdersStats'));
+const OrdersTable = dynamic(() => import('./components/OrdersTable'));
 
 // --- Configuración de Dayjs ---
 dayjs.extend(isSameOrAfter);
@@ -336,7 +338,7 @@ export default function OrdersPage() {
       key: 'total',
       width: 140,
       sorter: (a, b) => a.total - b.total,
-      render: (total: number) => <Text strong>${total.toLocaleString('es-CO')}</Text>,
+      render: (total: number) => <Text strong>{formatCurrency(total)}</Text>,
     },
     {
       title: 'Estado',
