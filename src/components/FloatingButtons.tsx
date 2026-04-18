@@ -5,8 +5,8 @@ import { ChevronUpIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import { isCheckoutPath } from "@/utils/routeUtils";
 
-const WHATSAPP_NUMBER = "573101234567"; // Cambia al número real
-const WHATSAPP_MESSAGE = "Hola, estoy interesado en sus productos de Taller de Motos A&R";
+const WHATSAPP_NUMBER = "573015271104";
+const WHATSAPP_MESSAGE = "Hola, estoy interesado en los repuestos de Motoservicio A&R";
 
 export default function FloatingButtons() {
   const [showBackToTop, setShowBackToTop] = useState(false);

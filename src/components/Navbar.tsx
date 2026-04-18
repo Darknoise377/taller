@@ -57,20 +57,20 @@ const Navbar = () => {
           <Link href="/" className="flex items-center gap-3 group">
             <div className="relative h-11 w-11 overflow-hidden rounded-full ring-1 ring-slate-200 shadow-md dark:ring-slate-700">
               <Image
-                src="/icon.svg"
+                src="/logo.png"
                 alt="Logo Taller de Motos A&R"
                 fill
                 sizes="44px"
-                className="object-contain"
+                className="object-cover"
                 priority
               />
             </div>
             <div>
               <h1 className="text-base md:text-xl font-semibold tracking-tight text-slate-900 dark:text-slate-100">
-                TALLER DE MOTOS A&amp;R
+                Motoservicio A&amp;R
               </h1>
               <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">
-                Almacén, taller y motoservicio.
+                Repuestos y servicio técnico
               </p>
             </div>
           </Link>

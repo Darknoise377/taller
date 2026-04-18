@@ -19,14 +19,16 @@ export default function AboutPage() {
       {/* Intro */}
       <section className="rounded-2xl bg-gradient-to-b from-white/60 to-white/30 dark:from-[#071022]/60 dark:to-[#081022]/30 border border-slate-200 dark:border-slate-800 p-8 shadow-xl backdrop-blur-md">
         <h2 className="text-3xl md:text-4xl font-extrabold mb-3 leading-tight">
-          Quiénes somos y cómo comprar
+          Quiénes somos
         </h2>
         <p className="text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">
-          En <strong className="text-slate-900 dark:text-slate-100">TALLER DE MOTOS A&amp;R</strong>, construimos una tienda enfocada en repuestos y accesorios para moto.
-          Queremos que encuentres lo que necesitas sin vueltas: información clara, stock visible y una compra simple.
+          <strong className="text-slate-900 dark:text-slate-100">Almacén y Taller Motoservicio A&amp;R</strong> es un negocio familiar con más de 15 años de experiencia
+          en el sector de las motos. Ubicados en La Ceja, Antioquia, ofrecemos servicio técnico especializado y venta de repuestos
+          para todas las marcas.
         </p>
         <p className="mt-3 text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">
-          Nuestro objetivo es simple: ayudarte a mantener tu moto lista, con productos confiables y una experiencia de compra accesible.
+          Nuestro compromiso es brindarte atención personalizada, piezas de calidad y un servicio que mantenga tu moto
+          en óptimas condiciones. Ahora también puedes comprar repuestos desde cualquier lugar de Colombia.
         </p>
 
         <div className="mt-6 rounded-2xl bg-white/70 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 p-5">
@@ -68,7 +70,8 @@ export default function AboutPage() {
             <h3 className="text-2xl font-bold">Nuestra Misión</h3>
           </div>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            Ofrecer repuestos y accesorios para moto con información clara, compra sencilla y un servicio que te acompañe antes y después del pedido.
+            Brindar soluciones integrales para el mantenimiento y reparación de motos, con repuestos de calidad, servicio técnico
+            profesional y atención cercana que genere confianza en nuestros clientes.
           </p>
         </div>
 
@@ -80,7 +83,8 @@ export default function AboutPage() {
             <h3 className="text-2xl font-bold">Nuestra Visión</h3>
           </div>
           <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-            Ser una referencia en repuestos y accesorios para moto, destacando por una experiencia moderna, accesible y transparente.
+            Ser el taller y almacén de confianza de la región, reconocido por la calidad de nuestro servicio, la disponibilidad de repuestos
+            y el trato honesto con cada cliente.
           </p>
         </div>
       </section>
@@ -93,11 +97,11 @@ export default function AboutPage() {
               <div className="p-2 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white">
                 <FlagIcon className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold">Calidad colombiana</h3>
+              <h3 className="text-2xl font-bold">Experiencia y confianza</h3>
             </div>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-              Apostamos por procesos responsables y proveedores confiables.
-              Nuestro compromiso es ofrecer productos consistentes y una experiencia clara desde el catálogo hasta la entrega.
+              Más de 15 años trabajando con motos nos respaldan. Conocemos las necesidades de nuestros clientes
+              y trabajamos con proveedores de confianza para ofrecer repuestos de calidad a precios justos.
             </p>
           </div>
 

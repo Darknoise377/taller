@@ -175,49 +175,49 @@ export default function Home() {
           >
             <div className="h-full rounded-[28px] border border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-[#09142d]/85 p-6 sm:p-8 shadow-[0_20px_70px_-30px_rgba(10,42,102,0.45)] backdrop-blur-xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#2E5FA7]/20 bg-[#0A2A66]/5 px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-[#0A2A66] dark:text-[#C7D2E0]">
-                A&amp;R MOTOSERVICIO
+                MOTOSERVICIO A&amp;R
               </div>
 
               <div className="mt-4 flex items-center gap-4">
                 <div className="relative h-14 w-14 rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-md dark:border-slate-700 dark:bg-slate-900">
                   <Image
-                    src="/icon.svg"
+                    src="/logo.png"
                     alt="Logo A&R"
                     fill
                     sizes="56px"
-                    className="object-contain p-1"
+                    className="object-cover"
                     priority
                   />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    Taller de Motos A&amp;R
+                    Almacén y Taller Motoservicio A&amp;R
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Almacén, repuestos y servicio especializado
+                    La Ceja, Antioquia • +57 301 527 1104
                   </p>
                 </div>
               </div>
 
               <h2 className="mt-5 text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight text-slate-950 dark:text-white">
-                Una vitrina más profesional para el taller y sus repuestos.
+                Repuestos y servicio técnico para tu moto
               </h2>
 
               <p className="mt-4 text-sm sm:text-base leading-7 text-slate-600 dark:text-slate-300">
-                Diseñamos una experiencia visual más sólida, confiable y moderna para que tus clientes encuentren
-                productos rápido y sientan la identidad real de A&amp;R desde el primer vistazo.
+                Más de 15 años de experiencia en mantenimiento, reparación y venta de repuestos para todas las marcas.
+                Atención personalizada y piezas de calidad garantizada.
               </p>
 
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
                   <WrenchScrewdriverIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
-                  <p className="text-sm font-semibold">Atención experta</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Asesoría pensada para moteros y taller.</p>
+                  <p className="text-sm font-semibold">Técnicos especializados</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Personal capacitado en todas las marcas.</p>
                 </div>
                 <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
                   <ShieldCheckIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
-                  <p className="text-sm font-semibold">Compra confiable</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Proceso claro, seguro y con mejor imagen.</p>
+                  <p className="text-sm font-semibold">Garantía en repuestos</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Piezas originales y genéricas de calidad.</p>
                 </div>
                 <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
                   <CheckCircleIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
@@ -284,18 +284,18 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FeatureCard
               icon={<CheckCircleIcon className="w-8 h-8" />}
-              title="Compra fácil"
-              description="Referencia clara del repuesto, stock visible y checkout directo."
+              title="Repuestos disponibles"
+              description="Amplio stock de piezas originales y genéricas para todas las marcas de motos."
             />
             <FeatureCard
               icon={<CubeTransparentIcon className="w-8 h-8" />}
-              title="Catálogo útil"
-              description="Cilindros, llantas, frenos y mas piezas organizadas para encontrar rapido lo que buscas."
+              title="Servicio técnico"
+              description="Mantenimiento preventivo, correctivo y diagnóstico profesional para tu moto."
             />
             <FeatureCard
               icon={<GlobeAltIcon className="w-8 h-8" />}
-              title="Envío confiable"
-              description="Despacho seguro y seguimiento para tus pedidos."
+              title="Envío a todo el país"
+              description="Despachamos tus repuestos con envío seguro a cualquier ciudad de Colombia."
             />
           </div>
         </section>
@@ -305,10 +305,10 @@ export default function Home() {
           <div className="rounded-[28px] overflow-hidden border border-slate-200 dark:border-slate-800 bg-gradient-to-r from-[#07122E] via-[#0A2A66] to-[#153B82] text-white p-6 sm:p-8 shadow-[0_20px_70px_-30px_rgba(10,42,102,0.55)]">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div className="max-w-2xl">
-                <p className="text-xs font-semibold tracking-[0.18em] text-[#C7D2E0] uppercase">Imagen profesional</p>
-                <h4 className="text-2xl sm:text-3xl font-bold mt-2">Equipa tu moto con una tienda que inspira confianza.</h4>
+                <p className="text-xs font-semibold tracking-[0.18em] text-[#C7D2E0] uppercase">Tu moto en buenas manos</p>
+                <h4 className="text-2xl sm:text-3xl font-bold mt-2">Visita nuestro taller o compra tus repuestos en línea</h4>
                 <p className="mt-3 text-sm sm:text-base text-slate-200">
-                  Repuestos, accesorios y una experiencia visual alineada con la calidad del taller.
+                  15+ años de experiencia respaldan nuestro trabajo. Calle 21 #14-29, La Ceja, Antioquia.
                 </p>
               </div>
               <Link

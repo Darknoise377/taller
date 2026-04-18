@@ -20,10 +20,10 @@ export default function ContactPage() {
             Tiempo estimado de respuesta: 1–2 días hábiles.
           </p>
           <a
-            href="mailto:info@onelikeoficial.com"
+            href="mailto:motoservicioar@gmail.com"
             className="text-sm font-semibold text-[#0A2A66] hover:underline"
           >
-            info@onelikeoficial.com
+            motoservicioar@gmail.com
           </a>
         </div>
 
@@ -34,13 +34,15 @@ export default function ContactPage() {
             Para consultas rápidas y seguimiento de pedidos.
           </p>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-            Horario sugerido: lunes a viernes, 9:00–18:00.
+            Horario: lunes a sábado, 8:00 AM – 6:00 PM.
           </p>
           <a
-            href="tel:+573101234567"
+            href="https://wa.me/573015271104"
+            target="_blank"
+            rel="noopener noreferrer"
             className="text-sm font-semibold text-[#0A2A66] hover:underline"
           >
-            +57 310 123 4567
+            +57 301 527 1104
           </a>
         </div>
 
@@ -48,8 +50,16 @@ export default function ContactPage() {
           <MapPinIcon className="w-10 h-10 text-[#0A2A66] mb-3" />
           <h3 className="text-xl font-semibold mb-2">Ubicación</h3>
           <p className="text-slate-600 dark:text-slate-300">
-            Calle 123 # 45 - 67, Bogotá, Colombia
+            Calle 21 #14-29, La Ceja, Antioquia
           </p>
+          <a
+            href="https://maps.google.com/?q=Calle+21+14-29+La+Ceja+Antioquia"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 inline-block text-sm font-semibold text-[#0A2A66] hover:underline"
+          >
+            Ver en Google Maps
+          </a>
         </div>
 
         <div className="rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-lg p-6 md:col-span-2 lg:col-span-3">

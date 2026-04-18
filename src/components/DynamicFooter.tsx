@@ -18,17 +18,17 @@ export default function DynamicFooter() {
         {/* Marca y descripción */}
         <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
           <div className="text-center md:text-left flex flex-col items-center md:items-start">
-            <div className="relative h-16 w-40 mb-3">
-              <Image
-                src="/logo-ar.svg"
+<div className="relative h-20 w-48 mb-3">
+            <Image
+                src="/logo.png"
                 alt="Logo Taller de Motos A&R"
                 fill
-                sizes="160px"
+                sizes="192px"
                 className="object-contain object-left"
               />
             </div>
             <p className="text-sm text-slate-500 dark:text-gray-400 mt-2">
-              Repuestos y accesorios para tu moto.
+              Taller y almacén de repuestos para motos. La Ceja, Antioquia.
             </p>
           </div>
 
