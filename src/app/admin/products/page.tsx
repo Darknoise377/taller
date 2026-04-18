@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { Product } from '@/types/product';
 import {
   Button,
@@ -31,6 +31,7 @@ import type { UploadFile } from 'antd/es/upload/interface';
 import type { ColumnsType } from 'antd/es/table';
 import { productService, uploadImage } from '@/services/productService';
 import { PRODUCT_CATEGORY_OPTIONS, getProductCategoryLabel } from '@/constants/productCategories';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 // --- Constantes y Opciones ---
 const CATEGORY_OPTIONS = PRODUCT_CATEGORY_OPTIONS;
@@ -144,21 +145,21 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleDeleteProduct = async (id: number) => {
+  const handleDeleteProduct = useCallback(async (id: number) => {
     try {
       await productService.deleteProduct(id);
       message.success('Producto eliminado con éxito');
-      setProducts(products.filter((p) => Number(p.id) !== id));
+      setProducts((prev) => prev.filter((p) => Number(p.id) !== id));
     } catch (error) {
       console.error('Error deleting product:', error);
       message.error(
         (error as Error).message || 'Error al eliminar el producto'
       );
     }
-  };
+  }, []);
 
   // --- Funciones del Modal y Formulario ---
-  const openModal = (product?: Product) => {
+  const openModal = useCallback((product?: Product) => {
     setEditingProduct(product || null);
     if (product) {
       form.setFieldsValue({ ...product });
@@ -174,10 +175,10 @@ export default function AdminProductsPage() {
       setFileList([]);
     }
     setModalOpen(true);
-  };
+  }, [form]);
 
   // --- Definición de Columnas para la Tabla ---
-  const columns: ColumnsType<Product> = [
+  const columns: ColumnsType<Product> = useMemo(() => [
     {
       title: 'Imagen',
       dataIndex: 'imageUrl',
@@ -204,8 +205,7 @@ export default function AdminProductsPage() {
       dataIndex: 'price',
       key: 'price',
       sorter: (a, b) => a.price - b.price,
-      render: (price: number, record) =>
-        `${record.currency ?? 'USD'} ${price.toLocaleString()}`,
+      render: (price: number, record) => formatCurrency(price, record.currency ?? 'COP'),
     },
     {
       title: 'Categoría',
@@ -253,7 +253,7 @@ export default function AdminProductsPage() {
         </Space>
       ),
     },
-  ];
+  ], [handleDeleteProduct, openModal]);
 
   // --- Renderizado del Componente ---
 return (

@@ -29,6 +29,7 @@ import {
   LockClosedIcon,
 } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
+import { calculateDiscountedTotal, formatCurrency } from '@/utils/formatCurrency';
 
 // --- Interfaces ---
 
@@ -196,16 +197,12 @@ const CheckoutPage: React.FC = () => {
 
   // --- ✨ AÑADIDO: Cálculos de Totales Dinámicos (de V2) ---
   const { finalTotal, discountAmount } = useMemo(() => {
-    let finalTotal = cartTotal;
-    let discountAmount = 0;
-
     if (validatedCode?.type === 'promotion') {
       const promo = validatedCode.data as Promotion;
-      discountAmount = cartTotal * (promo.discount / 100);
-      finalTotal = cartTotal - discountAmount;
+      return calculateDiscountedTotal(cartTotal, promo.discount);
     }
 
-    return { finalTotal, discountAmount };
+    return { finalTotal: cartTotal, discountAmount: 0 };
   }, [cartTotal, validatedCode]);
 
   // --- Efectos de Carga (de V1) ---
@@ -605,10 +602,7 @@ const CheckoutPage: React.FC = () => {
                           </p>
                         </div>
                         <span className="font-bold text-gray-900 dark:text-slate-100">
-                          $
-                          {(
-                            item.product.price * item.quantity
-                          ).toLocaleString('es-CO')}
+                          {formatCurrency(item.product.price * item.quantity, item.product.currency ?? 'COP')}
                         </span>
                       </li>
                     ))}
@@ -685,7 +679,7 @@ const CheckoutPage: React.FC = () => {
                       {totalItems === 1 ? 'artículo' : 'artículos'})
                     </span>
                     <span className="font-semibold text-gray-800 dark:text-slate-200">
-                      ${cartTotal.toLocaleString('es-CO')}
+                      {formatCurrency(cartTotal)}
                     </span>
                   </div>
                   
@@ -697,7 +691,7 @@ const CheckoutPage: React.FC = () => {
                         {(validatedCode.data as Promotion).discount}%)
                       </span>
                       <span>
-                        -${discountAmount.toLocaleString('es-CO')}
+                        -{formatCurrency(discountAmount)}
                       </span>
                     </div>
                   )}
@@ -706,7 +700,7 @@ const CheckoutPage: React.FC = () => {
                   <div className="flex justify-between text-xl font-bold border-t border-gray-200 dark:border-slate-700 pt-3 mt-3">
                     <span className="text-gray-900 dark:text-slate-100">Total a Pagar:</span>
                     <span className="text-[#0A2A66] dark:text-[#2E5FA7]">
-                      ${finalTotal.toLocaleString('es-CO')}
+                      {formatCurrency(finalTotal)}
                     </span>
                   </div>
                 </div>

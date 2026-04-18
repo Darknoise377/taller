@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma';
 import { PaymentMethod } from '@prisma/client'; // ✅ Importamos los enums de Prisma
 import { rateLimit } from '@/lib/rateLimit';
 import { sendOrderCreatedEmail } from '@/lib/email/orderEmails';
+import { calculateDiscountedTotal, clampPercentage, normalizeAmount } from '@/utils/formatCurrency';
 
 // ❌ Eliminamos los objetos `paymentMap` y `statusMap`.
 // Ya no son necesarios porque el frontend y el backend ahora usan los mismos valores de los enums.
@@ -158,7 +159,13 @@ export async function POST(req: Request) {
           { status: 400 }
         );
       }
-      subtotal += p.price * qty;
+
+      const normalizedPrice = normalizeAmount(p.price);
+      if (normalizedPrice < 0) {
+        return NextResponse.json({ message: 'Hay productos con precio inválido' }, { status: 400 });
+      }
+
+      subtotal = normalizeAmount(subtotal + normalizedPrice * qty);
     }
 
     // Validar promoción (si aplica) y calcular total final
@@ -181,12 +188,12 @@ export async function POST(req: Request) {
       if (promotion.expiresAt && new Date() > promotion.expiresAt) {
         return NextResponse.json({ message: 'Este código de promoción ha expirado' }, { status: 400 });
       }
-      if (typeof promotion.discount !== 'number' || promotion.discount <= 0 || promotion.discount > 100) {
+      const normalizedDiscount = clampPercentage(promotion.discount);
+      if (normalizedDiscount <= 0 || normalizedDiscount > 100) {
         return NextResponse.json({ message: 'Promoción inválida' }, { status: 400 });
       }
 
-      const discountAmount = subtotal * (promotion.discount / 100);
-      finalTotal = Math.max(0, subtotal - discountAmount);
+      finalTotal = calculateDiscountedTotal(subtotal, normalizedDiscount).finalTotal;
       promoCodeToStore = promotion.code;
     }
 
@@ -200,8 +207,8 @@ export async function POST(req: Request) {
       if (sellerExists) sellerIdToStore = sellerExists.id;
     }
 
-    // Redondeo consistente (evita cambios por flotantes). Mantiene 1 decimal como en PayU redirect actual.
-    const totalToStore = Math.round(finalTotal * 10) / 10;
+    // Redondeo consistente para evitar errores con flotantes.
+    const totalToStore = normalizeAmount(finalTotal);
 
     // 👇 Crear orden + decrementar stock en una transacción atómica
     const newOrder = await prisma.$transaction(async (tx) => {
