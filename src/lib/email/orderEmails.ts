@@ -73,7 +73,14 @@ function formatMoney(amount: number, currency: string): string {
 }
 
 function paymentMethodLabel(method: PaymentMethod): string {
-  return method === "PAYU" ? "PayU" : "Contraentrega";
+  switch (method) {
+    case "PAYU":
+      return "PayU";
+    case "WOMPI":
+      return "Wompi";
+    default:
+      return "Contraentrega";
+  }
 }
 
 function orderStatusLabel(status: OrderStatus): string {

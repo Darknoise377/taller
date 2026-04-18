@@ -123,6 +123,7 @@ enum OrderStatus {
 enum PaymentMethod {
   CONTRAENTREGA
   PAYU
+  WOMPI
 }
 
 //

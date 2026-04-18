@@ -100,7 +100,7 @@ export default function ResponseClient() {
               Tu orden <span className="font-semibold">#{referenceCode}</span> está pendiente de confirmación.
             </p>
             <p className="text-slate-600 dark:text-slate-300 mb-8">
-              Una vez recibamos la confirmación de PayU, te notificaremos por correo electrónico.
+              Una vez recibamos la confirmación de la pasarela de pago, te notificaremos por correo electrónico.
             </p>
           </div>
         );

@@ -57,6 +57,8 @@ const translatePaymentMethod = (method: string | null | undefined) => {
   switch (method) {
     case 'PAYU':
       return 'PayU';
+    case 'WOMPI':
+      return 'Wompi';
     case 'CONTRAENTREGA':
       return 'Contraentrega';
     default:

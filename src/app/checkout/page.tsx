@@ -349,6 +349,11 @@ const CheckoutPage: React.FC = () => {
         setOrderPlaced(true);
         if (paymentMethod === 'PAYU') {
           window.location.href = `/api/payu/redirect?ref=${newOrder.referenceCode}`;
+          return;
+        }
+        if (paymentMethod === 'WOMPI') {
+          window.location.href = `/api/wompi/redirect?ref=${newOrder.referenceCode}`;
+          return;
         }
       } else {
         throw new Error('No se pudo obtener el ID de la nueva orden.');
@@ -534,6 +539,16 @@ const CheckoutPage: React.FC = () => {
                       description="Tarjetas de crédito/débito, PSE, Nequi y más."
                       icon={
                         <LockClosedIcon className="w-5 h-5 mr-2 text-green-600" />
+                      }
+                    />
+                    <PaymentOption
+                      method="WOMPI"
+                      currentMethod={paymentMethod}
+                      setMethod={setPaymentMethod}
+                      title="Wompi"
+                      description="Tarjetas, PSE, Nequi y otros medios compatibles."
+                      icon={
+                        <CreditCardIcon className="w-5 h-5 mr-2 text-sky-600" />
                       }
                     />
                     <PaymentOption
@@ -731,6 +746,8 @@ const CheckoutPage: React.FC = () => {
                     ? 'Procesando...'
                     : paymentMethod === 'PAYU'
                     ? 'Pagar con PayU'
+                    : paymentMethod === 'WOMPI'
+                    ? 'Pagar con Wompi'
                     : 'Confirmar Pedido'}
                 </motion.button>
 

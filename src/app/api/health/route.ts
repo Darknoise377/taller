@@ -27,6 +27,11 @@ export async function GET() {
       process.env.PAYU_CHECKOUT_URL
   );
 
+  const wompiConfigured = Boolean(
+    process.env.WOMPI_PUBLIC_KEY &&
+      process.env.WOMPI_INTEGRITY_SECRET
+  );
+
   const smtpConfigured = Boolean(
     process.env.SMTP_HOST &&
       process.env.SMTP_USER &&
@@ -45,6 +50,7 @@ export async function GET() {
         database,
         cloudinary: cloudinaryConfigured ? 'configured' : 'missing-config',
         payu: payuConfigured ? 'configured' : 'missing-config',
+        wompi: wompiConfigured ? 'configured' : 'missing-config',
         smtp: smtpConfigured ? 'configured' : 'missing-config',
       },
     },

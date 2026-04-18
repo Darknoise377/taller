@@ -1,7 +1,7 @@
 // src/types/order.d.ts
 
 export type OrderStatus = 'PENDING' | 'APPROVED' | 'DECLINED' | 'SHIPPED' | 'CANCELLED';
-export type PaymentMethod = 'CONTRAENTREGA' | 'PAYU';
+export type PaymentMethod = 'CONTRAENTREGA' | 'PAYU' | 'WOMPI';
 
 export interface OrderCreatePayload {
   total: number;

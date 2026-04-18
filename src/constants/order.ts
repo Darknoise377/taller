@@ -11,4 +11,5 @@ export const OrderStatusLabels: Record<OrderStatus, string> = {
 export const PaymentMethodLabels: Record<PaymentMethod, string> = {
   CONTRAENTREGA: "Contraentrega",
   PAYU: "PayU",
+  WOMPI: "Wompi",
 };
