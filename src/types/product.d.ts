@@ -37,6 +37,11 @@ export interface Product {
   stock: number;
   createdAt?: string;
   updatedAt?: string;
+  // Opcionales para detalles extendidos
+  sku?: string;
+  tags?: string[];
+  diagramNumber?: string;
+  rating?: number;
 }
 
 /**

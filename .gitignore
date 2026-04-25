@@ -43,3 +43,8 @@ vercel-env.txt
 next-env.d.ts
 
 /src/generated/prisma
+
+# Local secrets & temp artifacts (ignored to avoid leaking credentials)
+admin_cookies.txt
+scripts/create-product-test.ps1
+.eslintcache

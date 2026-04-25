@@ -82,35 +82,53 @@ export async function POST(req: Request) {
       );
     }
 
-    // Subir a Cloudinary usando tu upload preset
-    const uploadResult = await new Promise<CloudinaryUploadResult>((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          upload_preset: "onelike", // 👈 tu preset de Cloudinary
-        },
-        (error, result) => {
-          if (error) {
-            reject(error);
-          } else {
-            const maybe = result as unknown;
-            if (
-              maybe &&
-              typeof maybe === "object" &&
-              "secure_url" in maybe &&
-              "public_id" in maybe
-            ) {
-              const r = maybe as { secure_url: unknown; public_id: unknown };
-              if (typeof r.secure_url === "string" && typeof r.public_id === "string") {
-                resolve({ secure_url: r.secure_url, public_id: r.public_id });
-                return;
-              }
+    // Intentamos subir a Cloudinary. Si tienes un upload preset configurado y
+    // lo defines en `CLOUDINARY_UPLOAD_PRESET`, lo usaremos; si no, subimos
+    // autenticados desde el servidor (no requiere preset).
+    const presetFromEnv = process.env.CLOUDINARY_UPLOAD_PRESET?.trim();
+
+    const doUpload = (options: Record<string, unknown>) =>
+      new Promise<CloudinaryUploadResult>((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(options, (error: any, result: any) => {
+          if (error) return reject(error);
+          const maybe = result as unknown;
+          if (
+            maybe &&
+            typeof maybe === "object" &&
+            "secure_url" in maybe &&
+            "public_id" in maybe
+          ) {
+            const r = maybe as { secure_url: unknown; public_id: unknown };
+            if (typeof r.secure_url === "string" && typeof r.public_id === "string") {
+              resolve({ secure_url: r.secure_url, public_id: r.public_id });
+              return;
             }
-            reject(new Error("Respuesta inválida de Cloudinary"));
           }
+          reject(new Error("Respuesta inválida de Cloudinary"));
+        });
+        uploadStream.end(buffer);
+      });
+
+    let uploadResult: CloudinaryUploadResult;
+    const tryOptions = presetFromEnv ? { upload_preset: presetFromEnv } : { folder: process.env.CLOUDINARY_UPLOAD_FOLDER ?? "onelike" };
+
+    try {
+      uploadResult = await doUpload(tryOptions);
+    } catch (err: any) {
+      // Si el preset está configurado pero no existe en la cuenta, reintentamos
+      // haciendo una subida autenticada (si las credenciales están disponibles).
+      const presetError = err && (err.message === 'Upload preset not found' || err.message?.includes('Upload preset not found') || err.http_code === 400);
+      const hasCredentials = Boolean(process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET && process.env.CLOUDINARY_CLOUD_NAME);
+      if (presetError && presetFromEnv && hasCredentials) {
+        try {
+          uploadResult = await doUpload({ folder: process.env.CLOUDINARY_UPLOAD_FOLDER ?? "onelike" });
+        } catch (err2) {
+          throw err2;
         }
-      );
-      uploadStream.end(buffer);
-    });
+      } else {
+        throw err;
+      }
+    }
 
     // ✅ Devuelve secure_url como espera el frontend
     return NextResponse.json({

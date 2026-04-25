@@ -1,7 +1,7 @@
 ﻿// /components/ProductCard.tsx (o la ruta que prefieras)
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -9,6 +9,7 @@ import { ShoppingCartIcon, EyeIcon } from '@heroicons/react/24/outline';
 
 import type { Product as ProductType, ProductSize } from '@/types/product';
 import { useCart } from '@/hooks/useCart';
+import { makeProductPlaceholder } from '@/lib/placeholder';
 
 // --- PROPS DEL COMPONENTE ---
 interface ProductCardProps {
@@ -69,6 +70,16 @@ export function ProductCard({ product, idx }: ProductCardProps) {
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]);
   const [validationError, setValidationError] = useState<string>("");
+  const [quantity, setQuantity] = useState<number>(1);
+
+  const imageSrc = product.images?.[0] ?? product.imageUrl ?? makeProductPlaceholder(product.name, product.id);
+  const _isDataUri = typeof imageSrc === 'string' && imageSrc.startsWith('data:');
+
+  useEffect(() => {
+    // Ajusta la cantidad si el stock cambia o es menor
+    if (product.stock <= 0) setQuantity(1);
+    if (quantity > (product.stock || 0)) setQuantity(Math.max(1, product.stock || 1));
+  }, [product.stock]);
 
   const handleAddToCart = () => {
     // Validamos que se hayan seleccionado las opciones si son requeridas
@@ -76,8 +87,12 @@ export function ProductCard({ product, idx }: ProductCardProps) {
       setValidationError("Selecciona medida y compatibilidad.");
       return;
     }
+    if (quantity <= 0 || (product.stock && quantity > product.stock)) {
+      setValidationError("Cantidad no disponible en stock.");
+      return;
+    }
     setValidationError("");
-    addToCart({ ...product, imageUrl: product.images?.[0] ?? "/placeholder.png" }, 1, selectedSize as ProductSize, selectedColor);
+    addToCart({ ...product, imageUrl: product.images?.[0] ?? "/placeholder.png" }, quantity, selectedSize as ProductSize, selectedColor);
     openCartModal(); // Mejor UX al abrir el modal del carrito
   };
 
@@ -103,10 +118,11 @@ export function ProductCard({ product, idx }: ProductCardProps) {
             <EyeIcon className="w-10 h-10 text-white opacity-0 group-hover:opacity-80 transition-opacity duration-300 transform group-hover:scale-110" />
         </div>
         <Image
-          src={product.images?.[0] ?? '/placeholder.png'}
+          src={imageSrc}
           alt={product.name}
           fill
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-in-out"
+          unoptimized={_isDataUri}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </Link>
@@ -141,14 +157,38 @@ export function ProductCard({ product, idx }: ProductCardProps) {
             {validationError && (
               <p className="text-red-500 text-xs font-medium mb-2">{validationError}</p>
             )}
-            <button
-              disabled={isAddDisabled}
-              onClick={handleAddToCart} // ¡Usa el handler local!
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md"
-            >
-              <ShoppingCartIcon className="w-5 h-5" />
-              Añadir al Carrito
-            </button>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  aria-label="Disminuir cantidad"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  disabled={isAddDisabled || quantity <= 1}
+                  className="px-3 py-1 rounded-md border bg-transparent text-sm hover:bg-slate-100 disabled:opacity-40"
+                >
+                  -
+                </button>
+                <div className="px-3 py-1 border rounded-md text-sm font-medium">{quantity}</div>
+                <button
+                  type="button"
+                  aria-label="Aumentar cantidad"
+                  onClick={() => setQuantity((q) => Math.min((product.stock || 9999), q + 1))}
+                  disabled={isAddDisabled || (product.stock ? quantity >= product.stock : false)}
+                  className="px-3 py-1 rounded-md border bg-transparent text-sm hover:bg-slate-100 disabled:opacity-40"
+                >
+                  +
+                </button>
+              </div>
+
+              <button
+                disabled={isAddDisabled}
+                onClick={handleAddToCart} // ¡Usa el handler local!
+                className="ml-auto flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md"
+              >
+                <ShoppingCartIcon className="w-5 h-5" />
+                Añadir al Carrito
+              </button>
+            </div>
         </div>
       </div>
     </motion.article>

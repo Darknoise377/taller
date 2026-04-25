@@ -122,6 +122,9 @@ export default function AdminProductsPage() {
         category: values.category?.toLowerCase(),
         images: allImageUrls,
         imageUrl: allImageUrls[0], // La primera imagen como principal
+        sizes: Array.isArray(values.sizes) ? values.sizes : [],
+        colors: Array.isArray(values.colors) ? values.colors : [],
+        tags: Array.isArray(values.tags) ? values.tags : [],
       };
 
       // 5. Enviar a la API (Crear o Actualizar)
@@ -214,6 +217,22 @@ export default function AdminProductsPage() {
       filters: CATEGORY_OPTIONS.map(c => ({ text: c.label, value: c.value })),
       render: (category: string) => <Tag>{getProductCategoryLabel(category)}</Tag>,
       onFilter: (value, record) => record.category.indexOf(value as string) === 0,
+    },
+    {
+      title: 'SKU',
+      dataIndex: 'sku',
+      key: 'sku',
+      render: (sku: string) => sku ? <span className="font-mono">{sku}</span> : null,
+    },
+    {
+      title: 'Etiquetas',
+      dataIndex: 'tags',
+      key: 'tags',
+      render: (tags: string[]) => (
+        <>
+          {tags?.map((t) => <Tag key={t}>{t}</Tag>)}
+        </>
+      ),
     },
     {
       title: 'Stock',
@@ -400,6 +419,27 @@ return (
           </Col>
         </Row>
 
+        {/* --- SKU, Número diagrama y etiquetas --- */}
+        <Row gutter={16}>
+          <Col xs={24} md={8}>
+            <Form.Item label="SKU (opcional)" name="sku">
+              <Input placeholder="Ej: SKU-12345" />
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} md={8}>
+            <Form.Item label="Número en Diagrama (opcional)" name="diagramNumber">
+              <Input placeholder="Ej: 14A" />
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} md={8}>
+            <Form.Item label="Etiquetas (opcional)" name="tags">
+              <Select mode="tags" allowClear placeholder="Ej: motor, filtro" />
+            </Form.Item>
+          </Col>
+        </Row>
+
         {/* --- Medidas y atributos --- */}
         <Row gutter={16}>
           <Col xs={24} md={12}>
@@ -444,7 +484,7 @@ return (
             {fileList.length < 5 && (
               <div>
                 <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Subir</div>
+                <div className="mt-2">Subir</div>
               </div>
             )}
           </Upload>

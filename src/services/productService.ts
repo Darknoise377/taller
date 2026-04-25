@@ -7,7 +7,11 @@ export const productService = {
   async getProducts(): Promise<Product[]> {
     const res = await fetch(`${API_URL}/products`);
     if (!res.ok) throw new Error('Error al obtener productos');
-    return (await res.json()) as Product[]; // 👈 Casting
+    const json = await res.json();
+    // Soportar ambos formatos: array legacy o objeto paginado { items, total }
+    if (Array.isArray(json)) return json as Product[];
+    if (json && Array.isArray(json.items)) return json.items as Product[];
+    throw new Error('Respuesta de productos inválida');
   },
 
   async getProduct(id: number): Promise<Product> {

@@ -20,6 +20,9 @@ model Product {
   currency    String
   imageUrl    String?
   images      String[]
+  sku         String?        @unique
+  tags        String[]       @default([])
+  diagramNumber String?
   category    Category
   sizes       String[]
   colors      String[]

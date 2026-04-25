@@ -51,7 +51,11 @@ export default async function ProductsPage() {
   }> = [];
 
   try {
+    // Limitar la consulta inicial para evitar cargar toda la colección en memoria
+    const limit = 24;
     rawProducts = await prisma.product.findMany({
+      take: limit,
+      orderBy: { createdAt: 'desc' },
       select: {
         id: true,
         name: true,
@@ -71,6 +75,14 @@ export default async function ProductsPage() {
   } catch (err) {
     console.error("Error al consultar productos (BD no disponible):", err);
     rawProducts = [];
+  }
+
+  // Total de productos (para paginación / UI)
+  let totalCount = 0;
+  try {
+    totalCount = await prisma.product.count();
+  } catch (err) {
+    console.error('No se pudo obtener el total de productos:', err);
   }
 
   const products: Product[] = rawProducts.map((p) => ({
@@ -149,7 +161,7 @@ export default async function ProductsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
-      <ProductsClient initialProducts={products} />
+      <ProductsClient initialProducts={products} totalCount={totalCount} />
     </>
   );
 }

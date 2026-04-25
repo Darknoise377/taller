@@ -15,6 +15,8 @@ import {
 } from "@heroicons/react/24/outline";
 import type { CategoryItem } from "@/types/product";
 import { PRODUCT_CATEGORIES } from "@/constants/productCategories";
+import HomeSearch from '@/components/HomeSearch';
+import { makeProductPlaceholder } from '@/lib/placeholder';
 
 // TIPOS DE DATOS
 interface SlideData {
@@ -208,6 +210,8 @@ export default function Home() {
                 Atención personalizada y piezas de calidad garantizada.
               </p>
 
+              <HomeSearch />
+
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
                   <WrenchScrewdriverIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
@@ -341,7 +345,7 @@ function HeroSlider({ products, isLoading }: HeroSliderProps) {
       (product.description?.substring(0, 80) || "") +
       (product.description?.length > 80 ? "..." : ""),
     cta: { label: "Ver producto", href: `/products/${product.id}` },
-    image: product.images?.[0] || "/placeholder.png",
+    image: product.images?.[0] || makeProductPlaceholder(product.name),
   }));
 
   const startAutoplay = useCallback(() => {
