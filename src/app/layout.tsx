@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import { CartProvider } from '@/context/CartContext';
 import CartModal from '@/components/CartModal';
-import Navbar from '@/components/Navbar';
+import ConditionalNavbar from '@/components/ConditionalNavbar';
 import DynamicFooter from '@/components/DynamicFooter';
 import FloatingButtons from '@/components/FloatingButtons';
 import { Toaster } from 'sonner';
@@ -126,8 +126,8 @@ export default function RootLayout({
             >
               Saltar al contenido
             </a>
-            {/* 🔹 Navbar siempre visible */}
-            <Navbar />
+            {/* 🔹 Navbar (oculto en /admin a través de ConditionalNavbar) */}
+            <ConditionalNavbar />
             <script
               type="application/ld+json"
               dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
