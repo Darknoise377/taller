@@ -115,6 +115,29 @@ export default function AdminDashboard() {
           recentOrders: recent,
         });
       } catch (err) {
+        // Log to console for local debugging
+        console.error('Error cargando dashboard:', err);
+
+        // Try sending the full error to server logs (Vercel / server logs)
+        try {
+          // Fire-and-forget, do not block UI
+          void fetch('/api/client-logs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              source: 'admin-dashboard',
+              error: {
+                message: err instanceof Error ? err.message : String(err),
+                name: err instanceof Error ? err.name : null,
+                stack: err instanceof Error ? err.stack : null,
+              },
+              timestamp: new Date().toISOString(),
+            }),
+          });
+        } catch (sendErr) {
+          console.error('Error sending client log:', sendErr);
+        }
+
         setError(err instanceof Error ? err.message : 'Error desconocido');
       } finally {
         setLoading(false);
