@@ -67,15 +67,21 @@ export default function AdminDashboard() {
           throw new Error('Error cargando datos del dashboard');
         }
 
-        const products = await productsRes.json();
-        const orders = await ordersRes.json();
-        const users = await usersRes.json();
+        // Normalizar posibles respuestas paginadas ({ items, total })
+        const prodJson = await productsRes.json();
+        const products = Array.isArray(prodJson) ? prodJson : prodJson?.items ?? [];
 
-        const lowStock = products.filter(
+        const ordersJson = await ordersRes.json();
+        const orders = Array.isArray(ordersJson) ? ordersJson : ordersJson?.items ?? [];
+
+        const usersJson = await usersRes.json();
+        const users = Array.isArray(usersJson) ? usersJson : usersJson?.items ?? [];
+
+        const lowStock = (products || []).filter(
           (p: { stock?: number }) => typeof p.stock === 'number' && p.stock <= 5
         );
 
-        const pendingOrders = orders.filter(
+        const pendingOrders = (orders || []).filter(
           (o: { status: string }) => o.status === 'PENDING'
         );
 
