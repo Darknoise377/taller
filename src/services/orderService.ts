@@ -11,7 +11,9 @@ export const orderService = {
   async getOrders(): Promise<Order[]> {
     const res = await fetch(`${API_URL}/orders`, { cache: 'no-store' });
     if (!res.ok) throw new Error('Error al obtener órdenes');
-    return (await res.json()) as Order[];
+    const json = await res.json();
+    // Normalizar respuesta: puede ser un array o un objeto paginado { items }
+    return Array.isArray(json) ? (json as Order[]) : (json?.items ?? []) as Order[];
   },
 
   /**
