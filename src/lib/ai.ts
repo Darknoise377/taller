@@ -11,28 +11,68 @@ type AIParams = {
  */
 export default async function sendToAI({ userText, systemPrompt, history = [] }: AIParams): Promise<string> {
   const system = systemPrompt ?? 'Eres un asistente de ventas para una tienda online. Responde en español y sé amable.';
-
-  // Try Gemini (@google/genai) via dynamic import if configured
-  if (process.env.GEMINI_API_KEY) {
+  // If the VERTEX service account JSON is provided via env (base64 or raw),
+  // write it to a temp file and set GOOGLE_APPLICATION_CREDENTIALS so the
+  // @google/genai client can pick it up (Node runtime required).
+  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && (process.env.VERTEX_SA_JSON || process.env.VERTEX_SA_JSON_BASE64)) {
     try {
-      // dynamic import keeps package optional
-      // NOTE: if you want to use this, install: npm i @google/genai
-      const genai = await import('@google/genai');
-      const GoogleGenAI = (genai as any).GoogleGenAI || (genai as any).default;
-      if (GoogleGenAI) {
-        const client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        // The exact SDK call may vary by version; this is a best-effort example.
-        const model = process.env.GEMINI_MODEL ?? 'gemini-1.5-mini';
-        // Build a simple prompt
-        const content = `${system}\n\nUsuario: ${userText}`;
-        const resp: any = await client.models.generateContent({ model, contents: content });
-        // Extract text in a robust way
-        const text = resp?.candidates?.[0]?.content ?? resp?.output?.[0]?.content ?? resp?.text ?? null;
-        if (typeof text === 'string') return text;
+      const os = await import('os');
+      const path = await import('path');
+      const fs = await import('fs');
+      const tmp = os.tmpdir();
+      const raw = process.env.VERTEX_SA_JSON ?? (process.env.VERTEX_SA_JSON_BASE64 ? Buffer.from(process.env.VERTEX_SA_JSON_BASE64, 'base64').toString('utf-8') : null);
+      if (raw) {
+        const filename = path.join(tmp, `vertex-sa-${process.pid}-${Date.now()}.json`);
+        await fs.promises.writeFile(filename, raw, { encoding: 'utf-8', mode: 0o600 });
+        process.env.GOOGLE_APPLICATION_CREDENTIALS = filename;
       }
     } catch (e) {
-      console.warn('Gemini client not available or failed, falling back to OpenAI:', e?.message ?? e);
+      // writing creds failed — continue, the genai client may still attempt ADC
     }
+  }
+  // Try Gemini / Vertex AI via optional @google/genai package.
+  // This will work either with an API key (`GEMINI_API_KEY`) or with
+  // Google Application Default Credentials (set `GOOGLE_APPLICATION_CREDENTIALS`
+  // pointing to the service account JSON) — so you can use the Vertex service account JSON locally.
+  try {
+    // dynamic import keeps the dependency optional
+    const genai = await import('@google/genai');
+    const GoogleGenAI = (genai as any).GoogleGenAI || (genai as any).default || genai;
+    if (GoogleGenAI) {
+      // If you have an API key set, pass it; otherwise the client will attempt
+      // to use Application Default Credentials (ADC) from `GOOGLE_APPLICATION_CREDENTIALS`.
+      const clientOptions: any = {};
+      if (process.env.GEMINI_API_KEY) clientOptions.apiKey = process.env.GEMINI_API_KEY;
+      const client = new GoogleGenAI(clientOptions);
+
+      const model = process.env.GEMINI_MODEL ?? process.env.GOOGLE_GENAI_MODEL ?? 'models/text-bison-001';
+      const content = `${system}\n\nUsuario: ${userText}`;
+
+      // Try multiple possible method names depending on SDK version.
+      let text: string | null = null;
+      try {
+        const resp: any = await client.models?.generateContent?.({ model, contents: content });
+        text = resp?.candidates?.[0]?.content ?? resp?.output?.[0]?.content ?? resp?.text ?? null;
+      } catch (_) {
+        // ignore and try alternate signature
+      }
+
+      if (!text) {
+        try {
+          const resp2: any = await client.generate?.({ model, input: content });
+          text = resp2?.data?.[0]?.text ?? resp2?.output ?? resp2?.text ?? null;
+        } catch (_) {
+          // ignore
+        }
+      }
+
+      if (typeof text === 'string' && text.length > 0) return text;
+    }
+  } catch (e) {
+    // Not fatal — fall back to OpenAI if available
+    // console.warn is kept minimal to avoid spamming logs in production
+    // (developer can enable more verbose logging when testing locally)
+    // console.warn('Google GenAI client not available or failed:', e?.message ?? e);
   }
 
   // Fallback: OpenAI Chat Completions

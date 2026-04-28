@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import sendToAI from '@/lib/ai';
+import { prisma } from '@/lib/prisma';
 
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
 const WHATSAPP_TOKEN = process.env.WHATSAPP_API_TOKEN;
@@ -70,17 +71,20 @@ export async function POST(request: Request) {
     const userText = message?.text?.body ?? (message?.type === 'text' ? message?.text?.body : null);
 
     if (userText && sender) {
-      console.log('Incoming WA message from', sender, userText.substring(0, 200));
+      console.log('Incoming WA message queued from', sender, userText.substring(0, 200));
 
-      const systemPrompt = process.env.WA_AI_SYSTEM_PROMPT ??
-        'Eres un asistente de ventas para una tienda online. Responde en español, sé amable y conciso.';
-
-      // Optionally load conversation history and pass to AI (not implemented here)
-      const aiReply = await sendToAI({ userText, systemPrompt, history: [] });
-
-      if (aiReply) {
-        await sendWhatsAppText(sender, aiReply);
-      }
+      // Create a job in the DB for background processing (worker will pick it up)
+      await prisma.job.create({
+        data: {
+          type: 'whatsapp_message',
+          payload: {
+            sender,
+            userText,
+            raw: message,
+            contact,
+          },
+        },
+      });
     }
   } catch (error) {
     console.error('Error handling webhook POST', error);

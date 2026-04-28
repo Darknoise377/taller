@@ -8,7 +8,8 @@
     "postinstall": "node ./node_modules/prisma/build/index.js generate",
     "start": "node ./node_modules/next/dist/bin/next start",
     "lint": "node ./node_modules/eslint/bin/eslint.js .",
-    "test": "node --import tsx --test tests/**/*.test.ts"
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "ai:worker": "tsx src/worker/processJobs.ts"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",

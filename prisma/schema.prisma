@@ -180,3 +180,49 @@ model Promotion {
   isActive    Boolean   @default(true)
   expiresAt   DateTime?
 }
+
+// --- CHAT / AI / EMBEDDINGS ---
+model ChatSession {
+  id        Int          @id @default(autoincrement())
+  userId    Int?
+  phone     String?      // WhatsApp wa_id
+  createdAt DateTime     @default(now())
+  messages  ChatMessage[]
+}
+
+model ChatMessage {
+  id         Int       @id @default(autoincrement())
+  session    ChatSession @relation(fields: [sessionId], references: [id])
+  sessionId  Int
+  role       String
+  content    String    @db.Text
+  metadata   Json?
+  createdAt  DateTime  @default(now())
+}
+
+model Embedding {
+  id         Int      @id @default(autoincrement())
+  model      String
+  vector     Json     // array of floats stored as JSON
+  sourceType String?  // e.g., 'product' | 'chat'
+  sourceId   Int?
+  text       String   @db.Text
+  createdAt  DateTime @default(now())
+}
+
+model Job {
+  id         Int      @id @default(autoincrement())
+  type       String
+  payload    Json
+  status     JobStatus @default(PENDING)
+  attempts   Int      @default(0)
+  createdAt  DateTime @default(now())
+  processedAt DateTime?
+}
+
+enum JobStatus {
+  PENDING
+  PROCESSING
+  FAILED
+  COMPLETED
+}
