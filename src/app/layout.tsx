@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CartProvider } from '@/context/CartContext';
 import CartModal from '@/components/CartModal';
 import ConditionalNavbar from '@/components/ConditionalNavbar';
@@ -146,6 +147,8 @@ export default function RootLayout({
             <Toaster position="top-center" richColors closeButton />
             {/* 🔹 Footer dinámico */}
             <DynamicFooter />
+            {/* Vercel Speed Insights: recoge métricas de rendimiento en producción */}
+            <SpeedInsights />
           </CartProvider>
         </ThemeProvider>
       </body>
