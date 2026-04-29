@@ -89,7 +89,7 @@ export async function POST(req: Request) {
 
     const doUpload = (options: Record<string, unknown>) =>
       new Promise<CloudinaryUploadResult>((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(options, (error: any, result: any) => {
+        const uploadStream = cloudinary.uploader.upload_stream(options, (error: unknown, result: unknown) => {
           if (error) return reject(error);
           const maybe = result as unknown;
           if (
@@ -114,10 +114,14 @@ export async function POST(req: Request) {
 
     try {
       uploadResult = await doUpload(tryOptions);
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Si el preset está configurado pero no existe en la cuenta, reintentamos
       // haciendo una subida autenticada (si las credenciales están disponibles).
-      const presetError = err && (err.message === 'Upload preset not found' || err.message?.includes('Upload preset not found') || err.http_code === 400);
+      const errObj = err as { message?: string; http_code?: number } | undefined;
+      const presetError = Boolean(
+        errObj &&
+          (errObj.message === 'Upload preset not found' || errObj.message?.includes('Upload preset not found') || errObj.http_code === 400)
+      );
       const hasCredentials = Boolean(process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET && process.env.CLOUDINARY_CLOUD_NAME);
       if (presetError && presetFromEnv && hasCredentials) {
         try {

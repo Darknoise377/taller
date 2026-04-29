@@ -60,7 +60,7 @@ export async function POST(req: Request) {
 
     // ✅ Definimos un tipo para el cuerpo de la solicitud
     type CreateOrderBody = {
-      products: { productId: number; quantity: number }[];
+      products: { productId: string; quantity: number }[];
       // NOTA: `total` puede venir del cliente pero NO se confía en él.
       // El total se recalcula server-side con precios en DB.
       total?: number;
@@ -122,12 +122,12 @@ export async function POST(req: Request) {
     // --- Fin Validaciones ---
 
     // Consolidar items (evita duplicados de productId)
-    const quantitiesByProductId = new Map<number, number>();
+    const quantitiesByProductId = new Map<string, number>();
     for (const item of products) {
-      const productId = Number(item?.productId);
+      const productId = String(item?.productId ?? '').trim();
       const quantity = Number(item?.quantity);
 
-      if (!Number.isInteger(productId) || productId <= 0) {
+      if (!productId) {
         return NextResponse.json({ message: 'Producto inválido' }, { status: 400 });
       }
       if (!Number.isInteger(quantity) || quantity <= 0) {
@@ -214,10 +214,10 @@ export async function POST(req: Request) {
     const newOrder = await prisma.$transaction(async (tx) => {
       // Decrementar stock con verificación optimista
       for (const [productId, qty] of quantitiesByProductId.entries()) {
-        const result = await tx.product.updateMany({
-          where: { id: productId, stock: { gte: qty } },
-          data: { stock: { decrement: qty } },
-        });
+          const result = await tx.product.updateMany({
+            where: { id: productId, stock: { gte: qty } },
+            data: { stock: { decrement: qty } },
+          });
         if (result.count === 0) {
           throw new Error(`Stock insuficiente para producto ${productId}`);
         }
@@ -241,10 +241,15 @@ export async function POST(req: Request) {
           sellerId: sellerIdToStore,
           
           products: {
-            create: Array.from(quantitiesByProductId.entries()).map(([productId, quantity]) => ({
-              productId,
-              quantity,
-            })),
+            create: Array.from(quantitiesByProductId.entries()).map(([productId, quantity]) => {
+              const prod = dbProducts.find((d) => d.id === productId);
+              const unitPrice = prod ? normalizeAmount(prod.price) : 0;
+              return {
+                product: { connect: { id: productId } },
+                quantity,
+                unitPrice,
+              };
+            }),
           },
         },
         include: {
@@ -255,6 +260,14 @@ export async function POST(req: Request) {
     });
 
     try {
+      const productsForEmail = (newOrder.products as Array<{ quantity: number; product: { name: string; price: number } }>).map((item) => ({
+        quantity: item.quantity,
+        product: {
+          name: item.product.name,
+          price: item.product.price,
+        },
+      }));
+
       await sendOrderCreatedEmail({
         referenceCode: newOrder.referenceCode,
         customerName: newOrder.customerName,
@@ -263,13 +276,7 @@ export async function POST(req: Request) {
         currency: newOrder.currency,
         paymentMethod: newOrder.paymentMethod,
         status: newOrder.status,
-        products: newOrder.products.map((item) => ({
-          quantity: item.quantity,
-          product: {
-            name: item.product.name,
-            price: item.product.price,
-          },
-        })),
+        products: productsForEmail,
       });
     } catch (mailError) {
       // El pedido ya fue creado: no devolvemos error al cliente por fallo de email.

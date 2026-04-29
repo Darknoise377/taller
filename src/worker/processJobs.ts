@@ -2,6 +2,7 @@
    Run locally with: `npx ts-node src/worker/processJobs.ts` or compile to JS.
 */
 import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 import sendToAI from '@/lib/ai';
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_API_TOKEN;
@@ -41,10 +42,11 @@ async function processOne() {
   await prisma.job.update({ where: { id: job.id }, data: { status: 'PROCESSING', attempts: job.attempts + 1 } });
 
   try {
-    const payload: any = job.payload;
+    const payload = job.payload as unknown;
     if (job.type === 'whatsapp_message') {
-      const sender = payload.sender;
-      const userText = payload.userText;
+      const p = (payload && typeof payload === 'object') ? payload as Record<string, unknown> : {};
+      const sender = typeof p.sender === 'string' ? p.sender : '';
+      const userText = typeof p.userText === 'string' ? p.userText : '';
 
       // find or create session
       let session = await prisma.chatSession.findFirst({ where: { phone: sender } });
@@ -53,11 +55,12 @@ async function processOne() {
       }
 
       // save user message
-      await prisma.chatMessage.create({ data: { sessionId: session.id, role: 'user', content: userText, metadata: payload.raw } });
+      await prisma.chatMessage.create({ data: { sessionId: session.id, role: 'user', content: userText, metadata: (p.raw ?? null) as Prisma.InputJsonValue } });
 
       // fetch history (last 20 messages)
       const messages = await prisma.chatMessage.findMany({ where: { sessionId: session.id }, orderBy: { createdAt: 'asc' }, take: 50 });
-      const history = messages.map((m) => ({ role: m.role as any, content: m.content }));
+      type ChatHistoryItem = { role: 'user' | 'assistant' | 'system'; content: string };
+      const history: ChatHistoryItem[] = messages.map((m) => ({ role: (m.role === 'user' || m.role === 'assistant' || m.role === 'system') ? m.role : 'user', content: m.content }));
 
       const systemPrompt = process.env.WA_AI_SYSTEM_PROMPT ?? 'Eres un asistente de ventas para una tienda online. Responde en español, sé amable y conciso.';
 

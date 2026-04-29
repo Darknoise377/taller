@@ -111,11 +111,14 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
         const res = await fetch(`/api/products?${params.toString()}`);
         if (!res.ok) throw new Error('Error al cargar productos');
         const data = await res.json();
-        const items: ProductType[] = (data.items || []).map((it: any) => ({
-          ...it,
-          createdAt: it.createdAt ?? undefined,
-          updatedAt: it.updatedAt ?? undefined,
-        }));
+        const items: ProductType[] = (Array.isArray(data?.items) ? data.items : []).map((raw: unknown) => {
+          const it = raw as ProductType & Record<string, unknown>;
+          return {
+            ...it,
+            createdAt: typeof it.createdAt === 'string' ? it.createdAt : undefined,
+            updatedAt: typeof it.updatedAt === 'string' ? it.updatedAt : undefined,
+          };
+        });
 
         if (append) {
           setProducts((prev) => [...prev, ...items]);
@@ -229,10 +232,11 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
     }
     // Cuando cambian filtros después de la primera carga
     fetchProductsFromServer(1, false);
-  }, [fetchProductsFromServer, areFiltersActive]);
+  }, [fetchProductsFromServer, areFiltersActive, products.length]);
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {loading && <div className="text-center text-sm text-slate-600 mb-4">Cargando...</div>}
       {selectedCategoryLabel && (
         <div className="mb-8 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Categoria activa</p>
@@ -252,7 +256,7 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
           <FilterSelect label="Medidas" value={selectedSize} onChange={(e) => handleFilterChange("size", e.target.value)} options={uniqueSizes} />
           <FilterSelect label="Compatibilidad" value={selectedColor} onChange={(e) => handleFilterChange("color", e.target.value)} options={uniqueColors} />
           <FilterSelect label="Modelo (sugerido)" value={selectedModel} onChange={(e) => handleFilterChange('model', e.target.value)} options={modelSuggestions} />
-          <FilterSelect label="Ordenar" value={sortBy} onChange={(e) => handleSortChange(e.target.value)} options={['relevance','price-asc','price-desc','newest']} formatOptionLabel={(v)=> ({relevance:'Relevancia', 'price-asc':'Precio: menor a mayor','price-desc':'Precio: mayor a menor','newest':'Recientes'} as any)[v] || v} />
+          <FilterSelect label="Ordenar" value={sortBy} onChange={(e) => handleSortChange(e.target.value)} options={['relevance','price-asc','price-desc','newest']} formatOptionLabel={(v)=> ({relevance:'Relevancia', 'price-asc':'Precio: menor a mayor','price-desc':'Precio: mayor a menor','newest':'Recientes'} as Record<string,string>)[v] || v} />
           <div className="flex items-center gap-2">
             <input type="number" placeholder="Mín" value={minPrice} onChange={(e)=>{ setMinPrice(e.target.value); }} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-20 text-sm pl-2 pr-2 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50" />
             <input type="number" placeholder="Máx" value={maxPrice} onChange={(e)=>{ setMaxPrice(e.target.value); }} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-20 text-sm pl-2 pr-2 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50" />
@@ -292,7 +296,7 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
                   <input type="number" placeholder="Mín" value={minPrice} onChange={(e)=>setMinPrice(e.target.value)} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-1/2 p-3 rounded-lg border" />
                   <input type="number" placeholder="Máx" value={maxPrice} onChange={(e)=>setMaxPrice(e.target.value)} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-1/2 p-3 rounded-lg border" />
                 </div>
-                <FilterSelect label="Ordenar" value={sortBy} onChange={(e) => handleSortChange(e.target.value)} options={['relevance','price-asc','price-desc','newest']} isMobile formatOptionLabel={(v)=> ({relevance:'Relevancia', 'price-asc':'Precio: menor a mayor','price-desc':'Precio: mayor a menor','newest':'Recientes'} as any)[v] || v} />
+                <FilterSelect label="Ordenar" value={sortBy} onChange={(e) => handleSortChange(e.target.value)} options={['relevance','price-asc','price-desc','newest']} isMobile formatOptionLabel={(v)=> ({relevance:'Relevancia', 'price-asc':'Precio: menor a mayor','price-desc':'Precio: mayor a menor','newest':'Recientes'} as Record<string,string>)[v] || v} />
                 {areFiltersActive && <button onClick={handleResetFilters} className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 font-semibold"><ArrowPathIcon className="w-5 h-5" /> Limpiar filtros</button>}
               </div>
             </motion.div>

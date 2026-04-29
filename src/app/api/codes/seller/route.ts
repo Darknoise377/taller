@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     const data = {
       name: String(body.name ?? "").trim(),
       code: String(body.code ?? "").trim().toUpperCase(),
-      userId: typeof body.userId === "number" ? body.userId : undefined,
+      userId: typeof body.userId === "string" ? body.userId : undefined,
     };
     if (!data.name || !data.code) {
       return NextResponse.json({ error: "Datos de vendedor inválidos" }, { status: 400 });
@@ -31,14 +31,14 @@ export async function PUT(req: Request) {
     const data: {
       name?: string;
       code?: string;
-      userId?: number | null;
+      userId?: string | null;
     } = {};
 
     if (body.name !== undefined) data.name = String(body.name).trim();
     if (body.code !== undefined) data.code = String(body.code).trim().toUpperCase();
     if (body.userId !== undefined) {
-      data.userId = body.userId === null ? null : Number(body.userId);
-      if (data.userId !== null && !Number.isInteger(data.userId)) {
+      data.userId = body.userId === null ? null : String(body.userId);
+      if (data.userId !== null && typeof data.userId !== 'string') {
         return NextResponse.json({ error: "userId inválido" }, { status: 400 });
       }
     }

@@ -15,21 +15,30 @@ async function ensureVertexCredentialsIfProvided() {
 export async function createEmbeddingVector(text: string): Promise<number[] | null> {
   // Prefer Vertex if configured
   if (process.env.VERTEX_SA_JSON || process.env.GEMINI_API_KEY) {
-    try {
+      try {
       await ensureVertexCredentialsIfProvided();
-      const genai = await import('@google/genai');
-      const GoogleGenAI = (genai as any).GoogleGenAI || (genai as any).default || genai;
-      const client = new GoogleGenAI(process.env.GEMINI_API_KEY ? { apiKey: process.env.GEMINI_API_KEY } : {});
+      const genaiModule: unknown = await import('@google/genai');
+      const GoogleGenAICtor = (genaiModule as { GoogleGenAI?: unknown; default?: unknown })?.GoogleGenAI ?? (genaiModule as { default?: unknown })?.default ?? genaiModule;
+      let client: unknown;
+      if (typeof GoogleGenAICtor === 'function') {
+        client = new (GoogleGenAICtor as new (opts?: unknown) => unknown)(process.env.GEMINI_API_KEY ? { apiKey: process.env.GEMINI_API_KEY } : {});
+      } else {
+        client = GoogleGenAICtor;
+      }
       const model = process.env.GENAI_EMBEDDING_MODEL ?? 'textembedding-gecko-001';
       // Try a few possible method names
       try {
-        const resp: any = await client.embeddings?.create?.({ model, input: text });
-        const vector = resp?.data?.[0]?.embedding ?? resp?.embedding ?? null;
-        if (vector) return vector as number[];
-      } catch (e) {
+        const embeddingsCreate = (client as unknown as { embeddings?: { create?: (args: unknown) => Promise<unknown> } })?.embeddings?.create;
+        if (embeddingsCreate) {
+          const respUnknown = await embeddingsCreate({ model, input: text } as unknown);
+          const respObj = respUnknown as { data?: Array<{ embedding?: number[] }>; embedding?: number[] } | undefined;
+          const vector = respObj?.data?.[0]?.embedding ?? respObj?.embedding ?? null;
+          if (vector) return vector as number[];
+        }
+      } catch {
         // ignore and try other signatures
       }
-    } catch (e) {
+    } catch {
       // fallthrough to OpenAI
     }
   }
@@ -56,9 +65,38 @@ export async function createEmbeddingVector(text: string): Promise<number[] | nu
   return null;
 }
 
-export async function createAndStoreEmbedding(opts: { text: string; model?: string; sourceType?: string; sourceId?: number | null }) {
+export async function createAndStoreEmbedding(opts: { text: string; model?: string; sourceType?: string; sourceId?: number | string | null }) {
   const vector = await createEmbeddingVector(opts.text);
   if (!vector) return null;
-  const rec = await prisma.embedding.create({ data: { model: opts.model ?? (process.env.OPENAI_EMBEDDING_MODEL ?? process.env.GENAI_EMBEDDING_MODEL ?? 'unknown'), vector: vector as any, sourceType: opts.sourceType ?? null, sourceId: opts.sourceId ?? null, text: opts.text } });
-  return rec;
+  const modelName = opts.model ?? (process.env.OPENAI_EMBEDDING_MODEL ?? process.env.GENAI_EMBEDDING_MODEL ?? 'unknown');
+  const sourceType = opts.sourceType ?? null;
+  const sourceId = opts.sourceId ?? null;
+  const text = opts.text;
+
+  // Try inserting using pgvector (requires pgvector extension and schema column vector(768)).
+  // We cast a text parameter to vector: e.g. $1::vector
+  const vectorLiteral = `[${vector.join(',')}]`;
+  try {
+    const inserted = await prisma.$queryRaw`
+      INSERT INTO "Embedding" ("model","vector","sourceType","sourceId","text","createdAt")
+      VALUES (${modelName}, ${vectorLiteral}::vector, ${sourceType}, ${sourceId}, ${text}, NOW())
+      RETURNING *;
+    `;
+    if (Array.isArray(inserted)) return inserted[0];
+    return inserted;
+  } catch (pgError) {
+    // Fallback: try inserting the vector as JSON (useful when DB still has JSON column)
+    try {
+      const insertedJson = await prisma.$queryRaw`
+        INSERT INTO "Embedding" ("model","vector","sourceType","sourceId","text","createdAt")
+        VALUES (${modelName}, ${JSON.stringify(vector)}::jsonb, ${sourceType}, ${sourceId}, ${text}, NOW())
+        RETURNING *;
+      `;
+      if (Array.isArray(insertedJson)) return insertedJson[0];
+      return insertedJson;
+    } catch {
+      // If all raw inserts fail, rethrow the original error for visibility
+      throw pgError;
+    }
+  }
 }

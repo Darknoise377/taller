@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 import { isProductCategory, PRODUCT_CATEGORIES } from '@/constants/productCategories';
 
 // GET /api/products - Lista paginada de productos con filtros básicos
@@ -16,7 +17,7 @@ export async function GET(req: Request) {
     const size = url.searchParams.get('size');
     const color = url.searchParams.get('color');
 
-    const where: any = {};
+    const where: Prisma.ProductWhereInput = {};
 
     if (q) {
       where.OR = [
@@ -29,9 +30,11 @@ export async function GET(req: Request) {
     if (category && isProductCategory(category)) where.category = category;
 
     if (minPrice || maxPrice) {
-      where.price = {} as any;
-      if (minPrice && !Number.isNaN(Number(minPrice))) where.price.gte = Number(minPrice);
-      if (maxPrice && !Number.isNaN(Number(maxPrice))) where.price.lte = Number(maxPrice);
+      // Inicializamos como FloatFilter para asignar gte/lte correctamente
+      where.price = {} as Prisma.FloatFilter;
+      const priceFilter = where.price as Prisma.FloatFilter;
+      if (minPrice && !Number.isNaN(Number(minPrice))) priceFilter.gte = Number(minPrice);
+      if (maxPrice && !Number.isNaN(Number(maxPrice))) priceFilter.lte = Number(maxPrice);
     }
 
     if (size) {
@@ -42,7 +45,7 @@ export async function GET(req: Request) {
       where.colors = { has: color };
     }
 
-    const orderBy: any =
+    const orderBy: Prisma.ProductOrderByWithRelationInput =
       sort === 'price-asc'
         ? { price: 'asc' }
         : sort === 'price-desc'
@@ -130,7 +133,7 @@ export async function POST(req: Request) {
     // propiedades opcionales que no provengan del payload. Esto evita que
     // Prisma intente escribir columnas que no existen en la BD y reduce
     // errores P2022 en entornos sin migraciones aplicadas.
-    const data: any = {
+    const data: Prisma.ProductCreateInput = {
       name,
       description,
       price,
@@ -141,8 +144,14 @@ export async function POST(req: Request) {
       sizes: Array.isArray(sizes) ? sizes : [],
       colors: Array.isArray(colors) ? colors : [],
       stock: typeof stock === 'number' ? stock : 0,
-      tags: Array.isArray(tags) ? tags : [],
     };
+
+    // Añadimos tags solo si vienen explícitamente en el body. Esto evita que
+    // Prisma intente escribir la columna cuando la migración no se ha aplicado
+    // en el entorno (causa común de P2022).
+    if (tags !== undefined) {
+      data.tags = Array.isArray(tags) ? tags : [];
+    }
 
     // Añadimos campos opcionales solo si vienen explícitamente en el body
     if (sku !== undefined) data.sku = sku;

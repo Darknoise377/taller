@@ -129,7 +129,7 @@ export default function AdminProductsPage() {
 
       // 5. Enviar a la API (Crear o Actualizar)
       if (editingProduct) {
-        await productService.updateProduct(Number(editingProduct.id), payload);
+        await productService.updateProduct(editingProduct.id, payload);
         message.success('Producto actualizado con éxito');
       } else {
         await productService.createProduct(payload);
@@ -148,11 +148,11 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleDeleteProduct = useCallback(async (id: number) => {
+  const handleDeleteProduct = useCallback(async (id: string) => {
     try {
       await productService.deleteProduct(id);
       message.success('Producto eliminado con éxito');
-      setProducts((prev) => prev.filter((p) => Number(p.id) !== id));
+      setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (error) {
       console.error('Error deleting product:', error);
       message.error(
@@ -263,7 +263,7 @@ export default function AdminProductsPage() {
           />
           <Popconfirm
             title="¿Estás seguro de eliminar este producto?"
-            onConfirm={() => handleDeleteProduct(Number(record.id))}
+            onConfirm={() => handleDeleteProduct(record.id)}
             okText="Sí, eliminar"
             cancelText="No"
           >

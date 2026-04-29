@@ -23,11 +23,12 @@ test('productService.getProducts fetches and returns products', async () => {
     },
   ];
 
-  const originalFetch = (global as any).fetch;
-  (global as any).fetch = async (url: string) => ({
+  const globalObj = global as unknown as Record<string, unknown>;
+  const originalFetch = globalObj.fetch;
+  globalObj.fetch = async () => ({
     ok: true,
     json: async () => sample,
-  } as any);
+  }) as unknown;
 
   try {
     const products = await productService.getProducts();
@@ -35,6 +36,6 @@ test('productService.getProducts fetches and returns products', async () => {
     assert.equal(products.length, 1);
     assert.equal(products[0].name, 'Prueba Producto');
   } finally {
-    (global as any).fetch = originalFetch;
+    globalObj.fetch = originalFetch;
   }
 });

@@ -15,18 +15,16 @@ export async function getVertexAccessToken(): Promise<string> {
 
   let clientEmail: string | undefined;
   let privateKeyPem: string | undefined;
-  let projectId: string | undefined;
 
   // Prefer full service account JSON if provided
   if (process.env.VERTEX_SA_JSON || process.env.VERTEX_SA_JSON_BASE64) {
     const raw = process.env.VERTEX_SA_JSON ?? (process.env.VERTEX_SA_JSON_BASE64 ? Buffer.from(process.env.VERTEX_SA_JSON_BASE64, 'base64').toString('utf-8') : null);
     if (raw) {
       try {
-        const sa: any = JSON.parse(raw);
-        clientEmail = sa.client_email;
-        privateKeyPem = sa.private_key;
-        projectId = sa.project_id;
-      } catch (e) {
+        const sa = JSON.parse(raw) as Record<string, unknown>;
+        if (typeof sa['client_email'] === 'string') clientEmail = sa['client_email'];
+        if (typeof sa['private_key'] === 'string') privateKeyPem = sa['private_key'];
+      } catch {
         // ignore
       }
     }
@@ -34,7 +32,6 @@ export async function getVertexAccessToken(): Promise<string> {
 
   clientEmail = clientEmail ?? process.env.GCP_CLIENT_EMAIL ?? process.env.VERTEX_CLIENT_EMAIL;
   privateKeyPem = privateKeyPem ?? process.env.GCP_PRIVATE_KEY ?? process.env.VERTEX_PRIVATE_KEY;
-  projectId = projectId ?? process.env.VERTEX_PROJECT_ID;
 
   if (!clientEmail || !privateKeyPem) {
     throw new Error('Configura GCP_CLIENT_EMAIL y GCP_PRIVATE_KEY o VERTEX_SA_JSON en las variables de entorno');

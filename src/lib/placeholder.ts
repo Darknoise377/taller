@@ -17,7 +17,7 @@ export function escapeXml(str: string) {
   });
 }
 
-export function makeProductPlaceholder(name: string, id?: number, width = 1200, height = 800) {
+export function makeProductPlaceholder(name: string, id?: string | number, width = 1200, height = 800) {
   const text = (name || 'Producto').toUpperCase().slice(0, 24);
   // simple deterministic palette
   const colors = ['#0A2A66', '#2E5FA7', '#153B82', '#355C97', '#6A8EC0', '#7F96BB'];

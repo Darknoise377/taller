@@ -57,14 +57,14 @@ export function getJwtCookieMaxAgeSeconds(): number {
 
 export interface AdminTokenPayload extends JWTPayload {
   sub: string; // email
-  uid: number; // userId
+  uid: string; // userId (UUID)
   role: AdminRole;
   name?: string | null;
 }
 
 export async function signAdminToken(input: {
   email: string;
-  userId: number;
+  userId: string;
   role: AdminRole;
   name?: string | null;
 }): Promise<string> {
@@ -92,7 +92,7 @@ export async function verifyAdminToken(token: string): Promise<AdminTokenPayload
     throw new Error("Token inválido: rol no autorizado");
   }
 
-  if (typeof payload.uid !== 'number') {
+  if (typeof payload.uid !== 'string' || !payload.uid) {
     throw new Error('Token inválido: uid faltante');
   }
 

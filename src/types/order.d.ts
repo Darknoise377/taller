@@ -14,7 +14,7 @@ export interface OrderCreatePayload {
   phone: string;
   postalCode?: string;
   cedula?: string;
-  products: { productId: number; quantity: number }[];
+  products: { productId: string; quantity: number }[];
   sellerId?: string;
   promoCodeApplied?: string;
   status?: OrderStatus;
@@ -30,7 +30,7 @@ export interface OrderProduct {
   id: number;
   quantity: number;
   product: {
-    id: number;
+    id: string;
     price: number;
     name: string;
     imageUrl?: string;

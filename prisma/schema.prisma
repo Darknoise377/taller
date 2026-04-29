@@ -1,19 +1,21 @@
 // 🔧 Prisma Configuration
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+  extensions = [vector]
 }
 
 //
 // 👕 Productos
 //
 model Product {
-  id          Int            @id @default(autoincrement())
+  id          String         @id @default(uuid())
   name        String
   description String
   price       Float
@@ -33,7 +35,7 @@ model Product {
   // 🔗 Relaciones
   orderItems OrderProduct[]
   owner      User?          @relation(fields: [ownerId], references: [id])
-  ownerId     Int?
+  ownerId     String?
 }
 
 enum Category {
@@ -79,7 +81,7 @@ model Order {
   cedula          String?
 
   // 🔗 Relación futura con usuario registrado
-  userId          Int?
+  userId          String?
   user            User?         @relation(fields: [userId], references: [id])
 
   // 🕒 Fechas
@@ -108,8 +110,10 @@ model OrderProduct {
   order     Order    @relation(fields: [orderId], references: [id])
   orderId   Int
   product   Product  @relation(fields: [productId], references: [id])
-  productId Int
+  productId String
   quantity  Int      @default(1)
+  // El precio unitario exacto al momento de la compra
+  unitPrice Float
 }
 
 //
@@ -133,7 +137,7 @@ enum PaymentMethod {
 // 👤 Usuarios (registro futuro)
 //
 model User {
-  id        Int      @id @default(autoincrement())
+  id        String   @id @default(uuid())
   email     String   @unique
   password  String
   role      Role     @default(VENDEDOR)
@@ -164,7 +168,7 @@ model Seller {
   orders  Order[]
 
   // 🔗 Relación 1:1 futura con usuario registrado
-  userId  Int?     @unique
+  userId  String?  @unique
   user    User?    @relation(fields: [userId], references: [id])
 }
 
@@ -184,7 +188,7 @@ model Promotion {
 // --- CHAT / AI / EMBEDDINGS ---
 model ChatSession {
   id        Int          @id @default(autoincrement())
-  userId    Int?
+  userId    String?
   phone     String?      // WhatsApp wa_id
   createdAt DateTime     @default(now())
   messages  ChatMessage[]
@@ -203,9 +207,10 @@ model ChatMessage {
 model Embedding {
   id         Int      @id @default(autoincrement())
   model      String
-  vector     Json     // array of floats stored as JSON
+  // Usar pgvector para poder aprovechar funciones de similitud (ajusta la dimensión si usas otro modelo)
+  vector     Unsupported("vector(768)")
   sourceType String?  // e.g., 'product' | 'chat'
-  sourceId   Int?
+  sourceId   String?
   text       String   @db.Text
   createdAt  DateTime @default(now())
 }

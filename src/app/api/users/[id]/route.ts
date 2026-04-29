@@ -5,9 +5,9 @@ import { hashPassword } from "@/lib/auth/hash";
 export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    const userId = Number(id);
+    const userId = String(id);
 
-    if (isNaN(userId)) {
+    if (!userId) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 
@@ -61,9 +61,9 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
 export async function DELETE(_: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await context.params;
-    const userId = Number(id);
+    const userId = String(id);
 
-    if (isNaN(userId)) {
+    if (!userId) {
       return NextResponse.json({ error: "ID inválido" }, { status: 400 });
     }
 

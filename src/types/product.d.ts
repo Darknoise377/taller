@@ -9,7 +9,7 @@ export type ProductSize = string;
  * @description Define la estructura de un producto en la tienda.
  */
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   description?: string;
   price: number;
@@ -61,7 +61,7 @@ export interface CategoryItem {
  * @description Estructura de un ítem dentro del carrito.
  */
 export interface CartItem {
-  id: number;
+  id: string;
   name: string;
   price: number;
   quantity: number;

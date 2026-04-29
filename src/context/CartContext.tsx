@@ -43,7 +43,7 @@ function isValidCartItem(value: unknown): value is CartItem {
     typeof maybeItem.quantity === "number" &&
     maybeItem.quantity > 0 &&
     !!maybeItem.product &&
-    typeof maybeItem.product.id === "number" &&
+    typeof maybeItem.product.id === "string" &&
     typeof maybeItem.product.name === "string" &&
     typeof maybeItem.product.price === "number"
   );
@@ -167,7 +167,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const removeItem = (
-    productId: number,
+    productId: string,
     selectedSize?: string,
     selectedColor?: string
   ) => {
@@ -182,7 +182,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   };
 
   const updateItemQuantity = (
-    productId: number,
+    productId: string,
     newQuantity: number,
     selectedSize?: string,
     selectedColor?: string

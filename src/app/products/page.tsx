@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 
 export default async function ProductsPage() {
   let rawProducts: Array<{
-    id: number;
+    id: string;
     name: string;
     description: string | null;
     price: number;

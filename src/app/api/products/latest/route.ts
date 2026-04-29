@@ -5,8 +5,8 @@ import { prisma } from "@/lib/prisma";
 
 // Definimos un tipo para el objeto que esperamos de la consulta
 type ProductForSlider = {
-  // CORREGIDO: El 'id' del producto es un número, no un string.
-  id: number; 
+  // El 'id' del producto es ahora una cadena UUID.
+  id: string;
   name: string;
   description: string | null;
   images: string[];

@@ -79,7 +79,7 @@ export function ProductCard({ product, idx }: ProductCardProps) {
     // Ajusta la cantidad si el stock cambia o es menor
     if (product.stock <= 0) setQuantity(1);
     if (quantity > (product.stock || 0)) setQuantity(Math.max(1, product.stock || 1));
-  }, [product.stock]);
+  }, [product.stock, quantity]);
 
   const handleAddToCart = () => {
     // Validamos que se hayan seleccionado las opciones si son requeridas

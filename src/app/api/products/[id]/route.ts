@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 
 // GET /api/products/[id] - Obtiene un producto por ID
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params; // ✅ await necesario
   try {
+    const productId = id;
     const product = await prisma.product.findUnique({
-      where: { id: Number(id) },
+      where: { id: productId },
       select: {
         id: true,
         name: true,
@@ -43,7 +45,7 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
     const body = await req.json();
 
     const existingProduct = await prisma.product.findUnique({
-      where: { id: Number(id) },
+      where: { id },
     });
 
     if (!existingProduct) {
@@ -64,22 +66,29 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
       return NextResponse.json({ error: 'El nombre es requerido' }, { status: 400 });
     }
 
+    const updateData: Prisma.ProductUpdateInput = {
+      name: body.name ?? existingProduct.name,
+      description: body.description ?? existingProduct.description,
+      price,
+      currency: body.currency ?? existingProduct.currency,
+      images: Array.isArray(body.images) ? body.images : existingProduct.images,
+      sku: body.sku ?? existingProduct.sku,
+      diagramNumber: body.diagramNumber ?? existingProduct.diagramNumber,
+      category: body.category ?? existingProduct.category,
+      sizes: Array.isArray(body.sizes) ? body.sizes : existingProduct.sizes,
+      colors: Array.isArray(body.colors) ? body.colors : existingProduct.colors,
+      stock,
+    };
+
+    // Añadimos tags solo si vienen en el payload para evitar errores P2022
+    // en entornos donde la migración aún no se aplicó.
+    if (body.tags !== undefined) {
+      updateData.tags = Array.isArray(body.tags) ? body.tags : existingProduct.tags;
+    }
+
     const updatedProduct = await prisma.product.update({
-      where: { id: Number(id) },
-      data: {
-        name: body.name ?? existingProduct.name,
-        description: body.description ?? existingProduct.description,
-        price,
-        currency: body.currency ?? existingProduct.currency,
-        images: Array.isArray(body.images) ? body.images : existingProduct.images,
-        sku: body.sku ?? existingProduct.sku,
-        tags: Array.isArray(body.tags) ? body.tags : existingProduct.tags,
-        diagramNumber: body.diagramNumber ?? existingProduct.diagramNumber,
-        category: body.category ?? existingProduct.category,
-        sizes: Array.isArray(body.sizes) ? body.sizes : existingProduct.sizes,
-        colors: Array.isArray(body.colors) ? body.colors : existingProduct.colors,
-        stock,
-      },
+      where: { id },
+      data: updateData,
     });
 
     return NextResponse.json(updatedProduct);
@@ -93,7 +102,7 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
 export async function DELETE(_: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params; // ✅ await necesario
   try {
-    const productId = Number(id);
+    const productId = id;
 
     const existingProduct = await prisma.product.findUnique({
       where: { id: productId },

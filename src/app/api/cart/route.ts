@@ -15,7 +15,7 @@ function isValidCartPayload(value: unknown): boolean {
       typeof maybeItem.quantity === "number" &&
       maybeItem.quantity > 0 &&
       !!maybeItem.product &&
-      typeof maybeItem.product.id === "number"
+      typeof maybeItem.product.id === "string"
     );
   });
 }

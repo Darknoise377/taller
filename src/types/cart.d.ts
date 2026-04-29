@@ -33,13 +33,13 @@ export interface CartContextType {
   ) => void;
 
   removeItem: (
-    productId: number,       // 🔹 Cambiado a number
+    productId: string,
     selectedSize?: string,
     selectedColor?: string
   ) => void;
 
   updateItemQuantity: (
-    productId: number,       // 🔹 Cambiado a number
+    productId: string,
     newQuantity: number,
     selectedSize?: string,
     selectedColor?: string

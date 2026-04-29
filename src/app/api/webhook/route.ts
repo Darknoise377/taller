@@ -1,11 +1,7 @@
 import { NextResponse } from 'next/server';
-import sendToAI from '@/lib/ai';
 import { prisma } from '@/lib/prisma';
 
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
-const WHATSAPP_TOKEN = process.env.WHATSAPP_API_TOKEN;
-const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
-const GRAPH_API_VERSION = process.env.WHATSAPP_GRAPH_API_VERSION ?? 'v17.0';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -20,35 +16,7 @@ export async function GET(request: Request) {
   return new NextResponse('Forbidden', { status: 403 });
 }
 
-async function sendWhatsAppText(to: string, text: string) {
-  if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
-    console.warn('WhatsApp token or phone id not configured');
-    return;
-  }
-
-  const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${PHONE_NUMBER_ID}/messages`;
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${WHATSAPP_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        messaging_product: 'whatsapp',
-        to,
-        text: { body: text },
-      }),
-    });
-
-    if (!res.ok) {
-      const txt = await res.text();
-      console.error('Failed sending WhatsApp message', res.status, txt);
-    }
-  } catch (error) {
-    console.error('Error sending WhatsApp message', error);
-  }
-}
+// sendWhatsAppText helper removed (unused) to silence ESLint warnings
 
 export async function POST(request: Request) {
   // Always return 200 quickly to avoid repeated retries from Meta.

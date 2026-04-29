@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Pencil, Trash2, UserPlus, X } from "lucide-react";
 
 interface User {
-  id: number;
+  id: string;
   email: string;
   name?: string;
   role: string;
@@ -71,7 +71,7 @@ export default function UsersPage() {
   };
 
   // ❌ Eliminar usuario
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
     if (res.ok) {
       toast.success("Usuario eliminado");

@@ -14,7 +14,7 @@ export const productService = {
     throw new Error('Respuesta de productos inválida');
   },
 
-  async getProduct(id: number): Promise<Product> {
+  async getProduct(id: string): Promise<Product> {
     const res = await fetch(`${API_URL}/products/${id}`);
     if (!res.ok) throw new Error('Error al obtener producto');
     return (await res.json()) as Product; // 👈 Casting
@@ -30,7 +30,7 @@ export const productService = {
     return (await res.json()) as Product; // 👈 Casting
   },
 
-  async updateProduct(id: number, product: Partial<Product>): Promise<Product> {
+  async updateProduct(id: string, product: Partial<Product>): Promise<Product> {
     const res = await fetch(`${API_URL}/products/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -40,7 +40,7 @@ export const productService = {
     return (await res.json()) as Product; // 👈 Casting
   },
 
-  async deleteProduct(id: number): Promise<void> {
+  async deleteProduct(id: string): Promise<void> {
     const res = await fetch(`${API_URL}/products/${id}`, {
       method: 'DELETE',
     });

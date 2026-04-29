@@ -16,7 +16,7 @@ export default function useProducts() {
     { revalidateOnFocus: true, dedupingInterval: 5000 }
   );
 
-  const updateProduct = async (id: number, updates: Partial<Product>) => {
+  const updateProduct = async (id: string, updates: Partial<Product>) => {
     const res = await fetch(`/api/products/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -28,7 +28,7 @@ export default function useProducts() {
     return updated;
   };
 
-  const deleteProduct = async (id: number) => {
+  const deleteProduct = async (id: string) => {
     const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Error al eliminar producto');
     mutate('/api/products');

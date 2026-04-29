@@ -16,7 +16,7 @@ interface ProductPageProps {
 
 export const revalidate = 60;
 
-const getProductById = cache(async (id: number) => {
+const getProductById = cache(async (id: string) => {
   return prisma.product.findUnique({
     where: { id },
     select: {
@@ -37,7 +37,7 @@ const getProductById = cache(async (id: number) => {
   });
 });
 
-const getRelatedProducts = cache(async (category: string, excludeId: number) => {
+const getRelatedProducts = cache(async (category: string, excludeId: string) => {
   return prisma.product.findMany({
     where: {
       category: category as never,
@@ -67,8 +67,8 @@ export async function generateMetadata(
   { params }: ProductPageProps
 ): Promise<Metadata> {
   const { id: idParam } = await params;
-  const id = Number(idParam);
-  if (!Number.isFinite(id)) {
+  const id = String(idParam);
+  if (!id) {
     return {
       title: "Producto no encontrado",
       description: "Este producto no existe en la tienda.",
@@ -131,8 +131,8 @@ export async function generateMetadata(
 // ✅ Página del producto
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id: idParam } = await params;
-  const id = Number(idParam);
-  if (!Number.isFinite(id)) return notFound();
+  const id = String(idParam);
+  if (!id) return notFound();
 
   let productRaw: Awaited<ReturnType<typeof getProductById>> = null;
   try {

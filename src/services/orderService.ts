@@ -35,7 +35,7 @@ export const orderService = {
       ...orderData,
       status: orderData.status ?? 'PENDING', // Valor por defecto
       products: orderData.products.map((p) => ({
-        productId: Number(p.productId),
+        productId: String(p.productId),
         quantity: p.quantity,
       })),
       // El status se define por defecto en la DB
@@ -78,13 +78,13 @@ export const orderService = {
 
     type ProductLike = {
       quantity: number;
-      productId?: number;
-      product?: { id: number };
+      productId?: string;
+      product?: { id: string };
     };
 
     if (data.products) {
       payload.products = (data.products as unknown as ProductLike[]).map((p) => ({
-        productId: Number(p.productId ?? p.product?.id),
+        productId: String(p.productId ?? p.product?.id),
         quantity: p.quantity,
       }));
     }

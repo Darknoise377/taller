@@ -2,10 +2,11 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from 'next/image';
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { makeProductPlaceholder } from "@/lib/placeholder";
 
-type MinimalProduct = { id: number; name: string; description?: string };
+type MinimalProduct = { id: string; name: string; description?: string };
 
 export default function HomeSearch() {
   const [products, setProducts] = useState<MinimalProduct[]>([]);
@@ -113,7 +114,7 @@ export default function HomeSearch() {
               className="flex flex-col items-center gap-2 text-xs"
               aria-label={`Buscar ${s}`}
             >
-              <img src={makeProductPlaceholder(s)} alt={s} className="w-16 h-16 rounded-md object-cover" />
+              <Image src={makeProductPlaceholder(s)} alt={s} width={64} height={64} className="w-16 h-16 rounded-md object-cover" unoptimized />
               <span className="truncate max-w-[72px] text-center">{s}</span>
             </button>
           ))}
