@@ -54,6 +54,9 @@ export async function GET() {
         smtp: smtpConfigured ? 'configured' : 'missing-config',
       },
     },
-    { status: ok ? 200 : 503 }
+    {
+      status: ok ? 200 : 503,
+      headers: { 'Cache-Control': 'no-store' },
+    }
   );
 }

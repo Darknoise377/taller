@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma, OrderStatus } from "@prisma/client";
 import { sendOrderStatusChangedEmail } from "@/lib/email/orderEmails";
+import { canTransitionOrderStatus } from "@/lib/orders/status";
+import { getRequestActorFromCookie, writeSecurityAuditLog } from "@/lib/security/auditDb";
 
 /**
  * ✅ GET /api/orders/[id]
@@ -46,6 +48,9 @@ export async function PATCH(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const actor = await getRequestActorFromCookie(req);
+    const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const userAgent = req.headers.get("user-agent") ?? "unknown";
     const { id } = await context.params;
     const numericId = Number(id);
     if (!Number.isInteger(numericId) || numericId <= 0) {
@@ -122,6 +127,13 @@ export async function PATCH(
         );
       }
 
+      if (!canTransitionOrderStatus(existingOrder.status, status)) {
+        return NextResponse.json(
+          { message: `Transición de estado inválida: ${existingOrder.status} -> ${status}` },
+          { status: 400 }
+        );
+      }
+
       previousOrderForEmail = existingOrder;
       dataToUpdate.status = status;
     }
@@ -142,6 +154,19 @@ export async function PATCH(
       where: { id: numericId },
       data: dataToUpdate,
       include: { products: { include: { product: true } } },
+    });
+
+    await writeSecurityAuditLog({
+      action: "SENSITIVE_ACTION",
+      path: `/api/orders/${numericId}`,
+      method: "PATCH",
+      actorId: actor?.id,
+      actorEmail: actor?.email,
+      actorRole: actor?.role,
+      reason: "Updated order",
+      ip: requestIp,
+      userAgent,
+      metadata: { orderId: numericId, status: updatedOrder.status },
     });
 
     if (
@@ -177,26 +202,59 @@ export async function PATCH(
  * Elimina una orden y sus productos asociados
  */
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const actor = await getRequestActorFromCookie(req);
+    const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const userAgent = req.headers.get("user-agent") ?? "unknown";
     const { id } = await context.params;
+    const numericId = Number(id);
+    if (!Number.isInteger(numericId) || numericId <= 0) {
+      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
+    }
 
     const deletedOrder = await prisma.$transaction(async (tx) => {
       const orderToDelete = await tx.order.findUnique({
-        where: { id: Number(id) },
+        where: { id: numericId },
+        include: {
+          products: {
+            select: { productId: true, quantity: true },
+          },
+        },
       });
 
       if (!orderToDelete) {
         throw new Error(`La orden ${id} no existe`);
       }
 
+      // Revert inventory consumed by the order before deleting it.
+      for (const item of orderToDelete.products) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { increment: item.quantity } },
+        });
+      }
+
       // ✅ Eliminar productos asociados antes de la orden
-      await tx.orderProduct.deleteMany({ where: { orderId: Number(id) } });
-      await tx.order.delete({ where: { id: Number(id) } });
+      await tx.orderProduct.deleteMany({ where: { orderId: numericId } });
+      await tx.order.delete({ where: { id: numericId } });
 
       return orderToDelete;
+    });
+
+    await writeSecurityAuditLog({
+      action: "SENSITIVE_ACTION",
+      path: `/api/orders/${numericId}`,
+      method: "DELETE",
+      actorId: actor?.id,
+      actorEmail: actor?.email,
+      actorRole: actor?.role,
+      reason: "Deleted order",
+      ip: requestIp,
+      userAgent,
+      metadata: { orderId: numericId, referenceCode: deletedOrder.referenceCode },
     });
 
     return NextResponse.json(

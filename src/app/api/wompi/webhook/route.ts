@@ -1,21 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { OrderStatus } from '@prisma/client';
 import { sendOrderStatusChangedEmail } from '@/lib/email/orderEmails';
 import { isValidWompiWebhookSignature, mapWompiStatusToOrderStatus, type WompiWebhookPayload } from '@/lib/payments/wompi';
-
-const statusPriority: Record<OrderStatus, number> = {
-  PENDING: 1,
-  APPROVED: 3,
-  DECLINED: 2,
-  SHIPPED: 4,
-  CANCELLED: 4,
-};
-
-function shouldUpdateStatus(current: OrderStatus, incoming: OrderStatus): boolean {
-  if (current === incoming) return false;
-  return statusPriority[incoming] >= statusPriority[current];
-}
+import { shouldApplyIncomingOrderStatus } from '@/lib/orders/status';
 
 export async function POST(req: Request) {
   try {
@@ -31,7 +18,12 @@ export async function POST(req: Request) {
     }
 
     const wompiEventsSecret = process.env.WOMPI_EVENTS_SECRET;
-    if (wompiEventsSecret && !isValidWompiWebhookSignature(body, wompiEventsSecret)) {
+    if (!wompiEventsSecret) {
+      console.error('WOMPI_EVENTS_SECRET no está configurado');
+      return NextResponse.json({ error: 'Configuración incompleta del servidor' }, { status: 500 });
+    }
+
+    if (!isValidWompiWebhookSignature(body, wompiEventsSecret)) {
       return NextResponse.json({ error: 'Firma inválida de Wompi' }, { status: 400 });
     }
 
@@ -45,6 +37,7 @@ export async function POST(req: Request) {
         currency: true,
         paymentMethod: true,
         status: true,
+        transactionId: true,
         products: {
           select: {
             quantity: true,
@@ -68,7 +61,15 @@ export async function POST(req: Request) {
     }
 
     const newStatus = mapWompiStatusToOrderStatus(status);
-    const canUpdateStatus = shouldUpdateStatus(order.status, newStatus);
+    const isDuplicateNotification =
+      order.transactionId === transactionId &&
+      order.status === newStatus;
+
+    if (isDuplicateNotification) {
+      return NextResponse.json({ ok: true }, { status: 200 });
+    }
+
+    const canUpdateStatus = shouldApplyIncomingOrderStatus(order.status, newStatus);
 
     await prisma.order.update({
       where: { referenceCode },

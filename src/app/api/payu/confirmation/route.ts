@@ -4,20 +4,7 @@ import { prisma } from "@/lib/prisma";   // ✅ Correcto para tu helper
 import { OrderStatus } from "@prisma/client"; // ✅ Enums desde Prisma
 import crypto from "crypto";
 import { sendOrderStatusChangedEmail } from "@/lib/email/orderEmails";
-
-const statusPriority: Record<OrderStatus, number> = {
-  PENDING: 1,
-  APPROVED: 3,
-  DECLINED: 2,
-  SHIPPED: 4,
-  CANCELLED: 4,
-};
-
-function shouldUpdateStatus(current: OrderStatus, incoming: OrderStatus): boolean {
-  if (current === incoming) return false;
-  // Never downgrade a stronger/final status with a weaker late callback.
-  return statusPriority[incoming] >= statusPriority[current];
-}
+import { shouldApplyIncomingOrderStatus } from "@/lib/orders/status";
 
 function normalizePayuValue(raw: string | undefined): string | null {
   if (!raw) return null;
@@ -83,6 +70,7 @@ export async function POST(req: Request) {
         total: true,
         currency: true,
         status: true,
+        transactionId: true,
         referenceCode: true,
         customerName: true,
         customerEmail: true,
@@ -145,7 +133,17 @@ export async function POST(req: Request) {
         newStatus = OrderStatus.PENDING;
     }
 
-    const canUpdateStatus = shouldUpdateStatus(order.status, newStatus);
+    const isDuplicateNotification =
+      typeof transactionId === "string" &&
+      transactionId.length > 0 &&
+      order.transactionId === transactionId &&
+      order.status === newStatus;
+
+    if (isDuplicateNotification) {
+      return new Response("OK", { status: 200 });
+    }
+
+    const canUpdateStatus = shouldApplyIncomingOrderStatus(order.status, newStatus);
     await prisma.order.update({
       where: { referenceCode },
       data: {

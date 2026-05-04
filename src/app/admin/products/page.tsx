@@ -26,7 +26,9 @@ import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons';
+import ExcelJS from 'exceljs';
 import type { UploadFile } from 'antd/es/upload/interface';
 import type { ColumnsType } from 'antd/es/table';
 import { productService, uploadImage } from '@/services/productService';
@@ -45,6 +47,7 @@ export default function AdminProductsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [form] = Form.useForm();
 
@@ -147,6 +150,79 @@ export default function AdminProductsPage() {
       setIsSaving(false);
     }
   };
+
+  const handleExportExcel = useCallback(async () => {
+    if (products.length === 0) {
+      message.warning('No hay productos para exportar.');
+      return;
+    }
+    setIsExporting(true);
+    try {
+      const wb = new ExcelJS.Workbook();
+      wb.creator = 'Motoservicio A&R Admin';
+      wb.created = new Date();
+      const ws = wb.addWorksheet('Productos');
+
+      ws.columns = [
+        { header: 'ID', key: 'id', width: 38 },
+        { header: 'Nombre', key: 'name', width: 40 },
+        { header: 'Categoría', key: 'category', width: 20 },
+        { header: 'Precio', key: 'price', width: 14 },
+        { header: 'Moneda', key: 'currency', width: 10 },
+        { header: 'Stock', key: 'stock', width: 10 },
+        { header: 'SKU', key: 'sku', width: 18 },
+        { header: 'Medidas', key: 'sizes', width: 30 },
+        { header: 'Compatibilidad', key: 'colors', width: 30 },
+        { header: 'Etiquetas', key: 'tags', width: 30 },
+        { header: 'Descripción', key: 'description', width: 50 },
+        { header: 'Creado', key: 'createdAt', width: 22 },
+      ];
+
+      // Header row style
+      const headerRow = ws.getRow(1);
+      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0A2A66' } };
+      headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+      headerRow.height = 20;
+
+      products.forEach((p) => {
+        ws.addRow({
+          id: p.id,
+          name: p.name,
+          category: getProductCategoryLabel(p.category),
+          price: p.price,
+          currency: p.currency ?? 'COP',
+          stock: p.stock ?? 0,
+          sku: p.sku ?? '',
+          sizes: (p.sizes ?? []).join(', '),
+          colors: (p.colors ?? []).join(', '),
+          tags: (p.tags ?? []).join(', '),
+          description: p.description ?? '',
+          createdAt: p.createdAt ? new Date(p.createdAt).toLocaleString('es-CO') : '',
+        });
+      });
+
+      // Auto-filter
+      ws.autoFilter = { from: 'A1', to: 'L1' };
+
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `productos_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      message.success(`${products.length} productos exportados correctamente.`);
+    } catch (err) {
+      console.error('Error exportando productos:', err);
+      message.error('Error al exportar productos.');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [products]);
 
   const handleDeleteProduct = useCallback(async (id: string) => {
     try {
@@ -282,16 +358,22 @@ return (
           Gestión de Productos
         </Typography.Title>
 
-        <div className="w-full sm:w-auto">
+        <Space wrap>
+          <Button
+            icon={<DownloadOutlined />}
+            onClick={handleExportExcel}
+            loading={isExporting}
+          >
+            Exportar Excel
+          </Button>
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => openModal()}
-            className="w-full sm:w-auto"
           >
             Añadir Producto
           </Button>
-        </div>
+        </Space>
       </div>
 
     <Card>

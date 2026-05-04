@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/hash";
+import { Role } from "@prisma/client";
+import { getRequestActorFromCookie, writeSecurityAuditLog } from "@/lib/security/auditDb";
 
 // 📍 GET → Listar todos los usuarios
 export async function GET() {
@@ -30,6 +32,9 @@ export async function GET() {
 // 📍 POST → Crear nuevo usuario
 export async function POST(req: Request) {
   try {
+    const actor = await getRequestActorFromCookie(req);
+    const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const userAgent = req.headers.get("user-agent") ?? "unknown";
     const { email, password, name, role } = await req.json();
 
     // 🔎 Validaciones
@@ -57,6 +62,13 @@ export async function POST(req: Request) {
       );
     }
 
+    if (role && !Object.values(Role).includes(role as Role)) {
+      return NextResponse.json(
+        { error: "Rol inválido" },
+        { status: 400 }
+      );
+    }
+
     // 🧩 Verificar si ya existe el usuario
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
@@ -78,6 +90,19 @@ export async function POST(req: Request) {
         role: role || "VENDEDOR",
       },
       select: { id: true, email: true, name: true, role: true, createdAt: true },
+    });
+
+    await writeSecurityAuditLog({
+      action: "SENSITIVE_ACTION",
+      path: "/api/users",
+      method: "POST",
+      actorId: actor?.id,
+      actorEmail: actor?.email,
+      actorRole: actor?.role,
+      reason: "Created user",
+      ip: requestIp,
+      userAgent,
+      metadata: { targetUserId: newUser.id, targetRole: newUser.role },
     });
 
     return NextResponse.json(

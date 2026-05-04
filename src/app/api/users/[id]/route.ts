@@ -1,9 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/hash";
+import { Role } from "@prisma/client";
+import { getRequestActorFromCookie, writeSecurityAuditLog } from "@/lib/security/auditDb";
 
 export async function PUT(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    const actor = await getRequestActorFromCookie(req);
+    const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const userAgent = req.headers.get("user-agent") ?? "unknown";
     const { id } = await context.params;
     const userId = String(id);
 
@@ -22,8 +27,8 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
       );
     }
 
-    // Validate role is a known value
-    if (role && !['ADMIN', 'SUPERADMIN', 'USER'].includes(role)) {
+    // Validate role is a known value in Prisma enum
+    if (role && !Object.values(Role).includes(role as Role)) {
       return NextResponse.json(
         { error: "Rol inválido" },
         { status: 400 }
@@ -48,6 +53,19 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
       },
     });
 
+    await writeSecurityAuditLog({
+      action: "SENSITIVE_ACTION",
+      path: `/api/users/${userId}`,
+      method: "PUT",
+      actorId: actor?.id,
+      actorEmail: actor?.email,
+      actorRole: actor?.role,
+      reason: "Updated user",
+      ip: requestIp,
+      userAgent,
+      metadata: { targetUserId: updatedUser.id, targetRole: updatedUser.role },
+    });
+
     return NextResponse.json(updatedUser);
   } catch (error) {
     console.error("Error al actualizar usuario:", error);
@@ -58,8 +76,11 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
   }
 }
 
-export async function DELETE(_: Request, context: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
+    const actor = await getRequestActorFromCookie(req);
+    const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const userAgent = req.headers.get("user-agent") ?? "unknown";
     const { id } = await context.params;
     const userId = String(id);
 
@@ -68,6 +89,20 @@ export async function DELETE(_: Request, context: { params: Promise<{ id: string
     }
 
     await prisma.user.delete({ where: { id: userId } });
+
+    await writeSecurityAuditLog({
+      action: "SENSITIVE_ACTION",
+      path: `/api/users/${userId}`,
+      method: "DELETE",
+      actorId: actor?.id,
+      actorEmail: actor?.email,
+      actorRole: actor?.role,
+      reason: "Deleted user",
+      ip: requestIp,
+      userAgent,
+      metadata: { targetUserId: userId },
+    });
+
     return NextResponse.json({ message: "Usuario eliminado correctamente" });
   } catch (error) {
     console.error("Error al eliminar usuario:", error);

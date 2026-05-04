@@ -147,8 +147,8 @@ export default function RootLayout({
             <Toaster position="top-center" richColors closeButton />
             {/* 🔹 Footer dinámico */}
             <DynamicFooter />
-            {/* Vercel Speed Insights: recoge métricas de rendimiento en producción */}
-            <SpeedInsights />
+            {/* Vercel Speed Insights: solo activo en producción */}
+            {process.env.NODE_ENV === 'production' && <SpeedInsights />}
           </CartProvider>
         </ThemeProvider>
       </body>

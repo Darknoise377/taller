@@ -1,7 +1,25 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import crypto from 'crypto';
 
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
+const WHATSAPP_APP_SECRET = process.env.WHATSAPP_APP_SECRET;
+
+function isValidWhatsAppSignature(rawBody: string, signatureHeader: string | null): boolean {
+  if (!WHATSAPP_APP_SECRET || !signatureHeader) return false;
+  const [algo, signature] = signatureHeader.split('=');
+  if (algo !== 'sha256' || !signature) return false;
+
+  const expectedSignature = crypto
+    .createHmac('sha256', WHATSAPP_APP_SECRET)
+    .update(rawBody, 'utf8')
+    .digest('hex');
+
+  const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
+  const incomingBuffer = Buffer.from(signature, 'utf8');
+  if (expectedBuffer.length !== incomingBuffer.length) return false;
+  return crypto.timingSafeEqual(expectedBuffer, incomingBuffer);
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -21,7 +39,15 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   // Always return 200 quickly to avoid repeated retries from Meta.
   try {
-    const body = await request.json();
+    const rawBody = await request.text();
+    const signatureHeader = request.headers.get('x-hub-signature-256');
+
+    if (!WHATSAPP_APP_SECRET || !isValidWhatsAppSignature(rawBody, signatureHeader)) {
+      console.error('Invalid WhatsApp webhook signature');
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+
+    const body = JSON.parse(rawBody);
     // Minimal defensive parsing of WhatsApp Cloud webhook
     const change = body?.entry?.[0]?.changes?.[0];
     const value = change?.value;

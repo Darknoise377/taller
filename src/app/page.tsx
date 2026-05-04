@@ -224,9 +224,9 @@ export default function Home() {
                   <p className="text-xs text-slate-500 dark:text-slate-400">Piezas originales y genéricas de calidad.</p>
                 </div>
                 <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
-                  <CheckCircleIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
-                  <p className="text-sm font-semibold">Marca sólida</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Colores y estilo alineados con el logo.</p>
+                  <GlobeAltIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
+                  <p className="text-sm font-semibold">Envíos a Colombia</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Despachamos a cualquier ciudad del país.</p>
                 </div>
               </div>
 

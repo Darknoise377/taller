@@ -7,8 +7,16 @@ on:
     branches: [main, master]
 
 jobs:
-  verify:
+  quality:
+    name: Type-check · Lint · Test
     runs-on: ubuntu-latest
+
+    env:
+      # Prisma needs a DATABASE_URL to generate the client (no real DB needed for CI)
+      DATABASE_URL: "postgresql://user:pass@localhost:5432/ci_db?schema=public"
+      DIRECT_URL: "postgresql://user:pass@localhost:5432/ci_db?schema=public"
+      JWT_SECRET: "ci-placeholder-secret"
+      NEXT_PUBLIC_BASE_URL: "http://localhost:3000"
 
     steps:
       - name: Checkout
@@ -17,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: npm
 
       - name: Install dependencies
@@ -26,8 +34,11 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
-      - name: Lint
+      - name: TypeScript type-check
+        run: npx tsc --noEmit
+
+      - name: ESLint
         run: npm run lint
 
-      - name: Build
-        run: npm run build
+      - name: Unit tests
+        run: npm test

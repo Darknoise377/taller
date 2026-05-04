@@ -231,3 +231,18 @@ enum JobStatus {
   FAILED
   COMPLETED
 }
+
+model SecurityAuditLog {
+  id         Int      @id @default(autoincrement())
+  action     String
+  path       String
+  method     String
+  actorId    String?
+  actorEmail String?
+  actorRole  String?
+  reason     String?
+  ip         String?
+  userAgent  String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}

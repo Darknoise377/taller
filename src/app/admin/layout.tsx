@@ -3,7 +3,7 @@
 import React from "react";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
-import { BadgePercent, LayoutDashboard, LogOut, Package, PackageSearch, Users } from "lucide-react";
+import { BadgePercent, LayoutDashboard, LogOut, Package, PackageSearch, ShieldAlert, Users } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/admin/orders", label: "Órdenes", icon: PackageSearch },
   { href: "/admin/users", label: "Usuarios", icon: Users },
   { href: "/admin/codes", label: "Códigos", icon: BadgePercent },
+  { href: "/admin/security-audit", label: "Auditoría", icon: ShieldAlert },
 ];
 
 function AdminShell({ children }: { children: React.ReactNode }) {

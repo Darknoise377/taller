@@ -112,6 +112,12 @@ export function ProductCard({ product, idx }: ProductCardProps) {
               Agotado
           </div>
       )}
+      {product.stock > 0 && product.createdAt &&
+        Date.now() - new Date(product.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000 && (
+          <div className="absolute top-3 left-3 bg-[#0A2A66] text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+            Nuevo
+          </div>
+      )}
 
       <Link href={`/products/${product.id}`} className="block relative aspect-square w-full overflow-hidden">
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 z-10 flex items-center justify-center">
