@@ -8,6 +8,7 @@ import CartModal from '@/components/CartModal';
 import ConditionalNavbar from '@/components/ConditionalNavbar';
 import DynamicFooter from '@/components/DynamicFooter';
 import FloatingButtons from '@/components/FloatingButtons';
+import ChatWidget from '@/components/ChatWidget';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from "./theme-provider";
 import { getBaseUrl, getBaseUrlAsUrl } from "@/lib/site";
@@ -143,6 +144,8 @@ export default function RootLayout({
             <CartModal />
             {/* 🔹 Botones flotantes (WhatsApp + Back to top) */}
             <FloatingButtons />
+            {/* 🔹 Asistente IA flotante */}
+            <ChatWidget />
             {/* 🔹 Toast notifications */}
             <Toaster position="top-center" richColors closeButton />
             {/* 🔹 Footer dinámico */}

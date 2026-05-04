@@ -12,12 +12,16 @@
     "ai:worker": "tsx src/worker/processJobs.ts"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.67",
+    "@ai-sdk/openai": "^3.0.60",
+    "@ai-sdk/react": "^3.0.177",
     "@ant-design/icons": "^6.1.0",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/client": "^6.17.1",
     "@vercel/speed-insights": "^2.0.0",
+    "ai": "^6.0.175",
     "antd": "^5.27.5",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
