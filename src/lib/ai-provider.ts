@@ -20,9 +20,13 @@ function getVertexCredentials(): { client_email: string; private_key: string } |
       client_email?: string;
       private_key?: string;
     };
-    if (!parsed.client_email || !parsed.private_key) return null;
+    if (!parsed.client_email || !parsed.private_key) {
+      console.error('[ai-provider] SA JSON parsed but missing client_email or private_key');
+      return null;
+    }
     return { client_email: parsed.client_email, private_key: parsed.private_key };
-  } catch {
+  } catch (e) {
+    console.error('[ai-provider] Failed to parse SA JSON:', e instanceof Error ? e.message : e);
     return null;
   }
 }

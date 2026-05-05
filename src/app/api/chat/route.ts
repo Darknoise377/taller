@@ -171,7 +171,11 @@ export async function POST(req: Request) {
   let model;
   try {
     model = getAIModel();
-  } catch {
+  } catch (e) {
+    console.error('[/api/chat] getAIModel failed:', e instanceof Error ? e.message : e);
+    console.error('[/api/chat] env check — VERTEX_SA_JSON_BASE64:', process.env.VERTEX_SA_JSON_BASE64 ? `set (${process.env.VERTEX_SA_JSON_BASE64.length} chars)` : 'NOT SET');
+    console.error('[/api/chat] env check — VERTEX_PROJECT_ID:', process.env.VERTEX_PROJECT_ID ?? 'NOT SET');
+    console.error('[/api/chat] env check — GEMINI_API_KEY:', process.env.GEMINI_API_KEY ? 'set' : 'NOT SET');
     return new Response(
       JSON.stringify({ error: 'El asistente de IA no está configurado en este momento.' }),
       { status: 503, headers: { 'Content-Type': 'application/json' } }
