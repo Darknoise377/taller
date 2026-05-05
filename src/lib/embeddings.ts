@@ -133,30 +133,13 @@ export async function createAndStoreEmbedding(opts: { text: string; model?: stri
   const sourceId = opts.sourceId ?? null;
   const text = opts.text;
 
-  // Try inserting using pgvector (requires pgvector extension and schema column vector(768)).
-  // We cast a text parameter to vector: e.g. $1::vector
+  // Insert using pgvector native type. Use $executeRawUnsafe to avoid Prisma
+  // trying to deserialize the vector column on RETURNING.
   const vectorLiteral = `[${vector.join(',')}]`;
-  try {
-    const inserted = await prisma.$queryRaw`
-      INSERT INTO "Embedding" ("model","vector","sourceType","sourceId","text","createdAt")
-      VALUES (${modelName}, ${vectorLiteral}::vector, ${sourceType}, ${sourceId}, ${text}, NOW())
-      RETURNING *;
-    `;
-    if (Array.isArray(inserted)) return inserted[0];
-    return inserted;
-  } catch (pgError) {
-    // Fallback: try inserting the vector as JSON (useful when DB still has JSON column)
-    try {
-      const insertedJson = await prisma.$queryRaw`
-        INSERT INTO "Embedding" ("model","vector","sourceType","sourceId","text","createdAt")
-        VALUES (${modelName}, ${JSON.stringify(vector)}::jsonb, ${sourceType}, ${sourceId}, ${text}, NOW())
-        RETURNING *;
-      `;
-      if (Array.isArray(insertedJson)) return insertedJson[0];
-      return insertedJson;
-    } catch {
-      // If all raw inserts fail, rethrow the original error for visibility
-      throw pgError;
-    }
-  }
+  await prisma.$executeRawUnsafe(
+    `INSERT INTO "Embedding" ("model","vector","sourceType","sourceId","text","createdAt")
+     VALUES ($1, $2::vector, $3, $4, $5, NOW())`,
+    modelName, vectorLiteral, sourceType, sourceId, text,
+  );
+  return { model: modelName, sourceType, sourceId, text };
 }

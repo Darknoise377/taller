@@ -7,7 +7,17 @@
  *   npx tsx src/scripts/ingest-embeddings.ts --force   # re-genera aunque ya existan
  */
 
-import 'dotenv/config';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+// Carga .env y luego .env.local (mismo orden que Next.js — local sobreescribe)
+config({ path: resolve(process.cwd(), '.env') });
+config({ path: resolve(process.cwd(), '.env.local'), override: true });
+
+// Para scripts standalone usamos DIRECT_URL (port 5432) en vez del pooler pgbouncer (6543)
+// porque $executeRawUnsafe no funciona correctamente sobre pgbouncer.
+if (process.env.DIRECT_URL) {
+  process.env.DATABASE_URL = process.env.DIRECT_URL;
+}
 import { prisma } from '../lib/prisma';
 import { createAndStoreEmbedding } from '../lib/embeddings';
 
