@@ -49,13 +49,13 @@ export function getAIModel(): LanguageModel {
         },
       },
     });
-    return vertexProvider(process.env.GEMINI_MODEL ?? 'gemini-2.0-flash');
+    return vertexProvider(process.env.GEMINI_MODEL ?? 'gemini-2.5-flash');
   }
 
   // 2. Google Gemini via API key
   if (process.env.GEMINI_API_KEY) {
     const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
-    return google(process.env.GEMINI_MODEL ?? 'gemini-2.0-flash');
+    return google(process.env.GEMINI_MODEL ?? 'gemini-2.5-flash');
   }
 
   // 3. OpenAI fallback
