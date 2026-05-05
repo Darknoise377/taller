@@ -1,42 +1,102 @@
 import { prisma } from '@/lib/prisma';
 
-async function ensureVertexCredentialsIfProvided() {
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) return;
-  const raw = process.env.VERTEX_SA_JSON ?? (process.env.VERTEX_SA_JSON_BASE64 ? Buffer.from(process.env.VERTEX_SA_JSON_BASE64, 'base64').toString('utf-8') : null);
-  if (!raw) return;
-  const os = await import('os');
-  const path = await import('path');
-  const fs = await import('fs');
-  const filename = path.join(os.tmpdir(), `vertex-sa-${process.pid}-${Date.now()}.json`);
-  await fs.promises.writeFile(filename, raw, { encoding: 'utf-8', mode: 0o600 });
-  process.env.GOOGLE_APPLICATION_CREDENTIALS = filename;
+/**
+ * Parses the Vertex service account JSON from env vars.
+ * Supports VERTEX_SA_JSON_BASE64 (preferred) or VERTEX_SA_JSON (raw).
+ */
+function parseVertexSA(): { client_email: string; private_key: string; project_id?: string } | null {
+  const raw =
+    process.env.VERTEX_SA_JSON_BASE64
+      ? Buffer.from(process.env.VERTEX_SA_JSON_BASE64, 'base64').toString('utf-8')
+      : process.env.VERTEX_SA_JSON ?? null;
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as Record<string, string>;
+    if (!parsed.client_email || !parsed.private_key) return null;
+    return {
+      client_email: parsed.client_email,
+      private_key: parsed.private_key,
+      project_id: parsed.project_id,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Gets an OAuth2 access token from Google using the service account credentials.
+ * Uses the JWT Bearer flow — no file system access needed (works in serverless).
+ */
+async function getVertexAccessToken(sa: { client_email: string; private_key: string }): Promise<string | null> {
+  try {
+    const { GoogleAuth } = await import('google-auth-library');
+    const auth = new GoogleAuth({
+      credentials: {
+        client_email: sa.client_email,
+        private_key: sa.private_key,
+      },
+      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    });
+    const client = await auth.getClient();
+    const tokenResponse = await client.getAccessToken();
+    return tokenResponse?.token ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function createEmbeddingVector(text: string): Promise<number[] | null> {
-  // Prefer Vertex if configured
-  if (process.env.VERTEX_SA_JSON || process.env.GEMINI_API_KEY) {
-      try {
-      await ensureVertexCredentialsIfProvided();
-      const genaiModule: unknown = await import('@google/genai');
-      const GoogleGenAICtor = (genaiModule as { GoogleGenAI?: unknown; default?: unknown })?.GoogleGenAI ?? (genaiModule as { default?: unknown })?.default ?? genaiModule;
-      let client: unknown;
-      if (typeof GoogleGenAICtor === 'function') {
-        client = new (GoogleGenAICtor as new (opts?: unknown) => unknown)(process.env.GEMINI_API_KEY ? { apiKey: process.env.GEMINI_API_KEY } : {});
-      } else {
-        client = GoogleGenAICtor;
-      }
-      const model = process.env.GENAI_EMBEDDING_MODEL ?? 'textembedding-gecko-001';
-      // Try a few possible method names
-      try {
-        const embeddingsCreate = (client as unknown as { embeddings?: { create?: (args: unknown) => Promise<unknown> } })?.embeddings?.create;
-        if (embeddingsCreate) {
-          const respUnknown = await embeddingsCreate({ model, input: text } as unknown);
-          const respObj = respUnknown as { data?: Array<{ embedding?: number[] }>; embedding?: number[] } | undefined;
-          const vector = respObj?.data?.[0]?.embedding ?? respObj?.embedding ?? null;
-          if (vector) return vector as number[];
+  // Prefer Vertex SA credentials (base64 or raw JSON)
+  const sa = parseVertexSA();
+  if (sa) {
+    try {
+      const accessToken = await getVertexAccessToken(sa);
+      if (accessToken) {
+        const project = process.env.VERTEX_PROJECT_ID ?? sa.project_id ?? '';
+        const location = process.env.VERTEX_LOCATION ?? 'us-central1';
+        const model = process.env.GENAI_EMBEDDING_MODEL ?? 'text-embedding-004';
+        const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${project}/locations/${location}/publishers/google/models/${model}:predict`;
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            instances: [{ content: text }],
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json() as {
+            predictions?: Array<{ embeddings?: { values?: number[] } }>;
+          };
+          const vector = data.predictions?.[0]?.embeddings?.values;
+          if (vector && vector.length > 0) return vector;
         }
-      } catch {
-        // ignore and try other signatures
+      }
+    } catch {
+      // fallthrough to GEMINI_API_KEY or OpenAI
+    }
+  }
+
+  // Fallback: Gemini API key (uses text-embedding-004 via REST)
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const model = process.env.GENAI_EMBEDDING_MODEL ?? 'text-embedding-004';
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${process.env.GEMINI_API_KEY}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: { parts: [{ text }] } }),
+        }
+      );
+      if (res.ok) {
+        const data = await res.json() as { embedding?: { values?: number[] } };
+        const vector = data.embedding?.values;
+        if (vector && vector.length > 0) return vector;
       }
     } catch {
       // fallthrough to OpenAI
@@ -58,7 +118,7 @@ export async function createEmbeddingVector(text: string): Promise<number[] | nu
       const txt = await res.text();
       throw new Error(`OpenAI embeddings error: ${res.status} ${txt}`);
     }
-    const data = await res.json();
+    const data = await res.json() as { data?: Array<{ embedding?: number[] }> };
     return data?.data?.[0]?.embedding ?? null;
   }
 
