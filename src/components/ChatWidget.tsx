@@ -47,8 +47,47 @@ function SpinnerIcon() {
 }
 
 // ──────────────────────────────────────────────
-// Suggested quick-questions
+// Renders text with clickable URLs and **bold** markdown
 // ──────────────────────────────────────────────
+function MessageText({ text }: { text: string }) {
+  // Split on URLs first, then handle **bold** within each segment
+  const URL_RE = /(https?:\/\/[^\s)>\]]+)/g;
+
+  const renderBold = (segment: string, key: string) => {
+    const parts = segment.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return <strong key={`${key}-b${i}`}>{part.slice(2, -2)}</strong>;
+      }
+      return <span key={`${key}-s${i}`}>{part}</span>;
+    });
+  };
+
+  const segments = text.split(URL_RE);
+  return (
+    <span className="whitespace-pre-wrap break-words">
+      {segments.map((seg, i) => {
+        if (URL_RE.test(seg)) {
+          URL_RE.lastIndex = 0; // reset stateful regex
+          return (
+            <a
+              key={i}
+              href={seg}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:opacity-80 break-all"
+            >
+              {seg}
+            </a>
+          );
+        }
+        return <span key={i}>{renderBold(seg, String(i))}</span>;
+      })}
+    </span>
+  );
+}
+
+
 const SUGGESTIONS = [
   "¿Qué filtros de aceite tienen?",
   "Necesito frenos para Honda CB125",
@@ -223,13 +262,13 @@ export default function ChatWidget() {
                         </div>
                       )}
                       <div
-                        className={`rounded-2xl px-3 py-2 text-sm max-w-[85%] leading-relaxed whitespace-pre-wrap break-words ${
+                        className={`rounded-2xl px-3 py-2 text-sm max-w-[85%] leading-relaxed ${
                           isUser
                             ? "bg-[#0A2A66] text-white rounded-tr-sm"
                             : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-tl-sm"
                         }`}
                       >
-                        {textContent}
+                        <MessageText text={textContent} />
                       </div>
                     </div>
                   );
