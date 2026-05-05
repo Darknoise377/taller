@@ -9,27 +9,36 @@ import type { UIMessage } from 'ai';
 
 export const maxDuration = 30;
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
+
 const SYSTEM_PROMPT = `Eres el asistente virtual de Almacén y Taller Motoservicio A&R, una tienda especializada en repuestos y accesorios para motos en La Ceja, Antioquia, Colombia.
+
+REGLA CRÍTICA — búsqueda obligatoria:
+- SIEMPRE llama a searchProducts ANTES de responder cualquier pregunta sobre productos, repuestos o disponibilidad.
+- Nunca digas "no tenemos" o "no hay stock" sin haber llamado primero a searchProducts.
+- Si la primera búsqueda no retorna resultados, intenta con términos alternativos (singular, plural, marca, categoría).
+- Ejemplo: si el cliente pregunta por "cilindros", busca también "cilindro".
 
 Tu rol:
 - Ayudas a los clientes a encontrar repuestos, accesorios y partes para sus motos
-- Puedes buscar productos en el catálogo usando la herramienta searchProducts
 - Orientas sobre compatibilidad básica, mantenimiento y precios en COP
 - Eres amable, conciso y respondes siempre en español colombiano
-- Cuando encuentres productos relevantes, menciona el nombre, precio y si hay stock
 
 Datos de la tienda:
 - Dirección: Calle 21 #14-29, La Ceja, Antioquia
 - WhatsApp: 301 527 1104
 - Horario: Lunes a Sábado 8am–6pm
-- Página de productos: /products
 
 Categorías disponibles: ${PRODUCT_CATEGORIES.join(', ')}
 
 Instrucciones de respuesta:
 - Máximo 3 párrafos cortos
-- Si hay productos disponibles, menciona 1-3 de los más relevantes con su precio
-- Si no hay stock, sugiere contactar por WhatsApp para disponibilidad futura
+- Cuando encuentres productos disponibles, presenta SIEMPRE:
+  1. Nombre y precio
+  2. Stock disponible
+  3. Enlace para ver y comprar: ${BASE_URL}/products/[id del producto]
+  Ejemplo: "Ver producto y agregar al carrito: ${BASE_URL}/products/abc123"
+- Si definitivamente no hay stock después de buscar, sugiere contactar por WhatsApp al 301 527 1104
 - Nunca inventes precios ni referencias; usa solo datos del catálogo`;
 
 const searchParamsSchema = z.object({
@@ -66,10 +75,13 @@ const searchProductsTool: Tool<SearchParams, SearchResult> = {
   inputSchema: searchParamsSchema,
   execute: async ({ query, category, maxResults }: SearchParams): Promise<SearchResult> => {
     const limit = maxResults ?? 5;
+    // Build search terms: query completa + palabras individuales + variante sin 's' final (plural→singular)
     const words = query
       .toLowerCase()
       .split(/\s+/)
       .filter((w) => w.length > 2);
+    const singulars = words.map((w) => (w.endsWith('s') ? w.slice(0, -1) : w));
+    const allTerms = [...new Set([...words, ...singulars])];
 
     try {
       const products = await prisma.product.findMany({
@@ -80,7 +92,10 @@ const searchProductsTool: Tool<SearchParams, SearchResult> = {
               OR: [
                 { name: { contains: query, mode: 'insensitive' } },
                 { description: { contains: query, mode: 'insensitive' } },
-                ...(words.length > 0 ? [{ tags: { hasSome: words } }] : []),
+                // Búsqueda por cada palabra individual (singular y plural)
+                ...allTerms.map((term) => ({ name: { contains: term, mode: 'insensitive' as const } })),
+                ...allTerms.map((term) => ({ description: { contains: term, mode: 'insensitive' as const } })),
+                ...(allTerms.length > 0 ? [{ tags: { hasSome: allTerms } }] : []),
               ],
             },
             ...(category ? [{ category: category as never }] : []),
@@ -96,7 +111,7 @@ const searchProductsTool: Tool<SearchParams, SearchResult> = {
           stock: true,
           sku: true,
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { stock: 'desc' },
       });
 
       if (products.length === 0) {
@@ -167,7 +182,7 @@ export async function POST(req: Request) {
     model,
     system: SYSTEM_PROMPT,
     messages,
-    stopWhen: stepCountIs(3),
+    stopWhen: stepCountIs(5),
     tools: { searchProducts: searchProductsTool },
     onError: (err) => {
       console.error('[/api/chat] streamText error:', err);
