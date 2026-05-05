@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import { isProductCategory, PRODUCT_CATEGORIES } from '@/constants/productCategories';
+import { createAndStoreEmbedding } from '@/lib/embeddings';
+
+function buildProductText(p: { name: string; description: string; sku?: string | null; tags?: string[]; diagramNumber?: string | null; category: string }): string {
+  return [p.name, p.category, p.description, p.sku ? `SKU: ${p.sku}` : '', (p.tags ?? []).join(', '), p.diagramNumber ? `Diagrama: ${p.diagramNumber}` : ''].filter(Boolean).join(' | ');
+}
 
 // GET /api/products - Lista paginada de productos con filtros básicos
 export async function GET(req: Request) {
@@ -158,6 +163,13 @@ export async function POST(req: Request) {
     if (diagramNumber !== undefined) data.diagramNumber = diagramNumber ?? null;
 
     const product = await prisma.product.create({ data });
+
+    // Indexar embedding de forma asíncrona (no bloquea la respuesta)
+    void createAndStoreEmbedding({
+      text: buildProductText({ name: product.name, description: product.description, sku: product.sku, tags: product.tags, diagramNumber: product.diagramNumber, category: product.category }),
+      sourceType: 'product',
+      sourceId: product.id,
+    }).catch((e) => console.error('[embed] product create:', e));
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {

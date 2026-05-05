@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
+import { createAndStoreEmbedding } from '@/lib/embeddings';
+
+function buildProductText(p: { name: string; description: string; sku?: string | null; tags?: string[]; diagramNumber?: string | null; category: string }): string {
+  return [p.name, p.category, p.description, p.sku ? `SKU: ${p.sku}` : '', (p.tags ?? []).join(', '), p.diagramNumber ? `Diagrama: ${p.diagramNumber}` : ''].filter(Boolean).join(' | ');
+}
 
 // GET /api/products/[id] - Obtiene un producto por ID
 export async function GET(_: Request, context: { params: Promise<{ id: string }> }) {
@@ -90,6 +95,13 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
       where: { id },
       data: updateData,
     });
+
+    // Re-indexar embedding de forma asíncrona (no bloquea la respuesta)
+    void createAndStoreEmbedding({
+      text: buildProductText({ name: updatedProduct.name, description: updatedProduct.description, sku: updatedProduct.sku, tags: updatedProduct.tags, diagramNumber: updatedProduct.diagramNumber, category: updatedProduct.category }),
+      sourceType: 'product',
+      sourceId: updatedProduct.id,
+    }).catch((e) => console.error('[embed] product update:', e));
 
     return NextResponse.json(updatedProduct);
   } catch (error) {

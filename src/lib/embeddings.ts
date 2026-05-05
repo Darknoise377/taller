@@ -133,6 +133,14 @@ export async function createAndStoreEmbedding(opts: { text: string; model?: stri
   const sourceId = opts.sourceId ?? null;
   const text = opts.text;
 
+  // Upsert: delete existing embedding for this source before inserting the new one
+  if (sourceId !== null) {
+    await prisma.$executeRawUnsafe(
+      `DELETE FROM "Embedding" WHERE "sourceType" = $1 AND "sourceId" = $2`,
+      sourceType ?? '', String(sourceId),
+    );
+  }
+
   // Insert using pgvector native type. Use $executeRawUnsafe to avoid Prisma
   // trying to deserialize the vector column on RETURNING.
   const vectorLiteral = `[${vector.join(',')}]`;
