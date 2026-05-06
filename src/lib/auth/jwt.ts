@@ -1,8 +1,9 @@
 // src/lib/auth/jwt.ts
 import { SignJWT, jwtVerify, type JWTPayload } from 'jose';
-import type { AdminRole } from '@/types/auth';
+import type { AdminRole, CustomerUser } from '@/types/auth';
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
+const CUSTOMER_JWT_EXPIRES_IN = "30d";
 let didWarnAboutJwtSecret = false;
 
 function getSecretKey(): Uint8Array {
@@ -55,6 +56,12 @@ export function getJwtCookieMaxAgeSeconds(): number {
   return parseExpiresInToSeconds(JWT_EXPIRES_IN);
 }
 
+export function getCustomerJwtCookieMaxAgeSeconds(): number {
+  return parseExpiresInToSeconds(CUSTOMER_JWT_EXPIRES_IN);
+}
+
+// ─── Admin tokens ───────────────────────────────────────────────────────────
+
 export interface AdminTokenPayload extends JWTPayload {
   sub: string; // email
   uid: string; // userId (UUID)
@@ -88,7 +95,8 @@ export async function verifyAdminToken(token: string): Promise<AdminTokenPayload
     algorithms: ["HS256"],
   });
 
-  if (payload.role !== "ADMIN" && payload.role !== "SUPERADMIN") {
+  const validAdminRoles: AdminRole[] = ["ADMIN", "SUPERADMIN", "VENDEDOR"];
+  if (!validAdminRoles.includes(payload.role)) {
     throw new Error("Token inválido: rol no autorizado");
   }
 
@@ -118,4 +126,53 @@ export async function refreshAdminToken(token: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+// ─── Customer tokens ─────────────────────────────────────────────────────────
+
+export interface CustomerTokenPayload extends JWTPayload {
+  sub: string;  // email
+  uid: string;  // userId (UUID)
+  name?: string | null;
+  tokenType: "customer";
+}
+
+export async function signCustomerToken(input: {
+  email: string;
+  userId: string;
+  name?: string | null;
+}): Promise<string> {
+  const payload: CustomerTokenPayload = {
+    sub: input.email,
+    uid: input.userId,
+    name: input.name,
+    tokenType: "customer",
+  };
+
+  return await new SignJWT(payload)
+    .setProtectedHeader({ alg: "HS256" })
+    .setSubject(payload.sub)
+    .setIssuedAt()
+    .setExpirationTime(CUSTOMER_JWT_EXPIRES_IN)
+    .sign(getSecretKey());
+}
+
+export async function verifyCustomerToken(token: string): Promise<CustomerTokenPayload> {
+  const { payload } = await jwtVerify<CustomerTokenPayload>(token, getSecretKey(), {
+    algorithms: ["HS256"],
+  });
+
+  if (payload.tokenType !== "customer") {
+    throw new Error("Token inválido: tipo incorrecto");
+  }
+
+  if (typeof payload.uid !== 'string' || !payload.uid) {
+    throw new Error('Token inválido: uid faltante');
+  }
+
+  return payload;
+}
+
+export function customerTokenPayloadToUser(payload: CustomerTokenPayload): CustomerUser {
+  return { id: payload.uid, email: payload.sub, name: payload.name };
 }

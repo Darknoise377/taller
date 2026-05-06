@@ -3,13 +3,17 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import {
   verifyAdminToken,
+  verifyCustomerToken,
   refreshAdminToken,
   getJwtCookieMaxAgeSeconds,
   type AdminTokenPayload,
 } from "./lib/auth/jwt";
-import { COOKIE_NAME } from "./config/admin";
+import { COOKIE_NAME, CUSTOMER_COOKIE_NAME } from "./config/admin";
 import type { AdminRole } from "./types/auth";
 import { auditSecurityEvent } from "./lib/security/audit";
+
+// ─── Role hierarchy ───────────────────────────────────────────────────────────
+const ROLE_RANK: Record<AdminRole, number> = { SUPERADMIN: 3, ADMIN: 2, VENDEDOR: 1 };
 
 type AccessRule = {
   pathPrefix: string;
@@ -18,15 +22,21 @@ type AccessRule = {
 };
 
 const accessRules: AccessRule[] = [
+  // SUPERADMIN only
   { pathPrefix: "/api/admin/security-audit", requiredRole: "SUPERADMIN" },
+  { pathPrefix: "/admin/security-audit", requiredRole: "SUPERADMIN" },
   { pathPrefix: "/admin/users", requiredRole: "SUPERADMIN" },
   { pathPrefix: "/api/users", requiredRole: "SUPERADMIN" },
   { pathPrefix: "/api/codes", methods: ["POST", "PUT", "DELETE"], requiredRole: "SUPERADMIN" },
   { pathPrefix: "/api/orders/", methods: ["DELETE"], requiredRole: "SUPERADMIN" },
-  { pathPrefix: "/api/orders", methods: ["GET", "PATCH"], requiredRole: "ADMIN" },
+  // ADMIN only (write)
+  { pathPrefix: "/api/orders", methods: ["PATCH"], requiredRole: "ADMIN" },
   { pathPrefix: "/api/products", methods: ["POST", "PUT", "DELETE"], requiredRole: "ADMIN" },
   { pathPrefix: "/api/upload", methods: ["POST"], requiredRole: "ADMIN" },
   { pathPrefix: "/api/cart", methods: ["PUT"], requiredRole: "ADMIN" },
+  // VENDEDOR and above (read-only)
+  { pathPrefix: "/api/orders", methods: ["GET"], requiredRole: "VENDEDOR" },
+  { pathPrefix: "/api/codes", methods: ["GET"], requiredRole: "VENDEDOR" },
 ];
 
 function requiredRoleForRequest(pathname: string, method: string): AdminRole | null {
@@ -41,20 +51,53 @@ function requiredRoleForRequest(pathname: string, method: string): AdminRole | n
 
 function hasRequiredRole(role: AdminRole, requiredRole: AdminRole | null): boolean {
   if (!requiredRole) return true;
-  if (role === "SUPERADMIN") return true;
-  return role === requiredRole;
+  return ROLE_RANK[role] >= ROLE_RANK[requiredRole];
 }
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const token = req.cookies.get(COOKIE_NAME)?.value;
   const requestIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
   const userAgent = req.headers.get("user-agent") ?? "unknown";
+
+  // ────────────────────────────────────────────────────────────────────────
+  // 🟦 Customer routes (/cuenta)
+  // ────────────────────────────────────────────────────────────────────────
+  if (pathname.startsWith("/cuenta")) {
+    const customerToken = req.cookies.get(CUSTOMER_COOKIE_NAME)?.value;
+    let isCustomerAuth = false;
+
+    if (customerToken) {
+      try {
+        await verifyCustomerToken(customerToken);
+        isCustomerAuth = true;
+      } catch {
+        isCustomerAuth = false;
+      }
+    }
+
+    const isPublicCustomerPage =
+      pathname === "/cuenta/login" || pathname === "/cuenta/registro";
+
+    if (isCustomerAuth && isPublicCustomerPage) {
+      return NextResponse.redirect(new URL("/cuenta/pedidos", req.url));
+    }
+    if (!isCustomerAuth && !isPublicCustomerPage) {
+      return NextResponse.redirect(
+        new URL(`/cuenta/login?next=${encodeURIComponent(pathname)}`, req.url),
+      );
+    }
+
+    return NextResponse.next();
+  }
+
+  // ────────────────────────────────────────────────────────────────────────
+  // 🟥 Admin routes
+  // ────────────────────────────────────────────────────────────────────────
+  const token = req.cookies.get(COOKIE_NAME)?.value;
 
   let payload: AdminTokenPayload | null = null;
   let shouldClearCookie = false;
 
-  // 1️⃣ Verificar token
   if (token) {
     try {
       payload = await verifyAdminToken(token);
@@ -74,6 +117,14 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL("/admin", req.url));
     if (!isAdmin && pathname !== "/admin/login")
       return NextResponse.redirect(new URL("/admin/login", req.url));
+
+    // Role-based page protection
+    if (isAdmin && payload && pathname !== "/admin/login") {
+      const requiredRole = requiredRoleForRequest(pathname, req.method);
+      if (requiredRole && !hasRequiredRole(payload.role, requiredRole)) {
+        return NextResponse.redirect(new URL("/admin?forbidden=1", req.url));
+      }
+    }
   }
 
   // 3️⃣ APIs protegidas
@@ -100,15 +151,12 @@ export async function middleware(req: NextRequest) {
     isPublicCartRead
   );
 
-  // Mitigación CSRF: en requests con efectos (POST/PUT/PATCH/DELETE)
-  // Requiere Origin válido o custom header para requests protegidas con side-effects.
+  // Mitigación CSRF
   if (isProtectedApi && ["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
     const origin = req.headers.get("origin");
     const host = req.headers.get("host");
 
-    // Require Origin header on mutating requests
     if (!origin || !host) {
-      // Allow if custom header present (API clients)
       const hasCustomHeader = req.headers.get("x-requested-with") === "XMLHttpRequest";
       if (!hasCustomHeader) {
         return new NextResponse(JSON.stringify({ error: "Forbidden: missing origin" }), {
@@ -126,7 +174,6 @@ export async function middleware(req: NextRequest) {
           });
         }
       } catch {
-        // Si el Origin no es parseable, lo tratamos como sospechoso
         return new NextResponse(JSON.stringify({ error: "Forbidden" }), {
           status: 403,
           headers: { "content-type": "application/json" },
@@ -214,7 +261,6 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // 5️⃣ Si el token es inválido/expirado, limpiar cookie para evitar sesión fantasma
   if (shouldClearCookie) {
     response.cookies.set(COOKIE_NAME, "", {
       httpOnly: true,
@@ -231,6 +277,7 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     "/admin/:path*",
+    "/cuenta/:path*",
     "/api/admin/:path*",
     "/api/orders/:path*",
     "/api/orders",

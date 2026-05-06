@@ -48,3 +48,5 @@ next-env.d.ts
 admin_cookies.txt
 scripts/create-product-test.ps1
 .eslintcache
+
+.vercel

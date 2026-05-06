@@ -63,7 +63,7 @@ export default function AdminDashboard() {
           fetch('/api/users'),
         ]);
 
-        if (!productsRes.ok || !ordersRes.ok || !usersRes.ok) {
+        if (!productsRes.ok || !ordersRes.ok) {
           throw new Error('Error cargando datos del dashboard');
         }
 
@@ -74,8 +74,13 @@ export default function AdminDashboard() {
         const ordersJson = await ordersRes.json();
         const orders = Array.isArray(ordersJson) ? ordersJson : ordersJson?.items ?? [];
 
-        const usersJson = await usersRes.json();
-        const users = Array.isArray(usersJson) ? usersJson : usersJson?.items ?? [];
+        // /api/users requiere SUPERADMIN; para otros roles simplemente omitimos el conteo
+        let usersCount = 0;
+        if (usersRes.ok) {
+          const usersJson = await usersRes.json();
+          const users = Array.isArray(usersJson) ? usersJson : usersJson?.items ?? [];
+          usersCount = users.length;
+        }
 
         const lowStock = (products || []).filter(
           (p: { stock?: number }) => typeof p.stock === 'number' && p.stock <= 5
@@ -111,7 +116,7 @@ export default function AdminDashboard() {
           totalOrders: orders.length,
           pendingOrders: pendingOrders.length,
           totalRevenue,
-          totalUsers: users.length,
+          totalUsers: usersCount,
           recentOrders: recent,
         });
       } catch (err) {

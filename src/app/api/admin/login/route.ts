@@ -45,8 +45,8 @@ export async function POST(req: Request) {
     const isValid = await verifyPassword(password, user.password);
     if (!isValid) return NextResponse.json({ error: "Credenciales inválidas" }, { status: 401 });
 
-    // 2.1️⃣ Verificar rol (solo ADMIN/SUPERADMIN pueden acceder al panel)
-    if (user.role !== "ADMIN" && user.role !== "SUPERADMIN") {
+    // 2.1️⃣ Verificar rol (solo ADMIN/SUPERADMIN/VENDEDOR pueden acceder al panel)
+    if (user.role !== "ADMIN" && user.role !== "SUPERADMIN" && user.role !== "VENDEDOR") {
       return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 
