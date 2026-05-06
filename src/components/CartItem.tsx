@@ -84,9 +84,14 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           </div>
 
           {/* Precio */}
-          <span className="text-[#0A2A66] dark:text-[#2E5FA7] font-bold text-sm">
-            ${(item.product.price * item.quantity).toLocaleString("es-CO")}
-          </span>
+          <div className="text-right">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              Unit: ${item.product.price.toLocaleString("es-CO")}
+            </p>
+            <span className="text-[#0A2A66] dark:text-[#2E5FA7] font-bold text-sm">
+              ${(item.product.price * item.quantity).toLocaleString("es-CO")}
+            </span>
+          </div>
         </div>
       </div>
 

@@ -21,7 +21,7 @@ interface ProductCardProps {
 
 const SizeSelector = ({ sizes, selectedSize, onSelect }: { sizes: string[], selectedSize?: string, onSelect: (size: string) => void }) => (
   <div>
-    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Medida:</span>
+            <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Medida:</span>
     <div className="flex flex-wrap gap-2 mt-1">
       {sizes.map((size) => (
         <button
@@ -42,7 +42,7 @@ const SizeSelector = ({ sizes, selectedSize, onSelect }: { sizes: string[], sele
 
 const ColorSelector = ({ colors, selectedColor, onSelect }: { colors: string[], selectedColor?: string, onSelect: (color: string) => void }) => (
   <div>
-    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Compatibilidad:</span>
+            <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">Compatibilidad:</span>
     <div className="flex flex-wrap gap-2 mt-1">
       {colors.map((compatibility) => (
         <button
@@ -163,8 +163,8 @@ export function ProductCard({ product, idx }: ProductCardProps) {
             {validationError && (
               <p className="text-red-500 text-xs font-medium mb-2">{validationError}</p>
             )}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between gap-2 w-full">
                 <button
                   type="button"
                   aria-label="Disminuir cantidad"
@@ -188,11 +188,12 @@ export function ProductCard({ product, idx }: ProductCardProps) {
 
               <button
                 disabled={isAddDisabled}
-                onClick={handleAddToCart} // ¡Usa el handler local!
-                className="ml-auto flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md"
+                onClick={handleAddToCart}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md"
               >
-                <ShoppingCartIcon className="w-5 h-5" />
-                Añadir al Carrito
+                <ShoppingCartIcon className="w-5 h-5 shrink-0" />
+                <span className="sm:hidden">Añadir</span>
+                <span className="hidden sm:inline">Añadir al Carrito</span>
               </button>
             </div>
         </div>

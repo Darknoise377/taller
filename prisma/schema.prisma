@@ -34,8 +34,24 @@ model Product {
 
   // 🔗 Relaciones
   orderItems OrderProduct[]
+  reviews    Review[]
   owner      User?          @relation(fields: [ownerId], references: [id])
   ownerId     String?
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  rating    Int
+  comment   String?  @db.Text
+  author    String
+  email     String
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId, approved])
 }
 
 enum Category {

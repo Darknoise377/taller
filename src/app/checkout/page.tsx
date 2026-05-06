@@ -27,6 +27,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 import { calculateDiscountedTotal, formatCurrency } from '@/utils/formatCurrency';
+import ShippingPromo from '@/components/ShippingPromo';
 
 // --- Interfaces ---
 
@@ -191,6 +192,10 @@ const CheckoutPage: React.FC = () => {
     loading: boolean;
     error: string | null;
   }>({ loading: false, error: null });
+
+  const freeShippingThreshold = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 200000);
+  const isFreeShipping = cartTotal >= freeShippingThreshold;
+  const missingForFreeShipping = Math.max(0, freeShippingThreshold - cartTotal);
 
   // --- ✨ AÑADIDO: Cálculos de Totales Dinámicos (de V2) ---
   const { finalTotal, discountAmount } = useMemo(() => {
@@ -419,7 +424,7 @@ const CheckoutPage: React.FC = () => {
             Finalizar Compra
           </motion.h1>
 
-          <div className="flex flex-col lg:flex-row gap-8">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* Formulario (de V1, sin cambios) */}
             <motion.div
               className="w-full lg:w-3/5 bg-white dark:bg-[#0b0a1f] rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-slate-800"
@@ -584,13 +589,13 @@ const CheckoutPage: React.FC = () => {
               {/* Usamos position: sticky para que el resumen se quede fijo al hacer scroll.
                 'top-24' es un valor común (depende de la altura de tu header).
               */}
-              <div className="bg-white dark:bg-[#0b0a1f] rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-slate-800 lg:sticky lg:top-24">
+              <div className="bg-white dark:bg-[#0b0a1f] rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 dark:border-slate-800 lg:sticky lg:top-24">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-4 border-b border-gray-200 dark:border-slate-800 pb-3">
                   Resumen del Pedido
                 </h2>
 
                 {/* Lista de Items (de V1, sin cambios) */}
-                <div className="max-h-80 overflow-y-auto">
+                <div className="max-h-72 sm:max-h-80 overflow-y-auto">
                   <ul className="divide-y divide-gray-200 dark:divide-slate-800">
                     {items.map((item) => (
                       <li key={item.product.id} className="flex items-center py-4">
@@ -685,6 +690,13 @@ const CheckoutPage: React.FC = () => {
 
                 {/* --- ✨ MODIFICADO: Resumen de Totales Dinámico (V1 + V2) --- */}
                 <div className="space-y-3">
+                  <ShippingPromo
+                    subtotal={cartTotal}
+                    freeShippingThreshold={freeShippingThreshold}
+                    missingForFreeShipping={missingForFreeShipping}
+                    isFreeShipping={isFreeShipping}
+                  />
+
                   <div className="flex justify-between text-md text-gray-600 dark:text-slate-400">
                     <span>
                       Subtotal ({totalItems}{' '}
@@ -693,6 +705,15 @@ const CheckoutPage: React.FC = () => {
                     <span className="font-semibold text-gray-800 dark:text-slate-200">
                       {formatCurrency(cartTotal)}
                     </span>
+                  </div>
+
+                  <div className="flex justify-between text-md text-gray-600 dark:text-slate-400">
+                    <span>Envío</span>
+                    {isFreeShipping ? (
+                      <span className="font-semibold text-green-600 dark:text-green-400">GRATIS</span>
+                    ) : (
+                      <span className="font-semibold text-gray-800 dark:text-slate-200">Se calcula por ciudad</span>
+                    )}
                   </div>
                   
                   {/* Descuento (si aplica) */}

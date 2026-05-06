@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { getProductCategoryLabel } from '@/constants/productCategories';
 import { Facebook, Instagram } from 'lucide-react';
+import ProductReviews from "@/components/ProductReviews";
 
 // --- Prop Interfaces ---
 interface ProductDetailClientProps {
@@ -183,6 +184,11 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]);
   const [quantity, setQuantity] = useState<number>(1);
   const [validationMessage, setValidationMessage] = useState<string>("");
+  const relatedScrollerRef = useRef<HTMLDivElement>(null);
+  const [activeRelatedIndex, setActiveRelatedIndex] = useState(0);
+  const autoScrollIntervalRef = useRef<number | null>(null);
+  const resumeTimeoutRef = useRef<number | null>(null);
+  const isUserInteractingRef = useRef(false);
 
   const images = useMemo(() => 
     product.images && product.images.length > 0 ? product.images : [product.imageUrl || "/placeholder.png"],
@@ -213,13 +219,70 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
     setValidationMessage("");
   }, [selectedSize, selectedColor, quantity]);
 
+  useEffect(() => {
+    if (relatedProducts.length <= 1) return;
+    if (typeof window === "undefined") return;
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+
+    if (autoScrollIntervalRef.current) clearInterval(autoScrollIntervalRef.current);
+    autoScrollIntervalRef.current = window.setInterval(() => {
+      if (isUserInteractingRef.current) return;
+      const scroller = relatedScrollerRef.current;
+      if (!scroller) return;
+      const cards = scroller.querySelectorAll("article");
+      if (cards.length <= 1) return;
+      setActiveRelatedIndex((prev) => {
+        const next = (prev + 1) % cards.length;
+        const target = cards[next] as HTMLElement;
+        target.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+        return next;
+      });
+    }, 4500);
+
+    return () => {
+      if (autoScrollIntervalRef.current) clearInterval(autoScrollIntervalRef.current);
+      if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    };
+  }, [relatedProducts.length]);
+
+  const pauseAutoScroll = () => {
+    isUserInteractingRef.current = true;
+    if (resumeTimeoutRef.current) clearTimeout(resumeTimeoutRef.current);
+    resumeTimeoutRef.current = window.setTimeout(() => {
+      isUserInteractingRef.current = false;
+    }, 6000);
+  };
+
+  const trackRelatedClick = (itemId: string, position: number) => {
+    try {
+      const key = `ctr_related_${product.id}`;
+      const raw = localStorage.getItem(key);
+      const data: Record<string, number> = raw ? JSON.parse(raw) : {};
+      data[`item_${itemId}`] = (data[`item_${itemId}`] || 0) + 1;
+      data[`pos_${position}`] = (data[`pos_${position}`] || 0) + 1;
+      data._total = (data._total || 0) + 1;
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch {
+      // ignorar si localStorage no disponible
+    }
+  };
+
+  const scrollToRelatedIndex = (index: number) => {
+    const scroller = relatedScrollerRef.current;
+    if (!scroller) return;
+    const cards = scroller.querySelectorAll("article");
+    if (!cards[index]) return;
+    (cards[index] as HTMLElement).scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+    setActiveRelatedIndex(index);
+  };
+
   const descriptionText =
     product.description?.trim() ||
     "Repuesto para moto de alta calidad. Revisa compatibilidad por marca, modelo y medida antes de comprar.";
 
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070617] dark:text-slate-100 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 pb-28 sm:pb-14">
         <nav aria-label="Miga de pan" className="text-sm text-slate-600 dark:text-slate-300 mb-6">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
@@ -274,7 +337,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-300">
                 <div>
                   <div className="text-xs text-slate-500">SKU</div>
-                  <div className="font-medium mt-1">{product.sku ?? String(product.id)}</div>
+                  <div className="font-medium mt-1 break-all">{product.sku ?? String(product.id)}</div>
                 </div>
                 <div>
                   <div className="text-xs text-slate-500">Categoría</div>
@@ -282,11 +345,11 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                 </div>
                 <div>
                   <div className="text-xs text-slate-500">Etiquetas</div>
-                  <div className="mt-1">{product.tags && product.tags.length > 0 ? product.tags.join(', ') : <span className="text-slate-400">Sin etiquetas</span>}</div>
+                  <div className="mt-1 break-words">{product.tags && product.tags.length > 0 ? product.tags.join(', ') : <span className="text-slate-400">Sin etiquetas</span>}</div>
                 </div>
                 <div>
                   <div className="text-xs text-slate-500">Número en Diagrama</div>
-                  <div className="font-medium mt-1">{product.diagramNumber ?? <span className="text-slate-400">—</span>}</div>
+                  <div className="font-medium mt-1 break-all">{product.diagramNumber ?? <span className="text-slate-400">—</span>}</div>
                 </div>
               </div>
 
@@ -394,7 +457,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
               )}
 
               <section aria-label="Cantidad y compra" className="space-y-4">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                   <div className="flex items-center gap-2 border border-slate-200 dark:border-slate-800 rounded-lg p-1 bg-white/60 dark:bg-slate-900/40">
                     <button
                       type="button"
@@ -419,7 +482,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                     </button>
                   </div>
 
-                  <div className="text-sm text-slate-500 dark:text-slate-400" aria-hidden="true">
+                  <div className="text-sm text-slate-500 dark:text-slate-400 self-end sm:self-auto" aria-hidden="true">
                     Máx: {product.stock}
                   </div>
                 </div>
@@ -429,7 +492,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                   disabled={product.stock <= 0}
                   onClick={handleAddToCart}
                   aria-describedby="stock-status"
-                  className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold shadow-lg transition-all duration-200 hover:opacity-95 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5FA7] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617]"
+                  className="hidden sm:flex w-full items-center justify-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold shadow-lg transition-all duration-200 hover:opacity-95 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5FA7] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617]"
                 >
                   <ShoppingCartIcon className="w-6 h-6" />
                   <span>{product.stock > 0 ? "Añadir al carrito" : "Agotado"}</span>
@@ -465,7 +528,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                 </div>
 
                 {/* Share buttons */}
-                <div className="flex items-center gap-3 pt-4 border-t border-slate-200/80 dark:border-slate-800/80">
+                <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-200/80 dark:border-slate-800/80">
                   <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Compartir:</span>
                   <button
                     type="button"
@@ -498,7 +561,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                     </svg>
                   </a>
                   {/* Follow links */}
-                  <div className="ml-2 flex items-center gap-2">
+                  <div className="w-full sm:w-auto sm:ml-2 flex flex-wrap items-center gap-2">
                     <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Síguenos:</span>
                     <a
                       href="https://www.facebook.com/ROBINSON.BOTERO.M/"
@@ -533,15 +596,85 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
             </div>
           </div>
         </article>
+
+        <ProductReviews productId={product.id} />
         
         {/* Productos Relacionados */}
         {relatedProducts.length > 0 && (
           <section className="mt-20 sm:mt-28">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-8">También te podría interesar</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {relatedProducts.map((item) => (
-                <div key={item.id} className="bg-white/70 dark:bg-slate-900/40 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <Link href={`/products/${item.id}`} aria-label={`Ver detalles de ${item.name}`}>
+            <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+              <div>
+                <h2 className="text-2xl sm:text-3xl font-bold">También te podría interesar</h2>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                  Complementa tu compra con repuestos de la misma categoría.
+                </p>
+              </div>
+              <Link
+                href="/products"
+                className="text-sm font-semibold text-[#0A2A66] dark:text-[#2E5FA7] hover:underline"
+              >
+                Ver todo el catálogo
+              </Link>
+            </div>
+
+            <div
+              ref={relatedScrollerRef}
+              className="md:hidden -mx-4 px-4 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2"
+              onTouchStart={pauseAutoScroll}
+              onScroll={(e) => {
+                const target = e.currentTarget;
+                const cardWidth = target.firstElementChild instanceof HTMLElement ? target.firstElementChild.offsetWidth + 16 : 1;
+                const index = Math.round(target.scrollLeft / cardWidth);
+                if (!Number.isNaN(index)) setActiveRelatedIndex(Math.max(0, Math.min(index, relatedProducts.length - 1)));
+              }}
+            >
+              {relatedProducts.map((item, idx) => (
+                <article
+                  key={item.id}
+                  className="snap-start snap-always min-w-[72%] bg-white/80 dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800"
+                >
+                  <Link href={`/products/${item.id}`} aria-label={`Ver detalles de ${item.name}`} onClick={() => trackRelatedClick(item.id, idx)}>
+                    <div className="relative w-full aspect-square">
+                      <Image
+                        src={item.imageUrl || "/placeholder.png"}
+                        alt={`Imagen de ${item.name}`}
+                        fill
+                        className="object-cover"
+                        sizes="72vw"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-slate-900 dark:text-slate-100 line-clamp-2 min-h-[40px]">
+                        {item.name}
+                      </h3>
+                      <span className="text-[#0A2A66] dark:text-[#2E5FA7] font-bold mt-1 block">
+                        {item.currency} {Number(item.price).toLocaleString("es-CO")}
+                      </span>
+                      <span className="mt-3 inline-flex items-center text-xs font-semibold text-[#0A2A66] dark:text-[#2E5FA7]">
+                        Ver producto →
+                      </span>
+                    </div>
+                  </Link>
+                </article>
+              ))}
+            </div>
+
+            <div className="md:hidden mt-3 flex items-center justify-center gap-1.5">
+              {relatedProducts.map((item, idx) => (
+                <button
+                  key={`dot-${item.id}`}
+                  type="button"
+                  onClick={() => scrollToRelatedIndex(idx)}
+                  aria-label={`Ir al relacionado ${idx + 1}`}
+                  className={`h-1.5 rounded-full transition-all ${activeRelatedIndex === idx ? 'w-6 bg-[#0A2A66] dark:bg-[#2E5FA7]' : 'w-1.5 bg-slate-300 dark:bg-slate-600'}`}
+                />
+              ))}
+            </div>
+
+            <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {relatedProducts.map((item, idx) => (
+                <article key={item.id} className="bg-white/70 dark:bg-slate-900/40 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 transition-all hover:shadow-xl hover:-translate-y-1">
+                  <Link href={`/products/${item.id}`} aria-label={`Ver detalles de ${item.name}`} onClick={() => trackRelatedClick(item.id, idx)}>
                     <div className="relative w-full aspect-square">
                       <Image
                         src={item.imageUrl || "/placeholder.png"}
@@ -552,17 +685,40 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                       />
                     </div>
                     <div className="p-4">
-                      <h3 className="font-semibold truncate">{item.name}</h3>
+                      <h3 className="font-semibold line-clamp-2 min-h-[40px]">{item.name}</h3>
                       <span className="text-[#0A2A66] dark:text-[#2E5FA7] font-bold mt-1 block">
                         {item.currency} {Number(item.price).toLocaleString("es-CO")}
                       </span>
+                      <span className="mt-2 inline-flex items-center text-xs font-semibold text-[#0A2A66] dark:text-[#2E5FA7]">
+                        Ver producto →
+                      </span>
                     </div>
                   </Link>
-                </div>
+                </article>
               ))}
             </div>
           </section>
         )}
+      </div>
+
+      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#070617]/95 backdrop-blur px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs text-slate-500 dark:text-slate-400">Total ({quantity})</p>
+            <p className="text-lg font-bold text-[#0A2A66] dark:text-[#2E5FA7] truncate">
+              {product.currency} {Number(product.price * quantity).toLocaleString("es-CO")}
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={product.stock <= 0}
+            onClick={handleAddToCart}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <ShoppingCartIcon className="w-5 h-5" />
+            {product.stock > 0 ? "Añadir" : "Agotado"}
+          </button>
+        </div>
       </div>
     </div>
   );

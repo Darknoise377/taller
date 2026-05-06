@@ -7,6 +7,7 @@ import {
   ChevronDownIcon,
   ArrowPathIcon,
   FunnelIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 
 import type { Product as ProductType, ProductSize } from "@/types/product";
@@ -221,6 +222,15 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
     setShowMobileFilters(false);
   }, [updateURLParams]);
 
+  useEffect(() => {
+    if (!showMobileFilters) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showMobileFilters]);
+
   const initialLoadRef = useRef(true);
   useEffect(() => {
     if (initialLoadRef.current) {
@@ -235,7 +245,7 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
   }, [fetchProductsFromServer, areFiltersActive, products.length]);
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-12">
       {loading && <div className="text-center text-sm text-slate-600 mb-4">Cargando...</div>}
       {selectedCategoryLabel && (
         <div className="mb-8 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-5 shadow-sm">
@@ -274,35 +284,79 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
           </div>
         </div>
 
-        <button onClick={() => setShowMobileFilters(!showMobileFilters)} className="w-full flex items-center justify-between px-4 py-2.5">
+        <button onClick={() => setShowMobileFilters(true)} className="w-full flex items-center justify-between px-4 py-2.5">
           <div className="flex items-center gap-2">
             <FunnelIcon className="w-5 h-5 text-[#0A2A66]" />
             <span className="font-semibold text-slate-800 dark:text-slate-200">{areFiltersActive ? "Filtros Aplicados" : "Filtrar y Ordenar"}</span>
           </div>
-          <motion.div animate={{ rotate: showMobileFilters ? 180 : 0 }} transition={{ duration: 0.2 }}>
-            <ChevronDownIcon className="w-5 h-5 text-slate-500" />
-          </motion.div>
+          <ChevronDownIcon className="w-5 h-5 text-slate-500" />
         </button>
+      </div>
 
-        <AnimatePresence>
-          {showMobileFilters && (
-            <motion.div key="mobile-filters-panel" initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: "easeInOut" }} className="overflow-hidden">
-              <div className="p-4 grid grid-cols-1 gap-3 border-t border-slate-200 dark:border-slate-800">
+      <AnimatePresence>
+        {showMobileFilters && (
+          <>
+            <motion.button
+              type="button"
+              aria-label="Cerrar filtros"
+              className="md:hidden fixed inset-0 z-50 bg-black/45"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowMobileFilters(false)}
+            />
+
+            <motion.div
+              key="mobile-filters-drawer"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="md:hidden fixed inset-x-0 bottom-0 z-[60] rounded-t-2xl border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl"
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
+                <h3 className="font-semibold text-slate-900 dark:text-slate-100">Filtrar y Ordenar</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowMobileFilters(false)}
+                  aria-label="Cerrar"
+                  className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="max-h-[68vh] overflow-y-auto p-4 grid grid-cols-1 gap-3">
                 <FilterSelect label="Categoría" value={selectedCategory} onChange={(e) => handleFilterChange("category", e.target.value)} options={uniqueCategories} isMobile formatOptionLabel={getProductCategoryLabel} />
                 <FilterSelect label="Medida" value={selectedSize} onChange={(e) => handleFilterChange("size", e.target.value)} options={uniqueSizes} isMobile />
                 <FilterSelect label="Compatibilidad" value={selectedColor} onChange={(e) => handleFilterChange("color", e.target.value)} options={uniqueColors} isMobile />
                 <FilterSelect label="Modelo (sugerido)" value={selectedModel} onChange={(e) => handleFilterChange('model', e.target.value)} options={modelSuggestions} isMobile />
                 <div className="flex gap-2">
-                  <input type="number" placeholder="Mín" value={minPrice} onChange={(e)=>setMinPrice(e.target.value)} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-1/2 p-3 rounded-lg border" />
-                  <input type="number" placeholder="Máx" value={maxPrice} onChange={(e)=>setMaxPrice(e.target.value)} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-1/2 p-3 rounded-lg border" />
+                  <input type="number" placeholder="Mín" value={minPrice} onChange={(e)=>setMinPrice(e.target.value)} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-1/2 p-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" />
+                  <input type="number" placeholder="Máx" value={maxPrice} onChange={(e)=>setMaxPrice(e.target.value)} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-1/2 p-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" />
                 </div>
                 <FilterSelect label="Ordenar" value={sortBy} onChange={(e) => handleSortChange(e.target.value)} options={['relevance','price-asc','price-desc','newest']} isMobile formatOptionLabel={(v)=> ({relevance:'Relevancia', 'price-asc':'Precio: menor a mayor','price-desc':'Precio: mayor a menor','newest':'Recientes'} as Record<string,string>)[v] || v} />
-                {areFiltersActive && <button onClick={handleResetFilters} className="w-full mt-2 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 font-semibold"><ArrowPathIcon className="w-5 h-5" /> Limpiar filtros</button>}
+              </div>
+
+              <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex gap-2">
+                {areFiltersActive && (
+                  <button onClick={handleResetFilters} className="w-1/2 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 font-semibold">
+                    <ArrowPathIcon className="w-5 h-5" />
+                    Limpiar
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowMobileFilters(false)}
+                  className={`${areFiltersActive ? 'w-1/2' : 'w-full'} px-4 py-3 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold`}
+                >
+                  Ver resultados
+                </button>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence mode="wait">
         {visibleProducts.length > 0 ? (
@@ -311,7 +365,7 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
               <div className="text-sm text-slate-600">Mostrando {products.length} de {totalCount} productos</div>
               <div className="text-sm text-slate-500">&nbsp;</div>
             </div>
-            <motion.div key="product-grid" layout className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+            <motion.div key="product-grid" layout className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {visibleProducts.map((p, idx) => <ProductCard key={p.id} product={p} idx={idx} />)}
             </motion.div>
             {products.length < totalCount && (

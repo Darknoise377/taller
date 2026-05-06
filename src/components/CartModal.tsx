@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useCart } from "@/hooks/useCart";
 import { CartItem as ICartItem } from "@/types/cart";
 import CartItem from "./CartItem";
+import ShippingPromo from "./ShippingPromo";
 
 import {
   XMarkIcon,
@@ -59,6 +60,9 @@ export default function CartModal() {
   if (isCheckoutPath(pathname)) return null;
 
   const overlayActive = isCartModalOpen;
+  const FREE_SHIPPING_THRESHOLD = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 200000);
+  const isFreeShipping = cartTotal >= FREE_SHIPPING_THRESHOLD;
+  const missingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - cartTotal);
 
   return (
     <div
@@ -124,11 +128,27 @@ export default function CartModal() {
             {/* FOOTER */}
             {items.length > 0 && (
               <footer className="p-4 border-t border-slate-200 dark:border-slate-800 flex-shrink-0 space-y-4 bg-white/95 dark:bg-[#070617]/95">
+                <ShippingPromo
+                  subtotal={cartTotal}
+                  freeShippingThreshold={FREE_SHIPPING_THRESHOLD}
+                  missingForFreeShipping={missingForFreeShipping}
+                  isFreeShipping={isFreeShipping}
+                />
+
                 <div className="flex justify-between items-center text-lg font-semibold text-slate-900 dark:text-slate-100">
                   <span>Subtotal:</span>
                   <span className="text-[#0A2A66] dark:text-[#2E5FA7]">
                     ${cartTotal.toLocaleString("es-CO")}
                   </span>
+                </div>
+
+                <div className="flex justify-between items-center text-sm text-slate-600 dark:text-slate-300">
+                  <span>Envio estimado:</span>
+                  {isFreeShipping ? (
+                    <span className="font-semibold text-green-600 dark:text-green-400">GRATIS</span>
+                  ) : (
+                    <span className="font-medium">Se calcula en checkout</span>
+                  )}
                 </div>
 
                 <Link href="/checkout" passHref>
