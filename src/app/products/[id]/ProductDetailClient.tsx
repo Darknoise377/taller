@@ -282,7 +282,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
 
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070617] dark:text-slate-100 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 pb-28 sm:pb-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 pb-8 sm:pb-14">
         <nav aria-label="Miga de pan" className="text-sm text-slate-600 dark:text-slate-300 mb-6">
           <ol className="flex flex-wrap items-center gap-2">
             <li>
@@ -358,11 +358,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
               </p>
             </header>
 
-            <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="text-3xl font-bold text-[#0A2A66] dark:text-[#2E5FA7]">
-                {product.currency} {Number(product.price).toLocaleString("es-CO")}
-              </div>
-
+            <div className="mt-6 flex items-center gap-3">
               <div className="flex items-center gap-2" id="stock-status">
                 {product.stock > 0 ? (
                   <span
@@ -457,49 +453,55 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
               )}
 
               <section aria-label="Cantidad y compra" className="space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-                  <div className="flex items-center gap-2 border border-slate-200 dark:border-slate-800 rounded-lg p-1 bg-white/60 dark:bg-slate-900/40">
+                {/* Precio prominente en mobile */}
+                <div className="rounded-2xl bg-[#0A2A66]/5 dark:bg-[#2E5FA7]/10 border border-[#0A2A66]/10 dark:border-[#2E5FA7]/20 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Precio unitario</p>
+                  <p className="text-4xl font-extrabold text-[#0A2A66] dark:text-[#2E5FA7]">
+                    {product.currency} {Number(product.price).toLocaleString("es-CO")}
+                  </p>
+                  {quantity > 1 && (
+                    <p className="text-sm text-slate-500 mt-1">Total: {product.currency} {Number(product.price * quantity).toLocaleString("es-CO")}</p>
+                  )}
+                </div>
+
+                {/* Qty + botón siempre visibles */}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center border-2 border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shrink-0">
                     <button
                       type="button"
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                       aria-label="Disminuir cantidad"
-                      className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-600 dark:text-slate-300 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66]"
+                      className="px-4 py-3 text-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
                       disabled={quantity <= 1}
                     >
-                      <MinusIcon className="w-5 h-5" />
+                      −
                     </button>
-                    <span className="text-lg font-semibold w-10 text-center" aria-live="polite">
-                      {quantity}
-                    </span>
+                    <span className="text-lg font-bold w-10 text-center" aria-live="polite">{quantity}</span>
                     <button
                       type="button"
                       onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
                       aria-label="Aumentar cantidad"
-                      className="p-2 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-600 dark:text-slate-300 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66]"
+                      className="px-4 py-3 text-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
                       disabled={quantity >= product.stock}
                     >
-                      <PlusIcon className="w-5 h-5" />
+                      +
                     </button>
                   </div>
 
-                  <div className="text-sm text-slate-500 dark:text-slate-400 self-end sm:self-auto" aria-hidden="true">
-                    Máx: {product.stock}
-                  </div>
+                  <button
+                    type="button"
+                    disabled={product.stock <= 0}
+                    onClick={handleAddToCart}
+                    aria-describedby="stock-status"
+                    className="flex-1 flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-bold text-base shadow-lg shadow-[#0A2A66]/30 transition-all duration-200 hover:opacity-95 hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ShoppingCartIcon className="w-5 h-5 shrink-0" />
+                    {product.stock > 0 ? "Añadir al carrito" : "Agotado"}
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  disabled={product.stock <= 0}
-                  onClick={handleAddToCart}
-                  aria-describedby="stock-status"
-                  className="hidden sm:flex w-full items-center justify-center gap-3 px-6 py-3 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold shadow-lg transition-all duration-200 hover:opacity-95 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5FA7] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617]"
-                >
-                  <ShoppingCartIcon className="w-6 h-6" />
-                  <span>{product.stock > 0 ? "Añadir al carrito" : "Agotado"}</span>
-                </button>
-
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Tip: confirma compatibilidad con tu moto (modelo/año) antes de comprar.
+                <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                  <span>💡</span> Confirma compatibilidad con tu moto antes de comprar.
                 </p>
 
                 {/* Trust strip */}
@@ -699,26 +701,6 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
             </div>
           </section>
         )}
-      </div>
-
-      <div className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-[#070617]/95 backdrop-blur px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-xs text-slate-500 dark:text-slate-400">Total ({quantity})</p>
-            <p className="text-lg font-bold text-[#0A2A66] dark:text-[#2E5FA7] truncate">
-              {product.currency} {Number(product.price * quantity).toLocaleString("es-CO")}
-            </p>
-          </div>
-          <button
-            type="button"
-            disabled={product.stock <= 0}
-            onClick={handleAddToCart}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <ShoppingCartIcon className="w-5 h-5" />
-            {product.stock > 0 ? "Añadir" : "Agotado"}
-          </button>
-        </div>
       </div>
     </div>
   );
