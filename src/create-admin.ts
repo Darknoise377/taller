@@ -34,8 +34,9 @@ function loadEnvFromDotenvFile(dotenvPath: string): void {
 }
 
 async function main() {
-  // Carga .env para que Prisma tenga DATABASE_URL cuando ejecutas este script
+  // Carga .env y .env.local para que Prisma tenga DATABASE_URL cuando ejecutas este script
   loadEnvFromDotenvFile(path.resolve(process.cwd(), ".env"));
+  loadEnvFromDotenvFile(path.resolve(process.cwd(), ".env.local"));
 
   const email = process.env.ADMIN_EMAIL?.trim();
   const plainPassword = process.env.ADMIN_PASSWORD?.trim();
@@ -52,20 +53,28 @@ async function main() {
     );
   }
 
+  const rawRole = (process.env.ADMIN_ROLE?.trim().toUpperCase() ?? "ADMIN") as
+    | "SUPERADMIN"
+    | "ADMIN"
+    | "VENDEDOR";
+  const validRoles = ["SUPERADMIN", "ADMIN", "VENDEDOR"] as const;
+  const role = validRoles.includes(rawRole as (typeof validRoles)[number])
+    ? (rawRole as (typeof validRoles)[number])
+    : "ADMIN";
+
   const hashed = await hashPassword(plainPassword);
 
   const user = await prisma.user.upsert({
     where: { email },
     update: {
       password: hashed,
-      role: "ADMIN",
-      name: "Administrador",
+      role,
     },
     create: {
       email,
       password: hashed,
-      name: "Administrador",
-      role: "ADMIN",
+      name: process.env.ADMIN_NAME?.trim() || "Administrador",
+      role,
     },
   });
 

@@ -1,11 +1,35 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { UIMessage } from "ai";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
+
+const STORAGE_KEY = "ar-chat-messages";
+const MAX_STORED_MESSAGES = 40; // keep last 40 to avoid bloat
+
+function loadStoredMessages(): UIMessage[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as UIMessage[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveMessages(messages: UIMessage[]) {
+  try {
+    const trimmed = messages.slice(-MAX_STORED_MESSAGES);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
+  } catch {
+    // ignore storage errors (quota, private mode, etc.)
+  }
+}
 
 // ──────────────────────────────────────────────
 // ChatWidget
@@ -109,7 +133,7 @@ const SUGGESTIONS = [
   "¿Qué filtros de aceite tienen?",
   "Necesito frenos para Honda CB125",
   "¿Cuánto cuesta una llanta trasera?",
-  "Kit de arrastre disponible",
+  "Quiero hacer un pedido",
 ];
 
 // ──────────────────────────────────────────────
@@ -119,12 +143,15 @@ export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [input, setInput] = useState("");
+  // Lazy-load initial messages from localStorage (only on first render)
+  const [initialMessages] = useState<UIMessage[]>(() => loadStoredMessages());
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname();
 
-  const { messages, sendMessage, stop, status } = useChat({
+  const { messages, sendMessage, stop, status, setMessages } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
+    messages: initialMessages,
     onFinish: () => {
       if (!open) setHasNewMessage(true);
     },
@@ -132,6 +159,19 @@ export default function ChatWidget() {
       console.error("[ChatWidget] error:", err);
     },
   });
+
+  // Persist messages to localStorage whenever they change
+  const saveRef = useRef(saveMessages);
+  saveRef.current = saveMessages;
+  useEffect(() => {
+    if (messages.length > 0) saveRef.current(messages);
+  }, [messages]);
+
+  // Clear chat helper (exposed via a "Nueva conversación" button)
+  const clearChat = useCallback(() => {
+    try { localStorage.removeItem(STORAGE_KEY); } catch { /* noop */ }
+    setMessages([]);
+  }, [setMessages]);
 
   const isLoading = status === "streaming" || status === "submitted";
 
@@ -214,6 +254,16 @@ export default function ChatWidget() {
                 <p className="text-sm font-semibold leading-tight">Asistente A&R</p>
                 <p className="text-xs text-blue-200 leading-tight">Repuestos y accesorios para moto</p>
               </div>
+              {messages.length > 0 && (
+                <button
+                  onClick={clearChat}
+                  title="Nueva conversación"
+                  aria-label="Nueva conversación"
+                  className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-white/20 transition-colors flex-shrink-0 text-blue-200 hover:text-white text-xs font-bold"
+                >
+                  ↺
+                </button>
+              )}
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Cerrar chat"
