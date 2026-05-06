@@ -47,11 +47,11 @@ function SpinnerIcon() {
 }
 
 // ──────────────────────────────────────────────
-// Renders text with clickable URLs and **bold** markdown
+// Renders text with clickable URLs, WhatsApp numbers and **bold** markdown
 // ──────────────────────────────────────────────
 function MessageText({ text }: { text: string }) {
-  // Split on URLs first, then handle **bold** within each segment
-  const URL_RE = /(https?:\/\/[^\s)>\]]+)/g;
+  // Matches: https URLs  OR  Colombian phone numbers like "301 527 1104", "3015271104", "+57 301..."
+  const TOKEN_RE = /(https?:\/\/[^\s)>\]]+|(?:\+57[\s-]?)?3\d{2}[\s-]?\d{3}[\s-]?\d{4})/g;
 
   const renderBold = (segment: string, key: string) => {
     const parts = segment.split(/(\*\*[^*]+\*\*)/g);
@@ -63,12 +63,13 @@ function MessageText({ text }: { text: string }) {
     });
   };
 
-  const segments = text.split(URL_RE);
+  const segments = text.split(TOKEN_RE);
   return (
     <span className="whitespace-pre-wrap break-words">
       {segments.map((seg, i) => {
-        if (URL_RE.test(seg)) {
-          URL_RE.lastIndex = 0; // reset stateful regex
+        if (!seg) return null;
+        // HTTPS URL
+        if (/^https?:\/\//.test(seg)) {
           return (
             <a
               key={i}
@@ -76,6 +77,22 @@ function MessageText({ text }: { text: string }) {
               target="_blank"
               rel="noopener noreferrer"
               className="underline underline-offset-2 hover:opacity-80 break-all"
+            >
+              {seg}
+            </a>
+          );
+        }
+        // Phone number → WhatsApp link
+        if (/^(\+57[\s-]?)?3\d{2}[\s-]?\d{3}[\s-]?\d{4}$/.test(seg)) {
+          const digits = seg.replace(/\D/g, '');
+          const wa = digits.startsWith('57') ? digits : `57${digits}`;
+          return (
+            <a
+              key={i}
+              href={`https://wa.me/${wa}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:opacity-80"
             >
               {seg}
             </a>
