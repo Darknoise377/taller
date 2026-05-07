@@ -11,10 +11,10 @@ import {
   XCircleIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  MinusIcon,
-  PlusIcon,
   ShareIcon,
   StarIcon,
+  MagnifyingGlassPlusIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { StarIcon as StarIconSolid } from "@heroicons/react/24/solid";
 import { useCart } from "@/context/CartContext";
@@ -36,142 +36,268 @@ interface ImageGalleryProps {
   productName: string;
 }
 
-// --- Sub-componentes para Mejor Organización ---
+// --- Lightbox fullscreen ---
+const Lightbox: React.FC<{
+  images: string[];
+  productName: string;
+  initialIndex: number;
+  onClose: () => void;
+}> = ({ images, productName, initialIndex, onClose }) => {
+  const [idx, setIdx] = useState(initialIndex);
 
-/**
- * 🎨 Galería de Imágenes Avanzada
- */
-const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
-  const [isZooming, setIsZooming] = useState(false);
+  const prev = useCallback(() => setIdx((i) => (i - 1 + images.length) % images.length), [images.length]);
+  const next = useCallback(() => setIdx((i) => (i + 1) % images.length), [images.length]);
 
-  const nextImage = useCallback(() => setCurrentIndex((prev) => (prev + 1) % images.length), [images.length]);
-  const prevImage = useCallback(() => setCurrentIndex((prev) => (prev - 1 + images.length) % images.length), [images.length]);
-  
-  const handleNavigate = (newDirection: number) => {
-    if (newDirection > 0) {
-      nextImage();
-    } else {
-      prevImage();
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (images.length <= 1) return;
-    if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      prevImage();
-    }
-    if (e.key === "ArrowRight") {
-      e.preventDefault();
-      nextImage();
-    }
-  };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose, prev, next]);
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 lg:gap-6">
-      {/* Thumbnails Verticales (Desktop) */}
-      <div className="hidden md:flex flex-col gap-3">
-        {images.map((img, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => setCurrentIndex(idx)}
-            className={cn(
-              "relative w-20 h-20 rounded-lg overflow-hidden ring-2 ring-offset-2 ring-offset-white dark:ring-offset-[#070617] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66]",
-              currentIndex === idx ? "ring-[#0A2A66]" : "ring-transparent hover:ring-[#0A2A66]/60"
-            )}
-            aria-label={`Ver imagen ${idx + 1} de ${productName}`}
-            aria-current={currentIndex === idx}
-          >
-            <Image
-              src={img}
-              alt={`Miniatura de ${productName} - vista ${idx + 1}`}
-              fill
-              loading="lazy"
-              className="object-cover"
-            />
-          </button>
-        ))}
-      </div>
-
-      {/* Imagen Principal con Zoom al hover */}
-      <figure
-        className="relative w-full aspect-square rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/40 shadow-lg backdrop-blur-md cursor-zoom-in"
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
-        onMouseEnter={() => setIsZooming(true)}
-        onMouseLeave={() => setIsZooming(false)}
-        onMouseMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const x = ((e.clientX - rect.left) / rect.width) * 100;
-          const y = ((e.clientY - rect.top) / rect.height) * 100;
-          setZoomPos({ x, y });
-        }}
-        aria-label={`Galería de imágenes de ${productName}. Usa flechas izquierda y derecha.`}
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/95"
+      onClick={onClose}
+    >
+      {/* Imagen centrada */}
+      <div
+        className="relative w-full h-full flex items-center justify-center p-4 sm:p-10"
+        onClick={(e) => e.stopPropagation()}
       >
         <Image
-          key={currentIndex}
-          src={images[currentIndex]}
-          alt={`Imagen de ${productName} - vista ${currentIndex + 1}`}
+          src={images[idx]}
+          alt={`${productName} - vista ${idx + 1}`}
           fill
+          className="object-contain"
+          sizes="100vw"
           priority
-          className={cn(
-            "object-cover transition-transform duration-200",
-            isZooming && "scale-[2]"
-          )}
-          style={isZooming ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
-          sizes="(max-width: 768px) 100vw, 50vw"
         />
-        <figcaption className="sr-only">Vista {currentIndex + 1} de {images.length}</figcaption>
+
+        {/* Cerrar */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Cerrar imagen"
+          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-sm text-white transition"
+        >
+          <XMarkIcon className="w-7 h-7" />
+        </button>
+
+        {/* Flechas */}
         {images.length > 1 && (
           <>
             <button
               type="button"
-              onClick={() => handleNavigate(-1)}
+              onClick={prev}
               aria-label="Imagen anterior"
-              className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/70 dark:bg-[#070617]/70 backdrop-blur-sm p-2 rounded-full text-slate-900 dark:text-slate-100 hover:bg-white/90 dark:hover:bg-[#070617]/90 transition shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66]"
+              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-sm text-white transition"
             >
-              <ChevronLeftIcon className="w-6 h-6" />
+              <ChevronLeftIcon className="w-7 h-7" />
             </button>
             <button
               type="button"
-              onClick={() => handleNavigate(1)}
+              onClick={next}
               aria-label="Imagen siguiente"
-              className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/70 dark:bg-[#070617]/70 backdrop-blur-sm p-2 rounded-full text-slate-900 dark:text-slate-100 hover:bg-white/90 dark:hover:bg-[#070617]/90 transition shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66]"
+              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-white/10 hover:bg-white/25 backdrop-blur-sm text-white transition"
             >
-              <ChevronRightIcon className="w-6 h-6" />
+              <ChevronRightIcon className="w-7 h-7" />
             </button>
           </>
         )}
-      </figure>
 
-      {/* Thumbnails Horizontales (Móvil) */}
-      <div className="md:hidden flex gap-3 overflow-x-auto pb-2">
-        {images.map((img, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => setCurrentIndex(idx)}
-            className={cn(
-              "relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden ring-2 ring-offset-2 ring-offset-white dark:ring-offset-[#070617] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66]",
-              currentIndex === idx ? "ring-[#0A2A66]" : "ring-transparent"
-            )}
-            aria-label={`Ver imagen ${idx + 1} de ${productName}`}
-            aria-current={currentIndex === idx}
-          >
-            <Image
-              src={img}
-              alt={`Miniatura de ${productName} - vista ${idx + 1}`}
-              fill
-              loading="lazy"
-              className="object-cover"
+        {/* Contador */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setIdx(i)}
+              className={`h-1.5 rounded-full transition-all ${i === idx ? "w-6 bg-white" : "w-1.5 bg-white/40"}`}
+              aria-label={`Imagen ${i + 1}`}
             />
-          </button>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
+  );
+};
+
+// --- Galería de Imágenes ---
+const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [isZooming, setIsZooming] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+
+  const prev = useCallback(() => setCurrentIndex((i) => (i - 1 + images.length) % images.length), [images.length]);
+  const next = useCallback(() => setCurrentIndex((i) => (i + 1) % images.length), [images.length]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
+    if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLightboxOpen(true); }
+  };
+
+  return (
+    <>
+      {lightboxOpen && (
+        <Lightbox
+          images={images}
+          productName={productName}
+          initialIndex={currentIndex}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
+
+      {/* Mobile: imagen arriba, thumbnails abajo */}
+      {/* Desktop: thumbnails verticales izquierda, imagen derecha */}
+      <div className="w-full flex flex-col md:flex-row gap-3">
+        {/* Thumbnails verticales SOLO en desktop */}
+        {images.length > 1 && (
+          <div className="hidden md:flex flex-col gap-2 shrink-0">
+            {images.map((img, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setCurrentIndex(i)}
+                aria-label={`Ver imagen ${i + 1}`}
+                aria-current={currentIndex === i}
+                className={cn(
+                  "relative w-[72px] h-[72px] rounded-xl overflow-hidden border-2 transition-all bg-white dark:bg-slate-900",
+                  currentIndex === i
+                    ? "border-[#0A2A66] dark:border-[#2E5FA7] shadow-md"
+                    : "border-slate-200 dark:border-slate-700 opacity-60 hover:opacity-100 hover:border-slate-400"
+                )}
+              >
+                <Image
+                  src={img}
+                  alt={`Miniatura ${i + 1} de ${productName}`}
+                  fill
+                  loading="lazy"
+                  className="object-contain p-1"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Columna principal: imagen + thumbnails mobile */}
+        <div className="flex flex-col gap-3 min-w-0 flex-1">
+          {/* Imagen principal — usa w-full + aspect-square para NO hacer overflow */}
+          <figure
+            className="relative w-full aspect-square rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md cursor-zoom-in group"
+            tabIndex={0}
+            onKeyDown={handleKeyDown}
+            onClick={() => setLightboxOpen(true)}
+            onMouseEnter={() => setIsZooming(true)}
+            onMouseLeave={() => setIsZooming(false)}
+            onMouseMove={(e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              setZoomPos({
+                x: ((e.clientX - r.left) / r.width) * 100,
+                y: ((e.clientY - r.top) / r.height) * 100,
+              });
+            }}
+            aria-label={`Imagen de ${productName}. Toca para ver a pantalla completa.`}
+          >
+            <Image
+              key={currentIndex}
+              src={images[currentIndex]}
+              alt={`${productName} - vista ${currentIndex + 1}`}
+              fill
+              priority
+              className={cn(
+                "object-contain p-2 transition-transform duration-200",
+                isZooming && "scale-[1.7]"
+              )}
+              style={isZooming ? { transformOrigin: `${zoomPos.x}% ${zoomPos.y}%` } : undefined}
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+
+            {/* Hint fullscreen — visible en hover (desktop) y siempre en mobile */}
+            <div className="absolute top-3 right-3 p-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm text-slate-600 dark:text-slate-300 md:opacity-0 md:group-hover:opacity-100 transition-opacity shadow-sm pointer-events-none">
+              <MagnifyingGlassPlusIcon className="w-5 h-5" />
+            </div>
+
+            {/* Flechas — solo si hay varias imágenes */}
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); prev(); }}
+                  aria-label="Imagen anterior"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-200 shadow-md hover:bg-white dark:hover:bg-slate-800 transition active:scale-95"
+                >
+                  <ChevronLeftIcon className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); next(); }}
+                  aria-label="Imagen siguiente"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-white/90 dark:bg-slate-900/90 text-slate-700 dark:text-slate-200 shadow-md hover:bg-white dark:hover:bg-slate-800 transition active:scale-95"
+                >
+                  <ChevronRightIcon className="w-5 h-5" />
+                </button>
+              </>
+            )}
+
+            {/* Dots */}
+            {images.length > 1 && (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/20 backdrop-blur-sm rounded-full px-2 py-1">
+                {images.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setCurrentIndex(i); }}
+                    aria-label={`Imagen ${i + 1}`}
+                    className={`h-1.5 rounded-full transition-all ${i === currentIndex ? "w-5 bg-white" : "w-1.5 bg-white/50"}`}
+                  />
+                ))}
+              </div>
+            )}
+
+            <figcaption className="sr-only">Vista {currentIndex + 1} de {images.length}</figcaption>
+          </figure>
+
+          {/* Thumbnails horizontales SOLO en mobile */}
+          {images.length > 1 && (
+            <div className="md:hidden flex gap-2 overflow-x-auto pb-1">
+              {images.map((img, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setCurrentIndex(i)}
+                  aria-label={`Ver imagen ${i + 1}`}
+                  aria-current={currentIndex === i}
+                  className={cn(
+                    "relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all bg-white dark:bg-slate-900",
+                    currentIndex === i
+                      ? "border-[#0A2A66] dark:border-[#2E5FA7] shadow"
+                      : "border-slate-200 dark:border-slate-700 opacity-55 hover:opacity-100"
+                  )}
+                >
+                  <Image
+                    src={img}
+                    alt={`Miniatura ${i + 1} de ${productName}`}
+                    fill
+                    loading="lazy"
+                    className="object-contain p-1"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -281,7 +407,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
     "Repuesto para moto de alta calidad. Revisa compatibilidad por marca, modelo y medida antes de comprar.";
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070617] dark:text-slate-100 transition-colors duration-300">
+    <div className="overflow-x-hidden bg-white text-slate-900 dark:bg-[#070617] dark:text-slate-100 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 pb-8 sm:pb-14">
         <nav aria-label="Miga de pan" className="text-sm text-slate-600 dark:text-slate-300 mb-6">
           <ol className="flex flex-wrap items-center gap-2">
@@ -309,10 +435,10 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
           </ol>
         </nav>
 
-        <article className="grid lg:grid-cols-2 gap-10 lg:gap-14">
+        <article className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
           <ImageGallery images={images} productName={product.name} />
 
-          <div className="glass p-6 sm:p-8 border border-slate-200 dark:border-slate-800">
+          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-8 lg:sticky lg:top-24">
             <header>
               <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                 {product.name}

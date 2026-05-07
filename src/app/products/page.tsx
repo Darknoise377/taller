@@ -161,6 +161,21 @@ export default async function ProductsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
+      {/* Banner / encabezado específico de la página de productos */}
+      <header className="relative pt-8 pb-6 px-4 md:px-12 overflow-hidden">
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-br from-[#0A2A66]/10 via-[#2E5FA7]/8 to-transparent dark:from-[#0A2A66]/20 dark:via-[#2E5FA7]/12 blur-3xl"
+        />
+        <div className="relative max-w-7xl mx-auto z-10 text-center md:text-left">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] bg-clip-text text-transparent mb-2">
+            Catálogo de repuestos
+          </h1>
+          <p className="text-md sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto md:mx-0">
+            Encuentra repuestos y accesorios para tu moto con información clara, precios visibles y stock actualizado.
+          </p>
+        </div>
+      </header>
       <ProductsClient initialProducts={products} totalCount={totalCount} />
     </>
   );
