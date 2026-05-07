@@ -3,6 +3,9 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // Packages used only on the server — Turbopack/webpack must not bundle them
+  serverExternalPackages: ['resend', 'svix', 'postal-mime'],
+
   // 👇 Esto desactiva ESLint durante el build de producción (soluciona el error en Vercel)
   eslint: {
     ignoreDuringBuilds: true,
