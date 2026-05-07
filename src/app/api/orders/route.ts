@@ -277,6 +277,10 @@ export async function POST(req: Request) {
         paymentMethod: newOrder.paymentMethod,
         status: newOrder.status,
         products: productsForEmail,
+        address: newOrder.address,
+        city: newOrder.city,
+        department: newOrder.department ?? undefined,
+        phone: newOrder.phone,
       });
     } catch (mailError) {
       // El pedido ya fue creado: no devolvemos error al cliente por fallo de email.

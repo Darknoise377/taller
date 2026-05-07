@@ -19,6 +19,11 @@ type BaseOrderForEmail = {
   paymentMethod: PaymentMethod;
   status: OrderStatus;
   products: OrderProductLine[];
+  // Dirección de envío (opcional para compatibilidad con colas existentes)
+  address?: string;
+  city?: string;
+  department?: string;
+  phone?: string;
 };
 
 type QueuedEmailJob = {
@@ -107,6 +112,66 @@ function buildOrderLinesHtml(products: OrderProductLine[], currency: string): st
         `<tr><td style="padding:8px 0;">${escapeHtml(line.product.name)}</td><td style="padding:8px 0;text-align:center;">${line.quantity}</td><td style="padding:8px 0;text-align:right;">${formatMoney(line.product.price * line.quantity, currency)}</td></tr>`
     )
     .join("");
+}
+
+function buildShippingAddressHtml(order: BaseOrderForEmail): string {
+  if (!order.address && !order.city) return "";
+  const parts = [order.address, order.city, order.department].filter(Boolean).map(escapeHtml);
+  return `
+    <div style="margin:16px 0;padding:14px 16px;background:#f8fafc;border-left:3px solid #0A2A66;border-radius:4px;">
+      <p style="margin:0 0 4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#64748b;">Dirección de envío</p>
+      <p style="margin:0;font-size:14px;color:#1e293b;line-height:1.5;">${parts.join(", ")}</p>
+      ${order.phone ? `<p style="margin:4px 0 0;font-size:13px;color:#475569;">Tel: ${escapeHtml(order.phone)}</p>` : ""}
+    </div>
+  `;
+}
+
+function buildStepsTimelineHtml(paymentMethod: PaymentMethod): string {
+  const steps =
+    paymentMethod === "CONTRAENTREGA"
+      ? [
+          { emoji: "✅", label: "Pedido recibido", active: true },
+          { emoji: "📦", label: "Preparando tu pedido", active: false },
+          { emoji: "🚚", label: "En camino", active: false },
+          { emoji: "🎉", label: "Contraentrega al recibir", active: false },
+        ]
+      : [
+          { emoji: "✅", label: "Pago confirmado", active: true },
+          { emoji: "📦", label: "Preparando tu pedido", active: false },
+          { emoji: "🚚", label: "En camino", active: false },
+          { emoji: "🎉", label: "¡Entregado!", active: false },
+        ];
+
+  const rows = steps
+    .map(
+      (s) =>
+        `<tr><td style="padding:5px 0;font-size:18px;width:28px;">${s.emoji}</td><td style="padding:5px 8px;font-size:14px;color:${s.active ? "#0f172a" : "#64748b"};font-weight:${s.active ? "600" : "400"};">${s.label}</td>${s.active ? `<td style="padding:5px 0;font-size:11px;color:#059669;font-weight:600;white-space:nowrap;">✓ Listo</td>` : "<td></td>"}</tr>`
+    )
+    .join("");
+
+  return `
+    <div style="margin:16px 0;">
+      <p style="margin:0 0 8px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#64748b;">¿Qué sigue?</p>
+      <table cellpadding="0" cellspacing="0" style="width:100%;border-collapse:collapse;">${rows}</table>
+    </div>
+  `;
+}
+
+function buildWhatsAppCtaHtml(referenceCode: string, phone?: string): string {
+  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? phone ?? "";
+  if (!whatsapp) return "";
+  const message = encodeURIComponent(
+    `Hola! Tengo una consulta sobre mi pedido #${referenceCode}.`
+  );
+  const url = `https://wa.me/${whatsapp.replace(/\D/g, "")}?text=${message}`;
+  return `
+    <div style="margin:20px 0;text-align:center;">
+      <a href="${url}" target="_blank" rel="noopener noreferrer"
+         style="display:inline-block;background:#25D366;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:700;letter-spacing:.02em;">
+        💬 Consultar por WhatsApp
+      </a>
+    </div>
+  `;
 }
 
 function renderEmailLayout(params: {
@@ -319,33 +384,53 @@ async function dispatchEmailJob(
 
   if (type === "ORDER_CREATED") {
     const order = payload as BaseOrderForEmail;
+    const isContraentrega = order.paymentMethod === "CONTRAENTREGA";
     const mailOptions = {
       from: smtpFrom,
       to: order.customerEmail,
       bcc: internalRecipients.length > 0 ? internalRecipients : undefined,
-      subject: `Confirmacion de pedido #${order.referenceCode}`,
+      subject: `Confirmación de pedido #${order.referenceCode} — Taller de Motos A&R`,
       html: renderEmailLayout({
-        title: "Confirmacion de pedido",
-        intro: `Hola ${escapeHtml(order.customerName)}, recibimos tu pedido y ya iniciamos el proceso.`,
+        title: isContraentrega ? "¡Pedido recibido!" : "¡Pago confirmado!",
+        intro: `Hola ${escapeHtml(order.customerName)}, ${isContraentrega ? "recibimos tu pedido y pronto lo estaremos despachando." : "tu pago fue confirmado y ya iniciamos el proceso de tu pedido."}`,
         contentHtml: `
-          <p style="margin:0 0 8px;">Referencia: <strong>#${escapeHtml(order.referenceCode)}</strong></p>
-          <p style="margin:0 0 8px;">Metodo de pago: <strong>${paymentMethodLabel(order.paymentMethod)}</strong></p>
-          <p style="margin:0 0 14px;">Estado inicial: <strong>${orderStatusLabel(order.status)}</strong></p>
-          <table width="100%" cellspacing="0" cellpadding="0" style="margin-top:12px;border-collapse:collapse;">
+          <!-- Referencia y método de pago -->
+          <div style="margin:0 0 16px;padding:12px 16px;background:#eff6ff;border-radius:8px;border:1px solid #bfdbfe;">
+            <p style="margin:0 0 4px;font-size:12px;color:#3b82f6;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">Número de pedido</p>
+            <p style="margin:0;font-size:22px;font-weight:700;color:#1e3a8a;letter-spacing:.04em;">#${escapeHtml(order.referenceCode)}</p>
+            <p style="margin:6px 0 0;font-size:13px;color:#475569;">Método de pago: <strong>${paymentMethodLabel(order.paymentMethod)}</strong></p>
+          </div>
+
+          <!-- Tabla de productos -->
+          <table width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-bottom:8px;">
             <thead>
-              <tr style="border-bottom:1px solid #e5e7eb;text-align:left;">
-                <th style="padding:8px 0;">Producto</th>
-                <th style="padding:8px 0;text-align:center;">Cant.</th>
-                <th style="padding:8px 0;text-align:right;">Subtotal</th>
+              <tr style="border-bottom:2px solid #e2e8f0;text-align:left;">
+                <th style="padding:8px 0;font-size:13px;color:#64748b;font-weight:600;">Producto</th>
+                <th style="padding:8px 0;text-align:center;font-size:13px;color:#64748b;font-weight:600;">Cant.</th>
+                <th style="padding:8px 0;text-align:right;font-size:13px;color:#64748b;font-weight:600;">Subtotal</th>
               </tr>
             </thead>
             <tbody>
               ${buildOrderLinesHtml(order.products, order.currency)}
             </tbody>
+            <tfoot>
+              <tr style="border-top:2px solid #e2e8f0;">
+                <td colspan="2" style="padding:10px 0;font-size:15px;font-weight:700;color:#0f172a;">Total</td>
+                <td style="padding:10px 0;text-align:right;font-size:16px;font-weight:700;color:#0A2A66;">${formatMoney(order.total, order.currency)}</td>
+              </tr>
+            </tfoot>
           </table>
-          <p style="margin-top:16px;font-size:18px;"><strong>Total: ${formatMoney(order.total, order.currency)}</strong></p>
-          <p style="margin-top:8px;color:#475569;">Te notificaremos cualquier cambio en el estado del pago.</p>
+
+          <!-- Dirección de envío -->
+          ${buildShippingAddressHtml(order)}
+
+          <!-- Timeline de pasos -->
+          ${buildStepsTimelineHtml(order.paymentMethod)}
+
+          <!-- WhatsApp CTA -->
+          ${buildWhatsAppCtaHtml(order.referenceCode, order.phone)}
         `,
+        footerNote: "Te notificaremos por correo cualquier cambio en el estado de tu pedido.",
       }),
     };
 
