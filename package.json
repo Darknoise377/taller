@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "node ./node_modules/next/dist/bin/next dev --turbopack",
-    "build": "node ./node_modules/next/dist/bin/next build --turbopack",
+    "build": "node ./node_modules/next/dist/bin/next build",
     "postinstall": "node ./node_modules/prisma/build/index.js generate",
     "start": "node ./node_modules/next/dist/bin/next start",
     "lint": "node ./node_modules/eslint/bin/eslint.js .",
@@ -46,6 +46,7 @@
     "react-hook-form": "^7.65.0",
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.5.0",
+    "resend": "^6.12.3",
     "sonner": "^2.0.7",
     "swr": "^2.3.6",
     "tailwind-merge": "^3.3.1",
