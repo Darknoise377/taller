@@ -116,7 +116,7 @@ function buildOrderLinesHtml(products: OrderProductLine[], currency: string): st
 
 function buildShippingAddressHtml(order: BaseOrderForEmail): string {
   if (!order.address && !order.city) return "";
-  const parts = [order.address, order.city, order.department].filter(Boolean).map(escapeHtml);
+  const parts = [order.address, order.city, order.department].filter((v): v is string => Boolean(v)).map(escapeHtml);
   return `
     <div style="margin:16px 0;padding:14px 16px;background:#f8fafc;border-left:3px solid #0A2A66;border-radius:4px;">
       <p style="margin:0 0 4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#64748b;">Dirección de envío</p>
