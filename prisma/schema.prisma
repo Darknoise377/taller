@@ -249,6 +249,27 @@ enum JobStatus {
   COMPLETED
 }
 
+//
+// 🔐 Registro de auditoría de seguridad
+//
+model AuditLog {
+  id          Int       @id @default(autoincrement())
+  timestamp   DateTime  @default(now())
+  action      String    // e.g. ACCESS_DENIED, SENSITIVE_ACTION, LOGIN_FAILED
+  path        String?
+  method      String?
+  actorId     String?
+  actorEmail  String?
+  actorRole   String?
+  reason      String?
+  ip          String?
+  userAgent   String?
+
+  @@index([timestamp])
+  @@index([actorEmail])
+  @@index([action])
+}
+
 model SecurityAuditLog {
   id         Int      @id @default(autoincrement())
   action     String

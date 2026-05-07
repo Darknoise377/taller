@@ -36,7 +36,7 @@ function validateMagicBytes(buffer: Buffer, declaredType: string): boolean {
 export async function POST(req: Request) {
   try {
     // Rate limit: 30 uploads per 5 minutes
-    const limit = rateLimit(req, { keyPrefix: 'upload', windowMs: 5 * 60 * 1000, max: 30 });
+    const limit = await rateLimit(req, { keyPrefix: 'upload', windowMs: 5 * 60 * 1000, max: 30 });
     if (!limit.ok) {
       return NextResponse.json(
         { error: "Demasiadas subidas. Intenta más tarde." },

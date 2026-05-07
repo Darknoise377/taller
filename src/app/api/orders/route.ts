@@ -38,7 +38,7 @@ export async function GET() {
  */
 export async function POST(req: Request) {
   try {
-    const limit = rateLimit(req, {
+    const limit = await rateLimit(req, {
       keyPrefix: 'orders-create',
       windowMs: 60 * 1000,
       max: 20,

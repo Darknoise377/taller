@@ -316,7 +316,7 @@ const createOrderTool: Tool<CreateOrderParams, CreateOrderResult> = {
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
-  const rl = rateLimit(req, { keyPrefix: 'chat', windowMs: 60_000, max: 20 });
+  const rl = await rateLimit(req, { keyPrefix: 'chat', windowMs: 60_000, max: 20 });
   if (!rl.ok) {
     return new Response(
       JSON.stringify({ error: 'Demasiadas solicitudes. Intenta de nuevo en unos segundos.' }),

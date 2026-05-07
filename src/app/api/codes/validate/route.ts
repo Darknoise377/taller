@@ -9,7 +9,7 @@ import { rateLimit } from '@/lib/rateLimit';
  * @param req NextRequest - Contiene el código en los search params (ej: /api/codes/validate?code=MI-CODIGO)
  */
 export async function GET(req: NextRequest) {
-  const limit = rateLimit(req, {
+  const limit = await rateLimit(req, {
     keyPrefix: 'codes-validate',
     windowMs: 60 * 1000,
     max: 30,

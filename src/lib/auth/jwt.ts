@@ -4,25 +4,52 @@ import type { AdminRole, CustomerUser } from '@/types/auth';
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d";
 const CUSTOMER_JWT_EXPIRES_IN = "30d";
-let didWarnAboutJwtSecret = false;
+let didWarnAboutAdminSecret = false;
+let didWarnAboutCustomerSecret = false;
 
-function getSecretKey(): Uint8Array {
-  const jwtSecretKey = process.env.JWT_SECRET;
+/**
+ * Returns the signing key for ADMIN tokens.
+ * Reads JWT_ADMIN_SECRET first; falls back to legacy JWT_SECRET.
+ * Having separate secrets means a customer token can never be accepted by an admin verifier.
+ */
+function getAdminSecretKey(): Uint8Array {
+  const secret = process.env.JWT_ADMIN_SECRET ?? process.env.JWT_SECRET;
 
-  if (jwtSecretKey) {
-    return new TextEncoder().encode(jwtSecretKey);
+  if (secret) {
+    return new TextEncoder().encode(secret);
   }
 
   if (process.env.NODE_ENV !== 'production') {
-    if (!didWarnAboutJwtSecret) {
-      console.warn('JWT_SECRET no está configurado. Se usará una clave temporal solo para desarrollo local.');
-      didWarnAboutJwtSecret = true;
+    if (!didWarnAboutAdminSecret) {
+      console.warn('[JWT] JWT_ADMIN_SECRET / JWT_SECRET no configurado. Usando clave temporal (solo dev).');
+      didWarnAboutAdminSecret = true;
     }
-
-    return new TextEncoder().encode('local-dev-jwt-secret-ar-change-me');
+    return new TextEncoder().encode('local-dev-admin-jwt-secret-ar');
   }
 
-  throw new Error('Falta JWT_SECRET en variables de entorno');
+  throw new Error('Falta JWT_ADMIN_SECRET (o JWT_SECRET) en variables de entorno');
+}
+
+/**
+ * Returns the signing key for CUSTOMER tokens.
+ * Reads JWT_CUSTOMER_SECRET first; falls back to legacy JWT_SECRET.
+ */
+function getCustomerSecretKey(): Uint8Array {
+  const secret = process.env.JWT_CUSTOMER_SECRET ?? process.env.JWT_SECRET;
+
+  if (secret) {
+    return new TextEncoder().encode(secret);
+  }
+
+  if (process.env.NODE_ENV !== 'production') {
+    if (!didWarnAboutCustomerSecret) {
+      console.warn('[JWT] JWT_CUSTOMER_SECRET / JWT_SECRET no configurado. Usando clave temporal (solo dev).');
+      didWarnAboutCustomerSecret = true;
+    }
+    return new TextEncoder().encode('local-dev-customer-jwt-secret-ar');
+  }
+
+  throw new Error('Falta JWT_CUSTOMER_SECRET (o JWT_SECRET) en variables de entorno');
 }
 
 function parseExpiresInToSeconds(expiresIn: string): number {
@@ -87,11 +114,11 @@ export async function signAdminToken(input: {
     .setSubject(payload.sub)
     .setIssuedAt()
     .setExpirationTime(JWT_EXPIRES_IN)
-    .sign(getSecretKey());
+    .sign(getAdminSecretKey());
 }
 
 export async function verifyAdminToken(token: string): Promise<AdminTokenPayload> {
-  const { payload } = await jwtVerify<AdminTokenPayload>(token, getSecretKey(), {
+  const { payload } = await jwtVerify<AdminTokenPayload>(token, getAdminSecretKey(), {
     algorithms: ["HS256"],
   });
 
@@ -154,11 +181,11 @@ export async function signCustomerToken(input: {
     .setSubject(payload.sub)
     .setIssuedAt()
     .setExpirationTime(CUSTOMER_JWT_EXPIRES_IN)
-    .sign(getSecretKey());
+    .sign(getCustomerSecretKey());
 }
 
 export async function verifyCustomerToken(token: string): Promise<CustomerTokenPayload> {
-  const { payload } = await jwtVerify<CustomerTokenPayload>(token, getSecretKey(), {
+  const { payload } = await jwtVerify<CustomerTokenPayload>(token, getCustomerSecretKey(), {
     algorithms: ["HS256"],
   });
 

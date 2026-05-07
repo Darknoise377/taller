@@ -10,7 +10,7 @@ import { rateLimit } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
   try {
-    const limit = rateLimit(req, {
+    const limit = await rateLimit(req, {
       keyPrefix: "customer-login",
       windowMs: 15 * 60 * 1000,
       max: 10,

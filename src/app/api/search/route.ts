@@ -29,7 +29,7 @@ export async function GET(req: Request) {
   }
 
   // Rate limit: 30 búsquedas / minuto por IP
-  const rl = rateLimit(req, { keyPrefix: 'ai-search', windowMs: 60_000, max: 30 });
+  const rl = await rateLimit(req, { keyPrefix: 'ai-search', windowMs: 60_000, max: 30 });
   if (!rl.ok) {
     return Response.json(
       { error: 'Demasiadas solicitudes.' },

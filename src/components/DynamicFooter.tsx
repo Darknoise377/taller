@@ -14,17 +14,17 @@ export default function DynamicFooter() {
 
   return (
     <footer className="bg-gradient-to-t from-[#eaf1fb] via-white to-[#f4f7fb] dark:from-[#07122e] dark:via-[#0a1838] dark:to-[#10234a] text-slate-700 dark:text-gray-300 border-t border-slate-200 dark:border-[#1d3258] relative z-20">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-6 py-12 pb-28">
         {/* Marca y descripción */}
         <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
           <div className="text-center md:text-left flex flex-col items-center md:items-start">
-<div className="relative h-20 w-48 mb-3">
-            <Image
+            <div className="relative h-20 w-48 mb-3">
+              <Image
                 src="/logo.png"
                 alt="Logo Taller de Motos A&R"
                 fill
                 sizes="192px"
-                className="object-contain object-left"
+                className="object-contain object-center"
               />
             </div>
             <p className="text-sm text-slate-500 dark:text-gray-400 mt-2">

@@ -9,10 +9,18 @@ interface Props {
 }
 
 function getDefaultEnd() {
-  const now = new Date();
-  // default to end of today (local time)
-  const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-  return end.getTime();
+  // Compute end-of-day in Colombia timezone (UTC-5, America/Bogota)
+  const bogotaFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  // Returns "YYYY-MM-DD" for today in Bogotá
+  const bogotaDateStr = bogotaFormatter.format(new Date());
+  // Build a Date at 23:59:59 Bogotá local time (UTC-5 = +18000 seconds offset)
+  const bogotaMidnight = new Date(`${bogotaDateStr}T23:59:59-05:00`);
+  return bogotaMidnight.getTime();
 }
 
 export default function CountdownTimer({ endTimeIso, className = "", onExpire }: Props) {

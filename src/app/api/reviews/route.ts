@@ -71,7 +71,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const limit = rateLimit(req, {
+  const limit = await rateLimit(req, {
     keyPrefix: "reviews-create",
     windowMs: 60 * 60 * 1000,
     max: 3,
