@@ -16,6 +16,8 @@ import {
 import type { CategoryItem } from "@/types/product";
 import { PRODUCT_CATEGORIES } from "@/constants/productCategories";
 import HomeSearch from '@/components/HomeSearch';
+import CountdownTimer from '@/components/CountdownTimer';
+import RecentPurchases from '@/components/RecentPurchases';
 import { makeProductPlaceholder } from '@/lib/placeholder';
 
 // TIPOS DE DATOS
@@ -161,97 +163,110 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-[#070617] dark:text-slate-100 antialiased font-sans transition-colors duration-300">
       <main className="px-4 sm:px-6 lg:px-10 xl:px-12 pt-6 sm:pt-8 pb-14 sm:pb-16">
-        {/* HERO + SLIDER */}
-        <section className="relative grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-6 sm:gap-8 items-stretch">
+        {/* HERO + SLIDER (Rediseñado: layout más amplio, CTAs prominentes) */}
+        <section className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
           <div className="absolute inset-0 -z-10 rounded-[32px] bg-gradient-to-r from-[#0A2A66]/5 via-[#2E5FA7]/5 to-transparent blur-2xl" />
 
-          <div className="order-2 lg:order-1">
-            <HeroSlider products={sliderProducts} isLoading={isLoading} />
+          <div className="order-2 lg:order-1 lg:col-span-7">
+            <div className="relative rounded-[28px] overflow-hidden shadow-[0_30px_90px_-40px_rgba(10,42,102,0.45)] border border-slate-200 dark:border-slate-800">
+              <HeroSlider products={sliderProducts} isLoading={isLoading} />
+              <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-black/5 dark:to-black/10" />
+            </div>
           </div>
 
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="order-1 lg:order-2"
+            className="order-1 lg:order-2 lg:col-span-5 flex items-center"
           >
-            <div className="h-full rounded-[28px] border border-slate-200/80 dark:border-slate-800 bg-white/80 dark:bg-[#09142d]/85 p-6 sm:p-8 shadow-[0_20px_70px_-30px_rgba(10,42,102,0.45)] backdrop-blur-xl">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#2E5FA7]/20 bg-[#0A2A66]/5 px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-[#0A2A66] dark:text-[#C7D2E0]">
-                MOTOSERVICIO A&amp;R
-              </div>
-
-              <div className="mt-4 flex items-center gap-4">
-                <div className="relative h-14 w-14 rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-md dark:border-slate-700 dark:bg-slate-900">
-                  <Image
-                    src="/logo.png"
-                    alt="Logo A&R"
-                    fill
-                    sizes="56px"
-                    className="object-cover"
-                    priority
-                  />
+            <div className="w-full">
+              <div className="h-full rounded-[28px] p-6 sm:p-8 bg-white/95 dark:bg-[#071124]/95 shadow-xl border border-slate-200 dark:border-slate-800">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#2E5FA7]/20 bg-[#0A2A66]/5 px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-[#0A2A66] dark:text-[#C7D2E0]">
+                  MOTOSERVICIO A&amp;R
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    Almacén y Taller Motoservicio A&amp;R
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    La Ceja, Antioquia • +57 301 527 1104
-                  </p>
+
+                <div className="mt-4 flex items-center gap-4">
+                  <div className="relative h-14 w-14 rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-md dark:border-slate-700 dark:bg-slate-900">
+                    <Image
+                      src="/logo.png"
+                      alt="Logo A&R"
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      Almacén y Taller Motoservicio A&amp;R
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      La Ceja, Antioquia • +57 301 527 1104
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <h2 className="mt-5 text-3xl sm:text-4xl md:text-5xl font-black leading-tight tracking-tight text-slate-950 dark:text-white">
-                Repuestos y servicio técnico para tu moto
-              </h2>
+                <h1 className="mt-6 text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-slate-950 dark:text-white">
+                  Repuestos y servicio técnico para tu moto
+                </h1>
 
-              <p className="mt-4 text-sm sm:text-base leading-7 text-slate-600 dark:text-slate-300">
-                Más de 15 años de experiencia en mantenimiento, reparación y venta de repuestos para todas las marcas.
-                Atención personalizada y piezas de calidad garantizada.
-              </p>
+                <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
+                  Más de 15 años de experiencia en mantenimiento, reparación y venta de repuestos para todas las marcas. Atención personalizada y piezas de calidad garantizada.
+                </p>
 
-              <HomeSearch />
-
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
-                  <WrenchScrewdriverIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
-                  <p className="text-sm font-semibold">Técnicos especializados</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Personal capacitado en todas las marcas.</p>
+                <div className="mt-4">
+                  <CountdownTimer />
                 </div>
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
-                  <ShieldCheckIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
-                  <p className="text-sm font-semibold">Garantía en repuestos</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Piezas originales y genéricas de calidad.</p>
+
+                <div className="mt-5">
+                  <HomeSearch />
                 </div>
-                <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
-                  <GlobeAltIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
-                  <p className="text-sm font-semibold">Envíos a Colombia</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Despachamos a cualquier ciudad del país.</p>
+
+                <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
+                  <Link
+                    href="/products"
+                    className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold shadow-lg focus:outline-none transition-transform hover:scale-[1.02]"
+                  >
+                    Ver repuestos
+                    <ArrowRightIcon className="w-4 h-4" />
+                  </Link>
+
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href="/about"
+                      className="px-5 py-2.5 rounded-full border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300 hover:shadow-md transition-shadow"
+                    >
+                      Conocer el taller
+                    </Link>
+
+                    <Link
+                      href="/cuenta/registro"
+                      className="px-4 py-2 rounded-full text-sm text-[#0A2A66] dark:text-blue-300 hover:underline"
+                    >
+                      Crear cuenta
+                    </Link>
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-6 flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/products"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold shadow-lg focus:outline-none transition-transform hover:scale-[1.02]"
-                >
-                  Ver repuestos
-                  <ArrowRightIcon className="w-4 h-4" />
-                </Link>
-
-                <Link
-                  href="/about"
-                  className="w-full sm:w-auto px-6 py-3 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:shadow-md transition-shadow text-center"
-                >
-                  Conocer el taller
-                </Link>
-
-                <Link
-                  href="/cuenta/registro"
-                  className="w-full sm:w-auto px-6 py-3 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:shadow-md transition-shadow text-center"
-                >
-                  Crear cuenta
-                </Link>
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
+                    <WrenchScrewdriverIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
+                    <p className="text-sm font-semibold">Técnicos especializados</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Personal capacitado en todas las marcas.</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
+                    <ShieldCheckIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
+                    <p className="text-sm font-semibold">Garantía en repuestos</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Piezas originales y genéricas de calidad.</p>
+                  </div>
+                  <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
+                    <GlobeAltIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
+                    <p className="text-sm font-semibold">Envíos a Colombia</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Despachamos a cualquier ciudad del país.</p>
+                  </div>
+                </div>
+                <RecentPurchases products={sliderProducts} />
               </div>
             </div>
           </motion.div>
@@ -437,7 +452,7 @@ function HeroSlider({ products, isLoading }: HeroSliderProps) {
             className="absolute inset-0 w-full h-full flex flex-col lg:flex-row items-center"
           >
             <motion.div
-              className="relative w-full h-3/5 lg:w-1/2 lg:h-full overflow-hidden"
+              className="relative w-full h-3/5 lg:w-1/2 lg:h-full overflow-hidden flex items-center justify-center bg-white"
               whileHover={{ scale: 1.03 }}
               transition={{ duration: 0.8 }}
             >
@@ -447,7 +462,7 @@ function HeroSlider({ products, isLoading }: HeroSliderProps) {
                 fill
                 priority={index === 0}
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover brightness-[0.95] transition-transform duration-[1200ms]"
+                className="object-contain transition-transform duration-[1200ms]"
               />
             </motion.div>
 

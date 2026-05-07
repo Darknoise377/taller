@@ -97,7 +97,7 @@ export function ProductCard({ product, idx }: ProductCardProps) {
             </span>
           )}
           {isLowStock && (
-            <span className="bg-amber-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+            <span className="bg-amber-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow animate-pulse ring-1 ring-amber-300/40">
               ¡Últimas {product.stock}!
             </span>
           )}

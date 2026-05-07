@@ -491,7 +491,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                     className={cn(
                       "inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full",
                       product.stock <= lowStockThreshold
-                        ? "text-yellow-900 bg-yellow-100"
+                        ? "text-yellow-900 bg-yellow-100 animate-pulse ring-1 ring-yellow-200/60"
                         : "text-green-900 bg-green-100"
                     )}
                   >
