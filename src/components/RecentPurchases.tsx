@@ -90,12 +90,12 @@ export default function RecentPurchases({ products = [], maxItems = 4 }: Props) 
   if (!items || items.length === 0) return null;
 
   return (
-    <div className="mt-6 rounded-xl p-3 border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/60 shadow-sm">
+    <div role="region" aria-label="Compras en tiempo real" aria-live="polite" className="mt-6 rounded-xl p-3 border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/60 shadow-sm">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold">Compras en tiempo real</h4>
         <span className="text-xs text-slate-500">En línea</span>
       </div>
-      <ul className="mt-3 space-y-2">
+      <ul className="mt-3 space-y-2" role="list" aria-live="polite" aria-atomic="false">
         <AnimatePresence initial={false}>
           {items.map((it) => (
             <motion.li
@@ -106,7 +106,7 @@ export default function RecentPurchases({ products = [], maxItems = 4 }: Props) 
               className="flex items-center gap-3"
             >
               <div className="relative w-9 h-9 rounded-md overflow-hidden border border-slate-200 dark:border-slate-800">
-                <Image src={it.image || "/placeholder.png"} alt={it.product} fill className="object-cover" sizes="36px" />
+                <Image src={it.image || "/placeholder.png"} alt={`Imagen de ${it.product}`} fill className="object-cover" sizes="36px" />
               </div>
               <div className="flex-1">
                 <div className="text-sm font-semibold leading-tight">

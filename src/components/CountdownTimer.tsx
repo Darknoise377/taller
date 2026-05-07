@@ -47,13 +47,19 @@ export default function CountdownTimer({ endTimeIso, className = "", onExpire }:
   const formatted = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 
   return (
-    <div aria-live="polite" className={`flex items-center gap-3 ${className}`}>
+    <div role="region" aria-label="Oferta relámpago" className={`flex items-center gap-3 ${className}`}>
       <span className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-200 to-amber-100 text-amber-900 px-3 py-1 rounded-full text-sm font-semibold">
         Oferta relámpago
       </span>
-      <span className="font-mono text-sm bg-white dark:bg-slate-800 px-3 py-1 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800">
+      <span
+        role="timer"
+        aria-live="polite"
+        aria-atomic="true"
+        className="font-mono text-sm bg-white dark:bg-slate-800 px-3 py-1 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800"
+      >
         {formatted}
       </span>
+      <span className="sr-only">La oferta termina en {formatted}</span>
     </div>
   );
 }
