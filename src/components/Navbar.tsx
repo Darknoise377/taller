@@ -13,6 +13,7 @@ import {
   MoonIcon,
   HomeIcon,
   CubeIcon,
+  UserIcon,
 } from '@heroicons/react/24/outline';
 
 const Navbar = () => {
@@ -94,6 +95,15 @@ const Navbar = () => {
             </Link>
           ))}
 
+          {/* Cuenta (desktop) */}
+          <Link
+            href="/cuenta/login"
+            className={`hidden md:flex items-center gap-2 text-sm font-medium transition-colors text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617] rounded`}
+          >
+            <UserIcon className="w-5 h-5" />
+            Cuenta
+          </Link>
+
           {/* Carrito */}
           <button
             type="button"
@@ -142,6 +152,15 @@ const Navbar = () => {
             {label}
           </Link>
         ))}
+
+          {/* Cuenta (móvil) */}
+          <Link
+            href="/cuenta/login"
+            className={`flex flex-col items-center text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white`}
+          >
+            <UserIcon className="w-6 h-6" />
+            Cuenta
+          </Link>
 
         {/* Carrito */}
         <button

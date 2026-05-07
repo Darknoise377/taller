@@ -97,22 +97,28 @@ export async function generateMetadata(
   const description =
     product.description?.slice(0, 150) ||
     `Compra ${product.name} al mejor precio en nuestra tienda.`;
-  const productPath = `/products/${product.id}`;
+  const baseUrl = getBaseUrl();
+  const productUrl = `${baseUrl}/products/${product.id}`;
+
+  const firstImage = product.images?.[0] || product.imageUrl || "/placeholder.png";
+  const ogImage = firstImage.startsWith("http")
+    ? firstImage
+    : `${baseUrl}${firstImage.startsWith("/") ? "" : "/"}${firstImage}`;
 
   return {
     title: product.name,
     description,
     alternates: {
-      canonical: productPath,
+      canonical: productUrl,
     },
     openGraph: {
       title: product.name,
       description,
-      url: productPath,
+      url: productUrl,
       type: "website",
       images: [
         {
-          url: product.images?.[0] || product.imageUrl || "/placeholder.png",
+          url: ogImage,
           width: 1200,
           height: 630,
           alt: product.name,
@@ -123,7 +129,7 @@ export async function generateMetadata(
       card: "summary_large_image",
       title: product.name,
       description,
-      images: [product.images?.[0] || product.imageUrl || "/placeholder.png"],
+      images: [ogImage],
     },
   };
 }

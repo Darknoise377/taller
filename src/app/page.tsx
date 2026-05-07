@@ -245,6 +245,13 @@ export default function Home() {
                 >
                   Conocer el taller
                 </Link>
+
+                <Link
+                  href="/cuenta/registro"
+                  className="w-full sm:w-auto px-6 py-3 rounded-full border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:shadow-md transition-shadow text-center"
+                >
+                  Crear cuenta
+                </Link>
               </div>
             </div>
           </motion.div>

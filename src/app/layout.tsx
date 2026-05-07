@@ -96,12 +96,19 @@ export const metadata: Metadata = {
       "Repuestos para todas las marcas de motos y servicio técnico especializado en La Ceja, Antioquia. Calidad garantizada y precios justos.",
     images: [
       {
-        url: "/logo.png",
+        url: `${baseUrl}/logo.png`,
         width: 800,
         height: 600,
         alt: "Almacén y Taller Motoservicio A&R",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Almacén y Taller Motoservicio A&R | Repuestos y Servicio Técnico",
+    description:
+      "Repuestos para todas las marcas de motos y servicio técnico especializado en La Ceja, Antioquia. Calidad garantizada y precios justos.",
+    images: [`${baseUrl}/logo.png`],
   },
 };
 
