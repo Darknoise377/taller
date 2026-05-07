@@ -50,12 +50,20 @@ function CuentaShell({ children }: { children: React.ReactNode }) {
                 <span className="hidden sm:inline">Salir</span>
               </button>
             ) : (
-              <Link
-                href="/cuenta/login"
-                className="px-3 py-2 rounded-lg text-sm font-medium bg-[#0A2A66] text-white hover:bg-[#0A2A66]/90 transition-colors"
-              >
-                Iniciar sesión
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/cuenta/registro"
+                  className="px-3 py-2 rounded-lg text-sm font-medium text-[#0A2A66] dark:text-blue-300 hover:underline transition-colors"
+                >
+                  Crear cuenta
+                </Link>
+                <Link
+                  href="/cuenta/login"
+                  className="px-3 py-2 rounded-lg text-sm font-medium bg-[#0A2A66] text-white hover:bg-[#0A2A66]/90 transition-colors"
+                >
+                  Iniciar sesión
+                </Link>
+              </div>
             )}
           </nav>
         </div>
