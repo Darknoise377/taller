@@ -28,6 +28,7 @@ import {
 import { motion } from 'framer-motion';
 import { calculateDiscountedTotal, formatCurrency } from '@/utils/formatCurrency';
 import ShippingPromo from '@/components/ShippingPromo';
+import { estimateShipping, CONTRAENTREGA_SURCHARGE } from '@/config/shippingRates';
 
 // --- Interfaces ---
 
@@ -179,7 +180,7 @@ const CheckoutPage: React.FC = () => {
 
   const [departamentos, setDepartamentos] = useState<string[]>([]);
   const [municipios, setMunicipios] = useState<string[]>([]);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('PAYU');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('WOMPI');
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -197,15 +198,29 @@ const CheckoutPage: React.FC = () => {
   const isFreeShipping = cartTotal >= freeShippingThreshold;
   const missingForFreeShipping = Math.max(0, freeShippingThreshold - cartTotal);
 
+  // --- Estimado de envío reactivo ---
+  const shippingEstimate = useMemo(() => {
+    if (!shippingInfo.state || (paymentMethod !== 'WOMPI' && paymentMethod !== 'CONTRAENTREGA')) {
+      return null;
+    }
+    return estimateShipping(
+      shippingInfo.state,
+      paymentMethod as 'WOMPI' | 'CONTRAENTREGA',
+      cartTotal,
+      freeShippingThreshold,
+    );
+  }, [shippingInfo.state, paymentMethod, cartTotal, freeShippingThreshold]);
+
   // --- ✨ AÑADIDO: Cálculos de Totales Dinámicos (de V2) ---
   const { finalTotal, discountAmount } = useMemo(() => {
+    const shipping = shippingEstimate?.total ?? 0;
     if (validatedCode?.type === 'promotion') {
       const promo = validatedCode.data as PromotionCode;
-      return calculateDiscountedTotal(cartTotal, promo.discount);
+      const { finalTotal: discounted, discountAmount } = calculateDiscountedTotal(cartTotal, promo.discount);
+      return { finalTotal: discounted + shipping, discountAmount };
     }
-
-    return { finalTotal: cartTotal, discountAmount: 0 };
-  }, [cartTotal, validatedCode]);
+    return { finalTotal: cartTotal + shipping, discountAmount: 0 };
+  }, [cartTotal, validatedCode, shippingEstimate]);
 
   // --- Efectos de Carga (de V1) ---
   useEffect(() => {
@@ -315,7 +330,7 @@ const CheckoutPage: React.FC = () => {
 
     // --- ✨ FUSIONADO: Payload (V1 + V2) ---
     const payload = {
-      total: finalTotal, // ✨ MODIFICADO: Usa el total final calculado
+      total: finalTotal, // incluye envío + descuento
       paymentMethod,
       customerName: shippingInfo.fullName,
       customerEmail: shippingInfo.email,
@@ -352,10 +367,6 @@ const CheckoutPage: React.FC = () => {
         setOrderId(newOrder.id);
         clearCart();
         setOrderPlaced(true);
-        if (paymentMethod === 'PAYU') {
-          window.location.href = `/api/payu/redirect?ref=${newOrder.referenceCode}`;
-          return;
-        }
         if (paymentMethod === 'WOMPI') {
           window.location.href = `/api/wompi/redirect?ref=${newOrder.referenceCode}`;
           return;
@@ -604,21 +615,11 @@ const CheckoutPage: React.FC = () => {
 
                   <div className="space-y-4">
                     <PaymentOption
-                      method="PAYU"
-                      currentMethod={paymentMethod}
-                      setMethod={setPaymentMethod}
-                      title="PayU (Pago seguro)"
-                      description="Tarjetas de crédito/débito, PSE, Nequi y más."
-                      icon={
-                        <LockClosedIcon className="w-5 h-5 mr-2 text-green-600" />
-                      }
-                    />
-                    <PaymentOption
                       method="WOMPI"
                       currentMethod={paymentMethod}
                       setMethod={setPaymentMethod}
-                      title="Wompi"
-                      description="Tarjetas, PSE, Nequi y otros medios compatibles."
+                      title="Wompi (Pago seguro)"
+                      description="Tarjetas de crédito/débito, PSE, Nequi y más medios."
                       icon={
                         <CreditCardIcon className="w-5 h-5 mr-2 text-sky-600" />
                       }
@@ -776,11 +777,34 @@ const CheckoutPage: React.FC = () => {
 
                   <div className="flex justify-between text-md text-gray-600 dark:text-slate-400">
                     <span>Envío</span>
-                    {isFreeShipping ? (
-                      <span className="font-semibold text-green-600 dark:text-green-400">GRATIS</span>
-                    ) : (
-                      <span className="font-semibold text-gray-800 dark:text-slate-200">Se calcula por ciudad</span>
-                    )}
+                    <span className="font-semibold text-right">
+                      {!shippingInfo.state ? (
+                        <span className="text-gray-400 dark:text-slate-500 text-sm">Selecciona departamento</span>
+                      ) : shippingEstimate ? (
+                        <span className="flex flex-col items-end gap-0.5">
+                          {shippingEstimate.isFreeBase && shippingEstimate.surcharge === 0 && (
+                            <span className="text-green-600 dark:text-green-400">GRATIS</span>
+                          )}
+                          {shippingEstimate.isFreeBase && shippingEstimate.surcharge > 0 && (
+                            <>
+                              <span className="text-green-600 dark:text-green-400 text-xs">Flete GRATIS</span>
+                              <span className="text-yellow-600 dark:text-yellow-400 text-xs">+ {formatCurrency(shippingEstimate.surcharge)} recargo CE</span>
+                            </>
+                          )}
+                          {!shippingEstimate.isFreeBase && (
+                            <>
+                              <span className="text-gray-800 dark:text-slate-200">{formatCurrency(shippingEstimate.baseRate)}</span>
+                              {shippingEstimate.surcharge > 0 && (
+                                <span className="text-yellow-600 dark:text-yellow-400 text-xs">+ {formatCurrency(shippingEstimate.surcharge)} recargo CE</span>
+                              )}
+                              {shippingEstimate.regionLabel && (
+                                <span className="text-gray-400 dark:text-slate-500 text-xs">{shippingEstimate.regionLabel}</span>
+                              )}
+                            </>
+                          )}
+                        </span>
+                      ) : null}
+                    </span>
                   </div>
                   
                   {/* Descuento (si aplica) */}
@@ -832,8 +856,6 @@ const CheckoutPage: React.FC = () => {
                   <CheckCircleIcon className="w-6 h-6 mr-2" />
                   {processing
                     ? 'Procesando...'
-                    : paymentMethod === 'PAYU'
-                    ? 'Pagar con PayU'
                     : paymentMethod === 'WOMPI'
                     ? 'Pagar con Wompi'
                     : 'Confirmar Pedido'}
