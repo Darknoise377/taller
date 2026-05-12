@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getRequestActorFromCookie, writeSecurityAuditLog } from '@/lib/security/auditDb';
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { flushQueuedEmailsForOrder } from '@/lib/email/orderEmails';
 
 export async function POST(req: Request) {
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
 
   try {
     // Find orders that may have queued emails (rawResponse not null)
-    const orders = await prisma.order.findMany({ where: { rawResponse: { not: null } }, select: { referenceCode: true, rawResponse: true } });
+    const orders = await prisma.order.findMany({ where: { rawResponse: { not: Prisma.JsonNull } }, select: { referenceCode: true, rawResponse: true } });
     let processed = 0;
     for (const o of orders) {
       try {
