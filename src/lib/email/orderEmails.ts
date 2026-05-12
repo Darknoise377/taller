@@ -11,8 +11,18 @@ function getResend(): Resend | null {
   return _resend;
 }
 
-const FROM_EMAIL =
-  process.env.RESEND_FROM_EMAIL || "Taller de Motos A&R <noreply@tallerar.com>";
+// Resend no permite dominios de proveedor gratuito (gmail.com, hotmail.com, etc.) como remitente FROM.
+// Si RESEND_FROM_EMAIL contiene un dominio de este tipo, se registra un error claro en los logs.
+const FREE_DOMAINS = ["gmail.com", "hotmail.com", "outlook.com", "yahoo.com", "live.com"];
+const _fromRaw = process.env.RESEND_FROM_EMAIL || "Taller de Motos A&R <noreply@tallerar.com>";
+const _fromDomain = (_fromRaw.match(/@([\w.-]+)>?/) ?? [])[1]?.toLowerCase() ?? "";
+if (FREE_DOMAINS.includes(_fromDomain)) {
+  console.error(
+    `[Email] ⚠️  RESEND_FROM_EMAIL usa el dominio "${_fromDomain}" que no está permitido como remitente en Resend. ` +
+    `Cámbialo a un dominio verificado (ej: no-reply@motoservicioayr.com).`
+  );
+}
+const FROM_EMAIL = _fromRaw;
 const REPLY_TO = process.env.RESEND_REPLY_TO || "";
 const internalBcc = (process.env.EMAIL_INTERNAL_TO ?? "")
   .split(",")
@@ -20,7 +30,7 @@ const internalBcc = (process.env.EMAIL_INTERNAL_TO ?? "")
   .filter(Boolean);
 
 function isEmailConfigured(): boolean {
-  return Boolean(process.env.RESEND_API_KEY);
+  return Boolean(process.env.RESEND_API_KEY) && !FREE_DOMAINS.includes(_fromDomain);
 }
 
 // ── Types ────────────────────────────────────────────────────────────────────
