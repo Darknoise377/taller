@@ -85,6 +85,8 @@ model Order {
   paymentNetwork  String?
   signature       String?
   rawResponse     Json?
+  trackingNumber  String?
+  trackingUrl     String?
 
   // 👤 Información del clienteact
   customerName    String

@@ -51,6 +51,8 @@ export interface Order {
   postalCode?: string;
   phone: string;
   cedula?: string;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
   createdAt: string;
   updatedAt: string;
   products: OrderProduct[];

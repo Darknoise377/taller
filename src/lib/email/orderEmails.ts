@@ -314,7 +314,7 @@ async function enqueueFailedEmail(
   await persistQueuedEmails(referenceCode, queue);
 }
 
-async function flushQueuedEmailsForOrder(referenceCode: string): Promise<void> {
+export async function flushQueuedEmailsForOrder(referenceCode: string): Promise<void> {
   const order = await prisma.order.findUnique({ where: { referenceCode }, select: { rawResponse: true } });
   if (!order) return;
   const queue = parseQueuedEmails(order.rawResponse);

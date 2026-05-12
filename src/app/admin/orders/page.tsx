@@ -33,6 +33,7 @@ import {
   UserSwitchOutlined,
   FilePdfOutlined, // <-- Añadido para el botón de exportación
   FileExcelOutlined, // <-- Añadido para el botón de exportación
+  SyncOutlined,
 } from '@ant-design/icons';
 
 // --- Importaciones de Servicios y Tipos ---
@@ -414,6 +415,34 @@ export default function OrdersPage() {
                 >
                   Excel
                 </Button>
+                <Popconfirm
+                  title={"¿Procesar la cola de emails para todas las órdenes? Esto puede enviar muchos correos."}
+                  onConfirm={async () => {
+                    try {
+                      message.loading({ content: 'Procesando colas...', key: 'flushAll' });
+                      const res = await fetch('/api/admin/emails/flush-all', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                      });
+                      const payload = await res.json().catch(() => ({}));
+                      if (!res.ok) {
+                        message.error({ content: payload?.error || 'Error procesando colas', key: 'flushAll' });
+                      } else {
+                        message.success({ content: `Hecho — procesadas: ${payload.processed ?? 'n/a'}`, key: 'flushAll' });
+                      }
+                    } catch (err) {
+                      console.error(err);
+                      message.error({ content: 'Error procesando colas', key: 'flushAll' });
+                    }
+                  }}
+                  okText="Sí, procesar"
+                  cancelText="Cancelar"
+                >
+                  <Button icon={<SyncOutlined />} danger>
+                    Procesar colas
+                  </Button>
+                </Popconfirm>
               </Space>
             </Col>
           </Row>

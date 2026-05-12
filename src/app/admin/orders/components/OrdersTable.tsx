@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   Tag,
@@ -11,6 +11,9 @@ import {
   Empty,
   Space,
   Typography,
+  Input,
+  Button,
+  message,
 } from 'antd';
 import type { TableProps } from 'antd';
 import { Order } from '@/types/order';
@@ -30,48 +33,106 @@ const shippingTextStyle: React.CSSProperties = {
 };
 
 // --- Componente para Renglón Expandido (Movido aquí) ---
-const ExpandedRowContent: React.FC<{ record: Order }> = ({ record }) => (
-  <Descriptions bordered column={{ xs: 1, sm: 2 }}>
-    <Descriptions.Item label={<Space><UserOutlined/>Contacto</Space>}>
-      <Text strong>{record.customerName}</Text><br/>
-      <MailOutlined /> <Text type="secondary">{record.customerEmail}</Text><br/>
-      <PhoneOutlined /> <Text type="secondary">{record.phone}</Text><br/>
-      {record.cedula && <Text type="secondary">C.C: {record.cedula}</Text>}
-    </Descriptions.Item>
-    <Descriptions.Item label={<Space><HomeOutlined/>Dirección de Envío</Space>}>
-      <Text style={shippingTextStyle}>{record.address || 'Sin dirección'}</Text><br/>
-      <Text style={shippingTextStyle}>
-        {(record.city || 'Sin ciudad')}{record.department ? `, ${record.department}` : ''}
-        {record.postalCode ? ` · ${record.postalCode}` : ''}
-      </Text>
-    </Descriptions.Item>
-    
-    <Descriptions.Item label="Códigos Aplicados" span={2}>
-      <Space direction="vertical" style={{ width: '100%' }}>
-        <Text>
-          <UserSwitchOutlined style={{ marginRight: 8 }} />
-          <strong>Vendedor:</strong> {record.seller ? `${record.seller.name} (Código: ${record.seller.code})` : 'N/A'}
-        </Text>
-        <Text>
-          <PercentageOutlined style={{ marginRight: 8 }} />
-          <strong>Promoción:</strong> {record.promoCodeApplied ? <Tag color="purple">{record.promoCodeApplied}</Tag> : 'N/A'}
-        </Text>
-      </Space>
-    </Descriptions.Item>
+const ExpandedRowContent: React.FC<{ record: Order }> = ({ record }) => {
+  const [trackingNumber, setTrackingNumber] = useState<string>(record.trackingNumber ?? '');
+  const [trackingUrl, setTrackingUrl] = useState<string>(record.trackingUrl ?? '');
+  const [saving, setSaving] = useState(false);
+  const [flushing, setFlushing] = useState(false);
 
-    <Descriptions.Item label="Detalle de Productos" span={2}>
-        {record.products?.map(p => (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                <Avatar src={p.product?.imageUrl || '/placeholder.png'} style={{ marginRight: 12 }} />
-                <div>
-                    <Text>{p.product?.name || 'Producto no disponible'}</Text><br/>
-                    <Text type="secondary">Cantidad: {p.quantity} | Precio Unit: ${p.product?.price != null ? p.product.price.toLocaleString('es-CO') : '0'}</Text>
-                </div>
-            </div>
-        ))}
-    </Descriptions.Item>
-  </Descriptions>
-);
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/orders/${record.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trackingNumber: trackingNumber || null, trackingUrl: trackingUrl || null }),
+      });
+      if (!res.ok) throw new Error('Error actualizando la orden');
+      message.success('Información de tracking guardada');
+    } catch (err) {
+      console.error(err);
+      message.error('No se pudo guardar el tracking');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleFlush = async () => {
+    setFlushing(true);
+    try {
+      const res = await fetch('/api/admin/emails/flush', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ referenceCode: record.referenceCode }),
+      });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => ({}));
+        throw new Error(payload?.error || 'Error procesando la cola');
+      }
+      message.success('Cola de emails procesada para la orden');
+    } catch (err) {
+      console.error(err);
+      message.error('No se pudo procesar la cola de emails');
+    } finally {
+      setFlushing(false);
+    }
+  };
+
+  return (
+    <Descriptions bordered column={{ xs: 1, sm: 2 }}>
+      <Descriptions.Item label={<Space><UserOutlined/>Contacto</Space>}>
+        <Text strong>{record.customerName}</Text><br/>
+        <MailOutlined /> <Text type="secondary">{record.customerEmail}</Text><br/>
+        <PhoneOutlined /> <Text type="secondary">{record.phone}</Text><br/>
+        {record.cedula && <Text type="secondary">C.C: {record.cedula}</Text>}
+      </Descriptions.Item>
+      <Descriptions.Item label={<Space><HomeOutlined/>Dirección de Envío</Space>}>
+        <Text style={shippingTextStyle}>{record.address || 'Sin dirección'}</Text><br/>
+        <Text style={shippingTextStyle}>
+          {(record.city || 'Sin ciudad')}{record.department ? `, ${record.department}` : ''}
+          {record.postalCode ? ` · ${record.postalCode}` : ''}
+        </Text>
+      </Descriptions.Item>
+      
+      <Descriptions.Item label="Códigos Aplicados" span={2}>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Text>
+            <UserSwitchOutlined style={{ marginRight: 8 }} />
+            <strong>Vendedor:</strong> {record.seller ? `${record.seller.name} (Código: ${record.seller.code})` : 'N/A'}
+          </Text>
+          <Text>
+            <PercentageOutlined style={{ marginRight: 8 }} />
+            <strong>Promoción:</strong> {record.promoCodeApplied ? <Tag color="purple">{record.promoCodeApplied}</Tag> : 'N/A'}
+          </Text>
+        </Space>
+      </Descriptions.Item>
+
+      <Descriptions.Item label="Detalle de Productos" span={2}>
+          {record.products?.map(p => (
+              <div key={p.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                  <Avatar src={p.product?.imageUrl || '/placeholder.png'} style={{ marginRight: 12 }} />
+                  <div>
+                      <Text>{p.product?.name || 'Producto no disponible'}</Text><br/>
+                      <Text type="secondary">Cantidad: {p.quantity} | Precio Unit: ${p.product?.price != null ? p.product.price.toLocaleString('es-CO') : '0'}</Text>
+                  </div>
+              </div>
+          ))}
+      </Descriptions.Item>
+
+      <Descriptions.Item label="Tracking" span={2}>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Input value={trackingNumber} onChange={(e) => setTrackingNumber(e.target.value)} placeholder="Número de guía / tracking" />
+          <Input value={trackingUrl} onChange={(e) => setTrackingUrl(e.target.value)} placeholder="URL de rastreo (opcional)" />
+          <Space>
+            <Button type="primary" onClick={handleSave} loading={saving}>Guardar</Button>
+            <Button onClick={handleFlush} loading={flushing}>Reenviar emails</Button>
+          </Space>
+        </Space>
+      </Descriptions.Item>
+    </Descriptions>
+  );
+};
 
 
 // --- Props del Componente de Tabla ---

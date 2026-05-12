@@ -58,6 +58,7 @@ export async function PATCH(
     }
 
     const body = await req.json();
+    const { trackingNumber, trackingUrl } = body;
     let previousOrderForEmail:
       | {
           referenceCode: string;
@@ -150,6 +151,30 @@ export async function PATCH(
     if (typeof phone === "string") dataToUpdate.phone = phone;
     if (typeof cedula === "string") dataToUpdate.cedula = cedula;
 
+    // Also persist into dedicated columns if provided (nullable allowed)
+    if (Object.prototype.hasOwnProperty.call(body, 'trackingNumber')) {
+      dataToUpdate.trackingNumber = trackingNumber ?? null;
+    }
+    if (Object.prototype.hasOwnProperty.call(body, 'trackingUrl')) {
+      dataToUpdate.trackingUrl = trackingUrl ?? null;
+    }
+
+    // Persist tracking info inside rawResponse to avoid a DB migration.
+    if (typeof trackingNumber === 'string' || typeof trackingUrl === 'string') {
+      try {
+        const existing = await prisma.order.findUnique({ where: { id: numericId }, select: { rawResponse: true } });
+        const base = existing && typeof existing.rawResponse === 'object' && !Array.isArray(existing.rawResponse) ? (existing.rawResponse as Record<string, unknown>) : {};
+        const tracking = {
+          ...(base.tracking && typeof base.tracking === 'object' ? (base.tracking as Record<string, unknown>) : {}),
+          ...(typeof trackingNumber === 'string' ? { number: trackingNumber } : {}),
+          ...(typeof trackingUrl === 'string' ? { url: trackingUrl } : {}),
+        };
+        dataToUpdate.rawResponse = { ...base, tracking } as Prisma.InputJsonValue;
+      } catch (err) {
+        console.error('Error persisting tracking info to rawResponse:', err);
+      }
+    }
+
     const updatedOrder = await prisma.order.update({
       where: { id: numericId },
       data: dataToUpdate,
@@ -174,6 +199,10 @@ export async function PATCH(
       previousOrderForEmail.status !== updatedOrder.status
     ) {
       try {
+        // Prefer explicit tracking values from the request body, fall back to stored rawResponse.tracking
+        const trackedNumber = typeof trackingNumber === 'string' ? trackingNumber : (updatedOrder.rawResponse && typeof updatedOrder.rawResponse === 'object' && (updatedOrder.rawResponse as Record<string, any>).tracking ? (updatedOrder.rawResponse as Record<string, any>).tracking.number : null);
+        const trackedUrl = typeof trackingUrl === 'string' ? trackingUrl : (updatedOrder.rawResponse && typeof updatedOrder.rawResponse === 'object' && (updatedOrder.rawResponse as Record<string, any>).tracking ? (updatedOrder.rawResponse as Record<string, any>).tracking.url : null);
+
         await sendOrderStatusChangedEmail({
           order: {
             ...previousOrderForEmail,
@@ -181,6 +210,8 @@ export async function PATCH(
           },
           previousStatus: previousOrderForEmail.status,
           newStatus: updatedOrder.status,
+          trackingNumber: trackedNumber ?? undefined,
+          trackingUrl: trackedUrl ?? undefined,
         });
       } catch (mailError) {
         console.error("Error enviando email de cambio de estado manual:", mailError);

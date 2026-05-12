@@ -332,8 +332,8 @@ const CheckoutPage: React.FC = () => {
     const payload = {
       total: finalTotal, // incluye envío + descuento
       paymentMethod,
-      customerName: shippingInfo.fullName,
-      customerEmail: shippingInfo.email,
+      customerName: shippingInfo.fullName?.trim(),
+      customerEmail: shippingInfo.email?.trim(),
       address: shippingInfo.address,
       city: shippingInfo.city,
       department: shippingInfo.state,
