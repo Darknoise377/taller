@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useDebounce } from "use-debounce";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MagnifyingGlassIcon,
@@ -41,6 +42,9 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
   const [sortBy, setSortBy] = useState<string>("relevance");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
+
+  // Debounce del término de búsqueda para evitar un fetch por cada pulsación
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 400);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -99,7 +103,7 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
         else setLoading(true);
 
         const params = new URLSearchParams();
-        if (searchTerm) params.set('q', searchTerm);
+        if (debouncedSearchTerm) params.set('q', debouncedSearchTerm);
         if (selectedCategory && selectedCategory !== 'all') params.set('category', selectedCategory);
         if (selectedSize && selectedSize !== 'all') params.set('size', selectedSize);
         if (selectedColor && selectedColor !== 'all') params.set('color', selectedColor);
@@ -137,7 +141,7 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
         setLoadingMore(false);
       }
     },
-    [searchTerm, selectedCategory, selectedSize, selectedColor, sortBy, minPrice, maxPrice]
+    [debouncedSearchTerm, selectedCategory, selectedSize, selectedColor, sortBy, minPrice, maxPrice]
   );
 
   // Cuando cambian filtros en la UI, pedimos página 1 al servidor

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,7 +16,7 @@ interface ProductCardProps {
   idx: number;
 }
 
-export function ProductCard({ product, idx }: ProductCardProps) {
+export const ProductCard = React.memo(function ProductCard({ product, idx }: ProductCardProps) {
   const { addToCart, openCartModal } = useCart();
   const [selectedSize, setSelectedSize] = useState<string | undefined>(product.sizes?.[0]);
   const [selectedColor, setSelectedColor] = useState<string | undefined>(product.colors?.[0]);
@@ -24,13 +24,18 @@ export function ProductCard({ product, idx }: ProductCardProps) {
   const [quantity, setQuantity] = useState<number>(1);
   const [added, setAdded] = useState(false);
 
-  const imageSrc =
-    product.images?.[0] ?? product.imageUrl ?? makeProductPlaceholder(product.name, product.id);
-  const isDataUri = typeof imageSrc === "string" && imageSrc.startsWith("data:");
-  const isNew =
-    product.stock > 0 &&
-    product.createdAt &&
-    Date.now() - new Date(product.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000;
+  const imageSrc = useMemo(
+    () => product.images?.[0] ?? product.imageUrl ?? makeProductPlaceholder(product.name, product.id),
+    [product.images, product.imageUrl, product.name, product.id]
+  );
+  const isDataUri = useMemo(() => typeof imageSrc === "string" && imageSrc.startsWith("data:"), [imageSrc]);
+  const isNew = useMemo(
+    () =>
+      product.stock > 0 &&
+      !!product.createdAt &&
+      Date.now() - new Date(product.createdAt).getTime() < 30 * 24 * 60 * 60 * 1000,
+    [product.stock, product.createdAt]
+  );
   const isLowStock = product.stock > 0 && product.stock <= 5;
   const isOutOfStock = product.stock <= 0;
 
@@ -248,4 +253,4 @@ export function ProductCard({ product, idx }: ProductCardProps) {
       </div>
     </motion.article>
   );
-}
+});

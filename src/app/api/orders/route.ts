@@ -12,19 +12,29 @@ import { calculateDiscountedTotal, clampPercentage, normalizeAmount } from '@/ut
 
 /**
  * GET /api/orders
- * ... (sin cambios)
+ * Devuelve órdenes paginadas. Acepta ?page=1&limit=50
  */
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const orders = await prisma.order.findMany({
-      include: {
-        products: { include: { product: true } },
-        seller: true, // 👈 Opcional: Incluir datos del vendedor si existe
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const url = new URL(req.url);
+    const page = Math.max(1, Number(url.searchParams.get('page') || '1'));
+    const limit = Math.min(200, Math.max(1, Number(url.searchParams.get('limit') || '100')));
+    const skip = (page - 1) * limit;
 
-    return NextResponse.json(orders, { status: 200 });
+    const [orders, total] = await Promise.all([
+      prisma.order.findMany({
+        include: {
+          products: { include: { product: true } },
+          seller: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.order.count(),
+    ]);
+
+    return NextResponse.json({ items: orders, total, page, limit }, { status: 200 });
   } catch (error) {
     console.error('❌ Error al obtener órdenes:', error);
     return NextResponse.json({ message: 'Error interno del servidor' }, { status: 500 });
