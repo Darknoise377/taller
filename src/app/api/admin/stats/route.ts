@@ -33,7 +33,7 @@ export async function GET() {
       prisma.user.count(),
       prisma.order.aggregate({
         _sum: { total: true },
-        where: { status: { notIn: ["CANCELLED", "REJECTED"] } },
+        where: { status: { notIn: ["CANCELLED", "DECLINED"] } },
       }),
       prisma.order.findMany({
         select: {
