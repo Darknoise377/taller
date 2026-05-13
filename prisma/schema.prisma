@@ -286,3 +286,12 @@ model SecurityAuditLog {
   metadata   Json?
   createdAt  DateTime @default(now())
 }
+
+//
+// ⚙️ Configuración global de la tienda (singleton, id = 1)
+//
+model StoreSettings {
+  id            Int      @id @default(1)
+  shippingRules Json
+  updatedAt     DateTime @updatedAt
+}

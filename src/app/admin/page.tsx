@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Package,
@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   Clock,
   DollarSign,
+  RefreshCw,
 } from 'lucide-react';
 
 type DashboardStats = {
@@ -54,103 +55,25 @@ export default function AdminDashboard() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    async function loadDashboard() {
-      try {
-        const [productsRes, ordersRes, usersRes] = await Promise.all([
-          fetch('/api/products'),
-          fetch('/api/orders'),
-          fetch('/api/users'),
-        ]);
-
-        if (!productsRes.ok || !ordersRes.ok) {
-          throw new Error('Error cargando datos del dashboard');
-        }
-
-        // Normalizar posibles respuestas paginadas ({ items, total })
-        const prodJson = await productsRes.json();
-        const products = Array.isArray(prodJson) ? prodJson : prodJson?.items ?? [];
-
-        const ordersJson = await ordersRes.json();
-        const orders = Array.isArray(ordersJson) ? ordersJson : ordersJson?.items ?? [];
-
-        // /api/users requiere SUPERADMIN; para otros roles simplemente omitimos el conteo
-        let usersCount = 0;
-        if (usersRes.ok) {
-          const usersJson = await usersRes.json();
-          const users = Array.isArray(usersJson) ? usersJson : usersJson?.items ?? [];
-          usersCount = users.length;
-        }
-
-        const lowStock = (products || []).filter(
-          (p: { stock?: number }) => typeof p.stock === 'number' && p.stock <= 5
-        );
-
-        const pendingOrders = (orders || []).filter(
-          (o: { status: string }) => o.status === 'PENDING'
-        );
-
-        const totalRevenue = orders
-          .filter((o: { status: string }) => o.status !== 'CANCELLED' && o.status !== 'REJECTED')
-          .reduce((acc: number, o: { total: number }) => acc + o.total, 0);
-
-        const recent = orders.slice(0, 5).map((o: {
-          id: number;
-          referenceCode: string;
-          customerName: string;
-          total: number;
-          status: string;
-          createdAt: string;
-        }) => ({
-          id: o.id,
-          referenceCode: o.referenceCode,
-          customerName: o.customerName,
-          total: o.total,
-          status: o.status,
-          createdAt: o.createdAt,
-        }));
-
-        setStats({
-          totalProducts: products.length,
-          lowStockProducts: lowStock.length,
-          totalOrders: orders.length,
-          pendingOrders: pendingOrders.length,
-          totalRevenue,
-          totalUsers: usersCount,
-          recentOrders: recent,
-        });
-      } catch (err) {
-        // Log to console for local debugging
-        console.error('Error cargando dashboard:', err);
-
-        // Try sending the full error to server logs (Vercel / server logs)
-        try {
-          // Fire-and-forget, do not block UI
-          void fetch('/api/client-logs', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              source: 'admin-dashboard',
-              error: {
-                message: err instanceof Error ? err.message : String(err),
-                name: err instanceof Error ? err.name : null,
-                stack: err instanceof Error ? err.stack : null,
-              },
-              timestamp: new Date().toISOString(),
-            }),
-          });
-        } catch (sendErr) {
-          console.error('Error sending client log:', sendErr);
-        }
-
-        setError(err instanceof Error ? err.message : 'Error desconocido');
-      } finally {
-        setLoading(false);
-      }
+  const loadDashboard = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/admin/stats');
+      if (!res.ok) throw new Error('Error cargando datos del dashboard');
+      const data: DashboardStats = await res.json();
+      setStats(data);
+    } catch (err) {
+      console.error('Error cargando dashboard:', err);
+      setError(err instanceof Error ? err.message : 'Error desconocido');
+    } finally {
+      setLoading(false);
     }
-
-    loadDashboard();
   }, []);
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
 
   if (loading) {
     return (
@@ -172,7 +95,7 @@ export default function AdminDashboard() {
           <AlertTriangle className="mx-auto mb-2 text-red-500" size={32} />
           <p className="text-red-700 dark:text-red-300 font-medium">{error}</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={loadDashboard}
             className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
           >
             Reintentar
@@ -227,9 +150,19 @@ export default function AdminDashboard() {
         <h2 className="text-2xl font-bold text-gray-800 dark:text-slate-100">
           Dashboard
         </h2>
-        <span className="text-sm text-gray-500 dark:text-slate-400">
-          {new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        </span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={loadDashboard}
+            title="Actualizar datos"
+            className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 transition-colors"
+          >
+            <RefreshCw size={15} />
+            <span className="hidden sm:inline">Actualizar</span>
+          </button>
+          <span className="text-sm text-gray-500 dark:text-slate-400">
+            {new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+          </span>
+        </div>
       </div>
 
       {/* KPI Cards */}

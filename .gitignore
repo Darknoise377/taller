@@ -50,3 +50,4 @@ scripts/create-product-test.ps1
 .eslintcache
 
 .vercel
+.env*.local

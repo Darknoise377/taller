@@ -9,8 +9,8 @@ import { isCheckoutPath } from "@/utils/routeUtils";
 export default function DynamicFooter() {
   const pathname = usePathname();
 
-  // En checkout no mostramos footer para evitar distracciones
-  if (isCheckoutPath(pathname)) return null;
+  // En checkout y admin no mostramos footer
+  if (isCheckoutPath(pathname) || pathname?.startsWith('/admin')) return null;
 
   return (
     <footer className="bg-gradient-to-t from-[#eaf1fb] via-white to-[#f4f7fb] dark:from-[#07122e] dark:via-[#0a1838] dark:to-[#10234a] text-slate-700 dark:text-gray-300 border-t border-slate-200 dark:border-[#1d3258] relative z-20">

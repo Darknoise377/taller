@@ -28,7 +28,8 @@ import {
 import { motion } from 'framer-motion';
 import { calculateDiscountedTotal, formatCurrency } from '@/utils/formatCurrency';
 import ShippingPromo from '@/components/ShippingPromo';
-import { estimateShipping, CONTRAENTREGA_SURCHARGE } from '@/config/shippingRates';
+import { estimateShippingWithConfig, CONTRAENTREGA_SURCHARGE, DEFAULT_SHIPPING_CONFIG } from '@/config/shippingRates';
+import type { ShippingConfig } from '@/config/shippingRates';
 
 // --- Interfaces ---
 
@@ -183,6 +184,7 @@ const CheckoutPage: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('WOMPI');
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
+  const [shippingConfig, setShippingConfig] = useState<ShippingConfig>(DEFAULT_SHIPPING_CONFIG);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -194,8 +196,8 @@ const CheckoutPage: React.FC = () => {
     error: string | null;
   }>({ loading: false, error: null });
 
-  const freeShippingThreshold = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 200000);
-  const isFreeShipping = cartTotal >= freeShippingThreshold;
+  const freeShippingThreshold = shippingConfig.freeShippingThreshold;
+  const isFreeShipping = shippingConfig.freeShippingAll || cartTotal >= freeShippingThreshold;
   const missingForFreeShipping = Math.max(0, freeShippingThreshold - cartTotal);
 
   // --- Estimado de envío reactivo ---
@@ -203,13 +205,13 @@ const CheckoutPage: React.FC = () => {
     if (!shippingInfo.state || (paymentMethod !== 'WOMPI' && paymentMethod !== 'CONTRAENTREGA')) {
       return null;
     }
-    return estimateShipping(
+    return estimateShippingWithConfig(
       shippingInfo.state,
       paymentMethod as 'WOMPI' | 'CONTRAENTREGA',
       cartTotal,
-      freeShippingThreshold,
+      shippingConfig,
     );
-  }, [shippingInfo.state, paymentMethod, cartTotal, freeShippingThreshold]);
+  }, [shippingInfo.state, paymentMethod, cartTotal, shippingConfig]);
 
   // --- ✨ AÑADIDO: Cálculos de Totales Dinámicos (de V2) ---
   const { finalTotal, discountAmount } = useMemo(() => {
@@ -226,6 +228,16 @@ const CheckoutPage: React.FC = () => {
   useEffect(() => {
     const deps = colombiaData.map((d) => d.departamento).sort();
     setDepartamentos(deps);
+  }, []);
+
+  // Load shipping config from DB
+  useEffect(() => {
+    fetch('/api/store-settings')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.shippingRules) setShippingConfig(data.shippingRules as ShippingConfig);
+      })
+      .catch(() => { /* use default */ });
   }, []);
 
   useEffect(() => {

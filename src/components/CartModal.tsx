@@ -16,6 +16,8 @@ import {
 } from "@heroicons/react/24/outline";
 
 import { isCheckoutPath } from "@/utils/routeUtils";
+import { DEFAULT_SHIPPING_CONFIG } from "@/config/shippingRates";
+import type { ShippingConfig } from "@/config/shippingRates";
 
 export default function CartModal() {
   const pathname = usePathname();
@@ -29,6 +31,16 @@ export default function CartModal() {
   } = useCart();
 
   const modalRef = useRef<HTMLDivElement>(null);
+  const [shippingConfig, setShippingConfig] = React.useState<ShippingConfig>(DEFAULT_SHIPPING_CONFIG);
+
+  useEffect(() => {
+    fetch('/api/store-settings')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.shippingRules) setShippingConfig(data.shippingRules as ShippingConfig);
+      })
+      .catch(() => { /* use default */ });
+  }, []);
 
   // Si el usuario entra a checkout y el modal estaba abierto, lo cerramos.
   useEffect(() => {
@@ -60,8 +72,8 @@ export default function CartModal() {
   if (isCheckoutPath(pathname)) return null;
 
   const overlayActive = isCartModalOpen;
-  const FREE_SHIPPING_THRESHOLD = Number(process.env.NEXT_PUBLIC_FREE_SHIPPING_THRESHOLD ?? 200000);
-  const isFreeShipping = cartTotal >= FREE_SHIPPING_THRESHOLD;
+  const FREE_SHIPPING_THRESHOLD = shippingConfig.freeShippingAll ? 0 : shippingConfig.freeShippingThreshold;
+  const isFreeShipping = shippingConfig.freeShippingAll || cartTotal >= FREE_SHIPPING_THRESHOLD;
   const missingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - cartTotal);
 
   return (

@@ -3,7 +3,7 @@
 import React from "react";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
-import { BadgePercent, LayoutDashboard, LogOut, Package, PackageSearch, ShieldAlert, Users } from "lucide-react";
+import { BadgePercent, LayoutDashboard, LogOut, Package, PackageSearch, ShieldAlert, Truck, Users } from "lucide-react";
 import type { AdminRole } from "@/types/auth";
 
 const ROLE_RANK: Record<AdminRole, number> = { SUPERADMIN: 3, ADMIN: 2, VENDEDOR: 1 };
@@ -33,6 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/products", label: "Productos", icon: Package, minRole: "VENDEDOR" },
   { href: "/admin/orders", label: "Órdenes", icon: PackageSearch, minRole: "VENDEDOR" },
   { href: "/admin/codes", label: "Códigos", icon: BadgePercent, minRole: "VENDEDOR" },
+  { href: "/admin/shipping", label: "Envío", icon: Truck, minRole: "ADMIN" },
   { href: "/admin/users", label: "Usuarios", icon: Users, minRole: "SUPERADMIN" },
   { href: "/admin/security-audit", label: "Auditoría", icon: ShieldAlert, minRole: "SUPERADMIN" },
 ];
@@ -67,6 +68,10 @@ function AdminShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {user && (
+          <div className="flex flex-col gap-2 w-full sm:w-auto sm:items-end">
+            <span className="text-xs text-gray-400 dark:text-slate-500 text-right truncate max-w-[260px]">
+              {user.email}
+            </span>
           <nav className="flex flex-wrap gap-2 w-full sm:w-auto">
             {visibleNav.map(({ href, label, icon: Icon, exact }) => {
               const active = isActive(href, exact);
@@ -93,6 +98,7 @@ function AdminShell({ children }: { children: React.ReactNode }) {
               <span className="hidden sm:inline">Salir</span>
             </button>
           </nav>
+          </div>
         )}
       </header>
 

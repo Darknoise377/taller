@@ -8,6 +8,17 @@ export interface ShippingRegion {
   departments: string[];
 }
 
+/**
+ * Configuración global de envío — se persiste en StoreSettings.shippingRules.
+ * Los valores por defecto se usan como fallback si la BD no tiene registro.
+ */
+export interface ShippingConfig {
+  freeShippingAll: boolean;
+  freeShippingThreshold: number;
+  contraentregaSurcharge: number;
+  regions: ShippingRegion[];
+}
+
 /** Recargo fijo que cobran las transportadoras por servicio contraentrega (COD) */
 export const CONTRAENTREGA_SURCHARGE = 8_000;
 
@@ -75,9 +86,17 @@ export const SHIPPING_REGIONS: ShippingRegion[] = [
   },
 ];
 
-export function getRegionForDepartment(department: string): ShippingRegion | null {
-  return SHIPPING_REGIONS.find((r) => r.departments.includes(department)) ?? null;
+export function getRegionForDepartment(department: string, regions = SHIPPING_REGIONS): ShippingRegion | null {
+  return regions.find((r) => r.departments.includes(department)) ?? null;
 }
+
+/** Default config — used as fallback when DB row doesn't exist yet. */
+export const DEFAULT_SHIPPING_CONFIG: ShippingConfig = {
+  freeShippingAll: false,
+  freeShippingThreshold: 200_000,
+  contraentregaSurcharge: CONTRAENTREGA_SURCHARGE,
+  regions: SHIPPING_REGIONS,
+};
 
 export interface ShippingEstimate {
   baseRate: number;
@@ -97,6 +116,30 @@ export function estimateShipping(
   const isFreeBase = cartTotal >= freeShippingThreshold;
   const baseRate = isFreeBase ? 0 : (region?.baseRate ?? 0);
   const surcharge = paymentMethod === 'CONTRAENTREGA' ? CONTRAENTREGA_SURCHARGE : 0;
+
+  return {
+    baseRate,
+    surcharge,
+    total: baseRate + surcharge,
+    isFreeBase,
+    regionLabel: region?.label ?? null,
+  };
+}
+
+/**
+ * Like estimateShipping but driven by a full ShippingConfig from the DB.
+ * Handles the freeShippingAll flag and per-region rates.
+ */
+export function estimateShippingWithConfig(
+  department: string,
+  paymentMethod: 'WOMPI' | 'CONTRAENTREGA',
+  cartTotal: number,
+  config: ShippingConfig,
+): ShippingEstimate {
+  const region = getRegionForDepartment(department, config.regions);
+  const isFreeBase = config.freeShippingAll || cartTotal >= config.freeShippingThreshold;
+  const baseRate = isFreeBase ? 0 : (region?.baseRate ?? 0);
+  const surcharge = paymentMethod === 'CONTRAENTREGA' ? config.contraentregaSurcharge : 0;
 
   return {
     baseRate,

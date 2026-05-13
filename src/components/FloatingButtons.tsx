@@ -24,8 +24,8 @@ export default function FloatingButtons() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Ocultar en checkout para flujo limpio
-  if (isCheckoutPath(pathname)) return null;
+  // Ocultar en checkout y admin
+  if (isCheckoutPath(pathname) || pathname?.startsWith('/admin')) return null;
 
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
 
