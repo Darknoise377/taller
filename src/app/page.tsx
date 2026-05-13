@@ -153,147 +153,163 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#070617] text-slate-900 dark:text-slate-100 antialiased font-sans">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-14">
-        {/* HERO + SLIDER (Rediseñado: layout más amplio, CTAs prominentes) */}
-        <section className="relative grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">
-          <div className="absolute inset-0 -z-10 rounded-[32px] bg-gradient-to-r from-[#0A2A66]/5 via-[#2E5FA7]/5 to-transparent blur-2xl" />
+    <div className="min-h-screen bg-slate-50 dark:bg-[#060D1F] text-slate-900 dark:text-slate-100 antialiased">
 
-          <div className="order-2 lg:order-1 lg:col-span-7">
-            <div className="relative rounded-[28px] overflow-hidden shadow-[0_30px_90px_-40px_rgba(10,42,102,0.45)] border border-slate-200 dark:border-slate-800">
-              <HeroSlider products={sliderProducts} isLoading={isLoading} />
-              <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-transparent via-transparent to-black/5 dark:to-black/10" />
-            </div>
-          </div>
+      {/* ════════════════════════════════════════
+          HERO — full-width, dark gradient band
+          ════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#07122E] via-[#0A2A66] to-[#0D1F4E]">
+        {/* Background texture rings */}
+        <div className="pointer-events-none absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-[#2E5FA7]/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-32 w-[480px] h-[480px] rounded-full bg-[#0A2A66]/20 blur-3xl" />
 
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="order-1 lg:order-2 lg:col-span-5 flex items-center"
-          >
-            <div className="w-full">
-              <div className="h-full rounded-[28px] p-6 sm:p-8 bg-white/95 dark:bg-[#071124]/95 shadow-xl border border-slate-200 dark:border-slate-800">
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#2E5FA7]/20 bg-[#0A2A66]/5 px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-[#0A2A66] dark:text-[#C7D2E0]">
-                  MOTOSERVICIO A&amp;R
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+
+            {/* LEFT — copy + CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="order-1"
+            >
+              {/* Brand pill */}
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-4 py-1.5 text-[11px] font-bold tracking-[0.18em] text-white/70 uppercase mb-5">
+                <div className="relative h-5 w-5 rounded-full overflow-hidden border border-white/20 bg-white/10 shrink-0">
+                  <Image src="/logo.png" alt="A&R" fill sizes="20px" className="object-cover" priority />
                 </div>
-
-                <div className="mt-4 flex items-center gap-4">
-                  <div className="relative h-14 w-14 rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-md dark:border-slate-700 dark:bg-slate-900">
-                    <Image
-                      src="/logo.png"
-                      alt="Logo A&R"
-                      fill
-                      sizes="56px"
-                      className="object-cover"
-                      priority
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                      Almacén y Taller Motoservicio A&amp;R
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                      La Ceja, Antioquia • +57 301 527 1104
-                    </p>
-                  </div>
-                </div>
-
-                <h1 className="mt-6 text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-slate-950 dark:text-white">
-                  El repuesto exacto para tu moto. <span className="text-[#2E5FA7]">Compra fácil, recíbelo rápido.</span>
-                </h1>
-
-                <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                  Más de 15 años en el mercado. Piezas originales y genéricas de calidad, stock permanente y despachos a todo Colombia desde La Ceja, Antioquia.
-                </p>
-
-                <div className="mt-4">
-                  <CountdownTimer />
-                </div>
-
-                <div className="mt-5">
-                  <HomeSearch />
-                </div>
-
-                <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
-                  <Link
-                    href="/products"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-full bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-bold text-base shadow-lg focus:outline-none transition-transform hover:scale-[1.03] active:scale-100"
-                  >
-                    <ShoppingCartIcon className="w-5 h-5" />
-                    Comprar repuestos
-                  </Link>
-
-                  <a
-                    href="https://wa.me/573015271104?text=Hola,%20necesito%20un%20repuesto%20para%20mi%20moto"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full border-2 border-[#0A2A66] dark:border-[#2E5FA7] text-[#0A2A66] dark:text-[#C7D2E0] font-semibold text-base hover:bg-[#0A2A66]/5 dark:hover:bg-white/5 transition-all"
-                  >
-                    <ChatBubbleLeftRightIcon className="w-5 h-5" />
-                    Asesoría por WhatsApp
-                  </a>
-                </div>
-
-                <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
-                    <ChatBubbleLeftRightIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
-                    <p className="text-sm font-semibold">Asesoría gratuita</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Te ayudamos a encontrar la pieza correcta.</p>
-                  </div>
-                  <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
-                    <ShieldCheckIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
-                    <p className="text-sm font-semibold">Garantía en repuestos</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Piezas originales y genéricas de calidad.</p>
-                  </div>
-                  <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
-                    <GlobeAltIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
-                    <p className="text-sm font-semibold">Envíos a Colombia</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Despachamos a cualquier ciudad del país.</p>
-                  </div>
-                </div>
-                <RecentPurchases products={sliderProducts} />
+                Motoservicio A&amp;R · La Ceja, Ant.
               </div>
-            </div>
-          </motion.div>
-        </section>
 
-        {/* BARRA DE CONFIANZA */}
-        <section className="mt-8 sm:mt-10">
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/40 px-4 py-4 shadow-sm">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-              {[
-                { icon: <ChatBubbleLeftRightIcon className="w-5 h-5" />, label: "Soporte por WhatsApp", sub: "Respuesta rápida" },
-                { icon: <LockClosedIcon className="w-5 h-5" />, label: "Pagos 100% seguros", sub: "Wompi · Contraentrega" },
-                { icon: <TruckIcon className="w-5 h-5" />, label: "Envíos a todo el país", sub: "Colombia" },
-                { icon: <StarIcon className="w-5 h-5" />, label: "15+ años en el mercado", sub: "Repuestos garantizados" },
-              ].map(({ icon, label, sub }) => (
-                <div key={label} className="flex flex-col items-center gap-1">
-                  <div className="text-[#0A2A66] dark:text-[#C7D2E0]">{icon}</div>
-                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">{label}</span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">{sub}</span>
-                </div>
-              ))}
-            </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-[1.1] tracking-tight text-white">
+                El repuesto exacto<br />
+                <span className="text-[#5B9BD5]">para tu moto.</span>
+              </h1>
+
+              <p className="mt-4 text-base sm:text-lg text-white/60 max-w-lg leading-relaxed">
+                15+ años en el mercado. Piezas originales y genéricas, stock permanente y despachos a todo Colombia.
+              </p>
+
+              <div className="mt-5">
+                <CountdownTimer />
+              </div>
+
+              <div className="mt-6 max-w-md">
+                <HomeSearch />
+              </div>
+
+              <div className="mt-7 flex flex-wrap gap-3">
+                <Link
+                  href="/products"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-[#0A2A66] font-bold text-sm shadow-lg hover:bg-slate-100 transition-colors"
+                >
+                  <ShoppingCartIcon className="w-5 h-5" />
+                  Ver catálogo
+                </Link>
+                <a
+                  href="https://wa.me/573015271104?text=Hola,%20necesito%20un%20repuesto%20para%20mi%20moto"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-white/25 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
+                >
+                  <ChatBubbleLeftRightIcon className="w-5 h-5" />
+                  Asesoría WhatsApp
+                </a>
+              </div>
+
+              {/* Mini trust bar */}
+              <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
+                {[
+                  { icon: <TruckIcon className="w-4 h-4" />, text: "Envíos a Colombia" },
+                  { icon: <ShieldCheckIcon className="w-4 h-4" />, text: "Garantía incluida" },
+                  { icon: <LockClosedIcon className="w-4 h-4" />, text: "Pago seguro Wompi" },
+                  { icon: <StarIcon className="w-4 h-4" />, text: "15+ años de experiencia" },
+                ].map(({ icon, text }) => (
+                  <div key={text} className="flex items-center gap-1.5 text-white/55 text-xs">
+                    <span className="text-[#5B9BD5]">{icon}</span>
+                    {text}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* RIGHT — slider */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="order-2 w-full"
+            >
+              <div className="rounded-2xl overflow-hidden shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)] border border-white/10">
+                <HeroSlider products={sliderProducts} isLoading={isLoading} />
+              </div>
+              <RecentPurchases products={sliderProducts} />
+            </motion.div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* CATEGORÍAS */}
-        <section id="categorias" className="mt-12 sm:mt-14">
-          <div className="mb-6">
-            <p className="text-sm font-semibold tracking-[0.16em] text-[#2E5FA7] uppercase">Catálogo destacado</p>
-            <h3 className="text-2xl sm:text-3xl font-bold mt-1">Encuentra el repuesto que necesitas</h3>
-            <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-2 max-w-2xl">
-              Stock permanente en las principales líneas para motos de todas las marcas. Busca por categoría o usa el buscador.
-            </p>
+      {/* ════════════════════════════════════════
+          TRUST BAR — horizontal strip
+          ════════════════════════════════════════ */}
+      <div className="bg-white dark:bg-[#08101E] border-b border-slate-200 dark:border-slate-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-slate-200 dark:divide-slate-800">
+            {[
+              { icon: <TruckIcon className="w-5 h-5" />, label: "Envíos a todo Colombia", sub: "Despacho el mismo día hábil" },
+              { icon: <ShieldCheckIcon className="w-5 h-5" />, label: "Garantía en cada pieza", sub: "Originales y genéricas de calidad" },
+              { icon: <LockClosedIcon className="w-5 h-5" />, label: "Pago 100% seguro", sub: "Wompi · Transferencia · Contraentrega" },
+              { icon: <ChatBubbleLeftRightIcon className="w-5 h-5" />, label: "Soporte por WhatsApp", sub: "Respondemos en minutos" },
+            ].map(({ icon, label, sub }) => (
+              <div key={label} className="flex items-center gap-3 px-5 py-4">
+                <div className="shrink-0 w-9 h-9 rounded-lg bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/15 flex items-center justify-center text-[#0A2A66] dark:text-[#5B9BD5]">
+                  {icon}
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-800 dark:text-slate-100">{label}</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 space-y-16">
+
+        {/* ════════════════════════════════════════
+            CATEGORÍAS
+            ════════════════════════════════════════ */}
+        <section id="categorias">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+            <div>
+              <p className="text-xs font-bold tracking-[0.18em] text-[#2E5FA7] uppercase">Catálogo</p>
+              <h2 className="text-2xl sm:text-3xl font-extrabold mt-1 text-slate-900 dark:text-white">
+                Encuentra el repuesto que necesitas
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-xl">
+                Stock permanente en todas las líneas. Busca por categoría o usa el buscador.
+              </p>
+            </div>
+            <Link
+              href="/products"
+              className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-[#2E5FA7] hover:text-[#0A2A66] dark:hover:text-white transition-colors"
+            >
+              Ver todo el catálogo
+              <ArrowRightIcon className="w-4 h-4" />
+            </Link>
           </div>
 
           {isLoading ? (
-            <p className="text-slate-500">Cargando categorías...</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="h-52 rounded-2xl bg-slate-200 dark:bg-slate-800 animate-pulse" />
+              ))}
+            </div>
           ) : categories.length === 0 ? (
-            <p className="text-slate-500">No hay categorías disponibles.</p>
+            <p className="text-slate-500 dark:text-slate-400">No hay categorías disponibles.</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
               {categories.map((item, i) => (
                 <CategoryCard
                   key={item.name}
@@ -306,98 +322,104 @@ export default function Home() {
           )}
         </section>
 
-        {/* BENEFICIOS */}
-        <section className="mt-14 sm:mt-16">
-          <div className="mb-6">
-            <p className="text-sm font-semibold tracking-[0.16em] text-[#2E5FA7] uppercase">Ventajas</p>
-            <h3 className="text-2xl sm:text-3xl font-bold mt-1">
+        {/* ════════════════════════════════════════
+            BENEFICIOS
+            ════════════════════════════════════════ */}
+        <section>
+          <div className="mb-8">
+            <p className="text-xs font-bold tracking-[0.18em] text-[#2E5FA7] uppercase">Ventajas</p>
+            <h2 className="text-2xl sm:text-3xl font-extrabold mt-1 text-slate-900 dark:text-white">
               ¿Por qué comprar con nosotros?
-            </h3>
+            </h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             <FeatureCard
-              icon={<CheckCircleIcon className="w-8 h-8" />}
+              icon={<CheckCircleIcon className="w-6 h-6" />}
               title="Piezas originales y garantizadas"
               description="Stock permanente de repuestos originales y genéricas de calidad para todas las marcas."
             />
             <FeatureCard
-              icon={<ShieldCheckIcon className="w-8 h-8" />}
+              icon={<ShieldCheckIcon className="w-6 h-6" />}
               title="Compra 100% segura"
               description="Pago con Wompi, contraentrega o transferencia. Tu dinero protegido en todo momento."
             />
             <FeatureCard
-              icon={<TruckIcon className="w-8 h-8" />}
+              icon={<TruckIcon className="w-6 h-6" />}
               title="Envío rápido a Colombia"
               description="Despachamos el mismo día hábil. Recibe tu repuesto donde estés en el país."
             />
           </div>
         </section>
 
-        {/* CONVERSIÓN — ¿No encuentras tu repuesto? */}
-        <section className="mt-14 sm:mt-16">
-          <div className="rounded-[28px] overflow-hidden border border-slate-800 bg-gradient-to-br from-[#05101F] via-[#07122E] to-[#0A1F4D] text-white shadow-[0_30px_80px_-30px_rgba(10,42,102,0.6)]">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-              {/* Texto */}
-              <div className="p-8 sm:p-10 flex flex-col justify-center">
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold tracking-widest text-[#C7D2E0] uppercase mb-4 w-fit">
-                  Asesoría Personalizada
-                </div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight">
-                  ¿No encuentras <br className="hidden sm:block" />
-                  <span className="text-[#5B8FD9]">el repuesto que buscas?</span>
-                </h2>
-                <p className="mt-4 text-slate-300 text-sm sm:text-base max-w-md">
-                  Escríbenos por WhatsApp con el modelo de tu moto y el repuesto que necesitas. Te respondemos de inmediato y te cotizamos sin compromiso.
+        {/* ════════════════════════════════════════
+            CONVERSIÓN — dark CTA band
+            ════════════════════════════════════════ */}
+        <section>
+          <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-[#060E20] via-[#07122E] to-[#0A1F4E] border border-white/8 shadow-[0_40px_100px_-40px_rgba(10,42,102,0.7)]">
+            <div className="grid grid-cols-1 lg:grid-cols-2">
+              <div className="p-8 sm:p-12 flex flex-col justify-center">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[10px] font-bold tracking-widest text-[#C7D2E0] uppercase mb-5 w-fit">
+                  Asesoría personalizada
+                </span>
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-white">
+                  ¿No encuentras<br />
+                  <span className="text-[#5B9BD5]">el repuesto que buscas?</span>
+                </h3>
+                <p className="mt-4 text-slate-300 text-sm sm:text-base max-w-md leading-relaxed">
+                  Escríbenos por WhatsApp con el modelo de tu moto. Te cotizamos en minutos, sin compromiso.
                 </p>
-                <ul className="mt-5 space-y-2 text-sm text-slate-300">
-                  {["Cotización sin compromiso en minutos", "Repuestos para todas las marcas y modelos", "Envío a cualquier ciudad de Colombia"].map(item => (
-                    <li key={item} className="flex items-center gap-2">
-                      <CheckCircleIcon className="w-4 h-4 text-[#5B8FD9] flex-shrink-0" />
-                      {item}
+                <ul className="mt-5 space-y-2.5 text-sm text-slate-300">
+                  {[
+                    "Cotización sin compromiso en minutos",
+                    "Repuestos para todas las marcas y modelos",
+                    "Envío a cualquier ciudad de Colombia",
+                  ].map((t) => (
+                    <li key={t} className="flex items-center gap-2.5">
+                      <CheckCircleIcon className="w-4 h-4 text-[#5B9BD5] shrink-0" />
+                      {t}
                     </li>
                   ))}
                 </ul>
-                <div className="mt-7 flex flex-col sm:flex-row gap-3">
+                <div className="mt-8 flex flex-wrap gap-3">
                   <a
                     href="https://wa.me/573015271104?text=Hola,%20busco%20un%20repuesto%20para%20mi%20moto"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-[#0A2A66] font-bold text-sm shadow-lg transition-transform hover:scale-[1.02]"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-[#0A2A66] font-bold text-sm shadow-lg hover:bg-slate-100 transition-colors"
                   >
                     <ChatBubbleLeftRightIcon className="w-4 h-4" />
                     Cotizar por WhatsApp
                   </a>
                   <Link
                     href="/products"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-white/20 text-white font-semibold text-sm hover:bg-white/10 transition-all"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/20 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
                   >
                     <ShoppingCartIcon className="w-4 h-4" />
-                    Ver catálogo completo
+                    Ver catálogo
                   </Link>
                 </div>
               </div>
 
-              {/* Panel de cifras de ventas */}
-              <div className="p-8 sm:p-10 flex flex-col justify-center gap-6 border-t lg:border-t-0 lg:border-l border-white/10">
+              <div className="p-8 sm:p-12 flex flex-col justify-center gap-7 border-t lg:border-t-0 lg:border-l border-white/8">
                 {[
                   { value: "15+", label: "años vendiendo repuestos", icon: <StarIcon className="w-5 h-5" /> },
                   { value: "5.000+", label: "referencias disponibles", icon: <CubeTransparentIcon className="w-5 h-5" /> },
                   { value: "100%", label: "garantía en cada pieza vendida", icon: <ShieldCheckIcon className="w-5 h-5" /> },
-                ].map(({ value, label, icon }) => (
+                ].map(({ value, label, icon }, i) => (
                   <motion.div
                     key={label}
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: 24 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.5 }}
-                    className="flex items-center gap-4"
+                    transition={{ duration: 0.5, delay: i * 0.1 }}
+                    className="flex items-center gap-5"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-[#5B8FD9] flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center text-[#5B9BD5] shrink-0">
                       {icon}
                     </div>
                     <div>
-                      <div className="text-3xl font-extrabold text-white">{value}</div>
-                      <div className="text-sm text-slate-400">{label}</div>
+                      <div className="text-4xl font-extrabold text-white leading-none">{value}</div>
+                      <div className="text-sm text-slate-400 mt-0.5">{label}</div>
                     </div>
                   </motion.div>
                 ))}
@@ -406,39 +428,42 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA FINAL */}
-        <section className="mt-14 sm:mt-16">
-          <div className="rounded-[28px] overflow-hidden border border-slate-200 dark:border-slate-800 bg-gradient-to-r from-[#07122E] via-[#0A2A66] to-[#153B82] text-white p-6 sm:p-8 shadow-[0_20px_70px_-30px_rgba(10,42,102,0.55)]">
-            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-              <div className="max-w-2xl">
-                <p className="text-xs font-semibold tracking-[0.18em] text-[#C7D2E0] uppercase">Catálogo completo en línea</p>
-                <h4 className="text-2xl sm:text-3xl font-bold mt-2">Todo lo que tu moto necesita, disponible ahora</h4>
-                <p className="mt-3 text-sm sm:text-base text-slate-200">
-                  Stock permanente · Precios directos · Envío a todo Colombia. Calle 21 #14-29, La Ceja, Antioquia.
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <Link
-                  href="/products"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-white text-[#0A2A66] font-semibold shadow-lg transition-transform hover:scale-[1.02]"
-                >
-                  <ShoppingCartIcon className="w-5 h-5" />
-                  Ver todos los productos
-                </Link>
-                <a
-                  href="https://wa.me/573015271104?text=Hola,%20quiero%20hacer%20un%20pedido"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full border border-white/30 text-white font-semibold hover:bg-white/10 transition-all"
-                >
-                  <ChatBubbleLeftRightIcon className="w-5 h-5" />
-                  Hacer pedido por WhatsApp
-                </a>
-              </div>
+        {/* ════════════════════════════════════════
+            CTA FINAL
+            ════════════════════════════════════════ */}
+        <section>
+          <div className="rounded-3xl bg-gradient-to-r from-[#07122E] via-[#0A2A66] to-[#153B82] p-8 sm:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 shadow-[0_30px_80px_-30px_rgba(10,42,102,0.5)]">
+            <div>
+              <p className="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase">Catálogo completo en línea</p>
+              <h4 className="text-2xl sm:text-3xl font-extrabold text-white mt-1.5">
+                Todo lo que tu moto necesita,<br className="hidden sm:block" /> disponible ahora
+              </h4>
+              <p className="mt-2 text-sm text-white/55">
+                Stock permanente · Precios directos · Envíos a Colombia · Calle 21 #14-29, La Ceja
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3 shrink-0">
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-[#0A2A66] font-bold text-sm shadow-lg hover:bg-slate-100 transition-colors"
+              >
+                <ShoppingCartIcon className="w-5 h-5" />
+                Ver todos los productos
+              </Link>
+              <a
+                href="https://wa.me/573015271104?text=Hola,%20quiero%20hacer%20un%20pedido"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-white/25 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
+              >
+                <ChatBubbleLeftRightIcon className="w-5 h-5" />
+                Hacer pedido WhatsApp
+              </a>
             </div>
           </div>
         </section>
-      </main>
+
+      </div>
     </div>
   );
 }
@@ -533,7 +558,7 @@ function HeroSlider({ products, isLoading }: HeroSliderProps) {
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
     >
-      <div className="relative h-[22rem] sm:h-96 lg:h-[520px] select-none">
+      <div className="relative h-[22rem] sm:h-[28rem] lg:h-[480px] select-none">
         <AnimatePresence initial={false} mode="wait">
           <motion.div
             key={index}
@@ -618,7 +643,7 @@ function CategoryCard({ item, config, highlight }: {
   return (
     <Link
       href={`/products?category=${encodeURIComponent(item.slug)}`}
-      className="block group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/40 p-3 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
+      className="block group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#0C1628] overflow-hidden shadow-sm hover:-translate-y-1.5 hover:shadow-2xl hover:border-[#2E5FA7]/50 dark:hover:border-[#2E5FA7]/40 transition-all duration-300"
     >
       <div className="relative w-full h-48 sm:h-56 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-md">
         <div className="absolute inset-0 bg-gradient-to-t from-[#07122E]/55 via-[#07122E]/10 to-transparent z-10" />
@@ -629,9 +654,7 @@ function CategoryCard({ item, config, highlight }: {
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
-        <div className="absolute top-3 left-3 z-20 rounded-full bg-white/90 dark:bg-slate-900/80 px-3 py-1 text-[11px] font-semibold text-[#0A2A66]">
-          {item.count ?? "0"} productos
-        </div>
+  
         {urgencyLabel && (
           <div className="absolute top-3 right-3 z-20 flex items-center gap-1 rounded-full bg-orange-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-md">
             <FireIcon className="w-3 h-3" />
@@ -640,23 +663,23 @@ function CategoryCard({ item, config, highlight }: {
         )}
       </div>
 
-      <div className="mt-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="p-3">
+        <div className="flex items-center gap-2.5">
           <div
-            className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${
+            className={`w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 ${
               config
                 ? `bg-gradient-to-br ${config.colorFrom} ${config.colorTo}`
-                : "bg-slate-100 dark:bg-slate-800"
+                : "bg-slate-200 dark:bg-slate-700"
             }`}
           >
-            {config?.icon ?? <GlobeAltIcon className="w-6 h-6" />}
+            {config?.icon ?? <GlobeAltIcon className="w-4 h-4" />}
           </div>
-          <div>
-            <div className="font-semibold text-slate-800 dark:text-slate-100 capitalize text-sm sm:text-base">
-              {item.name}
+          <div className="min-w-0">
+            <div className="font-bold text-slate-800 dark:text-slate-100 capitalize text-sm truncate">
+              {item.name.replace(/_/g, " ")}
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400">
-              Explorar categoría →
+            <div className="text-[10px] text-slate-400 dark:text-slate-500">
+              {item.count ?? "0"} productos
             </div>
           </div>
         </div>
@@ -680,9 +703,9 @@ function FeatureCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.5 }}
       transition={{ duration: 0.5 }}
-      className="bg-white/90 dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-start gap-4 hover:shadow-lg transition-shadow"
+      className="bg-white dark:bg-[#0C1628] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-start gap-5 hover:shadow-xl hover:border-[#2E5FA7]/40 transition-all duration-300"
     >
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white flex-shrink-0 shadow-md">
+      <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#0A2A66] to-[#2E5FA7] text-white shrink-0 shadow-md">
         {icon}
       </div>
       <div>
