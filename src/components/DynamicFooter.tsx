@@ -91,8 +91,11 @@ export default function DynamicFooter() {
         {/* Línea divisoria */}
         <div className="border-t border-slate-200 dark:border-gray-700 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500 dark:text-gray-500">
           <p>© {new Date().getFullYear()} Almacén y Taller Motoservicio A&amp;R. Todos los derechos reservados.</p>
-          <p className="mt-2 md:mt-0">
-            Diseño web por <span className="text-[#0A2A66] font-semibold">FACRISCD</span>
+          <p className="mt-2 md:mt-0 flex items-center gap-1.5">
+            Diseño web por{" "}
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-widest bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white shadow-sm shadow-[#0A2A66]/30 dark:shadow-[#5B9BD5]/20">
+              FACRISCD
+            </span>
           </p>
         </div>
       </div>
