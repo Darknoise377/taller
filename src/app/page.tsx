@@ -214,11 +214,11 @@ export default function Home() {
                 </div>
 
                 <h1 className="mt-6 text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-slate-950 dark:text-white">
-                  Rueda seguro. Repuestos originales y servicio técnico <span className="text-[#2E5FA7]">sin demoras.</span>
+                  El repuesto exacto para tu moto. <span className="text-[#2E5FA7]">Compra fácil, recíbelo rápido.</span>
                 </h1>
 
                 <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                  Más de 15 años de experiencia. Mecánicos certificados, piezas garantizadas y despachos a todo el país desde La Ceja, Antioquia.
+                  Más de 15 años en el mercado. Piezas originales y genéricas de calidad, stock permanente y despachos a todo Colombia desde La Ceja, Antioquia.
                 </p>
 
                 <div className="mt-4">
@@ -238,20 +238,22 @@ export default function Home() {
                     Comprar repuestos
                   </Link>
 
-                  <Link
-                    href="/contact"
+                  <a
+                    href="https://wa.me/573015271104?text=Hola,%20necesito%20un%20repuesto%20para%20mi%20moto"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full border-2 border-[#0A2A66] dark:border-[#2E5FA7] text-[#0A2A66] dark:text-[#C7D2E0] font-semibold text-base hover:bg-[#0A2A66]/5 dark:hover:bg-white/5 transition-all"
                   >
-                    <CalendarDaysIcon className="w-5 h-5" />
-                    Agendar taller
-                  </Link>
+                    <ChatBubbleLeftRightIcon className="w-5 h-5" />
+                    Asesoría por WhatsApp
+                  </a>
                 </div>
 
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
-                    <WrenchScrewdriverIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
-                    <p className="text-sm font-semibold">Técnicos especializados</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Personal capacitado en todas las marcas.</p>
+                    <ChatBubbleLeftRightIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
+                    <p className="text-sm font-semibold">Asesoría gratuita</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Te ayudamos a encontrar la pieza correcta.</p>
                   </div>
                   <div className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/70 dark:bg-slate-900/40 p-3">
                     <ShieldCheckIcon className="w-5 h-5 text-[#0A2A66] mb-2" />
@@ -278,7 +280,7 @@ export default function Home() {
                 { icon: <ChatBubbleLeftRightIcon className="w-5 h-5" />, label: "Soporte por WhatsApp", sub: "Respuesta rápida" },
                 { icon: <LockClosedIcon className="w-5 h-5" />, label: "Pagos 100% seguros", sub: "Wompi · Contraentrega" },
                 { icon: <TruckIcon className="w-5 h-5" />, label: "Envíos a todo el país", sub: "Colombia" },
-                { icon: <StarIcon className="w-5 h-5" />, label: "15+ años de experiencia", sub: "Mecánicos certificados" },
+                { icon: <StarIcon className="w-5 h-5" />, label: "15+ años en el mercado", sub: "Repuestos garantizados" },
               ].map(({ icon, label, sub }) => (
                 <div key={label} className="flex flex-col items-center gap-1">
                   <div className="text-[#0A2A66] dark:text-[#C7D2E0]">{icon}</div>
@@ -294,9 +296,9 @@ export default function Home() {
         <section id="categorias" className="mt-12 sm:mt-14">
           <div className="mb-6">
             <p className="text-sm font-semibold tracking-[0.16em] text-[#2E5FA7] uppercase">Catálogo destacado</p>
-            <h3 className="text-2xl sm:text-3xl font-bold mt-1">Categorías organizadas para comprar más fácil</h3>
+            <h3 className="text-2xl sm:text-3xl font-bold mt-1">Encuentra el repuesto que necesitas</h3>
             <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-2 max-w-2xl">
-              Presentamos las líneas principales del taller con una apariencia más ordenada, moderna y confiable.
+              Stock permanente en las principales líneas para motos de todas las marcas. Busca por categoría o usa el buscador.
             </p>
           </div>
 
@@ -323,46 +325,46 @@ export default function Home() {
           <div className="mb-6">
             <p className="text-sm font-semibold tracking-[0.16em] text-[#2E5FA7] uppercase">Ventajas</p>
             <h3 className="text-2xl sm:text-3xl font-bold mt-1">
-              ¿Por qué elegir nuestra tienda?
+              ¿Por qué comprar con nosotros?
             </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <FeatureCard
               icon={<CheckCircleIcon className="w-8 h-8" />}
-              title="Repuestos disponibles"
-              description="Amplio stock de piezas originales y genéricas para todas las marcas de motos."
+              title="Piezas originales y garantizadas"
+              description="Stock permanente de repuestos originales y genéricas de calidad para todas las marcas."
             />
             <FeatureCard
-              icon={<CubeTransparentIcon className="w-8 h-8" />}
-              title="Servicio técnico"
-              description="Mantenimiento preventivo, correctivo y diagnóstico profesional para tu moto."
+              icon={<ShieldCheckIcon className="w-8 h-8" />}
+              title="Compra 100% segura"
+              description="Pago con Wompi, contraentrega o transferencia. Tu dinero protegido en todo momento."
             />
             <FeatureCard
-              icon={<GlobeAltIcon className="w-8 h-8" />}
-              title="Envío a todo el país"
-              description="Despachamos tus repuestos con envío seguro a cualquier ciudad de Colombia."
+              icon={<TruckIcon className="w-8 h-8" />}
+              title="Envío rápido a Colombia"
+              description="Despachamos el mismo día hábil. Recibe tu repuesto donde estés en el país."
             />
           </div>
         </section>
 
-        {/* TALLER — RUPTURA DE PATRÓN */}
+        {/* CONVERSIÓN — ¿No encuentras tu repuesto? */}
         <section className="mt-14 sm:mt-16">
           <div className="rounded-[28px] overflow-hidden border border-slate-800 bg-gradient-to-br from-[#05101F] via-[#07122E] to-[#0A1F4D] text-white shadow-[0_30px_80px_-30px_rgba(10,42,102,0.6)]">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
               {/* Texto */}
               <div className="p-8 sm:p-10 flex flex-col justify-center">
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold tracking-widest text-[#C7D2E0] uppercase mb-4 w-fit">
-                  Taller Especializado
+                  Asesoría Personalizada
                 </div>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight">
-                  No dejes tu moto <br className="hidden sm:block" />
-                  <span className="text-[#5B8FD9]">en manos de cualquiera.</span>
+                  ¿No encuentras <br className="hidden sm:block" />
+                  <span className="text-[#5B8FD9]">el repuesto que buscas?</span>
                 </h2>
                 <p className="mt-4 text-slate-300 text-sm sm:text-base max-w-md">
-                  Mantenimiento preventivo, correctivo y diagnóstico profesional. Cada pieza instalada con garantía. Tu moto sale rodando, no rodando a empujones.
+                  Escríbenos por WhatsApp con el modelo de tu moto y el repuesto que necesitas. Te respondemos de inmediato y te cotizamos sin compromiso.
                 </p>
                 <ul className="mt-5 space-y-2 text-sm text-slate-300">
-                  {["Diagnóstico sin costo adicional", "Repuestos originales instalados en el acto", "Atención sin cita previa de lunes a sábado"].map(item => (
+                  {["Cotización sin compromiso en minutos", "Repuestos para todas las marcas y modelos", "Envío a cualquier ciudad de Colombia"].map(item => (
                     <li key={item} className="flex items-center gap-2">
                       <CheckCircleIcon className="w-4 h-4 text-[#5B8FD9] flex-shrink-0" />
                       {item}
@@ -370,31 +372,31 @@ export default function Home() {
                   ))}
                 </ul>
                 <div className="mt-7 flex flex-col sm:flex-row gap-3">
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-[#0A2A66] font-bold text-sm shadow-lg transition-transform hover:scale-[1.02]"
-                  >
-                    <CalendarDaysIcon className="w-4 h-4" />
-                    Agendar servicio
-                  </Link>
                   <a
-                    href="https://wa.me/573015271104?text=Hola,%20quiero%20agendar%20un%20servicio%20de%20taller"
+                    href="https://wa.me/573015271104?text=Hola,%20busco%20un%20repuesto%20para%20mi%20moto"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-white/20 text-white font-semibold text-sm hover:bg-white/10 transition-all"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-[#0A2A66] font-bold text-sm shadow-lg transition-transform hover:scale-[1.02]"
                   >
                     <ChatBubbleLeftRightIcon className="w-4 h-4" />
-                    Consultar por WhatsApp
+                    Cotizar por WhatsApp
                   </a>
+                  <Link
+                    href="/products"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-white/20 text-white font-semibold text-sm hover:bg-white/10 transition-all"
+                  >
+                    <ShoppingCartIcon className="w-4 h-4" />
+                    Ver catálogo completo
+                  </Link>
                 </div>
               </div>
 
-              {/* Panel de stats de autoridad */}
+              {/* Panel de cifras de ventas */}
               <div className="p-8 sm:p-10 flex flex-col justify-center gap-6 border-t lg:border-t-0 lg:border-l border-white/10">
                 {[
-                  { value: "15+", label: "años de experiencia", icon: <StarIcon className="w-5 h-5" /> },
-                  { value: "2.000+", label: "motos atendidas", icon: <WrenchScrewdriverIcon className="w-5 h-5" /> },
-                  { value: "100%", label: "garantía en repuestos instalados", icon: <ShieldCheckIcon className="w-5 h-5" /> },
+                  { value: "15+", label: "años vendiendo repuestos", icon: <StarIcon className="w-5 h-5" /> },
+                  { value: "5.000+", label: "referencias disponibles", icon: <CubeTransparentIcon className="w-5 h-5" /> },
+                  { value: "100%", label: "garantía en cada pieza vendida", icon: <ShieldCheckIcon className="w-5 h-5" /> },
                 ].map(({ value, label, icon }) => (
                   <motion.div
                     key={label}
@@ -423,18 +425,30 @@ export default function Home() {
           <div className="rounded-[28px] overflow-hidden border border-slate-200 dark:border-slate-800 bg-gradient-to-r from-[#07122E] via-[#0A2A66] to-[#153B82] text-white p-6 sm:p-8 shadow-[0_20px_70px_-30px_rgba(10,42,102,0.55)]">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               <div className="max-w-2xl">
-                <p className="text-xs font-semibold tracking-[0.18em] text-[#C7D2E0] uppercase">Tu moto en buenas manos</p>
-                <h4 className="text-2xl sm:text-3xl font-bold mt-2">Visita nuestro taller o compra tus repuestos en línea</h4>
+                <p className="text-xs font-semibold tracking-[0.18em] text-[#C7D2E0] uppercase">Catálogo completo en línea</p>
+                <h4 className="text-2xl sm:text-3xl font-bold mt-2">Todo lo que tu moto necesita, disponible ahora</h4>
                 <p className="mt-3 text-sm sm:text-base text-slate-200">
-                  15+ años de experiencia respaldan nuestro trabajo. Calle 21 #14-29, La Ceja, Antioquia.
+                  Stock permanente · Precios directos · Envío a todo Colombia. Calle 21 #14-29, La Ceja, Antioquia.
                 </p>
               </div>
-              <Link
-                href="/products"
-                className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 rounded-full bg-white text-[#0A2A66] font-semibold shadow-lg transition-transform hover:scale-[1.02]"
-              >
-                Ver todos los productos
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <Link
+                  href="/products"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-white text-[#0A2A66] font-semibold shadow-lg transition-transform hover:scale-[1.02]"
+                >
+                  <ShoppingCartIcon className="w-5 h-5" />
+                  Ver todos los productos
+                </Link>
+                <a
+                  href="https://wa.me/573015271104?text=Hola,%20quiero%20hacer%20un%20pedido"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full border border-white/30 text-white font-semibold hover:bg-white/10 transition-all"
+                >
+                  <ChatBubbleLeftRightIcon className="w-5 h-5" />
+                  Hacer pedido por WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         </section>
