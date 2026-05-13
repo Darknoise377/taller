@@ -12,6 +12,12 @@ import {
   ShieldCheckIcon,
   ShoppingCartIcon,
   WrenchScrewdriverIcon,
+  ChatBubbleLeftRightIcon,
+  LockClosedIcon,
+  TruckIcon,
+  StarIcon,
+  FireIcon,
+  CalendarDaysIcon,
 } from "@heroicons/react/24/outline";
 import type { CategoryItem } from "@/types/product";
 import { PRODUCT_CATEGORIES } from "@/constants/productCategories";
@@ -208,11 +214,11 @@ export default function Home() {
                 </div>
 
                 <h1 className="mt-6 text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight text-slate-950 dark:text-white">
-                  Repuestos y servicio técnico para tu moto
+                  Rueda seguro. Repuestos originales y servicio técnico <span className="text-[#2E5FA7]">sin demoras.</span>
                 </h1>
 
                 <p className="mt-3 text-sm sm:text-base text-slate-600 dark:text-slate-300">
-                  Más de 15 años de experiencia en mantenimiento, reparación y venta de repuestos para todas las marcas. Atención personalizada y piezas de calidad garantizada.
+                  Más de 15 años de experiencia. Mecánicos certificados, piezas garantizadas y despachos a todo el país desde La Ceja, Antioquia.
                 </p>
 
                 <div className="mt-4">
@@ -226,27 +232,19 @@ export default function Home() {
                 <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
                   <Link
                     href="/products"
-                    className="inline-flex items-center justify-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold shadow-lg focus:outline-none transition-transform hover:scale-[1.02]"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-full bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-bold text-base shadow-lg focus:outline-none transition-transform hover:scale-[1.03] active:scale-100"
                   >
-                    Ver repuestos
-                    <ArrowRightIcon className="w-4 h-4" />
+                    <ShoppingCartIcon className="w-5 h-5" />
+                    Comprar repuestos
                   </Link>
 
-                  <div className="flex items-center gap-2">
-                    <Link
-                      href="/about"
-                      className="px-5 py-2.5 rounded-full border border-slate-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-300 hover:shadow-md transition-shadow"
-                    >
-                      Conocer el taller
-                    </Link>
-
-                    <Link
-                      href="/cuenta/registro"
-                      className="px-4 py-2 rounded-full text-sm text-[#0A2A66] dark:text-blue-300 hover:underline"
-                    >
-                      Crear cuenta
-                    </Link>
-                  </div>
+                  <Link
+                    href="/contact"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full border-2 border-[#0A2A66] dark:border-[#2E5FA7] text-[#0A2A66] dark:text-[#C7D2E0] font-semibold text-base hover:bg-[#0A2A66]/5 dark:hover:bg-white/5 transition-all"
+                  >
+                    <CalendarDaysIcon className="w-5 h-5" />
+                    Agendar taller
+                  </Link>
                 </div>
 
                 <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -272,6 +270,26 @@ export default function Home() {
           </motion.div>
         </section>
 
+        {/* BARRA DE CONFIANZA */}
+        <section className="mt-8 sm:mt-10">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/40 px-4 py-4 shadow-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+              {[
+                { icon: <ChatBubbleLeftRightIcon className="w-5 h-5" />, label: "Soporte por WhatsApp", sub: "Respuesta rápida" },
+                { icon: <LockClosedIcon className="w-5 h-5" />, label: "Pagos 100% seguros", sub: "Wompi · Contraentrega" },
+                { icon: <TruckIcon className="w-5 h-5" />, label: "Envíos a todo el país", sub: "Colombia" },
+                { icon: <StarIcon className="w-5 h-5" />, label: "15+ años de experiencia", sub: "Mecánicos certificados" },
+              ].map(({ icon, label, sub }) => (
+                <div key={label} className="flex flex-col items-center gap-1">
+                  <div className="text-[#0A2A66] dark:text-[#C7D2E0]">{icon}</div>
+                  <span className="text-xs font-semibold text-slate-800 dark:text-slate-100">{label}</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">{sub}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* CATEGORÍAS */}
         <section id="categorias" className="mt-12 sm:mt-14">
           <div className="mb-6">
@@ -287,12 +305,13 @@ export default function Home() {
           ) : categories.length === 0 ? (
             <p className="text-slate-500">No hay categorías disponibles.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {categories.map((item) => (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {categories.map((item, i) => (
                 <CategoryCard
                   key={item.name}
                   item={item}
                   config={item.slug ? categoryConfig[item.slug as keyof typeof categoryConfig] : undefined}
+                  highlight={i < 3}
                 />
               ))}
             </div>
@@ -323,6 +342,79 @@ export default function Home() {
               title="Envío a todo el país"
               description="Despachamos tus repuestos con envío seguro a cualquier ciudad de Colombia."
             />
+          </div>
+        </section>
+
+        {/* TALLER — RUPTURA DE PATRÓN */}
+        <section className="mt-14 sm:mt-16">
+          <div className="rounded-[28px] overflow-hidden border border-slate-800 bg-gradient-to-br from-[#05101F] via-[#07122E] to-[#0A1F4D] text-white shadow-[0_30px_80px_-30px_rgba(10,42,102,0.6)]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
+              {/* Texto */}
+              <div className="p-8 sm:p-10 flex flex-col justify-center">
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold tracking-widest text-[#C7D2E0] uppercase mb-4 w-fit">
+                  Taller Especializado
+                </div>
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold leading-tight">
+                  No dejes tu moto <br className="hidden sm:block" />
+                  <span className="text-[#5B8FD9]">en manos de cualquiera.</span>
+                </h2>
+                <p className="mt-4 text-slate-300 text-sm sm:text-base max-w-md">
+                  Mantenimiento preventivo, correctivo y diagnóstico profesional. Cada pieza instalada con garantía. Tu moto sale rodando, no rodando a empujones.
+                </p>
+                <ul className="mt-5 space-y-2 text-sm text-slate-300">
+                  {["Diagnóstico sin costo adicional", "Repuestos originales instalados en el acto", "Atención sin cita previa de lunes a sábado"].map(item => (
+                    <li key={item} className="flex items-center gap-2">
+                      <CheckCircleIcon className="w-4 h-4 text-[#5B8FD9] flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-7 flex flex-col sm:flex-row gap-3">
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white text-[#0A2A66] font-bold text-sm shadow-lg transition-transform hover:scale-[1.02]"
+                  >
+                    <CalendarDaysIcon className="w-4 h-4" />
+                    Agendar servicio
+                  </Link>
+                  <a
+                    href="https://wa.me/573015271104?text=Hola,%20quiero%20agendar%20un%20servicio%20de%20taller"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full border border-white/20 text-white font-semibold text-sm hover:bg-white/10 transition-all"
+                  >
+                    <ChatBubbleLeftRightIcon className="w-4 h-4" />
+                    Consultar por WhatsApp
+                  </a>
+                </div>
+              </div>
+
+              {/* Panel de stats de autoridad */}
+              <div className="p-8 sm:p-10 flex flex-col justify-center gap-6 border-t lg:border-t-0 lg:border-l border-white/10">
+                {[
+                  { value: "15+", label: "años de experiencia", icon: <StarIcon className="w-5 h-5" /> },
+                  { value: "2.000+", label: "motos atendidas", icon: <WrenchScrewdriverIcon className="w-5 h-5" /> },
+                  { value: "100%", label: "garantía en repuestos instalados", icon: <ShieldCheckIcon className="w-5 h-5" /> },
+                ].map(({ value, label, icon }) => (
+                  <motion.div
+                    key={label}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5 }}
+                    className="flex items-center gap-4"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-[#5B8FD9] flex-shrink-0">
+                      {icon}
+                    </div>
+                    <div>
+                      <div className="text-3xl font-extrabold text-white">{value}</div>
+                      <div className="text-sm text-slate-400">{label}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -517,27 +609,38 @@ function HeroSlider({ products, isLoading }: HeroSliderProps) {
 function CategoryCard({
   item,
   config,
+  highlight = false,
 }: {
   item: CategoryItem;
   config?: { icon: React.ReactNode; colorFrom: string; colorTo: string };
+  highlight?: boolean;
 }) {
+  const URGENCY_LABELS = ["Alta demanda 🔥", "Últimas unidades", "Muy buscado"];
+  const urgencyLabel = highlight ? URGENCY_LABELS[Math.abs(item.name.charCodeAt(0)) % URGENCY_LABELS.length] : null;
+
   return (
     <Link
       href={`/products?category=${encodeURIComponent(item.slug)}`}
       className="block group rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/40 p-3 shadow-sm hover:-translate-y-1 hover:shadow-xl transition-all duration-300"
     >
-      <div className="relative w-full h-56 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-md">
+      <div className="relative w-full h-48 sm:h-56 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-md">
         <div className="absolute inset-0 bg-gradient-to-t from-[#07122E]/55 via-[#07122E]/10 to-transparent z-10" />
         <Image
           src={item.image || "/placeholder.png"}
           alt={item.name}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute top-3 left-3 z-20 rounded-full bg-white/90 dark:bg-slate-900/80 px-3 py-1 text-[11px] font-semibold text-[#0A2A66]">
           {item.count ?? "0"} productos
         </div>
+        {urgencyLabel && (
+          <div className="absolute top-3 right-3 z-20 flex items-center gap-1 rounded-full bg-orange-500 px-2.5 py-1 text-[10px] font-bold text-white shadow-md">
+            <FireIcon className="w-3 h-3" />
+            {urgencyLabel}
+          </div>
+        )}
       </div>
 
       <div className="mt-3 flex items-center justify-between">
@@ -552,11 +655,11 @@ function CategoryCard({
             {config?.icon ?? <GlobeAltIcon className="w-6 h-6" />}
           </div>
           <div>
-            <div className="font-semibold text-slate-800 dark:text-slate-100 capitalize">
+            <div className="font-semibold text-slate-800 dark:text-slate-100 capitalize text-sm sm:text-base">
               {item.name}
             </div>
             <div className="text-xs text-slate-500 dark:text-slate-400">
-              Explorar categoría
+              Explorar categoría →
             </div>
           </div>
         </div>
