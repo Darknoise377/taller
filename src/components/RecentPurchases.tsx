@@ -90,7 +90,7 @@ export default function RecentPurchases({ products = [], maxItems = 4 }: Props) 
   if (!items || items.length === 0) return null;
 
   return (
-    <div role="region" aria-label="Compras en tiempo real" aria-live="polite" className="mt-6 rounded-xl p-3 border border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/60 shadow-sm">
+    <div role="region" aria-label="Compras en tiempo real" aria-live="polite" className="mt-6 rounded-xl p-3 border border-slate-200 dark:border-white/10 bg-white dark:bg-white/8 shadow-sm">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold">Compras en tiempo real</h4>
         <span className="text-xs text-slate-500">En línea</span>
@@ -110,7 +110,7 @@ export default function RecentPurchases({ products = [], maxItems = 4 }: Props) 
               </div>
               <div className="flex-1">
                 <div className="text-sm font-semibold leading-tight">
-                  {it.name} compró <span className="text-[#0A2A66]">{it.product}</span>
+                  {it.name} compró <span className="text-[#0A2A66] dark:text-[#5B9BD5] font-semibold">{it.product}</span>
                 </div>
                 <div className="text-xs text-slate-500">{timeAgoText(it.minutes)}</div>
               </div>

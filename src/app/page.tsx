@@ -243,7 +243,9 @@ export default function Home() {
               <div className="rounded-2xl overflow-hidden shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)] border border-white/10">
                 <HeroSlider products={sliderProducts} isLoading={isLoading} />
               </div>
-              <RecentPurchases products={sliderProducts} />
+              <div className="mt-3">
+                <RecentPurchases products={sliderProducts} />
+              </div>
             </motion.div>
           </div>
         </div>
@@ -588,12 +590,12 @@ function HeroSlider({ products, isLoading }: HeroSliderProps) {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="bg-gradient-to-r from-[#0A2A66]/20 to-[#2E5FA7]/20 p-3 sm:p-4 rounded-xl backdrop-blur-md border border-white/10 shadow-lg"
+                className="bg-[#07122E]/70 backdrop-blur-md border border-white/10 p-3 sm:p-4 rounded-xl shadow-lg"
               >
-                <h3 className="text-xl sm:text-2xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7]">
+                <h3 className="text-base sm:text-xl md:text-3xl font-bold tracking-tight text-white leading-tight">
                   {slides[index].title}
                 </h3>
-                <p className="text-slate-600 dark:text-slate-300 mt-2 leading-relaxed text-xs sm:text-sm">
+                <p className="text-white/55 mt-1.5 leading-relaxed text-xs sm:text-sm line-clamp-2">
                   {slides[index].subtitle}
                 </p>
                 <div className="mt-4">
