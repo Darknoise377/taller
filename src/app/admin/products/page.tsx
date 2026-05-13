@@ -21,7 +21,10 @@ import {
   Typography,
   Image,
   Tag,
+  Divider,
+  Tooltip,
 } from 'antd';
+import { CalculatorOutlined } from '@ant-design/icons';
 import {
   PlusOutlined,
   EditOutlined,
@@ -34,6 +37,8 @@ import type { ColumnsType } from 'antd/es/table';
 import { productService, uploadImage } from '@/services/productService';
 import { PRODUCT_CATEGORY_OPTIONS, getProductCategoryLabel } from '@/constants/productCategories';
 import { formatCurrency } from '@/utils/formatCurrency';
+import { DEFAULT_SHIPPING_CONFIG } from '@/config/shippingRates';
+import type { ShippingConfig } from '@/config/shippingRates';
 
 // --- Constantes y Opciones ---
 const CATEGORY_OPTIONS = PRODUCT_CATEGORY_OPTIONS;
@@ -50,6 +55,33 @@ export default function AdminProductsPage() {
   const [isExporting, setIsExporting] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [form] = Form.useForm();
+
+  // --- Calculadora de precio ---
+  const [shippingConfig, setShippingConfig] = useState<ShippingConfig>(DEFAULT_SHIPPING_CONFIG);
+  const [calcOpen, setCalcOpen] = useState(false);
+  const [calcCost, setCalcCost] = useState<number>(0);
+  const [calcMargin, setCalcMargin] = useState<number>(35);
+  const [calcContraentregaPct, setCalcContraentregaPct] = useState<number>(40);
+
+  useEffect(() => {
+    fetch('/api/store-settings')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.shippingRules) setShippingConfig(data.shippingRules as ShippingConfig); })
+      .catch(() => {});
+  }, []);
+
+  const avgShippingRate = useMemo(() => {
+    if (shippingConfig.freeShippingAll) return 0;
+    const rates = shippingConfig.regions.map(r => r.baseRate);
+    return Math.round(rates.reduce((a, b) => a + b, 0) / rates.length);
+  }, [shippingConfig]);
+
+  const suggestedPrice = useMemo(() => {
+    if (calcCost <= 0 || calcMargin >= 100) return 0;
+    const contraentregaAbsorbed = (calcContraentregaPct / 100) * shippingConfig.contraentregaSurcharge;
+    const totalCost = calcCost + avgShippingRate + contraentregaAbsorbed;
+    return Math.ceil(totalCost / (1 - calcMargin / 100) / 100) * 100;
+  }, [calcCost, calcMargin, calcContraentregaPct, avgShippingRate, shippingConfig.contraentregaSurcharge]);
 
   const getErrorMessage = (err: unknown): string => {
     if (err instanceof Error) return err.message;
@@ -468,6 +500,113 @@ return (
             </Form.Item>
           </Col>
         </Row>
+
+        {/* --- Calculadora de precio mínimo --- */}
+        <div style={{ marginBottom: 16 }}>
+          <Button
+            type="link"
+            icon={<CalculatorOutlined />}
+            style={{ padding: 0, fontSize: 13 }}
+            onClick={() => setCalcOpen(o => !o)}
+          >
+            {calcOpen ? 'Ocultar calculadora de precio' : 'Calcular precio mínimo sugerido'}
+          </Button>
+
+          {calcOpen && (
+            <div style={{ marginTop: 12, padding: '12px 16px', background: '#f0f5ff', borderRadius: 8, border: '1px solid #adc6ff' }}>
+              <Typography.Text strong style={{ fontSize: 13 }}>Calculadora de precio</Typography.Text>
+              <Typography.Paragraph type="secondary" style={{ fontSize: 12, margin: '4px 0 12px' }}>
+                Calcula el precio mínimo para cubrir costos, envío gratis y comisión contraentrega.
+              </Typography.Paragraph>
+
+              <Row gutter={12}>
+                <Col xs={24} sm={8}>
+                  <div style={{ marginBottom: 8 }}>
+                    <Tooltip title="Cuánto te costó el producto (sin envío)">
+                      <Typography.Text style={{ fontSize: 12 }}>Costo del producto (COP)</Typography.Text>
+                    </Tooltip>
+                    <InputNumber
+                      min={0}
+                      step={1000}
+                      style={{ width: '100%', marginTop: 4 }}
+                      value={calcCost}
+                      onChange={v => setCalcCost(v ?? 0)}
+                      formatter={v => v ? `$ ${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''}
+                      parser={v => Number(v?.replace(/\$\s?|(,*)/g, '') || 0)}
+                    />
+                  </div>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <div style={{ marginBottom: 8 }}>
+                    <Tooltip title="Porcentaje de ganancia deseado sobre el precio de venta">
+                      <Typography.Text style={{ fontSize: 12 }}>Margen deseado (%)</Typography.Text>
+                    </Tooltip>
+                    <InputNumber
+                      min={1}
+                      max={99}
+                      style={{ width: '100%', marginTop: 4 }}
+                      value={calcMargin}
+                      onChange={v => setCalcMargin(v ?? 35)}
+                      formatter={v => `${v}%`}
+                      parser={v => Number(v?.replace('%', '') || 35)}
+                    />
+                  </div>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <div style={{ marginBottom: 8 }}>
+                    <Tooltip title="Qué porcentaje de tus pedidos se pagan contraentrega">
+                      <Typography.Text style={{ fontSize: 12 }}>% pedidos contraentrega</Typography.Text>
+                    </Tooltip>
+                    <InputNumber
+                      min={0}
+                      max={100}
+                      style={{ width: '100%', marginTop: 4 }}
+                      value={calcContraentregaPct}
+                      onChange={v => setCalcContraentregaPct(v ?? 40)}
+                      formatter={v => `${v}%`}
+                      parser={v => Number(v?.replace('%', '') || 40)}
+                    />
+                  </div>
+                </Col>
+              </Row>
+
+              <Divider style={{ margin: '10px 0' }} />
+
+              <Row gutter={8} align="middle">
+                <Col flex="auto">
+                  <div style={{ fontSize: 12, color: '#8c8c8c', lineHeight: 1.8 }}>
+                    <div>Envío promedio absorbido: <strong>{formatCurrency(avgShippingRate, 'COP')}</strong></div>
+                    <div>Recargo contraentrega ponderado: <strong>{formatCurrency(Math.round((calcContraentregaPct / 100) * shippingConfig.contraentregaSurcharge), 'COP')}</strong></div>
+                    {suggestedPrice > 0 && suggestedPrice < shippingConfig.freeShippingThreshold && (
+                      <div style={{ color: '#fa8c16' }}>⚠ Queda bajo el umbral de envío gratis ({formatCurrency(shippingConfig.freeShippingThreshold, 'COP')})</div>
+                    )}
+                  </div>
+                </Col>
+                <Col>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 11, color: '#8c8c8c' }}>Precio mínimo sugerido</div>
+                    <div style={{ fontSize: 22, fontWeight: 700, color: '#0A2A66' }}>
+                      {suggestedPrice > 0 ? formatCurrency(suggestedPrice, 'COP') : '—'}
+                    </div>
+                    {suggestedPrice > 0 && (
+                      <Button
+                        size="small"
+                        type="primary"
+                        style={{ marginTop: 4 }}
+                        onClick={() => {
+                          form.setFieldsValue({ price: suggestedPrice, currency: 'COP' });
+                          setCalcOpen(false);
+                        }}
+                      >
+                        Usar este precio
+                      </Button>
+                    )}
+                  </div>
+                </Col>
+              </Row>
+            </div>
+          )}
+        </div>
 
         {/* --- Categoría y Stock --- */}
         <Row gutter={16}>
