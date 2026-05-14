@@ -498,6 +498,21 @@ const CheckoutPage: React.FC = () => {
   }
 
   // --- Renderizado del formulario principal (V1 + V2) ---
+
+  // Progress step: 1 = datos, 2 = pago, 3 = confirmar
+  const step1Done = Boolean(
+    shippingInfo.fullName && shippingInfo.email && shippingInfo.phone &&
+    shippingInfo.address && shippingInfo.city && shippingInfo.state
+  );
+  const step2Done = step1Done && Boolean(paymentMethod);
+  const currentStep = step2Done ? 3 : step1Done ? 2 : 1;
+
+  const checkoutSteps = [
+    { label: "Datos de envío", step: 1 },
+    { label: "Método de pago", step: 2 },
+    { label: "Confirmar", step: 3 },
+  ];
+
   return (
     <>
       <Head>
@@ -507,12 +522,60 @@ const CheckoutPage: React.FC = () => {
       <main className="bg-gray-50 dark:bg-[#070617] min-h-screen">
         <div className="container mx-auto px-4 py-10 md:py-16">
           <motion.h1
-            className="text-3xl md:text-4xl font-bold text-center mb-10 text-gray-800 dark:text-slate-100"
+            className="text-3xl md:text-4xl font-bold text-center mb-6 text-gray-800 dark:text-slate-100"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             Finalizar Compra
           </motion.h1>
+
+          {/* Progress steps */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="flex items-center justify-center gap-0 mb-10 max-w-md mx-auto"
+          >
+            {checkoutSteps.map(({ label, step }, idx) => (
+              <div key={step} className="flex items-center flex-1">
+                <div className="flex flex-col items-center flex-1">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all duration-300 ${
+                      step < currentStep
+                        ? "bg-[#0A2A66] dark:bg-[#2E5FA7] border-[#0A2A66] dark:border-[#2E5FA7] text-white"
+                        : step === currentStep
+                        ? "bg-white dark:bg-slate-900 border-[#0A2A66] dark:border-[#2E5FA7] text-[#0A2A66] dark:text-[#5B9BD5] ring-4 ring-[#0A2A66]/15 dark:ring-[#2E5FA7]/20"
+                        : "bg-white dark:bg-slate-800 border-gray-300 dark:border-slate-600 text-gray-400 dark:text-slate-500"
+                    }`}
+                  >
+                    {step < currentStep ? (
+                      <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                    ) : (
+                      step
+                    )}
+                  </div>
+                  <span
+                    className={`mt-1.5 text-[10px] font-semibold text-center leading-tight transition-colors duration-300 ${
+                      step <= currentStep
+                        ? "text-[#0A2A66] dark:text-[#5B9BD5]"
+                        : "text-gray-400 dark:text-slate-500"
+                    }`}
+                  >
+                    {label}
+                  </span>
+                </div>
+                {idx < checkoutSteps.length - 1 && (
+                  <div
+                    className={`h-0.5 flex-1 mx-1 mb-5 transition-all duration-500 rounded-full ${
+                      step < currentStep
+                        ? "bg-[#0A2A66] dark:bg-[#2E5FA7]"
+                        : "bg-gray-200 dark:bg-slate-700"
+                    }`}
+                  />
+                )}
+              </div>
+            ))}
+          </motion.div>
 
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* Formulario (de V1, sin cambios) */}

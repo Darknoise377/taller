@@ -142,11 +142,13 @@ const SUGGESTIONS = [
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
+  const [showLabel, setShowLabel] = useState(false);
   const [input, setInput] = useState("");
   // Lazy-load initial messages from localStorage (only on first render)
   const [initialMessages] = useState<UIMessage[]>(() => loadStoredMessages());
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const hasShownLabelRef = useRef(false);
   const pathname = usePathname();
 
   const { messages, sendMessage, stop, status, setMessages } = useChat({
@@ -184,9 +186,23 @@ export default function ChatWidget() {
   useEffect(() => {
     if (open) {
       setHasNewMessage(false);
+      setShowLabel(false);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [open]);
+
+  // Show tooltip bubble after 3s if chat has never been opened
+  useEffect(() => {
+    if (hasShownLabelRef.current || initialMessages.length > 0) return;
+    const t = setTimeout(() => {
+      if (!open) {
+        setShowLabel(true);
+        hasShownLabelRef.current = true;
+      }
+    }, 3000);
+    return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Hide on admin and checkout
   if (pathname.startsWith("/admin") || pathname.startsWith("/checkout")) return null;
@@ -196,41 +212,77 @@ export default function ChatWidget() {
   return (
     <>
       {/* ── Floating button ── */}
-      <div className="fixed bottom-20 md:bottom-6 left-4 z-40">
-        <button
-          onClick={() => setOpen((v) => !v)}
-          aria-label={open ? "Cerrar asistente IA" : "Abrir asistente IA"}
-          className="relative w-14 h-14 rounded-full bg-[#0A2A66] shadow-lg shadow-[#0A2A66]/30 flex items-center justify-center hover:scale-110 hover:shadow-xl hover:shadow-[#0A2A66]/40 transition-all duration-300 text-white"
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            {open ? (
-              <motion.span
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
+      <div className="fixed bottom-20 md:bottom-6 left-4 z-40 flex flex-col items-start gap-2">
+        {/* Tooltip bubble */}
+        <AnimatePresence>
+          {showLabel && !open && (
+            <motion.div
+              initial={{ opacity: 0, x: -10, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -10, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 350, damping: 28 }}
+              className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-3.5 py-2.5 shadow-xl text-sm font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap max-w-[220px]"
+            >
+              <span>🔧 ¿Buscas un repuesto?</span>
+              <button
+                type="button"
+                onClick={() => setShowLabel(false)}
+                aria-label="Cerrar sugerencia"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 ml-1 transition-colors leading-none flex-shrink-0"
               >
-                <CloseIcon />
-              </motion.span>
-            ) : (
-              <motion.span
-                key="bot"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <BotIcon className="w-7 h-7" />
-              </motion.span>
-            )}
-          </AnimatePresence>
-
-          {/* Notification dot */}
-          {hasNewMessage && !open && (
-            <span className="absolute top-0.5 right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
+                ✕
+              </button>
+            </motion.div>
           )}
-        </button>
+        </AnimatePresence>
+
+        {/* Button with pulsing ring when no history */}
+        <div className="relative">
+          {messages.length === 0 && !open && (
+            <span className="absolute inset-0 rounded-full animate-ping bg-[#0A2A66]/25 pointer-events-none" />
+          )}
+          <button
+            onClick={() => { setOpen((v) => !v); setShowLabel(false); }}
+            aria-label={open ? "Cerrar asistente IA" : "Abrir asistente IA"}
+            className="relative w-14 h-14 rounded-full bg-gradient-to-br from-[#0A2A66] to-[#2E5FA7] shadow-lg shadow-[#0A2A66]/30 flex items-center justify-center hover:scale-110 hover:shadow-xl hover:shadow-[#0A2A66]/40 transition-all duration-300 text-white"
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {open ? (
+                <motion.span
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <CloseIcon />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="bot"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <BotIcon className="w-7 h-7" />
+                </motion.span>
+              )}
+            </AnimatePresence>
+
+            {/* Notification dot */}
+            {hasNewMessage && !open && (
+              <span className="absolute top-0.5 right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-white animate-bounce" />
+            )}
+
+            {/* IA badge */}
+            {!open && (
+              <span className="absolute -bottom-1 -right-1 text-[9px] font-black bg-white text-[#0A2A66] rounded-full w-5 h-5 flex items-center justify-center shadow border border-[#0A2A66]/20 leading-none">
+                IA
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* ── Chat panel ── */}

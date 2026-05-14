@@ -484,7 +484,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
               </p>
             </header>
 
-            <div className="mt-6 flex items-center gap-3">
+            <div className="mt-6 space-y-3">
               <div className="flex items-center gap-2" id="stock-status">
                 {product.stock > 0 ? (
                   <span
@@ -507,6 +507,16 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                   </span>
                 )}
               </div>
+
+              {/* Urgency callout — only when very low stock */}
+              {product.stock > 0 && product.stock <= 3 && (
+                <div className="flex items-center gap-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl px-3.5 py-2.5">
+                  <span className="text-lg leading-none" aria-hidden="true">🔥</span>
+                  <p className="text-sm font-semibold text-red-700 dark:text-red-400 leading-snug">
+                    ¡Alta demanda! Solo quedan <strong>{product.stock}</strong> {product.stock === 1 ? "unidad" : "unidades"} — compra antes que se agoten.
+                  </p>
+                </div>
+              )}
             </div>
 
             {validationMessage && (
