@@ -1,5 +1,14 @@
-﻿import Link from "next/link";
+﻿import type { Metadata } from "next";
+import Link from "next/link";
 import { DocumentTextIcon, ScaleIcon } from "@heroicons/react/24/outline";
+
+export const metadata: Metadata = {
+  title: "Términos y Condiciones | Almacén y Taller Motoservicio A&R",
+  description:
+    "Conoce los términos y condiciones de uso de nuestra tienda de repuestos para motos. Reglas de compra, envíos y devoluciones.",
+  alternates: { canonical: "/terms" },
+  robots: { index: false, follow: true },
+};
 
 const LAST_UPDATED = "19 de enero de 2026";
 

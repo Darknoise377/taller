@@ -57,6 +57,8 @@ const organizationJsonLd = {
     },
   ],
   sameAs: ["https://www.facebook.com/AlmacenyTallerAYR/", "https://www.instagram.com/motoservicioayr/"],
+  priceRange: "$$",
+  hasMap: "https://www.google.com/maps/search/?api=1&query=Calle+27+%2314-29+La+Ceja+Antioquia+Colombia",
 };
 
 const websiteJsonLd = {

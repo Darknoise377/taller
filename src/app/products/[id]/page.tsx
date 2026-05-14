@@ -62,6 +62,22 @@ const getRelatedProducts = cache(async (category: string, excludeId: string) => 
   });
 });
 
+const getReviewStats = cache(async (productId: string) => {
+  try {
+    const stats = await prisma.review.aggregate({
+      where: { productId, approved: true },
+      _avg: { rating: true },
+      _count: { id: true },
+    });
+    return {
+      average: stats._avg.rating ? Math.round(stats._avg.rating * 10) / 10 : 0,
+      count: stats._count.id ?? 0,
+    };
+  } catch {
+    return { average: 0, count: 0 };
+  }
+});
+
 // ✅ Metadata dinámico para SEO
 export async function generateMetadata(
   { params }: ProductPageProps
@@ -209,6 +225,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const productUrl = `${baseUrl}/products/${product.id}`;
   const imageUrls = imagesToAbsoluteUrls(product.images, product.imageUrl, baseUrl);
 
+  const reviewStats = await getReviewStats(product.id);
+
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -245,6 +263,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
         ? [{ "@type": "PropertyValue", name: "Colores disponibles", value: product.colors.join(", ") }]
         : []),
     ],
+    ...(reviewStats.count > 0 && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: reviewStats.average,
+        reviewCount: reviewStats.count,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
   };
 
   const breadcrumbJsonLd = {

@@ -1,5 +1,18 @@
-﻿import { EnvelopeIcon, PhoneIcon, MapPinIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
-// ELIMINADO: import Link from 'next/link'; // Ya no es necesario si no se usa en el componente
+﻿import type { Metadata } from "next";
+import { EnvelopeIcon, PhoneIcon, MapPinIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+
+export const metadata: Metadata = {
+  title: "Contacto | Almacén y Taller Motoservicio A&R",
+  description:
+    "Contáctanos por WhatsApp al 301 527 1104, por correo o visítanos en Calle 27 #14-29, La Ceja, Antioquia. Atención de lunes a sábado.",
+  alternates: { canonical: "/contact" },
+  openGraph: {
+    title: "Contacto | Almacén y Taller Motoservicio A&R",
+    description: "Escríbenos por WhatsApp, correo o visítanos en La Ceja, Antioquia.",
+    url: "/contact",
+    type: "website",
+  },
+};
 
 /**
  * @function ContactPage

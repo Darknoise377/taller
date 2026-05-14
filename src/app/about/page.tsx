@@ -1,4 +1,5 @@
-﻿import Link from "next/link";
+﻿import type { Metadata } from "next";
+import Link from "next/link";
 import Image from "next/image";
 import {
   SparklesIcon,
@@ -7,6 +8,19 @@ import {
   FlagIcon,
   ArrowRightIcon,
 } from "@heroicons/react/24/outline";
+
+export const metadata: Metadata = {
+  title: "Sobre Nosotros | Almacén y Taller Motoservicio A&R",
+  description:
+    "Negocio familiar con más de 15 años de experiencia en motos. Servicio técnico especializado y venta de repuestos para todas las marcas en La Ceja, Antioquia.",
+  alternates: { canonical: "/about" },
+  openGraph: {
+    title: "Sobre Nosotros | Almacén y Taller Motoservicio A&R",
+    description: "Conoce nuestra historia, misión y compromiso con el servicio técnico de motos en La Ceja, Antioquia.",
+    url: "/about",
+    type: "website",
+  },
+};
 
 /**
  * @function AboutPage
