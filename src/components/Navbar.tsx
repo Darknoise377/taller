@@ -14,6 +14,7 @@ import {
   HomeIcon,
   CubeIcon,
   UserIcon,
+  PhoneIcon,
 } from '@heroicons/react/24/outline';
 
 const Navbar = () => {
@@ -84,10 +85,10 @@ const Navbar = () => {
               key={href}
               href={href}
               aria-current={pathname === href ? 'page' : undefined}
-              className={`hidden md:flex items-center gap-2 text-sm font-medium transition-colors ${
+              className={`hidden md:flex items-center gap-2 text-sm font-medium transition-colors pb-0.5 border-b-2 ${
                 pathname === href
-                  ? 'text-[#0A2A66]'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                  ? 'text-[#0A2A66] dark:text-white border-[#0A2A66] dark:border-white font-semibold'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-transparent hover:border-slate-300 dark:hover:border-slate-600'
               } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617] rounded`}
             >
               <Icon className="w-5 h-5" />
@@ -103,6 +104,18 @@ const Navbar = () => {
             <UserIcon className="w-5 h-5" />
             Cuenta
           </Link>
+
+          {/* WhatsApp rápido (desktop) */}
+          <a
+            href="https://wa.me/573015271104?text=Hola%2C%20quiero%20informaci%C3%B3n"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Contactar por WhatsApp"
+            className="hidden md:flex items-center gap-1.5 text-xs font-semibold text-white bg-[#25D366] hover:bg-[#1ebe5d] transition-colors px-3 py-1.5 rounded-full shadow-sm"
+          >
+            <PhoneIcon className="w-4 h-4" />
+            WhatsApp
+          </a>
 
           {/* Carrito */}
           <button

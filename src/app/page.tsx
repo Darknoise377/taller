@@ -18,10 +18,12 @@ import {
   FireIcon,
 } from "@heroicons/react/24/outline";
 import type { CategoryItem } from "@/types/product";
+import type { Product as ProductType } from "@/types/product";
 import { PRODUCT_CATEGORIES } from "@/constants/productCategories";
 import HomeSearch from '@/components/HomeSearch';
 import CountdownTimer from '@/components/CountdownTimer';
 import RecentPurchases from '@/components/RecentPurchases';
+import { ProductCard } from '@/components/ProductCard';
 import { makeProductPlaceholder } from '@/lib/placeholder';
 
 // TIPOS DE DATOS
@@ -322,6 +324,31 @@ export default function Home() {
               ))}
             </div>
           )}
+        </section>
+
+        {/* ════════════════════════════════════════
+            PRODUCTOS DESTACADOS
+            ════════════════════════════════════════ */}
+        <section id="destacados">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+            <div>
+              <p className="text-xs font-bold tracking-[0.18em] text-[#2E5FA7] uppercase">Novedades</p>
+              <h2 className="text-2xl sm:text-3xl font-extrabold mt-1 text-slate-900 dark:text-white">
+                Productos Destacados
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-xl">
+                Los últimos repuestos en llegar a nuestro catálogo.
+              </p>
+            </div>
+            <Link
+              href="/products"
+              className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-[#2E5FA7] hover:text-[#0A2A66] dark:hover:text-white transition-colors"
+            >
+              Ver todo el catálogo
+              <ArrowRightIcon className="w-4 h-4" />
+            </Link>
+          </div>
+          <FeaturedProductsRow />
         </section>
 
         {/* ════════════════════════════════════════
@@ -717,5 +744,49 @@ function FeatureCard({
         </p>
       </div>
     </motion.div>
+  );
+}
+
+function FeaturedProductsRow() {
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/products?limit=8&sort=newest")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data) {
+          const items: ProductType[] = (Array.isArray(data) ? data : (data.items ?? [])).map(
+            (it: ProductType & Record<string, unknown>) => ({
+              ...it,
+              createdAt: typeof it.createdAt === "string" ? it.createdAt : undefined,
+              updatedAt: typeof it.updatedAt === "string" ? it.updatedAt : undefined,
+            })
+          );
+          setProducts(items);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-80 rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (products.length === 0) return null;
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+      {products.map((p, idx) => (
+        <ProductCard key={p.id} product={p} idx={idx} />
+      ))}
+    </div>
   );
 }

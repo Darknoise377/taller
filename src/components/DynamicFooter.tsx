@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Facebook, Instagram } from "lucide-react";
+import { Facebook, Instagram, MessageCircle } from "lucide-react";
 import { isCheckoutPath } from "@/utils/routeUtils";
 
 export default function DynamicFooter() {
@@ -70,10 +70,11 @@ export default function DynamicFooter() {
           </div>
 
           {/* Redes sociales */}
-          <div className="flex gap-4 justify-center md:justify-end">
+          <div className="flex gap-3 justify-center md:justify-end">
             <Link
               href="https://www.facebook.com/AlmacenyTallerAYR/"
               target="_blank"
+              aria-label="Facebook"
               className="p-2 rounded-full bg-slate-200 dark:bg-gray-700 hover:bg-[#0A2A66] hover:text-white transition-colors"
             >
               <Facebook className="w-5 h-5" />
@@ -81,15 +82,51 @@ export default function DynamicFooter() {
             <Link
               href="https://www.instagram.com/motoservicioayr/"
               target="_blank"
+              aria-label="Instagram"
               className="p-2 rounded-full bg-slate-200 dark:bg-gray-700 hover:bg-[#2E5FA7] hover:text-white transition-colors"
             >
               <Instagram className="w-5 h-5" />
             </Link>
+            <a
+              href="https://wa.me/573015271104?text=Hola%2C%20quiero%20m%C3%A1s%20informaci%C3%B3n"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp"
+              className="p-2 rounded-full bg-slate-200 dark:bg-gray-700 hover:bg-[#25D366] hover:text-white transition-colors"
+            >
+              <MessageCircle className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+
+        {/* Métodos de pago */}
+        <div className="border-t border-slate-200 dark:border-gray-700 mt-8 pt-6">
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 text-center mb-4">
+            Medios de pago aceptados
+          </p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {[
+              { label: "Wompi", icon: "💳", desc: "Tarjetas · PSE · Nequi" },
+              { label: "Contraentrega", icon: "📦", desc: "Pago al recibir" },
+              { label: "Transferencia", icon: "🏦", desc: "Bancaria directa" },
+              { label: "Efectivo", icon: "💵", desc: "En tienda física" },
+            ].map(({ label, icon, desc }) => (
+              <div
+                key={label}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+              >
+                <span className="text-base leading-none">{icon}</span>
+                <div>
+                  <p className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-tight">{label}</p>
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-tight">{desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Línea divisoria */}
-        <div className="border-t border-slate-200 dark:border-gray-700 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500 dark:text-gray-500">
+        <div className="border-t border-slate-200 dark:border-gray-700 mt-6 pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500 dark:text-gray-500">
           <p>© {new Date().getFullYear()} Almacén y Taller Motoservicio A&amp;R. Todos los derechos reservados.</p>
           <p className="mt-2 md:mt-0 flex items-center gap-1.5">
             Diseño web por{" "}

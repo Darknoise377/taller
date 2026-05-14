@@ -362,6 +362,53 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
         )}
       </AnimatePresence>
 
+      {/* Chips de filtros activos */}
+      {areFiltersActive && (
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Filtros:</span>
+          {searchTerm && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
+              &ldquo;{searchTerm}&rdquo;
+              <button type="button" aria-label="Quitar búsqueda" onClick={() => updateURLParams({ q: "" })} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
+            </span>
+          )}
+          {selectedCategory !== "all" && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
+              {getProductCategoryLabel(selectedCategory)}
+              <button type="button" aria-label="Quitar categoría" onClick={() => updateURLParams({ category: "all" })} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
+            </span>
+          )}
+          {selectedSize !== "all" && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
+              Medida: {selectedSize}
+              <button type="button" aria-label="Quitar medida" onClick={() => updateURLParams({ size: "all" })} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
+            </span>
+          )}
+          {selectedColor !== "all" && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
+              Comp.: {selectedColor}
+              <button type="button" aria-label="Quitar compatibilidad" onClick={() => updateURLParams({ color: "all" })} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
+            </span>
+          )}
+          {sortBy !== "relevance" && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
+              {{ "price-asc": "Precio ↑", "price-desc": "Precio ↓", newest: "Recientes" }[sortBy] ?? sortBy}
+              <button type="button" aria-label="Quitar orden" onClick={() => updateURLParams({ sort: "relevance" })} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
+            </span>
+          )}
+          {(minPrice || maxPrice) && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
+              ${minPrice || "0"} – ${maxPrice || "∞"}
+              <button type="button" aria-label="Quitar rango de precio" onClick={() => handlePriceChange("", "")} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
+            </span>
+          )}
+          <button onClick={handleResetFilters} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-500/10 text-red-500 text-xs font-semibold hover:bg-red-500 hover:text-white transition-all duration-200">
+            <ArrowPathIcon className="w-3.5 h-3.5" />
+            Limpiar todo
+          </button>
+        </div>
+      )}
+
       <AnimatePresence mode="wait">
         {visibleProducts.length > 0 ? (
           <>

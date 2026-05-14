@@ -4,8 +4,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingCartIcon } from "@heroicons/react/24/outline";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import { ShoppingCartIcon, HeartIcon } from "@heroicons/react/24/outline";
+import { CheckCircleIcon, HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 
 import type { Product as ProductType, ProductSize } from "@/types/product";
 import { useCart } from "@/hooks/useCart";
@@ -23,6 +23,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
   const [validationError, setValidationError] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
   const [added, setAdded] = useState(false);
+  const [liked, setLiked] = useState(false);
 
   const imageSrc = useMemo(
     () => product.images?.[0] ?? product.imageUrl ?? makeProductPlaceholder(product.name, product.id),
@@ -112,6 +113,20 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
             </span>
           )}
         </div>
+
+        {/* Botón favoritos */}
+        <button
+          type="button"
+          aria-label={liked ? "Quitar de favoritos" : "Añadir a favoritos"}
+          onClick={(e) => { e.preventDefault(); setLiked(!liked); }}
+          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 shadow border border-slate-200/80 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-10"
+        >
+          {liked ? (
+            <HeartSolid className="w-4 h-4 text-red-500" />
+          ) : (
+            <HeartIcon className="w-4 h-4 text-slate-400 hover:text-red-400 transition-colors" />
+          )}
+        </button>
       </Link>
 
       {/* ── Contenido ───────────────────────────── */}

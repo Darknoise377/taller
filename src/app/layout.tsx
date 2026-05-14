@@ -8,6 +8,7 @@ import CartModal from '@/components/CartModal';
 import ConditionalNavbar from '@/components/ConditionalNavbar';
 import DynamicFooter from '@/components/DynamicFooter';
 import FloatingButtons from '@/components/FloatingButtons';
+import AnnouncementBar from '@/components/AnnouncementBar';
 import ChatWidget from '@/components/ChatWidget';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from "./theme-provider";
@@ -135,6 +136,8 @@ export default function RootLayout({
             >
               Saltar al contenido
             </a>
+            {/* 🔹 Barra de anuncios rotatoria */}
+            <AnnouncementBar />
             {/* 🔹 Navbar (oculto en /admin a través de ConditionalNavbar) */}
             <ConditionalNavbar />
             <script
