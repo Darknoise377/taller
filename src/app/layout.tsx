@@ -28,7 +28,7 @@ const organizationJsonLd = {
   description: "Taller especializado en motos y almacén de repuestos originales y genéricos. Servicio técnico, mantenimiento y venta de partes para todas las marcas.",
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Calle 21 #14-29",
+    streetAddress: "Calle 27 #14-29",
     addressLocality: "La Ceja",
     addressRegion: "Antioquia",
     addressCountry: "CO",
@@ -55,7 +55,7 @@ const organizationJsonLd = {
       closes: "18:00",
     },
   ],
-  sameAs: ["https://www.facebook.com/ROBINSON.BOTERO.M/", "https://www.instagram.com/motoservicioayr/"],
+  sameAs: ["https://www.facebook.com/AlmacenyTallerAYR/", "https://www.instagram.com/motoservicioayr/"],
 };
 
 const websiteJsonLd = {

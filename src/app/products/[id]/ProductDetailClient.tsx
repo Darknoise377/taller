@@ -692,7 +692,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                   <div className="w-full sm:w-auto sm:ml-2 flex flex-wrap items-center gap-2">
                     <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Síguenos:</span>
                     <a
-                      href="https://www.facebook.com/ROBINSON.BOTERO.M/"
+                      href="https://www.facebook.com/AlmacenyTallerAYR/"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"

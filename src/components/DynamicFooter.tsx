@@ -72,7 +72,7 @@ export default function DynamicFooter() {
           {/* Redes sociales */}
           <div className="flex gap-4 justify-center md:justify-end">
             <Link
-              href="https://www.facebook.com/ROBINSON.BOTERO.M/"
+              href="https://www.facebook.com/AlmacenyTallerAYR/"
               target="_blank"
               className="p-2 rounded-full bg-slate-200 dark:bg-gray-700 hover:bg-[#0A2A66] hover:text-white transition-colors"
             >

@@ -441,7 +441,7 @@ export default function Home() {
                 Todo lo que tu moto necesita,<br className="hidden sm:block" /> disponible ahora
               </h4>
               <p className="mt-2 text-sm text-white/55">
-                Stock permanente · Precios directos · Envíos a Colombia · Calle 21 #14-29, La Ceja
+                Stock permanente · Precios directos · Envíos a Colombia · Calle 27 #14-29, La Ceja
               </p>
             </div>
             <div className="flex flex-wrap gap-3 shrink-0">

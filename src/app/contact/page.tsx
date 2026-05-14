@@ -50,10 +50,10 @@ export default function ContactPage() {
           <MapPinIcon className="w-10 h-10 text-[#0A2A66] mb-3" />
           <h3 className="text-xl font-semibold mb-2">Ubicación</h3>
           <p className="text-slate-600 dark:text-slate-300">
-            Calle 21 #14-29, La Ceja, Antioquia
+            Calle 27 #14-29, La Ceja, Antioquia
           </p>
           <a
-            href="https://maps.google.com/?q=Calle+21+14-29+La+Ceja+Antioquia"
+            href="https://maps.google.com/?q=Calle+27+14-29+La+Ceja+Antioquia"
             target="_blank"
             rel="noopener noreferrer"
             className="mt-2 inline-block text-sm font-semibold text-[#0A2A66] hover:underline"

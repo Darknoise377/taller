@@ -52,7 +52,7 @@ const Footer: React.FC = () => {
             <h3 className="font-semibold text-slate-900 dark:text-white mb-4 tracking-wide">Síguenos</h3>
             <div className="flex justify-center md:justify-start gap-4 mb-6">
               <a
-                href="https://www.facebook.com/ROBINSON.BOTERO.M/"
+                href="https://www.facebook.com/AlmacenyTallerAYR/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
