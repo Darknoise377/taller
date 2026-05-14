@@ -250,7 +250,32 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
 
   return (
     <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-12">
-      {loading && <div className="text-center text-sm text-slate-600 mb-4">Cargando...</div>}
+      {/* Skeleton — initial load */}
+      {loading && products.length === 0 && (
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 animate-pulse">
+              <div className="aspect-square bg-slate-200 dark:bg-slate-700" />
+              <div className="p-4 space-y-2.5">
+                <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-2/3" />
+                <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-1/2" />
+                <div className="flex items-center justify-between mt-3">
+                  <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-full w-1/3" />
+                  <div className="h-8 w-8 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Spinner — re-fetch with existing products */}
+      {loading && products.length > 0 && (
+        <div className="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-4">
+          <span className="inline-block w-4 h-4 border-2 border-[#0A2A66] border-t-transparent rounded-full animate-spin" />
+          Actualizando resultados...
+        </div>
+      )}
       {selectedCategoryLabel && (
         <div className="mb-8 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Categoria activa</p>

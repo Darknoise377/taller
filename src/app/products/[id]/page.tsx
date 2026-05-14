@@ -266,6 +266,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
       {
         "@type": "ListItem",
         position: 3,
+        name: getProductCategoryLabel(product.category),
+        item: `${baseUrl}/products?category=${product.category}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
         name: product.name,
         item: productUrl,
       },

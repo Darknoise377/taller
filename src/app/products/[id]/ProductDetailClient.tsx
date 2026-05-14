@@ -315,6 +315,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
   const autoScrollIntervalRef = useRef<number | null>(null);
   const resumeTimeoutRef = useRef<number | null>(null);
   const isUserInteractingRef = useRef(false);
+  const [recentlyViewed, setRecentlyViewed] = useState<{ id: string; name: string; imageUrl: string; price: number; currency: string }[]>([]);
 
   const images = useMemo(() => 
     product.images && product.images.length > 0 ? product.images : [product.imageUrl || "/placeholder.png"],
@@ -344,6 +345,23 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
   useEffect(() => {
     setValidationMessage("");
   }, [selectedSize, selectedColor, quantity]);
+
+  // Visto recientemente — guardar al entrar a la página
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("ar-recently-viewed");
+      const existing: { id: string; name: string; imageUrl: string; price: number; currency: string }[] = raw ? JSON.parse(raw) : [];
+      const filtered = existing.filter((item) => item.id !== product.id);
+      const updated = [
+        { id: product.id, name: product.name, imageUrl: product.imageUrl || "/placeholder.png", price: Number(product.price), currency: product.currency || "COP" },
+        ...filtered,
+      ].slice(0, 6);
+      localStorage.setItem("ar-recently-viewed", JSON.stringify(updated));
+      setRecentlyViewed(filtered.slice(0, 4));
+    } catch {
+      // ignorar si localStorage no disponible
+    }
+  }, [product.id, product.name, product.imageUrl, product.price, product.currency]);
 
   useEffect(() => {
     if (relatedProducts.length <= 1) return;
@@ -426,6 +444,15 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                 className="hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617] rounded"
               >
                 Productos
+              </Link>
+            </li>
+            <li aria-hidden="true" className="text-slate-400">/</li>
+            <li>
+              <Link
+                href={`/products?category=${product.category}`}
+                className="capitalize hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617] rounded"
+              >
+                {getProductCategoryLabel(product.category)}
               </Link>
             </li>
             <li aria-hidden="true" className="text-slate-400">/</li>
@@ -833,6 +860,40 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                     </div>
                   </Link>
                 </article>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Vistos recientemente */}
+        {recentlyViewed.length > 0 && (
+          <section className="mt-16 sm:mt-20" aria-label="Vistos recientemente">
+            <h2 className="text-xl sm:text-2xl font-bold mb-5 text-slate-900 dark:text-slate-100">
+              Vistos recientemente
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {recentlyViewed.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/products/${item.id}`}
+                  className="group block rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  <div className="relative aspect-square bg-slate-100 dark:bg-slate-800">
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.name}
+                      fill
+                      className="object-contain p-2"
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                    />
+                  </div>
+                  <div className="p-3">
+                    <p className="text-sm font-medium line-clamp-2 text-slate-800 dark:text-slate-200">{item.name}</p>
+                    <p className="text-sm font-bold text-[#0A2A66] dark:text-[#2E5FA7] mt-1">
+                      {item.currency} {item.price.toLocaleString("es-CO")}
+                    </p>
+                  </div>
+                </Link>
               ))}
             </div>
           </section>
