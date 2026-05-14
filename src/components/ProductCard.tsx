@@ -9,7 +9,7 @@ import { CheckCircleIcon, HeartIcon as HeartSolid } from "@heroicons/react/24/so
 
 import type { Product as ProductType, ProductSize } from "@/types/product";
 import { useCart } from "@/hooks/useCart";
-import { makeProductPlaceholder } from "@/lib/placeholder";
+import { makeProductPlaceholder, BLUR_DATA_URL } from "@/lib/placeholder";
 
 interface ProductCardProps {
   product: ProductType;
@@ -90,6 +90,8 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
           fill
           className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
           unoptimized={isDataUri}
+          placeholder={isDataUri ? "empty" : "blur"}
+          blurDataURL={isDataUri ? undefined : BLUR_DATA_URL}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
         />
         {/* Overlay gradiente sutil */}

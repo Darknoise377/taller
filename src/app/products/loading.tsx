@@ -1,6 +1,6 @@
 export default function ProductsLoading() {
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* Filter bar skeleton */}
       <div className="hidden md:block mb-12 p-5 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800">
         <div className="flex flex-wrap items-center gap-4">
@@ -17,7 +17,7 @@ export default function ProductsLoading() {
       </div>
 
       {/* Product grid skeleton */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}

@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { getProductCategoryLabel } from '@/constants/productCategories';
 import { Facebook, Instagram } from 'lucide-react';
 import ProductReviews from "@/components/ProductReviews";
+import { BLUR_DATA_URL } from "@/lib/placeholder";
 
 // --- Prop Interfaces ---
 interface ProductDetailClientProps {
@@ -214,6 +215,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
               alt={`${productName} - vista ${currentIndex + 1}`}
               fill
               priority
+              placeholder="blur"
+              blurDataURL={BLUR_DATA_URL}
               className={cn(
                 "object-contain p-2 transition-transform duration-200",
                 isZooming && "scale-[1.7]"
@@ -805,6 +808,8 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                         alt={`Imagen de ${item.name}`}
                         fill
                         className="object-cover"
+                        placeholder="blur"
+                        blurDataURL={BLUR_DATA_URL}
                         sizes="72vw"
                       />
                     </div>
@@ -846,6 +851,8 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                         alt={`Imagen de ${item.name}`}
                         fill
                         className="object-cover"
+                        placeholder="blur"
+                        blurDataURL={BLUR_DATA_URL}
                         sizes="(max-width: 768px) 50vw, 25vw"
                       />
                     </div>
@@ -884,6 +891,8 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                       alt={item.name}
                       fill
                       className="object-contain p-2"
+                      placeholder="blur"
+                      blurDataURL={BLUR_DATA_URL}
                       sizes="(max-width: 640px) 50vw, 25vw"
                     />
                   </div>

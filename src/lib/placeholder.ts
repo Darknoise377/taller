@@ -1,3 +1,8 @@
+// 1×1 slate-200 PNG — used as next/image blurDataURL for remote product images.
+// Any tiny image works because next/image applies a CSS blur filter on top of it.
+export const BLUR_DATA_URL =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
 export function escapeXml(str: string) {
   return String(str).replace(/[&<>"']/g, function (c) {
     switch (c) {
