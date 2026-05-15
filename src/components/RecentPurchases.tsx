@@ -75,7 +75,7 @@ export default function RecentPurchases({ products = [], maxItems = 4 }: Props) 
         id: `ev-${Date.now()}`,
         name: random(NAMES),
         product: prod.name || "Producto",
-        image: (prod as any).images?.[0] ?? (prod as any).image ?? "/placeholder.png",
+        image: (prod as StubProduct).images?.[0] ?? (prod as StubProduct).image ?? "/placeholder.png",
         minutes: 0,
       };
       setItems((prev) => {

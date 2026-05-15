@@ -40,7 +40,7 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 export default function PedidosPage() {
-  const { user } = useCustomerAuth();
+  useCustomerAuth();
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>([]);

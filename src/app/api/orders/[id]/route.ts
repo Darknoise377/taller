@@ -200,8 +200,9 @@ export async function PATCH(
     ) {
       try {
         // Prefer explicit tracking values from the request body, fall back to stored rawResponse.tracking
-        const trackedNumber = typeof trackingNumber === 'string' ? trackingNumber : (updatedOrder.rawResponse && typeof updatedOrder.rawResponse === 'object' && (updatedOrder.rawResponse as Record<string, any>).tracking ? (updatedOrder.rawResponse as Record<string, any>).tracking.number : null);
-        const trackedUrl = typeof trackingUrl === 'string' ? trackingUrl : (updatedOrder.rawResponse && typeof updatedOrder.rawResponse === 'object' && (updatedOrder.rawResponse as Record<string, any>).tracking ? (updatedOrder.rawResponse as Record<string, any>).tracking.url : null);
+        const rawTracking = (updatedOrder.rawResponse && typeof updatedOrder.rawResponse === 'object') ? (updatedOrder.rawResponse as Record<string, Record<string, string>>).tracking : null;
+        const trackedNumber = typeof trackingNumber === 'string' ? trackingNumber : (rawTracking?.number ?? null);
+        const trackedUrl = typeof trackingUrl === 'string' ? trackingUrl : (rawTracking?.url ?? null);
 
         await sendOrderStatusChangedEmail({
           order: {

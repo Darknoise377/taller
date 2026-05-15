@@ -28,7 +28,7 @@ import {
 import { motion } from 'framer-motion';
 import { calculateDiscountedTotal, formatCurrency } from '@/utils/formatCurrency';
 import ShippingPromo from '@/components/ShippingPromo';
-import { estimateShippingWithConfig, CONTRAENTREGA_SURCHARGE, DEFAULT_SHIPPING_CONFIG } from '@/config/shippingRates';
+import { estimateShippingWithConfig, DEFAULT_SHIPPING_CONFIG } from '@/config/shippingRates';
 import type { ShippingConfig } from '@/config/shippingRates';
 
 // --- Interfaces ---

@@ -41,8 +41,9 @@ export const orderService = {
       // El status se define por defecto en la DB
     };
     // Asegurarnos de que el email no tenga espacios al inicio/fin
-    if (typeof (payload as any).customerEmail === 'string') {
-      (payload as any).customerEmail = (payload as any).customerEmail.trim();
+    const mutablePayload = payload as Record<string, unknown>;
+    if (typeof mutablePayload.customerEmail === 'string') {
+      mutablePayload.customerEmail = mutablePayload.customerEmail.trim();
     }
 
     const res = await fetch(`${API_URL}/orders`, {

@@ -232,9 +232,15 @@ export default function ResponseClient() {
               </div>
             </div>
 
-            <p className="text-slate-600 dark:text-slate-300 text-sm text-center mb-6">
+            <p className="text-slate-600 dark:text-slate-300 text-sm text-center mb-4">
               Cuando recibamos la confirmación de la pasarela de pago, te notificaremos por correo electrónico.
             </p>
+            <Link
+              href={`/seguimiento?ref=${encodeURIComponent(referenceCode ?? '')}`}
+              className="flex items-center justify-center gap-2 w-full border border-[#0A2A66] dark:border-[#2E5FA7] text-[#0A2A66] dark:text-[#5B9BD5] px-5 py-3 rounded-xl text-sm font-semibold hover:bg-[#0A2A66]/5 dark:hover:bg-[#2E5FA7]/10 transition"
+            >
+              Rastrear mi pedido
+            </Link>
           </div>
         );
 

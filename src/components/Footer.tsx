@@ -35,6 +35,7 @@ const Footer: React.FC = () => {
               {[
                 { href: '/', label: 'Inicio' },
                 { href: '/products', label: 'Productos' },
+                { href: '/seguimiento', label: 'Rastrear pedido' },
                 { href: '/about', label: 'Sobre Nosotros' },
                 { href: '/contact', label: 'Contacto' },
               ].map(({ href, label }) => (
