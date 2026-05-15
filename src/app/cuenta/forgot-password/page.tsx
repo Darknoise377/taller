@@ -3,19 +3,21 @@
 import React, { useState, FormEvent } from "react";
 import Link from "next/link";
 import { Mail, CheckCircle } from "lucide-react";
+import { useCsrf } from "@/hooks/useCsrf";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const { csrfFetch } = useCsrf();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/forgot-password", {
+      const res = await csrfFetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -70,7 +72,11 @@ export default function ForgotPasswordPage() {
               </p>
 
               {error && (
-                <p className="mb-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2 text-center">
+                <p
+                  role="alert"
+                  aria-live="assertive"
+                  className="mb-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2 text-center"
+                >
                   {error}
                 </p>
               )}

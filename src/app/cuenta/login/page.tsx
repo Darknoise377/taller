@@ -4,10 +4,12 @@ import React, { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
+import { useCsrf } from "@/hooks/useCsrf";
 
 export default function LoginPage() {
   const { setUser } = useCustomerAuth();
   const router = useRouter();
+  const { csrfFetch } = useCsrf();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,7 +22,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await csrfFetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -53,7 +55,11 @@ export default function LoginPage() {
           </h1>
 
           {error && (
-            <p className="mb-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2 text-center">
+            <p
+              role="alert"
+              aria-live="assertive"
+              className="mb-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2 text-center"
+            >
               {error}
             </p>
           )}

@@ -4,6 +4,7 @@ import React, { useState, FormEvent, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, CheckCircle } from "lucide-react";
+import { useCsrf } from "@/hooks/useCsrf";
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -31,6 +32,7 @@ function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token") ?? "";
+  const { csrfFetch } = useCsrf();
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -68,7 +70,7 @@ function ResetPasswordForm() {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/reset-password", {
+      const res = await csrfFetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password }),
@@ -116,7 +118,11 @@ function ResetPasswordForm() {
       </p>
 
       {error && (
-        <p className="mb-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2 text-center">
+        <p
+          role="alert"
+          aria-live="assertive"
+          className="mb-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2 text-center"
+        >
           {error}
         </p>
       )}

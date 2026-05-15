@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import { Eye, EyeOff } from "lucide-react";
+import { useCsrf } from "@/hooks/useCsrf";
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -31,6 +32,7 @@ function PasswordStrength({ password }: { password: string }) {
 export default function RegistroPage() {
   const { setUser } = useCustomerAuth();
   const router = useRouter();
+  const { csrfFetch } = useCsrf();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -58,7 +60,7 @@ export default function RegistroPage() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await csrfFetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
@@ -91,7 +93,11 @@ export default function RegistroPage() {
           </h1>
 
           {error && (
-            <p className="mb-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2 text-center">
+            <p
+              role="alert"
+              aria-live="assertive"
+              className="mb-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 rounded-lg px-3 py-2 text-center"
+            >
               {error}
             </p>
           )}

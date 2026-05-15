@@ -80,14 +80,46 @@ export default function PedidosPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-4 border-[#0A2A66] border-t-transparent rounded-full animate-spin" />
+      <div aria-label="Cargando pedidos" aria-busy="true">
+        <div className="h-8 w-48 bg-slate-200 dark:bg-slate-700 rounded-lg mb-6 animate-pulse" />
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="bg-white dark:bg-[#0b0a1f] rounded-xl border border-gray-200 dark:border-slate-800 shadow-sm p-5 animate-pulse"
+            >
+              <div className="flex justify-between mb-4">
+                <div className="space-y-2">
+                  <div className="h-3 w-28 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                  <div className="h-3 w-20 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                </div>
+                <div className="h-6 w-20 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              </div>
+              <div className="space-y-2 mb-4">
+                <div className="h-3 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="h-3 w-1/2 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              </div>
+              <div className="flex justify-between pt-3 border-t border-gray-100 dark:border-slate-800">
+                <div className="h-3 w-10 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                <div className="h-4 w-24 bg-slate-200 dark:bg-slate-700 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   if (error) {
-    return <p className="text-center py-12 text-red-600 dark:text-red-400">{error}</p>;
+    return (
+      <p
+        role="alert"
+        aria-live="assertive"
+        className="text-center py-12 text-red-600 dark:text-red-400"
+      >
+        {error}
+      </p>
+    );
   }
 
   return (

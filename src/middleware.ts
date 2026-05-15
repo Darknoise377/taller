@@ -11,6 +11,7 @@ import {
 import { COOKIE_NAME, CUSTOMER_COOKIE_NAME } from "./config/admin";
 import type { AdminRole } from "./types/auth";
 import { auditSecurityEvent } from "./lib/security/audit";
+import { validateCsrfToken, CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from "./lib/csrf";
 
 // ─── Role hierarchy ───────────────────────────────────────────────────────────
 const ROLE_RANK: Record<AdminRole, number> = { SUPERADMIN: 3, ADMIN: 2, VENDEDOR: 1 };
@@ -59,7 +60,39 @@ export async function middleware(req: NextRequest) {
   const userAgent = req.headers.get("user-agent") ?? "unknown";
 
   // ────────────────────────────────────────────────────────────────────────
-  // 🟦 Customer routes (/cuenta)
+  // � CSRF validation for customer-facing mutation APIs
+  // Applies to: /api/auth/* (except login) and /api/cuenta/*
+  // Uses double-submit cookie pattern: cookie value must match x-csrf-token header.
+  // ────────────────────────────────────────────────────────────────────────
+  const isCustomerMutation =
+    ["POST", "PUT", "PATCH", "DELETE"].includes(req.method) &&
+    (
+      (pathname.startsWith("/api/auth/") && pathname !== "/api/auth/login") ||
+      pathname.startsWith("/api/cuenta/")
+    );
+
+  if (isCustomerMutation) {
+    const origin = req.headers.get("origin");
+    const host = req.headers.get("host");
+    // Allow same-origin requests without CSRF token (origin check is sufficient)
+    const isSameOrigin = origin && host && (() => {
+      try { return new URL(origin).host === host; } catch { return false; }
+    })();
+
+    if (!isSameOrigin) {
+      const cookieToken = req.cookies.get(CSRF_COOKIE_NAME)?.value;
+      const headerToken = req.headers.get(CSRF_HEADER_NAME);
+      if (!validateCsrfToken(cookieToken, headerToken)) {
+        return new NextResponse(JSON.stringify({ error: "Invalid CSRF token" }), {
+          status: 403,
+          headers: { "content-type": "application/json" },
+        });
+      }
+    }
+  }
+
+  // ────────────────────────────────────────────────────────────────────────
+  // �🟦 Customer routes (/cuenta)
   // ────────────────────────────────────────────────────────────────────────
   if (pathname.startsWith("/cuenta")) {
     const customerToken = req.cookies.get(CUSTOMER_COOKIE_NAME)?.value;
@@ -281,6 +314,8 @@ export const config = {
     "/admin/:path*",
     "/cuenta/:path*",
     "/api/admin/:path*",
+    "/api/auth/:path*",
+    "/api/cuenta/:path*",
     "/api/orders/:path*",
     "/api/orders",
     "/api/codes/:path*",
