@@ -11,10 +11,10 @@ const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
 function PasswordStrength({ password }: { password: string }) {
   const checks = [
-    { label: "8 caracteres mÃ­nimo", ok: password.length >= 8 },
-    { label: "Una mayÃºscula", ok: /[A-Z]/.test(password) },
-    { label: "Una minÃºscula", ok: /[a-z]/.test(password) },
-    { label: "Un nÃºmero", ok: /\d/.test(password) },
+    { label: "8 caracteres mínimo", ok: password.length >= 8 },
+    { label: "Una mayúscula", ok: /[A-Z]/.test(password) },
+    { label: "Una minúscula", ok: /[a-z]/.test(password) },
+    { label: "Un número", ok: /\d/.test(password) },
   ];
   if (!password) return null;
   return (
@@ -48,12 +48,12 @@ export default function RegistroPage() {
     setError(null);
 
     if (password !== confirm) {
-      setError("Las contraseÃ±as no coinciden");
+      setError("Las contraseñas no coinciden");
       return;
     }
 
     if (!PASSWORD_REGEX.test(password)) {
-      setError("La contraseÃ±a debe tener mÃ­nimo 8 caracteres, una mayÃºscula, una minÃºscula y un nÃºmero");
+      setError("La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número");
       return;
     }
 
@@ -78,7 +78,7 @@ export default function RegistroPage() {
         router.push("/cuenta/pedidos");
       }
     } catch {
-      setError("Error de conexiÃ³n. Intenta nuevamente.");
+      setError("Error de conexión. Intenta nuevamente.");
     } finally {
       setLoading(false);
     }
@@ -134,7 +134,7 @@ export default function RegistroPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                ContraseÃ±a
+                Contraseña
               </label>
               <div className="relative">
                 <input
@@ -150,7 +150,7 @@ export default function RegistroPage() {
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  aria-label={showPassword ? "Ocultar contraseÃ±a" : "Mostrar contraseÃ±a"}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -160,7 +160,7 @@ export default function RegistroPage() {
 
             <div>
               <label htmlFor="confirm" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
-                Confirmar contraseÃ±a
+                Confirmar contraseña
               </label>
               <div className="relative">
                 <input
@@ -176,7 +176,7 @@ export default function RegistroPage() {
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  aria-label={showConfirm ? "Ocultar contraseÃ±a" : "Mostrar contraseÃ±a"}
+                  aria-label={showConfirm ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
                   {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -188,14 +188,14 @@ export default function RegistroPage() {
               disabled={loading}
               className="w-full py-2.5 rounded-lg bg-[#0A2A66] text-white font-semibold text-sm hover:bg-[#0A2A66]/90 disabled:opacity-60 transition-colors"
             >
-              {loading ? "Creando cuentaâ€¦" : "Crear cuenta"}
+              {loading ? "Creando cuenta…" : "Crear cuenta"}
             </button>
           </form>
 
           <p className="mt-5 text-center text-sm text-gray-500 dark:text-slate-400">
-            Â¿Ya tienes cuenta?{" "}
+            ¿Ya tienes cuenta?{" "}
             <Link href="/cuenta/login" className="text-[#0A2A66] dark:text-blue-400 font-medium hover:underline">
-              Inicia sesiÃ³n
+              Inicia sesión
             </Link>
           </p>
         </div>

@@ -205,16 +205,16 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
     <section className="mt-14 sm:mt-16">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Resenas</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100">Reseñas</h2>
           {stats.count > 0 ? (
             <div className="flex items-center gap-2 mt-2">
               <StarRating rating={roundedAvg} />
               <span className="text-sm text-slate-600 dark:text-slate-300">
-                {stats.average.toFixed(1)} ({stats.count} {stats.count === 1 ? "resena" : "resenas"})
+                {stats.average.toFixed(1)} ({stats.count} {stats.count === 1 ? "reseña" : "reseñas"})
               </span>
             </div>
           ) : (
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Aun no hay resenas para este producto.</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Aún no hay reseñas para este producto.</p>
           )}
         </div>
 
