@@ -162,34 +162,55 @@ export default async function ProductsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
       {/* Hero banner */}
-      <header className="relative overflow-hidden bg-gradient-to-br from-[#050F2C] via-[#0A2A66] to-[#0d3580] py-10 px-4">
+      <header className="relative overflow-hidden bg-gradient-to-br from-[#050F2C] via-[#0A2A66] to-[#0d3580] py-4 sm:py-7 md:py-10 px-4">
         <div
           aria-hidden
           className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle,_#fff_1px,_transparent_1px)] [background-size:20px_20px]"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#050F2C]/50" aria-hidden />
         <div className="relative max-w-7xl mx-auto z-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          {/* Mobile: compact one-liner strip */}
+          <div className="flex items-center justify-between gap-4 md:hidden">
+            <div>
+              <p className="text-[#7BA4D9] text-[10px] font-bold uppercase tracking-widest mb-0.5">Catálogo completo</p>
+              <h1 className="text-xl font-black text-white tracking-tight leading-tight">
+                Repuestos <span className="text-[#4A8FE2]">&amp; Accesorios</span>
+              </h1>
+            </div>
+            <div className="flex gap-4 shrink-0">
+              <div className="text-center">
+                <p className="text-base font-black text-white">{totalCount}+</p>
+                <p className="text-[#7BA4D9] text-[10px] font-semibold">Productos</p>
+              </div>
+              <div className="text-center">
+                <p className="text-base font-black text-white">14</p>
+                <p className="text-[#7BA4D9] text-[10px] font-semibold">Categ.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop: full hero with description + stats */}
+          <div className="hidden md:flex md:items-center md:justify-between gap-6">
             <div>
               <p className="text-[#7BA4D9] text-xs font-bold uppercase tracking-widest mb-2">Catálogo completo</p>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
                 Repuestos <span className="text-[#4A8FE2]">&amp; Accesorios</span>
               </h1>
               <p className="mt-2 text-[#9DC0E8] text-sm sm:text-base max-w-xl">
                 Stock actualizado, precios visibles y despacho a todo Colombia.
               </p>
             </div>
-            <div className="flex gap-6 md:gap-8">
+            <div className="flex gap-8">
               <div className="text-center">
-                <p className="text-2xl sm:text-3xl font-black text-white">{totalCount}+</p>
+                <p className="text-3xl font-black text-white">{totalCount}+</p>
                 <p className="text-[#7BA4D9] text-xs font-semibold mt-0.5">Productos</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl sm:text-3xl font-black text-white">14</p>
+                <p className="text-3xl font-black text-white">14</p>
                 <p className="text-[#7BA4D9] text-xs font-semibold mt-0.5">Categorías</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl sm:text-3xl font-black text-white">🇨🇴</p>
+                <p className="text-3xl font-black text-white">COL</p>
                 <p className="text-[#7BA4D9] text-xs font-semibold mt-0.5">Colombia</p>
               </div>
             </div>

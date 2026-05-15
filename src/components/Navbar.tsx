@@ -197,18 +197,18 @@ const Navbar = () => {
           </Link>
         ))}
 
-        {/* Cuenta / Mis pedidos (móvil) */}
+        {/* Rastrear / Mis pedidos (móvil) */}
         {user ? (
           <Link
             href="/cuenta/pedidos"
             className={`flex flex-col items-center text-xs ${
-              pathname.startsWith('/cuenta')
+              pathname === '/cuenta/pedidos'
                 ? 'text-[#0A2A66] dark:text-white'
                 : 'text-slate-600 dark:text-slate-300'
             }`}
           >
             <Package className="w-6 h-6" />
-            Mis pedidos
+            Pedidos
           </Link>
         ) : (
           <Link
@@ -223,6 +223,19 @@ const Navbar = () => {
             Rastrear
           </Link>
         )}
+
+        {/* Cuenta (móvil) */}
+        <Link
+          href={user ? '/cuenta' : '/cuenta/login'}
+          className={`flex flex-col items-center text-xs ${
+            pathname.startsWith('/cuenta') && pathname !== '/cuenta/pedidos'
+              ? 'text-[#0A2A66] dark:text-white'
+              : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+          }`}
+        >
+          <UserIcon className="w-6 h-6" />
+          Cuenta
+        </Link>
 
         {/* Carrito */}
         <button

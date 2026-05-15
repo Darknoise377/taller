@@ -212,19 +212,19 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
         <div className="flex-1" />
 
         {/* Cantidad + botón */}
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+        <div className="flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 sm:flex-row sm:items-center">
           {/* Qty */}
-          <div className="flex items-center rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800 shrink-0">
+          <div className="flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800 sm:shrink-0">
             <button
               type="button"
               aria-label="Disminuir cantidad"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               disabled={isOutOfStock || quantity <= 1}
-              className="w-9 h-10 flex items-center justify-center text-lg font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors"
+              className="w-8 h-9 sm:w-9 sm:h-10 flex items-center justify-center text-lg font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors"
             >
               −
             </button>
-            <span className="w-7 text-center text-sm font-bold text-slate-800 dark:text-slate-100 tabular-nums">
+            <span className="w-8 text-center text-sm font-bold text-slate-800 dark:text-slate-100 tabular-nums">
               {quantity}
             </span>
             <button
@@ -232,7 +232,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
               aria-label="Aumentar cantidad"
               onClick={() => setQuantity((q) => Math.min(product.stock || 99, q + 1))}
               disabled={isOutOfStock || quantity >= (product.stock || 99)}
-              className="w-9 h-10 flex items-center justify-center text-lg font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors"
+              className="w-8 h-9 sm:w-9 sm:h-10 flex items-center justify-center text-lg font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors"
             >
               +
             </button>
@@ -243,7 +243,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
             type="button"
             disabled={isOutOfStock}
             onClick={handleAddToCart}
-            className={`flex-1 h-10 flex items-center justify-center gap-1.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-sm ${
+            className={`w-full sm:flex-1 h-9 sm:h-10 flex items-center justify-center gap-1.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-sm ${
               added
                 ? "bg-green-500 text-white shadow-green-200 dark:shadow-green-900 scale-[0.97]"
                 : isOutOfStock
@@ -261,7 +261,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
             ) : (
               <>
                 <ShoppingCartIcon className="w-4 h-4 shrink-0" />
-                <span>Añadir</span>
+                <span>Añadir al carrito</span>
               </>
             )}
           </button>
