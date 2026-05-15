@@ -1,0 +1,6 @@
+﻿-- AddColumn: address fields on User
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "address"    TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "city"       TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "department" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "postalCode" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "cedula"     TEXT;

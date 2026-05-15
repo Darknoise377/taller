@@ -25,7 +25,7 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: payload.uid },
-    select: { id: true, email: true, name: true, phone: true, createdAt: true },
+    select: { id: true, email: true, name: true, phone: true, address: true, city: true, department: true, postalCode: true, cedula: true, createdAt: true },
   });
 
   if (!user) {
@@ -42,9 +42,14 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   }
 
-  const body = (await req.json()) as { name?: string; phone?: string };
+  const body = (await req.json()) as { name?: string; phone?: string; address?: string; city?: string; department?: string; postalCode?: string; cedula?: string };
   const name = body.name?.trim() ?? "";
   const phone = body.phone?.trim() ?? "";
+  const address = body.address?.trim() ?? "";
+  const city = body.city?.trim() ?? "";
+  const department = body.department?.trim() ?? "";
+  const postalCode = body.postalCode?.trim() ?? "";
+  const cedula = body.cedula?.trim() ?? "";
 
   if (!name) {
     return NextResponse.json({ error: "El nombre es requerido" }, { status: 400 });
@@ -55,8 +60,13 @@ export async function PUT(req: Request) {
     data: {
       name: name || null,
       phone: phone || null,
+      address: address || null,
+      city: city || null,
+      department: department || null,
+      postalCode: postalCode || null,
+      cedula: cedula || null,
     },
-    select: { id: true, email: true, name: true, phone: true },
+    select: { id: true, email: true, name: true, phone: true, address: true, city: true, department: true, postalCode: true, cedula: true },
   });
 
   return NextResponse.json(updated);

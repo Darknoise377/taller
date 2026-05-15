@@ -162,6 +162,12 @@ model User {
   role      Role     @default(VENDEDOR)
   name      String?
   phone     String?
+  // Dirección de envío guardada
+  address    String?
+  city       String?
+  department String?
+  postalCode String?
+  cedula     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

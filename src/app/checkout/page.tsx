@@ -12,6 +12,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/useCart';
+import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import { CartItem as ICartItem } from '@/types/cart';
 import { orderService } from '@/services/orderService';
 import type { PaymentMethod } from '@/types/order';
@@ -166,6 +167,7 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
 const CheckoutPage: React.FC = () => {
   const router = useRouter();
   const { items, totalItems, cartTotal, clearCart, isCartLoaded } = useCart();
+  const { user } = useCustomerAuth();
 
   // --- Estado del Formulario de Envío (de V1) ---
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
@@ -229,6 +231,28 @@ const CheckoutPage: React.FC = () => {
     const deps = colombiaData.map((d) => d.departamento).sort();
     setDepartamentos(deps);
   }, []);
+
+  // Auto-fill shipping info from saved profile when authenticated
+  useEffect(() => {
+    if (!user) return;
+    fetch('/api/cuenta/profile')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (!data) return;
+        setShippingInfo((prev) => ({
+          ...prev,
+          fullName: prev.fullName || data.name || '',
+          phone:    prev.phone    || data.phone || '',
+          email:    prev.email    || data.email || '',
+          address:  prev.address  || data.address || '',
+          city:     prev.city     || data.city || '',
+          state:    prev.state    || data.department || '',
+          zipCode:  prev.zipCode  || data.postalCode || '',
+          cedula:   prev.cedula   || data.cedula || '',
+        }));
+      })
+      .catch(() => {});
+  }, [user]);
 
   // Load shipping config from DB
   useEffect(() => {
