@@ -1,6 +1,7 @@
 ﻿// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import dynamic from "next/dynamic";
 import "../styles/globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CartProvider } from '@/context/CartContext';
@@ -8,12 +9,14 @@ import { CustomerAuthProvider } from '@/context/CustomerAuthContext';
 import CartModal from '@/components/CartModal';
 import ConditionalNavbar from '@/components/ConditionalNavbar';
 import DynamicFooter from '@/components/DynamicFooter';
-import FloatingButtons from '@/components/FloatingButtons';
 import AnnouncementBar from '@/components/AnnouncementBar';
-import ChatWidget from '@/components/ChatWidget';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from "./theme-provider";
 import { getBaseUrl, getBaseUrlAsUrl } from "@/lib/site";
+
+// Cargados solo en cliente, sin bloquear el renderizado inicial
+const FloatingButtons = dynamic(() => import('@/components/FloatingButtons'), { ssr: false });
+const ChatWidget = dynamic(() => import('@/components/ChatWidget'), { ssr: false });
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 

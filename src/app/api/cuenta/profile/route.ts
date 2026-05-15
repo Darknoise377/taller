@@ -4,6 +4,17 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { verifyCustomerToken } from "@/lib/auth/jwt";
 import { CUSTOMER_COOKIE_NAME } from "@/config/admin";
+import { z } from "zod";
+
+const updateProfileSchema = z.object({
+  name: z.string().trim().min(1, "El nombre es requerido").max(200),
+  phone: z.string().trim().max(30).optional().or(z.literal("")),
+  address: z.string().trim().max(500).optional().or(z.literal("")),
+  city: z.string().trim().max(200).optional().or(z.literal("")),
+  department: z.string().trim().max(200).optional().or(z.literal("")),
+  postalCode: z.string().trim().max(20).optional().or(z.literal("")),
+  cedula: z.string().trim().max(30).optional().or(z.literal("")),
+});
 
 async function getAuthUser() {
   const cookieStore = await cookies();
@@ -42,18 +53,12 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: "No autenticado" }, { status: 401 });
   }
 
-  const body = (await req.json()) as { name?: string; phone?: string; address?: string; city?: string; department?: string; postalCode?: string; cedula?: string };
-  const name = body.name?.trim() ?? "";
-  const phone = body.phone?.trim() ?? "";
-  const address = body.address?.trim() ?? "";
-  const city = body.city?.trim() ?? "";
-  const department = body.department?.trim() ?? "";
-  const postalCode = body.postalCode?.trim() ?? "";
-  const cedula = body.cedula?.trim() ?? "";
-
-  if (!name) {
-    return NextResponse.json({ error: "El nombre es requerido" }, { status: 400 });
+  const parseResult = updateProfileSchema.safeParse(await req.json());
+  if (!parseResult.success) {
+    const error = parseResult.error.issues[0]?.message ?? "Datos inválidos";
+    return NextResponse.json({ error }, { status: 400 });
   }
+  const { name, phone, address, city, department, postalCode, cedula } = parseResult.data;
 
   const updated = await prisma.user.update({
     where: { id: payload.uid },

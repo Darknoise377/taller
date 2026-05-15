@@ -6,6 +6,11 @@ import { sendPasswordResetEmail } from "@/lib/email/authEmails";
 import { getBaseUrl } from "@/lib/site";
 import { randomBytes } from "crypto";
 import { Role } from "@prisma/client";
+import { z } from "zod";
+
+const forgotPasswordSchema = z.object({
+  email: z.string().trim().email("Email inválido").max(254),
+});
 
 export async function POST(req: Request) {
   try {
@@ -21,12 +26,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const body = (await req.json()) as { email?: string };
-    const email = body.email?.trim().toLowerCase() ?? "";
-
-    if (!email) {
-      return NextResponse.json({ error: "Email requerido" }, { status: 400 });
+    const parseResult = forgotPasswordSchema.safeParse(await req.json());
+    if (!parseResult.success) {
+      // Responder OK siempre para no revelar si el email existe
+      return NextResponse.json({ ok: true, message: "Si el correo está registrado, recibirás instrucciones en breve." });
     }
+    const email = parseResult.data.email.toLowerCase();
 
     // Buscar usuario CUSTOMER (no revelar si existe o no)
     const user = await prisma.user.findFirst({

@@ -3,8 +3,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/hash";
 import { rateLimit } from "@/lib/rateLimit";
+import { z } from "zod";
 
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+const resetPasswordSchema = z.object({
+  token: z.string().trim().min(1, "Token requerido"),
+  password: z.string().min(8, "Mínimo 8 caracteres").max(128),
+});
 
 export async function POST(req: Request) {
   try {
@@ -20,23 +26,16 @@ export async function POST(req: Request) {
       );
     }
 
-    const body = (await req.json()) as { token?: string; password?: string };
-    const token = body.token?.trim() ?? "";
-    const password = body.password ?? "";
-
-    if (!token || !password) {
-      return NextResponse.json(
-        { error: "Token y contraseña son requeridos" },
-        { status: 400 },
-      );
+    const parseResult = resetPasswordSchema.safeParse(await req.json());
+    if (!parseResult.success) {
+      const error = parseResult.error.issues[0]?.message ?? "Datos inválidos";
+      return NextResponse.json({ error }, { status: 400 });
     }
+    const { token, password } = parseResult.data;
 
     if (!PASSWORD_REGEX.test(password)) {
       return NextResponse.json(
-        {
-          error:
-            "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número",
-        },
+        { error: "La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número" },
         { status: 400 },
       );
     }

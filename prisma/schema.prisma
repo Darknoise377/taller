@@ -37,6 +37,9 @@ model Product {
   reviews    Review[]
   owner      User?          @relation(fields: [ownerId], references: [id])
   ownerId     String?
+
+  @@index([category])
+  @@index([stock])
 }
 
 model Review {
@@ -119,6 +122,11 @@ model Order {
   sellerId        String?
   seller          Seller?       @relation(fields: [sellerId], references: [id])
   // --- ---
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([customerEmail])
+  @@index([status])
 }
 
 //

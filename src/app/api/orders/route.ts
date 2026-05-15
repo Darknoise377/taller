@@ -2,10 +2,32 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { PaymentMethod } from '@prisma/client'; // ✅ Importamos los enums de Prisma
+import { PaymentMethod } from '@prisma/client';
 import { rateLimit } from '@/lib/rateLimit';
 import { sendOrderCreatedEmail } from '@/lib/email/orderEmails';
 import { calculateDiscountedTotal, clampPercentage, normalizeAmount } from '@/utils/formatCurrency';
+import { z } from 'zod';
+
+const createOrderSchema = z.object({
+  products: z.array(
+    z.object({
+      productId: z.string().min(1),
+      quantity: z.number().int().positive(),
+    })
+  ).min(1, 'Debes enviar al menos un producto'),
+  paymentMethod: z.nativeEnum(PaymentMethod),
+  customerName: z.string().trim().min(1, 'Nombre requerido').max(200),
+  customerEmail: z.string().trim().email('Email inválido').max(254),
+  address: z.string().trim().min(1, 'Dirección requerida').max(500),
+  city: z.string().trim().min(1, 'Ciudad requerida').max(200),
+  department: z.string().trim().max(200).optional(),
+  state: z.string().trim().max(200).optional(), // compatibilidad con payload antiguo
+  phone: z.string().trim().min(1, 'Teléfono requerido').max(30),
+  postalCode: z.string().trim().max(20).optional(),
+  cedula: z.string().trim().max(30).optional(),
+  sellerId: z.string().trim().optional(),
+  promoCodeApplied: z.string().trim().optional(),
+});
 
 // ❌ Eliminamos los objetos `paymentMap` y `statusMap`.
 // Ya no son necesarios porque el frontend y el backend ahora usan los mismos valores de los enums.
@@ -68,30 +90,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // ✅ Definimos un tipo para el cuerpo de la solicitud
-    type CreateOrderBody = {
-      products: { productId: string; quantity: number }[];
-      // NOTA: `total` puede venir del cliente pero NO se confía en él.
-      // El total se recalcula server-side con precios en DB.
-      total?: number;
-      paymentMethod: PaymentMethod;
-      customerName: string;
-      customerEmail: string;
-      address: string;
-      city: string;
-      department?: string;
-      // Compatibilidad con payload antiguo (checkout enviaba `state`)
-      state?: string;
-      phone: string;
-      postalCode?: string;
-      cedula?: string;
-      
-      // --- Campos Híbridos (Añadidos) ---
-      sellerId?: string;
-      promoCodeApplied?: string;
-    };
-
-    const body: CreateOrderBody = await req.json();
+    // ✅ Validar body con Zod
+    const parseResult = createOrderSchema.safeParse(await req.json());
+    if (!parseResult.success) {
+      const message = parseResult.error.issues[0]?.message ?? 'Datos inválidos';
+      return NextResponse.json({ message }, { status: 400 });
+    }
     const {
       products,
       paymentMethod,
@@ -104,32 +108,11 @@ export async function POST(req: Request) {
       postalCode,
       phone,
       cedula,
-      
-      // --- Campos Híbridos (Añadidos) ---
       sellerId,
       promoCodeApplied,
-    } = body;
+    } = parseResult.data;
 
     const resolvedDepartment = department ?? state;
-
-    // --- Validaciones (sin cambios) ---
-    if (!products || !Array.isArray(products) || products.length === 0) {
-      return NextResponse.json({ message: 'Debes enviar al menos un producto' }, { status: 400 });
-    }
-    if (!customerName || !customerEmail || !address || !city || !phone) {
-      return NextResponse.json({ message: 'Faltan datos del cliente' }, { status: 400 });
-    }
-
-    // Validar formato de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(customerEmail)) {
-      return NextResponse.json({ message: 'Email inválido' }, { status: 400 });
-    }
-    // Opcional: Validar que el paymentMethod sea uno de los valores del enum
-    if (!Object.values(PaymentMethod).includes(paymentMethod)) {
-       return NextResponse.json({ message: 'Método de pago inválido' }, { status: 400 });
-    }
-    // --- Fin Validaciones ---
 
     // Consolidar items (evita duplicados de productId)
     const quantitiesByProductId = new Map<string, number>();
