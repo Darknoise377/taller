@@ -31,7 +31,7 @@ export default function FloatingButtons() {
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
 
   return (
-    <div className={`fixed ${isProductDetail ? 'bottom-32' : 'bottom-20'} md:bottom-6 right-4 z-40 flex flex-col items-center gap-3`}>
+    <div className={`fixed ${isProductDetail ? 'bottom-[calc(8.5rem+env(safe-area-inset-bottom))]' : 'bottom-20'} md:bottom-6 right-4 z-40 flex flex-col items-center gap-3`}>
       {/* Back to top */}
       <button
         onClick={scrollToTop}

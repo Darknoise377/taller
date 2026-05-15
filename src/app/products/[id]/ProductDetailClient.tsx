@@ -456,7 +456,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
         </ol>
       </nav>
 
-      <div className="max-w-7xl mx-auto pb-36 md:pb-16">
+      <div className="max-w-7xl mx-auto pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-16">
         {/* Mobile: imagen full-width sin padding lateral */}
         <div className="md:hidden">
           <ImageGallery images={images} productName={product.name} />
@@ -912,7 +912,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
       </div>
 
       {/* ===== BARRA STICKY INFERIOR — Solo móvil ===== */}
-      <div className="md:hidden fixed bottom-14 inset-x-0 z-40 bg-white/96 dark:bg-[#070617]/96 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-4 py-2.5 flex items-center gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]">
+      <div className="md:hidden fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 z-40 bg-white/96 dark:bg-[#070617]/96 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-4 py-2.5 flex items-center gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]">
         <div className="flex items-center border-2 border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shrink-0">
           <button
             type="button"

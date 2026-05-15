@@ -126,12 +126,12 @@ export default function DynamicFooter() {
         </div>
 
         {/* Línea divisoria */}
-        <div className="border-t border-slate-200 dark:border-gray-700 mt-6 pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500 dark:text-gray-500">
+        <div className="border-t border-slate-200 dark:border-gray-700 mt-6 pt-6 flex flex-col items-center gap-2 text-sm text-slate-500 dark:text-gray-500 text-center">
           <p>© {new Date().getFullYear()} Almacén y Taller Motoservicio A&amp;R. Todos los derechos reservados.</p>
-          <p className="mt-2 md:mt-0 flex items-center gap-1.5">
-            Diseño web por{" "}
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-widest bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white shadow-sm shadow-[#0A2A66]/30 dark:shadow-[#5B9BD5]/20">
-              FACRISCD
+          <p className="flex items-center gap-2">
+            <span className="text-slate-400 dark:text-slate-500">Diseño web por</span>
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black tracking-[0.18em] bg-gradient-to-r from-[#0A2A66] via-[#1d4ed8] to-[#2E5FA7] text-white shadow-lg shadow-[#0A2A66]/40 dark:shadow-[#2E5FA7]/30 ring-1 ring-white/20 hover:shadow-xl hover:brightness-110 transition-all cursor-default select-none">
+              ✦ FACRISCD ✦
             </span>
           </p>
         </div>
