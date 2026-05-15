@@ -75,7 +75,10 @@ export async function middleware(req: NextRequest) {
     }
 
     const isPublicCustomerPage =
-      pathname === "/cuenta/login" || pathname === "/cuenta/registro";
+      pathname === "/cuenta/login" ||
+      pathname === "/cuenta/registro" ||
+      pathname === "/cuenta/forgot-password" ||
+      pathname === "/cuenta/reset-password";
 
     if (isCustomerAuth && isPublicCustomerPage) {
       return NextResponse.redirect(new URL("/cuenta/pedidos", req.url));
