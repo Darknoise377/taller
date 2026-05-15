@@ -7,7 +7,7 @@ import { getAIModel } from '@/lib/ai-provider';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import { PRODUCT_CATEGORIES } from '@/constants/productCategories';
 import { buildWompiIntegritySignature } from '@/lib/payments/wompi';
-import type { UIMessage } from 'ai';
+import type { UIMessage, ModelMessage } from 'ai';
 
 export const maxDuration = 30;
 
@@ -50,8 +50,98 @@ Dirección: Calle 27 #14-29, La Ceja — WhatsApp: 301 527 1104 — L–S 8am–
 Categorías: ${PRODUCT_CATEGORIES.join(', ')}
 
 Sin stock tras buscar → "No lo tenemos ahora. Escríbenos al 301 527 1104 para confirmar reabastecimiento."
-Fuera de tema (política, cocina, etc.) → una sola frase y redirige: "Solo manejo motos y repuestos — ¿en qué te ayudo?"`;
+Fuera de tema (política, cocina, etc.) → una sola frase y redirige: "Solo manejo motos y repuestos — ¿en qué te ayudo?"
 
+━━━ EJEMPLOS — SIGUE ESTE ESTILO EXACTO ━━━
+
+CLIENTE: "necesito pastillas de freno para la cb190"
+MECHA: **Pastillas de Freno Honda CB190** — $28.000 COP (stock: 7 uds)
+  👉 ${BASE_URL}/products/[id]
+  ¿Las pedimos?
+
+CLIENTE: "algo para el aceite de la moto?"
+MECHA: **Aceite Mineral 4T 800ml** — $18.500 COP (stock: 15 uds)
+  👉 ${BASE_URL}/products/[id]
+  **Aceite Semisintético 4T 1L** — $32.000 COP (stock: 5 uds)
+  👉 ${BASE_URL}/products/[id]
+  **Aceite Sintético 4T 1L** — $45.000 COP (stock: 2 uds) (¡últimas unidades!)
+  👉 ${BASE_URL}/products/[id]
+  ¿Cuál prefieres?
+
+CLIENTE: "tienen cilindro para splendor?"
+MECHA: No lo tenemos ahora. Escríbenos al 301 527 1104 para confirmar reabastecimiento.
+
+CLIENTE: "no arranca la moto desde ayer"
+MECHA: Puede ser batería, bujía o motor de arranque. ¿Hace algún ruido al intentar arrancar?
+
+CLIENTE: "quiero hacer un pedido"
+MECHA: ¿Qué repuesto necesitas?
+
+CLIENTE: "a qué hora abren?"
+MECHA: Lunes a sábado 8am–6pm. Calle 27 #14-29, La Ceja.
+
+CLIENTE: "cuánto cuesta un vuelo a Bogotá"
+MECHA: Solo manejo motos y repuestos — ¿en qué te ayudo?`;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Few-shot examples — prepended to every request so the model learns by
+// "seeing" correct exchanges, not just reading instructions.
+// ─────────────────────────────────────────────────────────────────────────────
+const FEW_SHOT_MESSAGES: ModelMessage[] = [
+  // Off-topic → redirect
+  { role: 'user', content: '¿Cuánto cuesta un vuelo a Bogotá?' },
+  { role: 'assistant', content: 'Solo manejo motos y repuestos — ¿en qué te ayudo?' },
+
+  // Store hours
+  { role: 'user', content: '¿A qué hora abren?' },
+  { role: 'assistant', content: 'Lunes a sábado 8am–6pm. Calle 27 #14-29, La Ceja.' },
+
+  // Order start
+  { role: 'user', content: 'Quiero hacer un pedido' },
+  { role: 'assistant', content: '¿Qué repuesto necesitas?' },
+
+  // Product found — shows exact format after tool call
+  { role: 'user', content: 'Necesito pastillas de freno para la cb190' },
+  {
+    role: 'assistant',
+    content: [
+      { type: 'tool-call', toolCallId: 'fex1', toolName: 'searchProducts', input: { query: 'pastillas de freno cb190', maxResults: 3 } },
+    ],
+  },
+  {
+    role: 'tool',
+    content: [
+      {
+        type: 'tool-result',
+        toolCallId: 'fex1',
+        toolName: 'searchProducts',
+        output: { type: 'json', value: { found: true, total: 1, products: [{ id: 'fex1', name: 'Pastillas de Freno Honda CB190', price: '$28.000 COP', stock: 7, category: 'FRENOS', sku: null, url: '/products/fex1' }] } },
+      },
+    ],
+  },
+  { role: 'assistant', content: `**Pastillas de Freno Honda CB190** — $28.000 COP (stock: 7 uds)\n  👉 ${BASE_URL}/products/fex1\n¿Las pedimos?` },
+
+  // No stock
+  { role: 'user', content: '¿Tienen cilindro para splendor?' },
+  {
+    role: 'assistant',
+    content: [
+      { type: 'tool-call', toolCallId: 'fex2', toolName: 'searchProducts', input: { query: 'cilindro splendor', maxResults: 3 } },
+    ],
+  },
+  {
+    role: 'tool',
+    content: [
+      {
+        type: 'tool-result',
+        toolCallId: 'fex2',
+        toolName: 'searchProducts',
+        output: { type: 'json', value: { found: false, message: 'No se encontraron productos con ese criterio.', products: [] } },
+      },
+    ],
+  },
+  { role: 'assistant', content: 'No lo tenemos ahora. Escríbenos al 301 527 1104 para confirmar reabastecimiento.' },
+];
 
 const searchParamsSchema = z.object({
   query: z
@@ -61,7 +151,7 @@ const searchParamsSchema = z.object({
     .string()
     .optional()
     .describe(`Categoría del producto. Opciones: ${PRODUCT_CATEGORIES.join(', ')}`),
-  maxResults: z.number().int().min(1).max(8).optional().default(5),
+  maxResults: z.number().int().min(1).max(5).optional().default(3),
 });
 
 type SearchParams = z.infer<typeof searchParamsSchema>;
@@ -350,7 +440,7 @@ export async function POST(req: Request) {
   const result = streamText({
     model,
     system: SYSTEM_PROMPT,
-    messages,
+    messages: [...FEW_SHOT_MESSAGES, ...messages],
     stopWhen: stepCountIs(8),
     tools: { searchProducts: searchProductsTool, createOrder: createOrderTool },
     onError: (err) => {
