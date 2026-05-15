@@ -90,7 +90,7 @@ export default function PerfilPage() {
         return;
       }
       setProfile((prev) => (prev ? { ...prev, name: data.name ?? null, phone: phone || null } : prev));
-      setUser((prev) => (prev ? { ...prev, name: data.name } : prev));
+      if (user) setUser({ ...user, name: data.name ?? null });
       setProfileMsg({ type: "ok", text: "Perfil actualizado correctamente" });
     } catch {
       setProfileMsg({ type: "err", text: "Error de conexión" });
