@@ -31,6 +31,15 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Hide scrollbar utility */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Selection color */
 ::selection {
   background-color: rgba(10, 42, 102, 0.2);

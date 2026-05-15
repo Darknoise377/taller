@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRightIcon,
   CheckCircleIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   CubeTransparentIcon,
   GlobeAltIcon,
   ShieldCheckIcon,
@@ -748,6 +750,8 @@ function FeatureCard({
 function FeaturedProductsRow() {
   const [products, setProducts] = useState<ProductType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/products?limit=8&sort=newest")
@@ -768,23 +772,118 @@ function FeaturedProductsRow() {
       .finally(() => setIsLoading(false));
   }, []);
 
+  const scrollTo = useCallback((index: number) => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const card = container.children[index] as HTMLElement | undefined;
+    if (!card) return;
+    container.scrollTo({ left: card.offsetLeft - 16, behavior: "smooth" });
+    setActiveIndex(index);
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+    const firstCard = container.children[0] as HTMLElement | undefined;
+    if (!firstCard) return;
+    const cardWidth = firstCard.offsetWidth + 12; // gap-3 = 12px
+    const idx = Math.min(
+      Math.round(container.scrollLeft / cardWidth),
+      products.length - 1
+    );
+    setActiveIndex(Math.max(0, idx));
+  }, [products.length]);
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-80 rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse" />
-        ))}
-      </div>
+      <>
+        {/* Mobile skeleton */}
+        <div className="sm:hidden flex gap-3 overflow-hidden -mx-4 pl-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="shrink-0 w-[72%] h-80 rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse"
+            />
+          ))}
+        </div>
+        {/* Desktop skeleton */}
+        <div className="hidden sm:grid grid-cols-3 lg:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-80 rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse" />
+          ))}
+        </div>
+      </>
     );
   }
 
   if (products.length === 0) return null;
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-      {products.map((p, idx) => (
-        <ProductCard key={p.id} product={p} idx={idx} />
-      ))}
+    <div>
+      {/* ── Mobile Carousel ── */}
+      <div className="sm:hidden relative -mx-4">
+        {/* Prev button */}
+        {activeIndex > 0 && (
+          <button
+            type="button"
+            onClick={() => scrollTo(Math.max(0, activeIndex - 1))}
+            aria-label="Anterior"
+            className="absolute left-1.5 top-[40%] -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/95 dark:bg-slate-900/95 shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-200 transition active:scale-90"
+          >
+            <ChevronLeftIcon className="w-4 h-4" />
+          </button>
+        )}
+        {/* Next button */}
+        {activeIndex < products.length - 1 && (
+          <button
+            type="button"
+            onClick={() => scrollTo(Math.min(products.length - 1, activeIndex + 1))}
+            aria-label="Siguiente"
+            className="absolute right-1.5 top-[40%] -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/95 dark:bg-slate-900/95 shadow-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-200 transition active:scale-90"
+          >
+            <ChevronRightIcon className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* Scroll container */}
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex gap-3 overflow-x-auto pl-4 pr-4 pb-1 no-scrollbar snap-x snap-mandatory"
+        >
+          {products.map((p, idx) => (
+            <div key={p.id} className="snap-start shrink-0 w-[75%]">
+              <ProductCard product={p} idx={idx} />
+            </div>
+          ))}
+          {/* trailing spacer so last card isn't flush with edge */}
+          <div className="shrink-0 w-3" aria-hidden />
+        </div>
+
+        {/* Dot indicators */}
+        <div className="flex justify-center gap-1.5 mt-4">
+          {products.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => scrollTo(i)}
+              aria-label={`Ir al producto ${i + 1}`}
+              className={`rounded-full transition-all duration-300 ${
+                i === activeIndex
+                  ? "w-5 h-2 bg-[#0A2A66] dark:bg-[#5B9BD5]"
+                  : "w-2 h-2 bg-slate-300 dark:bg-slate-600 hover:bg-slate-400 dark:hover:bg-slate-500"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Desktop Grid ── */}
+      <div className="hidden sm:grid grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+        {products.map((p, idx) => (
+          <ProductCard key={p.id} product={p} idx={idx} />
+        ))}
+      </div>
     </div>
   );
 }

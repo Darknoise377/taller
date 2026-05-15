@@ -161,19 +161,39 @@ export default async function ProductsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
       />
-      {/* Banner / encabezado específico de la página de productos */}
-      <header className="relative pt-8 pb-6 px-4 md:px-12 overflow-hidden">
+      {/* Hero banner */}
+      <header className="relative overflow-hidden bg-gradient-to-br from-[#050F2C] via-[#0A2A66] to-[#0d3580] py-10 px-4">
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-br from-[#0A2A66]/10 via-[#2E5FA7]/8 to-transparent dark:from-[#0A2A66]/20 dark:via-[#2E5FA7]/12 blur-3xl"
+          className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle,_#fff_1px,_transparent_1px)] [background-size:20px_20px]"
         />
-        <div className="relative max-w-7xl mx-auto z-10 text-center md:text-left">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] bg-clip-text text-transparent mb-2">
-            Catálogo de repuestos
-          </h1>
-          <p className="text-md sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto md:mx-0">
-            Encuentra repuestos y accesorios para tu moto con información clara, precios visibles y stock actualizado.
-          </p>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#050F2C]/50" aria-hidden />
+        <div className="relative max-w-7xl mx-auto z-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+              <p className="text-[#7BA4D9] text-xs font-bold uppercase tracking-widest mb-2">Catálogo completo</p>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight">
+                Repuestos <span className="text-[#4A8FE2]">&amp; Accesorios</span>
+              </h1>
+              <p className="mt-2 text-[#9DC0E8] text-sm sm:text-base max-w-xl">
+                Stock actualizado, precios visibles y despacho a todo Colombia.
+              </p>
+            </div>
+            <div className="flex gap-6 md:gap-8">
+              <div className="text-center">
+                <p className="text-2xl sm:text-3xl font-black text-white">{totalCount}+</p>
+                <p className="text-[#7BA4D9] text-xs font-semibold mt-0.5">Productos</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl sm:text-3xl font-black text-white">14</p>
+                <p className="text-[#7BA4D9] text-xs font-semibold mt-0.5">Categorías</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl sm:text-3xl font-black text-white">🇨🇴</p>
+                <p className="text-[#7BA4D9] text-xs font-semibold mt-0.5">Colombia</p>
+              </div>
+            </div>
+          </div>
         </div>
       </header>
       <ProductsClient initialProducts={products} totalCount={totalCount} />

@@ -13,6 +13,7 @@ import {
 
 import type { Product as ProductType, ProductSize } from "@/types/product";
 import {
+  PRODUCT_CATEGORIES,
   getProductCategoryDescription,
   getProductCategoryLabel,
 } from "@/constants/productCategories";
@@ -70,10 +71,6 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
     }
   }, []);
 
-  const uniqueCategories = useMemo(
-    () => Array.from(new Set(products.map((p) => p.category))).filter(Boolean),
-    [products]
-  );
   const uniqueSizes = useMemo(
     () => Array.from(new Set(products.flatMap((p) => p.sizes ?? []))).filter(Boolean),
     [products]
@@ -238,6 +235,17 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
     setShowMobileFilters(false);
   }, [updateURLParams]);
 
+  const activeFilterCount = useMemo(() => {
+    let c = 0;
+    if (selectedCategory !== 'all') c++;
+    if (selectedSize !== 'all') c++;
+    if (selectedColor !== 'all') c++;
+    if (selectedModel !== 'all') c++;
+    if (minPrice || maxPrice) c++;
+    if (sortBy !== 'relevance') c++;
+    return c;
+  }, [selectedCategory, selectedSize, selectedColor, selectedModel, minPrice, maxPrice, sortBy]);
+
   useEffect(() => {
     if (!showMobileFilters) return;
     const previousOverflow = document.body.style.overflow;
@@ -261,214 +269,354 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
   }, [fetchProductsFromServer, areFiltersActive, products.length]);
 
   return (
-    <div className="container mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10 lg:py-12">
-      {/* Skeleton — initial load */}
-      {loading && products.length === 0 && (
-        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 animate-pulse">
-              <div className="aspect-square bg-slate-200 dark:bg-slate-700" />
-              <div className="p-4 space-y-2.5">
-                <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-2/3" />
-                <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-1/2" />
-                <div className="flex items-center justify-between mt-3">
-                  <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded-full w-1/3" />
-                  <div className="h-8 w-8 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+    <div className="bg-gray-50 dark:bg-[#070617] min-h-screen">
+      {/* ── Sticky search + category bar ─────────────────────────────── */}
+      <div className="sticky top-[68px] z-30 bg-white/95 dark:bg-[#070617]/98 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Search + controls row */}
+          <div className="flex items-center gap-2 py-3">
+            {/* Search input */}
+            <div className="relative flex-1">
+              <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+              <input
+                placeholder="Buscar repuesto, marca o modelo..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-[#0A2A66] dark:focus:border-[#2E5FA7] focus:bg-white dark:focus:bg-slate-900 text-sm text-slate-800 dark:text-slate-200 outline-none transition-all placeholder-slate-400"
+              />
+            </div>
+            {/* Desktop: sort */}
+            <div className="relative hidden md:block">
+              <select
+                aria-label="Ordenar"
+                value={sortBy}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="pl-3 pr-8 py-2.5 text-sm rounded-xl bg-slate-100 dark:bg-slate-800 border border-transparent text-slate-700 dark:text-slate-300 appearance-none cursor-pointer outline-none hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              >
+                <option value="relevance">Relevancia</option>
+                <option value="price-asc">Precio ↑</option>
+                <option value="price-desc">Precio ↓</option>
+                <option value="newest">Recientes</option>
+              </select>
+              <ChevronDownIcon className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            </div>
+            {/* Mobile: filter button */}
+            <button
+              type="button"
+              onClick={() => setShowMobileFilters(true)}
+              className={`md:hidden flex items-center gap-1.5 pl-3 pr-4 py-2.5 rounded-xl text-sm font-semibold transition-colors ${
+                areFiltersActive
+                  ? 'bg-[#0A2A66] text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              <FunnelIcon className="w-4 h-4" />
+              {areFiltersActive ? `Filtros (${activeFilterCount})` : 'Filtros'}
+            </button>
+          </div>
+
+          {/* Category pills */}
+          <div className="flex gap-2 overflow-x-auto pb-3 no-scrollbar">
+            <button
+              type="button"
+              onClick={() => handleFilterChange('category', 'all')}
+              className={`flex-none px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+                selectedCategory === 'all'
+                  ? 'bg-[#0A2A66] text-white shadow-md'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+              }`}
+            >
+              Todos
+            </button>
+            {PRODUCT_CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => handleFilterChange('category', cat)}
+                className={`flex-none px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+                  selectedCategory === cat
+                    ? 'bg-[#0A2A66] text-white shadow-md'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                {getProductCategoryLabel(cat)}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+        {/* Desktop: advanced filters row */}
+        <div className="hidden md:flex flex-wrap items-center gap-2 mb-5">
+          <FilterSelect label="Medida" value={selectedSize} onChange={(e) => handleFilterChange("size", e.target.value)} options={uniqueSizes} />
+          <FilterSelect label="Compatibilidad" value={selectedColor} onChange={(e) => handleFilterChange("color", e.target.value)} options={uniqueColors} />
+          <FilterSelect label="Modelo" value={selectedModel} onChange={(e) => handleFilterChange('model', e.target.value)} options={modelSuggestions} />
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2 border border-transparent text-sm">
+            <span className="text-slate-400 text-xs mr-1">$</span>
+            <input
+              type="number"
+              placeholder="Mín"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              onBlur={() => handlePriceChange(minPrice, maxPrice)}
+              className="w-16 text-xs bg-transparent outline-none text-slate-700 dark:text-slate-300 placeholder-slate-400"
+            />
+            <span className="text-slate-400 mx-1">—</span>
+            <input
+              type="number"
+              placeholder="Máx"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              onBlur={() => handlePriceChange(minPrice, maxPrice)}
+              className="w-16 text-xs bg-transparent outline-none text-slate-700 dark:text-slate-300 placeholder-slate-400"
+            />
+          </div>
+          {areFiltersActive && (
+            <button
+              onClick={handleResetFilters}
+              className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white transition-all"
+            >
+              <XMarkIcon className="w-3.5 h-3.5" />
+              Limpiar filtros
+            </button>
+          )}
+        </div>
+
+        {/* Category description banner */}
+        {selectedCategoryLabel && (
+          <div className="mb-5 rounded-2xl bg-gradient-to-r from-[#0A2A66]/8 to-[#2E5FA7]/5 dark:from-[#0A2A66]/25 dark:to-[#2E5FA7]/10 border border-[#0A2A66]/15 dark:border-[#2E5FA7]/20 px-5 py-4">
+            <h2 className="font-bold text-base text-[#0A2A66] dark:text-slate-100">{selectedCategoryLabel}</h2>
+            {selectedCategoryDescription && (
+              <p className="text-sm text-slate-600 dark:text-slate-400 mt-0.5">{selectedCategoryDescription}</p>
+            )}
+          </div>
+        )}
+
+        {/* Results bar */}
+        {!loading && (
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              <span className="font-black text-slate-900 dark:text-slate-100">{visibleProducts.length}</span>
+              {' de '}
+              <span className="font-bold">{totalCount}</span>
+              {' productos'}
+            </p>
+            {searchTerm && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/15 dark:border-[#2E5FA7]/25">
+                &ldquo;{searchTerm}&rdquo;
+                <button type="button" aria-label="Quitar búsqueda" onClick={() => updateURLParams({ q: '' })}><XMarkIcon className="w-3 h-3 hover:text-red-500" /></button>
+              </span>
+            )}
+            {selectedSize !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/15 dark:border-[#2E5FA7]/25">
+                Medida: {selectedSize}
+                <button type="button" aria-label="Quitar medida" onClick={() => updateURLParams({ size: 'all' })}><XMarkIcon className="w-3 h-3 hover:text-red-500" /></button>
+              </span>
+            )}
+            {selectedColor !== 'all' && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/15 dark:border-[#2E5FA7]/25">
+                Comp.: {selectedColor}
+                <button type="button" aria-label="Quitar compatibilidad" onClick={() => updateURLParams({ color: 'all' })}><XMarkIcon className="w-3 h-3 hover:text-red-500" /></button>
+              </span>
+            )}
+            {sortBy !== 'relevance' && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-semibold border border-amber-200 dark:border-amber-800">
+                {({ 'price-asc': 'Precio ↑', 'price-desc': 'Precio ↓', newest: 'Recientes' } as Record<string, string>)[sortBy] ?? sortBy}
+                <button type="button" aria-label="Quitar orden" onClick={() => updateURLParams({ sort: 'relevance' })}><XMarkIcon className="w-3 h-3 hover:text-red-500" /></button>
+              </span>
+            )}
+            {(minPrice || maxPrice) && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/15 dark:border-[#2E5FA7]/25">
+                ${minPrice || '0'}–${maxPrice || '∞'}
+                <button type="button" aria-label="Quitar precio" onClick={() => handlePriceChange('', '')}><XMarkIcon className="w-3 h-3 hover:text-red-500" /></button>
+              </span>
+            )}
+            {areFiltersActive && (
+              <button onClick={handleResetFilters} className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-100 dark:border-red-900/30">
+                <ArrowPathIcon className="w-3 h-3" />
+                Limpiar todo
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Skeleton — initial load */}
+        {loading && products.length === 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 animate-pulse">
+                <div className="aspect-square bg-slate-200 dark:bg-slate-700" />
+                <div className="p-3 space-y-2">
+                  <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-3/4" />
+                  <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-1/2" />
+                  <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded-xl mt-2" />
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Spinner — re-fetch with existing products */}
-      {loading && products.length > 0 && (
-        <div className="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-4">
-          <span className="inline-block w-4 h-4 border-2 border-[#0A2A66] border-t-transparent rounded-full animate-spin" />
-          Actualizando resultados...
-        </div>
-      )}
-      {selectedCategoryLabel && (
-        <div className="mb-8 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-5 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Categoria activa</p>
-          <h2 className="mt-2 text-2xl font-bold text-slate-900 dark:text-slate-100">{selectedCategoryLabel}</h2>
-          {selectedCategoryDescription && <p className="mt-2 max-w-3xl text-sm text-slate-600 dark:text-slate-300">{selectedCategoryDescription}</p>}
-        </div>
-      )}
-
-      {/* Filtros Desktop */}
-      <div className="hidden md:block sticky top-24 z-20 mb-12 p-5 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-lg">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="relative flex-grow min-w-[250px]">
-            <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input placeholder="Buscar producto..." value={searchTerm} onChange={handleSearchChange} className="w-full text-sm pl-11 pr-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 focus:ring-2 focus:ring-[#0A2A66]" />
+            ))}
           </div>
-          <FilterSelect label="Categorías" value={selectedCategory} onChange={(e) => handleFilterChange("category", e.target.value)} options={uniqueCategories} formatOptionLabel={getProductCategoryLabel} />
-          <FilterSelect label="Medidas" value={selectedSize} onChange={(e) => handleFilterChange("size", e.target.value)} options={uniqueSizes} />
-          <FilterSelect label="Compatibilidad" value={selectedColor} onChange={(e) => handleFilterChange("color", e.target.value)} options={uniqueColors} />
-          <FilterSelect label="Modelo (sugerido)" value={selectedModel} onChange={(e) => handleFilterChange('model', e.target.value)} options={modelSuggestions} />
-          <FilterSelect label="Ordenar" value={sortBy} onChange={(e) => handleSortChange(e.target.value)} options={['relevance','price-asc','price-desc','newest']} formatOptionLabel={(v)=> ({relevance:'Relevancia', 'price-asc':'Precio: menor a mayor','price-desc':'Precio: mayor a menor','newest':'Recientes'} as Record<string,string>)[v] || v} />
-          <div className="flex items-center gap-2">
-            <input type="number" placeholder="Mín" value={minPrice} onChange={(e)=>{ setMinPrice(e.target.value); }} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-20 text-sm pl-2 pr-2 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50" />
-            <input type="number" placeholder="Máx" value={maxPrice} onChange={(e)=>{ setMaxPrice(e.target.value); }} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-20 text-sm pl-2 pr-2 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50" />
+        )}
+
+        {/* Spinner — re-fetch with existing products */}
+        {loading && products.length > 0 && (
+          <div className="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400 py-3 mb-4">
+            <span className="w-4 h-4 border-2 border-[#0A2A66] border-t-transparent rounded-full animate-spin" />
+            Actualizando resultados...
           </div>
-          {areFiltersActive && <button onClick={handleResetFilters} className="flex items-center gap-2 text-sm px-4 py-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors"><ArrowPathIcon className="w-4 h-4" /> Limpiar</button>}
-        </div>
+        )}
+
+        <AnimatePresence mode="wait">
+          {visibleProducts.length > 0 ? (
+            <>
+              <motion.div
+                key="product-grid"
+                layout
+                className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4"
+              >
+                {visibleProducts.map((p, idx) => <ProductCard key={p.id} product={p} idx={idx} />)}
+              </motion.div>
+              {products.length < totalCount && (
+                <div className="mt-8 flex flex-col items-center gap-2">
+                  <button
+                    disabled={loadingMore}
+                    onClick={() => fetchProductsFromServer(page + 1, true)}
+                    className="group flex items-center gap-2 px-8 py-3 rounded-2xl border-2 border-[#0A2A66] dark:border-[#2E5FA7] text-[#0A2A66] dark:text-[#5B9BD5] font-bold text-sm hover:bg-[#0A2A66] hover:text-white dark:hover:bg-[#2E5FA7] dark:hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loadingMore ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        Cargando...
+                      </>
+                    ) : (
+                      <>
+                        <ArrowPathIcon className="w-4 h-4" />
+                        Ver más ({totalCount - products.length} productos)
+                      </>
+                    )}
+                  </button>
+                  <p className="text-xs text-slate-400">{products.length} de {totalCount} productos</p>
+                </div>
+              )}
+            </>
+          ) : !loading ? (
+            <motion.div
+              key="no-results"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center justify-center py-24 text-center"
+            >
+              <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-5">
+                <MagnifyingGlassIcon className="w-9 h-9 text-slate-400 dark:text-slate-600" />
+              </div>
+              <p className="text-xl font-black text-slate-800 dark:text-slate-200">Sin resultados</p>
+              <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-sm text-sm leading-relaxed">
+                Prueba cambiando los filtros o el término de búsqueda.
+              </p>
+              {areFiltersActive && (
+                <button
+                  onClick={handleResetFilters}
+                  className="mt-6 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-bold text-sm flex items-center gap-2 hover:opacity-90 transition-opacity"
+                >
+                  <ArrowPathIcon className="w-4 h-4" />
+                  Limpiar filtros
+                </button>
+              )}
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </div>
 
-      {/* Filtros Móviles */}
-      <div className="md:hidden mb-6 sticky top-[70px] z-40 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
-        <div className="px-4 pt-3 pb-2">
-          <div className="relative">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input placeholder="Buscar producto..." value={searchTerm} onChange={handleSearchChange} className="w-full text-sm pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 focus:ring-2 focus:ring-[#0A2A66] outline-none" />
-          </div>
-        </div>
-
-        <button onClick={() => setShowMobileFilters(true)} className="w-full flex items-center justify-between px-4 py-2.5">
-          <div className="flex items-center gap-2">
-            <FunnelIcon className="w-5 h-5 text-[#0A2A66]" />
-            <span className="font-semibold text-slate-800 dark:text-slate-200">{areFiltersActive ? "Filtros Aplicados" : "Filtrar y Ordenar"}</span>
-          </div>
-          <ChevronDownIcon className="w-5 h-5 text-slate-500" />
-        </button>
-      </div>
-
+      {/* ── Mobile filter drawer ─────────────────────────────────── */}
       <AnimatePresence>
         {showMobileFilters && (
           <>
             <motion.button
               type="button"
               aria-label="Cerrar filtros"
-              className="md:hidden fixed inset-0 z-50 bg-black/45"
+              className="md:hidden fixed inset-0 z-50 bg-black/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowMobileFilters(false)}
             />
-
             <motion.div
               key="mobile-filters-drawer"
-              initial={{ y: "100%" }}
+              initial={{ y: '100%' }}
               animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="md:hidden fixed inset-x-0 bottom-0 z-[60] rounded-t-2xl border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl"
+              exit={{ y: '100%' }}
+              transition={{ duration: 0.28, ease: 'easeOut' }}
+              className="md:hidden fixed inset-x-0 bottom-0 z-[60] rounded-t-3xl bg-white dark:bg-[#0b0a1f] shadow-2xl border-t border-slate-200 dark:border-slate-800"
             >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100">Filtrar y Ordenar</h3>
+              <div className="flex justify-center pt-3">
+                <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-700" />
+              </div>
+              <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 dark:border-slate-800">
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">Filtrar y ordenar</h3>
                 <button
                   type="button"
+                  aria-label="Cerrar filtros"
                   onClick={() => setShowMobileFilters(false)}
-                  aria-label="Cerrar"
-                  className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="w-8 h-8 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                 >
                   <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
-
-              <div className="max-h-[68vh] overflow-y-auto p-4 grid grid-cols-1 gap-3">
-                <FilterSelect label="Categoría" value={selectedCategory} onChange={(e) => handleFilterChange("category", e.target.value)} options={uniqueCategories} isMobile formatOptionLabel={getProductCategoryLabel} />
-                <FilterSelect label="Medida" value={selectedSize} onChange={(e) => handleFilterChange("size", e.target.value)} options={uniqueSizes} isMobile />
-                <FilterSelect label="Compatibilidad" value={selectedColor} onChange={(e) => handleFilterChange("color", e.target.value)} options={uniqueColors} isMobile />
-                <FilterSelect label="Modelo (sugerido)" value={selectedModel} onChange={(e) => handleFilterChange('model', e.target.value)} options={modelSuggestions} isMobile />
-                <div className="flex gap-2">
-                  <input type="number" placeholder="Mín" value={minPrice} onChange={(e)=>setMinPrice(e.target.value)} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-1/2 p-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" />
-                  <input type="number" placeholder="Máx" value={maxPrice} onChange={(e)=>setMaxPrice(e.target.value)} onBlur={()=>handlePriceChange(minPrice, maxPrice)} className="w-1/2 p-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800" />
+              <div className="max-h-[62vh] overflow-y-auto px-5 py-4 space-y-4">
+                <FilterSelect label="Medida" value={selectedSize} onChange={(e) => handleFilterChange('size', e.target.value)} options={uniqueSizes} isMobile />
+                <FilterSelect label="Compatibilidad" value={selectedColor} onChange={(e) => handleFilterChange('color', e.target.value)} options={uniqueColors} isMobile />
+                <FilterSelect label="Modelo sugerido" value={selectedModel} onChange={(e) => handleFilterChange('model', e.target.value)} options={modelSuggestions} isMobile />
+                <FilterSelect
+                  label="Ordenar por"
+                  value={sortBy}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  options={['relevance', 'price-asc', 'price-desc', 'newest']}
+                  isMobile
+                  formatOptionLabel={(v) =>
+                    ({ relevance: 'Relevancia', 'price-asc': 'Menor precio', 'price-desc': 'Mayor precio', newest: 'Más recientes' } as Record<string, string>)[v] ?? v
+                  }
+                />
+                <div>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Rango de precio</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder="Mínimo"
+                      value={minPrice}
+                      onChange={(e) => setMinPrice(e.target.value)}
+                      onBlur={() => handlePriceChange(minPrice, maxPrice)}
+                      className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-[#0A2A66] dark:focus:border-[#2E5FA7]"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Máximo"
+                      value={maxPrice}
+                      onChange={(e) => setMaxPrice(e.target.value)}
+                      onBlur={() => handlePriceChange(minPrice, maxPrice)}
+                      className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-[#0A2A66] dark:focus:border-[#2E5FA7]"
+                    />
+                  </div>
                 </div>
-                <FilterSelect label="Ordenar" value={sortBy} onChange={(e) => handleSortChange(e.target.value)} options={['relevance','price-asc','price-desc','newest']} isMobile formatOptionLabel={(v)=> ({relevance:'Relevancia', 'price-asc':'Precio: menor a mayor','price-desc':'Precio: mayor a menor','newest':'Recientes'} as Record<string,string>)[v] || v} />
               </div>
-
-              <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex gap-2">
+              <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-800 flex gap-3">
                 {areFiltersActive && (
-                  <button onClick={handleResetFilters} className="w-1/2 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 font-semibold">
-                    <ArrowPathIcon className="w-5 h-5" />
+                  <button
+                    onClick={handleResetFilters}
+                    className="flex-1 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  >
                     Limpiar
                   </button>
                 )}
                 <button
                   type="button"
                   onClick={() => setShowMobileFilters(false)}
-                  className={`${areFiltersActive ? 'w-1/2' : 'w-full'} px-4 py-3 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold`}
+                  className={`${areFiltersActive ? 'flex-1' : 'w-full'} py-3 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white text-sm font-bold shadow-lg`}
                 >
-                  Ver resultados
+                  Ver {visibleProducts.length} productos
                 </button>
               </div>
             </motion.div>
           </>
-        )}
-      </AnimatePresence>
-
-      {/* Chips de filtros activos */}
-      {areFiltersActive && (
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Filtros:</span>
-          {searchTerm && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
-              &ldquo;{searchTerm}&rdquo;
-              <button type="button" aria-label="Quitar búsqueda" onClick={() => updateURLParams({ q: "" })} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
-            </span>
-          )}
-          {selectedCategory !== "all" && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
-              {getProductCategoryLabel(selectedCategory)}
-              <button type="button" aria-label="Quitar categoría" onClick={() => updateURLParams({ category: "all" })} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
-            </span>
-          )}
-          {selectedSize !== "all" && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
-              Medida: {selectedSize}
-              <button type="button" aria-label="Quitar medida" onClick={() => updateURLParams({ size: "all" })} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
-            </span>
-          )}
-          {selectedColor !== "all" && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
-              Comp.: {selectedColor}
-              <button type="button" aria-label="Quitar compatibilidad" onClick={() => updateURLParams({ color: "all" })} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
-            </span>
-          )}
-          {sortBy !== "relevance" && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
-              {{ "price-asc": "Precio ↑", "price-desc": "Precio ↓", newest: "Recientes" }[sortBy] ?? sortBy}
-              <button type="button" aria-label="Quitar orden" onClick={() => updateURLParams({ sort: "relevance" })} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
-            </span>
-          )}
-          {(minPrice || maxPrice) && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/20 dark:border-[#2E5FA7]/30">
-              ${minPrice || "0"} – ${maxPrice || "∞"}
-              <button type="button" aria-label="Quitar rango de precio" onClick={() => handlePriceChange("", "")} className="hover:text-red-500 transition-colors"><XMarkIcon className="w-3.5 h-3.5" /></button>
-            </span>
-          )}
-          <button onClick={handleResetFilters} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-500/10 text-red-500 text-xs font-semibold hover:bg-red-500 hover:text-white transition-all duration-200">
-            <ArrowPathIcon className="w-3.5 h-3.5" />
-            Limpiar todo
-          </button>
-        </div>
-      )}
-
-      <AnimatePresence mode="wait">
-        {visibleProducts.length > 0 ? (
-          <>
-            <div className="mb-4 flex items-center justify-between">
-              <div className="text-sm text-slate-600">Mostrando {products.length} de {totalCount} productos</div>
-              <div className="text-sm text-slate-500">&nbsp;</div>
-            </div>
-            <motion.div key="product-grid" layout className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {visibleProducts.map((p, idx) => <ProductCard key={p.id} product={p} idx={idx} />)}
-            </motion.div>
-            {products.length < totalCount && (
-              <div className="mt-6 flex justify-center">
-                <button disabled={loadingMore} onClick={() => fetchProductsFromServer(page + 1, true)} className="px-5 py-3 rounded-xl bg-[#0A2A66] text-white font-semibold hover:opacity-90">{loadingMore ? 'Cargando...' : 'Cargar más'}</button>
-              </div>
-            )}
-          </>
-        ) : (
-          <motion.div key="no-products-message" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="col-span-full flex flex-col items-center justify-center text-center py-20">
-            <MagnifyingGlassIcon className="w-16 h-16 text-slate-300 dark:text-slate-700 mb-4" />
-            <p className="text-xl font-bold text-slate-800 dark:text-slate-200">No se encontraron productos</p>
-            <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-sm">Prueba cambiando los filtros o la búsqueda para encontrar lo que necesitas</p>
-            {areFiltersActive && <button onClick={handleResetFilters} className="mt-6 px-5 py-3 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-semibold flex items-center gap-2 mx-auto hover:opacity-90 transition-opacity"><ArrowPathIcon className="w-5 h-5" /> Limpiar filtros</button>}
-          </motion.div>
         )}
       </AnimatePresence>
     </div>

@@ -79,8 +79,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
       {/* ── Imagen ──────────────────────────────── */}
       <Link
         href={`/products/${product.id}`}
-        className="relative block overflow-hidden bg-slate-100 dark:bg-slate-800"
-        style={{ aspectRatio: "1 / 1" }}
+        className="relative block overflow-hidden bg-slate-100 dark:bg-slate-800 aspect-square"
         tabIndex={-1}
         aria-hidden="true"
       >
@@ -132,7 +131,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
       </Link>
 
       {/* ── Contenido ───────────────────────────── */}
-      <div className="flex flex-col flex-1 p-4 gap-3">
+      <div className="flex flex-col flex-1 p-3 sm:p-4 gap-2 sm:gap-3">
         {/* Nombre + precio */}
         <div>
           <Link href={`/products/${product.id}`}>
@@ -140,7 +139,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
               {product.name}
             </h3>
           </Link>
-          <p className="mt-1.5 text-xl sm:text-2xl font-extrabold text-[#0A2A66] dark:text-[#5B8DD9]">
+          <p className="mt-1 text-lg sm:text-2xl font-extrabold text-[#0A2A66] dark:text-[#5B8DD9]">
             ${Number(product.price).toLocaleString("es-CO")}
           </p>
         </div>
