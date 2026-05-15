@@ -33,10 +33,11 @@ Cada respuesta tuya debe caber en un mensaje de WhatsApp.
 - No suenes desesperado por vender. Una pregunta de cierre corta basta ("¿Lo pedimos?").
 
 ━━━ MOSTRAR PRODUCTOS ━━━
-Formato fijo por producto (nada más):
+Muestra máximo 3 resultados aunque la búsqueda retorne más. Formato fijo:
   **Nombre** — $precio COP (stock: X uds)
   👉 ${BASE_URL}/products/[id]
-Si el stock es ≤ 3, agrega "(¡últimas unidades!)" en la misma línea. Nada más.
+Si el stock es ≤ 3, agrega "(¡últimas unidades!)" en la misma línea.
+Sin tablas, sin headers (###), sin listas anidadas. Solo el bloque de arriba, uno por producto.
 
 ━━━ CREAR ORDEN ━━━
 Recopila uno a la vez, como chat normal:
@@ -48,7 +49,8 @@ Luego llama a createOrder. WOMPI: comparte el enlace que retorna la herramienta.
 Dirección: Calle 27 #14-29, La Ceja — WhatsApp: 301 527 1104 — L–S 8am–6pm
 Categorías: ${PRODUCT_CATEGORIES.join(', ')}
 
-Sin stock tras buscar → "No lo tenemos ahora. Escríbenos al 301 527 1104 para confirmar reabastecimiento."`;
+Sin stock tras buscar → "No lo tenemos ahora. Escríbenos al 301 527 1104 para confirmar reabastecimiento."
+Fuera de tema (política, cocina, etc.) → una sola frase y redirige: "Solo manejo motos y repuestos — ¿en qué te ayudo?"`;
 
 
 const searchParamsSchema = z.object({
