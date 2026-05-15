@@ -10,7 +10,7 @@ import {
 } from "./lib/auth/jwt";
 import { COOKIE_NAME, CUSTOMER_COOKIE_NAME } from "./config/admin";
 import type { AdminRole } from "./types/auth";
-import { auditSecurityEvent } from "./lib/security/audit";
+import { auditSecurityEventEdge as auditSecurityEvent } from "./lib/security/audit-edge";
 import { validateCsrfToken, CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from "./lib/csrf";
 
 // ─── Role hierarchy ───────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { AdminRole } from "@/types/auth";
 
-type AuditAction = "ACCESS_DENIED" | "SENSITIVE_ACTION" | "LOGIN_FAILED" | "LOGIN_SUCCESS";
+export type AuditAction = "ACCESS_DENIED" | "SENSITIVE_ACTION" | "LOGIN_FAILED" | "LOGIN_SUCCESS";
 
 export function auditSecurityEvent(input: {
   action: AuditAction;
