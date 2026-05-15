@@ -31,6 +31,7 @@ export default function CartModal() {
   } = useCart();
 
   const modalRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const [shippingConfig, setShippingConfig] = React.useState<ShippingConfig>(DEFAULT_SHIPPING_CONFIG);
 
   useEffect(() => {
@@ -54,14 +55,29 @@ export default function CartModal() {
   useEffect(() => {
     if (isCartModalOpen) {
       document.body.style.overflow = "hidden";
-      // No necesitamos focus en un panel lateral, pero no hace daño
-      modalRef.current?.focus();
+      // Mover foco al botón de cerrar al abrir
+      setTimeout(() => closeButtonRef.current?.focus(), 50);
     } else {
       document.body.style.overflow = "unset";
     }
 
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeCartModal();
+      if (e.key === "Escape") { closeCartModal(); return; }
+
+      // Focus trap: mantener el foco dentro del panel cuando está abierto
+      if (e.key === "Tab" && isCartModalOpen && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      }
     };
 
     document.addEventListener("keydown", handleKey);
@@ -89,6 +105,9 @@ export default function CartModal() {
     >
       <div
         ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Carrito de compras"
         tabIndex={-1}
         className={
           "w-full max-w-md h-full flex flex-col bg-white/80 dark:bg-[#070617]/80 backdrop-blur-xl " +
@@ -104,6 +123,7 @@ export default function CartModal() {
                 Tu Carrito ({totalItems})
               </h3>
               <button
+                ref={closeButtonRef}
                 aria-label="Cerrar carrito"
                 onClick={closeCartModal}
                 className="p-2 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors"

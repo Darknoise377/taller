@@ -10,6 +10,7 @@ import CartModal from '@/components/CartModal';
 import ConditionalNavbar from '@/components/ConditionalNavbar';
 import DynamicFooter from '@/components/DynamicFooter';
 import AnnouncementBar from '@/components/AnnouncementBar';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from "./theme-provider";
 import { getBaseUrl, getBaseUrlAsUrl } from "@/lib/site";
@@ -156,7 +157,9 @@ export default function RootLayout({
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
               />
               {/* 🔹 Contenido dinámico */}
-              <main id="main-content" className="pb-24 md:pb-0">{children}</main>
+              <main id="main-content" className="pb-24 md:pb-0">
+                <ErrorBoundary>{children}</ErrorBoundary>
+              </main>
               {/* 🔹 Modal del carrito */}
               <CartModal />
               {/* 🔹 Botones flotantes (WhatsApp + Back to top) */}

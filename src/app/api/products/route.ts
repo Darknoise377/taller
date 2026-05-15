@@ -89,7 +89,12 @@ export async function GET(req: Request) {
       prisma.product.count({ where }),
     ]);
 
-    return NextResponse.json({ items, total, page, limit });
+    return NextResponse.json({ items, total, page, limit }, {
+      headers: {
+        // 60s en CDN, revalidar en segundo plano hasta 5min
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
+    });
   } catch (error) {
     console.error('Error al obtener productos:', error);
     return NextResponse.json({ error: 'Error al obtener productos' }, { status: 500 });
