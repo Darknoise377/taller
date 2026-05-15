@@ -1,13 +1,24 @@
 ﻿"use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Facebook, Instagram, MessageCircle } from "lucide-react";
 import { isCheckoutPath } from "@/utils/routeUtils";
 
+const BRAND_COLORS = ["#0A2A66", "#2E5FA7", "#3b82f6", "#1d4ed8", "#60a5fa", "#2563eb"];
+
 export default function DynamicFooter() {
   const pathname = usePathname();
+  const [colorIdx, setColorIdx] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setColorIdx((i) => (i + 1) % BRAND_COLORS.length);
+    }, 1800);
+    return () => clearInterval(interval);
+  }, []);
 
   // En checkout y admin no mostramos footer
   if (isCheckoutPath(pathname) || pathname?.startsWith('/admin')) return null;
@@ -130,8 +141,9 @@ export default function DynamicFooter() {
           <p>© {new Date().getFullYear()} Almacén y Taller Motoservicio A&amp;R. Todos los derechos reservados.</p>
           <p className="flex items-center gap-2">
             <span className="text-slate-400 dark:text-slate-500">Diseño web por</span>
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-black tracking-[0.18em] bg-gradient-to-r from-[#0A2A66] via-[#1d4ed8] to-[#2E5FA7] text-white shadow-lg shadow-[#0A2A66]/40 dark:shadow-[#2E5FA7]/30 ring-1 ring-white/20 hover:shadow-xl hover:brightness-110 transition-all cursor-default select-none">
-              ✦ FACRISCD ✦
+            <span className="brand-text-animate font-black tracking-[0.18em] cursor-default select-none text-[13px]"
+              style={{ color: BRAND_COLORS[colorIdx], transition: "color 1.4s ease-in-out" }}>
+              FACRISCD
             </span>
           </p>
         </div>

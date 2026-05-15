@@ -46,7 +46,28 @@ html {
   color: #0A2A66;
 }
 
-.dark ::selection {
-  background-color: rgba(46, 95, 167, 0.3);
-  color: #e5edf7;
+/* Animated brand text color (footer credit) */
+@keyframes brand-color-cycle {
+  0%, 100% { color: #0A2A66; }
+  25%       { color: #2E5FA7; }
+  50%       { color: #3b82f6; }
+  75%       { color: #1d4ed8; }
+}
+@keyframes brand-color-cycle-dark {
+  0%, 100% { color: #60a5fa; }
+  25%       { color: #93c5fd; }
+  50%       { color: #3b82f6; }
+  75%       { color: #7dd3fc; }
+}
+.brand-text-animate {
+  animation: brand-color-cycle 6s ease-in-out infinite;
+}
+.dark .brand-text-animate {
+  animation-name: brand-color-cycle-dark;
+}
+
+/* Fade-in for tooltip */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
