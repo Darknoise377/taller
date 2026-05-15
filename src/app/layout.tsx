@@ -1,7 +1,6 @@
 ﻿// src/app/layout.tsx
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import dynamic from "next/dynamic";
 import "../styles/globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CartProvider } from '@/context/CartContext';
@@ -11,13 +10,10 @@ import ConditionalNavbar from '@/components/ConditionalNavbar';
 import DynamicFooter from '@/components/DynamicFooter';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import ClientOnlyWidgets from '@/components/ClientOnlyWidgets';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from "./theme-provider";
 import { getBaseUrl, getBaseUrlAsUrl } from "@/lib/site";
-
-// Cargados solo en cliente, sin bloquear el renderizado inicial
-const FloatingButtons = dynamic(() => import('@/components/FloatingButtons'), { ssr: false });
-const ChatWidget = dynamic(() => import('@/components/ChatWidget'), { ssr: false });
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -162,10 +158,8 @@ export default function RootLayout({
               </main>
               {/* 🔹 Modal del carrito */}
               <CartModal />
-              {/* 🔹 Botones flotantes (WhatsApp + Back to top) */}
-              <FloatingButtons />
-              {/* 🔹 Asistente IA flotante */}
-              <ChatWidget />
+              {/* 🔹 Botones flotantes + Asistente IA (solo cliente) */}
+              <ClientOnlyWidgets />
               {/* 🔹 Toast notifications */}
               <Toaster position="top-center" richColors closeButton />
               {/* 🔹 Footer dinámico */}
