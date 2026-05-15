@@ -33,7 +33,6 @@ const accessRules: AccessRule[] = [
   { pathPrefix: "/api/orders", methods: ["PATCH"], requiredRole: "ADMIN" },
   { pathPrefix: "/api/products", methods: ["POST", "PUT", "DELETE"], requiredRole: "ADMIN" },
   { pathPrefix: "/api/upload", methods: ["POST"], requiredRole: "ADMIN" },
-  { pathPrefix: "/api/cart", methods: ["PUT"], requiredRole: "ADMIN" },
   // VENDEDOR and above (read-only)
   { pathPrefix: "/api/orders", methods: ["GET"], requiredRole: "VENDEDOR" },
   { pathPrefix: "/api/codes", methods: ["GET"], requiredRole: "VENDEDOR" },
