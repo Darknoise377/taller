@@ -218,21 +218,29 @@ export default function ChatWidget() {
         <AnimatePresence>
           {showLabel && !open && (
             <motion.div
-              initial={{ opacity: 0, x: -10, scale: 0.95 }}
+              initial={{ opacity: 0, x: -16, scale: 0.92 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -10, scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 350, damping: 28 }}
-              className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-3.5 py-2.5 shadow-xl text-sm font-medium text-slate-700 dark:text-slate-200 whitespace-nowrap max-w-[220px]"
+              exit={{ opacity: 0, x: -12, scale: 0.94 }}
+              transition={{ type: "spring", stiffness: 380, damping: 30 }}
+              className="relative w-56 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 shadow-xl"
             >
-              <span>🔧 ¿Buscas un repuesto?</span>
+              {/* Puntero izquierdo hacia el botón */}
+              <span className="absolute -bottom-2 left-5 w-3 h-3 bg-white dark:bg-slate-800 border-b border-l border-slate-200 dark:border-slate-700 rotate-[-45deg]" />
+
               <button
                 type="button"
                 onClick={() => setShowLabel(false)}
                 aria-label="Cerrar sugerencia"
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 ml-1 transition-colors leading-none flex-shrink-0"
+                className="absolute top-2 right-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-base leading-none transition-colors"
               >
-                ✕
+                ×
               </button>
+              <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm pr-4">
+                🤖 ¡Hola! Soy <span className="text-[#2E5FA7] dark:text-blue-400">Mecha</span>
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                Tu asesor virtual de repuestos. ¿En qué te puedo ayudar?
+              </p>
             </motion.div>
           )}
         </AnimatePresence>
