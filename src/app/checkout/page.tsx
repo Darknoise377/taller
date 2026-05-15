@@ -267,9 +267,10 @@ const CheckoutPage: React.FC = () => {
   useEffect(() => {
     if (shippingInfo.state) {
       const dep = colombiaData.find((d) => d.departamento === shippingInfo.state);
-      setMunicipios(dep ? dep.ciudades.sort() : []);
-      // Resetea la ciudad si el departamento cambia
-      setShippingInfo((prev) => ({ ...prev, city: '' }));
+      const cities = dep ? dep.ciudades.sort() : [];
+      setMunicipios(cities);
+      // Solo resetea la ciudad si no pertenece al departamento seleccionado
+      setShippingInfo((prev) => ({ ...prev, city: cities.includes(prev.city) ? prev.city : '' }));
     } else {
       setMunicipios([]);
     }
