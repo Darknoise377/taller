@@ -4,7 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCustomerAuth } from "@/context/CustomerAuthContext";
-import { LogOut, Package, User } from "lucide-react";
+import { LogOut, Package, User, Heart } from "lucide-react";
 
 function CuentaShell({ children }: { children: React.ReactNode }) {
   const { user, logout } = useCustomerAuth();
@@ -12,6 +12,7 @@ function CuentaShell({ children }: { children: React.ReactNode }) {
 
   const NAV = [
     { href: "/cuenta/pedidos", label: "Mis pedidos", icon: Package },
+    { href: "/cuenta/favoritos", label: "Favoritos", icon: Heart },
     { href: "/cuenta/perfil", label: "Perfil", icon: User },
   ];
 

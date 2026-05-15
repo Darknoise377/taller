@@ -198,6 +198,10 @@ const CheckoutPage: React.FC = () => {
     error: string | null;
   }>({ loading: false, error: null });
 
+  // --- Stock reservation: availability check + countdown ---
+  const [stockWarnings, setStockWarnings] = useState<string[]>([]);
+  const [countdownSeconds, setCountdownSeconds] = useState(15 * 60);
+
   const freeShippingThreshold = shippingConfig.freeShippingThreshold;
   const isFreeShipping = shippingConfig.freeShippingAll || cartTotal >= freeShippingThreshold;
   const missingForFreeShipping = Math.max(0, freeShippingThreshold - cartTotal);
@@ -281,6 +285,44 @@ const CheckoutPage: React.FC = () => {
       router.push('/products');
     }
   }, [items, orderPlaced, router, isCartLoaded]);
+
+  // Check real-time stock availability when cart is ready
+  useEffect(() => {
+    if (!isCartLoaded || items.length === 0) return;
+    const param = items.map((i) => `${i.product.id}:${i.quantity}`).join(',');
+    fetch(`/api/cart/availability?items=${encodeURIComponent(param)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) return;
+        const warnings = (
+          data.items as Array<{
+            name: string;
+            available: boolean;
+            inStock: number;
+            requested: number;
+          }>
+        )
+          .filter((i) => !i.available)
+          .map((i) =>
+            i.inStock === 0
+              ? `"${i.name}" está agotado`
+              : `"${i.name}" solo tiene ${i.inStock} unidad${i.inStock > 1 ? 'es' : ''} disponible`
+          );
+        setStockWarnings(warnings);
+      })
+      .catch(() => {});
+  }, [isCartLoaded, items]);
+
+  // 15-minute countdown to encourage completing the purchase
+  useEffect(() => {
+    if (!isCartLoaded || items.length === 0) return;
+    setCountdownSeconds(15 * 60);
+    const interval = setInterval(() => {
+      setCountdownSeconds((t) => (t > 0 ? t - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCartLoaded]);
 
   // --- Handlers ---
 
@@ -762,6 +804,29 @@ const CheckoutPage: React.FC = () => {
                   Resumen del Pedido
                 </h2>
 
+                {/* Countdown timer */}
+                {(() => {
+                  const min = Math.floor(countdownSeconds / 60);
+                  const sec = countdownSeconds % 60;
+                  return countdownSeconds > 0 ? (
+                    <div className="mb-3 flex items-center gap-2 text-xs bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 text-amber-700 dark:text-amber-400 rounded-lg px-3 py-2">
+                      <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6l4 2m-4-8a9 9 0 100 18A9 9 0 0012 3z" /></svg>
+                      <span>
+                        Completa tu pedido en{' '}
+                        <strong>
+                          {min}:{sec.toString().padStart(2, '0')}
+                        </strong>{' '}
+                        para asegurar tu stock
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="mb-3 flex items-center gap-2 text-xs bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700/40 text-red-700 dark:text-red-400 rounded-lg px-3 py-2">
+                      <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                      <span>Tiempo de reserva expirado. Verifica disponibilidad antes de continuar.</span>
+                    </div>
+                  );
+                })()}
+
                 {/* Lista de Items (de V1, sin cambios) */}
                 <div className="max-h-72 sm:max-h-80 overflow-y-auto">
                   <ul className="divide-y divide-gray-200 dark:divide-slate-800">
@@ -934,6 +999,16 @@ const CheckoutPage: React.FC = () => {
                   <div className="mt-4 p-3 bg-red-100 dark:bg-red-500/10 border border-red-400 dark:border-red-500/30 text-red-700 dark:text-red-400 rounded-lg flex items-center text-sm">
                     <ExclamationCircleIcon className="w-5 h-5 mr-2 flex-shrink-0" />
                     <span>{error}</span>
+                  </div>
+                )}
+
+                {/* Stock warnings */}
+                {stockWarnings.length > 0 && (
+                  <div className="mt-4 p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700/40 text-orange-700 dark:text-orange-400 rounded-lg text-sm" role="alert">
+                    <p className="font-semibold mb-1">Algunos productos tienen stock limitado:</p>
+                    <ul className="list-disc list-inside space-y-0.5">
+                      {stockWarnings.map((w, i) => <li key={i}>{w}</li>)}
+                    </ul>
                   </div>
                 )}
 

@@ -9,7 +9,8 @@
     "start": "node ./node_modules/next/dist/bin/next start",
     "lint": "node ./node_modules/eslint/bin/eslint.js .",
     "test": "node --import tsx --test tests/**/*.test.ts",
-    "ai:worker": "tsx src/worker/processJobs.ts"
+    "ai:worker": "tsx src/worker/processJobs.ts",
+    "analyze": "cross-env ANALYZE=true node ./node_modules/next/dist/bin/next build"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.67",
@@ -55,11 +56,13 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/bundle-analyzer": "^15.5.18",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/nodemailer": "^8.0.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "^15.5.9",
     "tailwindcss": "^4",

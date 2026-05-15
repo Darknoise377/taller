@@ -31,7 +31,6 @@ import {
   DeleteOutlined,
   DownloadOutlined,
 } from '@ant-design/icons';
-import ExcelJS from 'exceljs';
 import type { UploadFile } from 'antd/es/upload/interface';
 import type { ColumnsType } from 'antd/es/table';
 import { productService, uploadImage } from '@/services/productService';
@@ -190,6 +189,7 @@ export default function AdminProductsPage() {
     }
     setIsExporting(true);
     try {
+      const ExcelJS = (await import('exceljs')).default;
       const wb = new ExcelJS.Workbook();
       wb.creator = 'Motoservicio A&R Admin';
       wb.created = new Date();

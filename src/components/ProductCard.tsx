@@ -9,6 +9,7 @@ import { CheckCircleIcon, HeartIcon as HeartSolid } from "@heroicons/react/24/so
 
 import type { Product as ProductType, ProductSize } from "@/types/product";
 import { useCart } from "@/hooks/useCart";
+import { useWishlist } from "@/hooks/useWishlist";
 import { makeProductPlaceholder, BLUR_DATA_URL } from "@/lib/placeholder";
 
 interface ProductCardProps {
@@ -23,7 +24,8 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
   const [validationError, setValidationError] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
   const [added, setAdded] = useState(false);
-  const [liked, setLiked] = useState(false);
+  const { toggle: toggleWishlist, isLiked } = useWishlist();
+  const liked = isLiked(product.id);
 
   const imageSrc = useMemo(
     () => product.images?.[0] ?? product.imageUrl ?? makeProductPlaceholder(product.name, product.id),
@@ -119,7 +121,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
         <button
           type="button"
           aria-label={liked ? "Quitar de favoritos" : "Añadir a favoritos"}
-          onClick={(e) => { e.preventDefault(); setLiked(!liked); }}
+          onClick={(e) => { e.preventDefault(); toggleWishlist(product.id); }}
           className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 shadow border border-slate-200/80 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-10"
         >
           {liked ? (
