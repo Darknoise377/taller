@@ -23,6 +23,14 @@ type ProductsClientProps = {
   totalCount?: number;
 };
 
+function normalizeForSearch(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 export default function ProductsClient({ initialProducts, totalCount: initialTotal }: ProductsClientProps) {
   const [products, setProducts] = useState<ProductType[]>(initialProducts ?? []);
   const [totalCount, setTotalCount] = useState<number>(initialTotal ?? initialProducts?.length ?? 0);
@@ -50,7 +58,8 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
     if (typeof window !== "undefined") {
       setPathname(window.location.pathname);
       const params = new URLSearchParams(window.location.search);
-      setSearchTerm(params.get("q") || "");
+      const q = params.get("q") || params.get("model") || "";
+      setSearchTerm(q);
       setSelectedCategory(params.get("category") || "all");
       setSelectedSize(params.get("size") || "all");
       setSelectedColor(params.get("color") || "all");
@@ -103,7 +112,8 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
         else setLoading(true);
 
         const params = new URLSearchParams();
-        if (debouncedSearchTerm) params.set('q', debouncedSearchTerm);
+        const effectiveQuery = debouncedSearchTerm || (selectedModel !== 'all' ? selectedModel : '');
+        if (effectiveQuery) params.set('q', effectiveQuery);
         if (selectedCategory && selectedCategory !== 'all') params.set('category', selectedCategory);
         if (selectedSize && selectedSize !== 'all') params.set('size', selectedSize);
         if (selectedColor && selectedColor !== 'all') params.set('color', selectedColor);
@@ -141,7 +151,7 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
         setLoadingMore(false);
       }
     },
-    [debouncedSearchTerm, selectedCategory, selectedSize, selectedColor, sortBy, minPrice, maxPrice]
+    [debouncedSearchTerm, selectedCategory, selectedSize, selectedColor, selectedModel, sortBy, minPrice, maxPrice]
   );
 
   // Cuando cambian filtros en la UI, pedimos página 1 al servidor
@@ -176,13 +186,15 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
   const handlePriceChange = (min: string, max: string) => updateURLParams({ minPrice: min, maxPrice: max });
 
   const filteredProducts = useMemo(() => {
-    const q = searchTerm.trim().toLowerCase();
+    const q = normalizeForSearch(searchTerm);
+    const modelQuery = normalizeForSearch(selectedModel === 'all' ? '' : selectedModel);
     return products.filter((product) => {
-      const matchesQuery = !q || product.name.toLowerCase().includes(q) || (product.description ?? "").toLowerCase().includes(q);
+      const productText = normalizeForSearch(`${product.name} ${product.description ?? ''}`);
+      const matchesQuery = !q || productText.includes(q);
       const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
       const matchesSize = selectedSize === "all" || (product.sizes?.includes(selectedSize as ProductSize) ?? false);
       const matchesColor = selectedColor === "all" || (product.colors?.includes(selectedColor as ProductSize) ?? false);
-      const matchesModel = selectedModel === 'all' || product.name.toLowerCase().includes(selectedModel) || (product.description ?? "").toLowerCase().includes(selectedModel);
+      const matchesModel = !modelQuery || productText.includes(modelQuery);
       const price = Number(product.price ?? 0);
       const minOk = !minPrice || price >= Number(minPrice);
       const maxOk = !maxPrice || price <= Number(maxPrice);

@@ -80,8 +80,9 @@ export default function HomeSearch() {
   }, [suggestions, input]);
 
   const doSearch = (q: string) => {
-    if (!q) return;
-    router.push(`/products?model=${encodeURIComponent(q)}`);
+    const query = q.trim();
+    if (!query) return;
+    router.push(`/products?q=${encodeURIComponent(query)}`);
   };
 
   return (
