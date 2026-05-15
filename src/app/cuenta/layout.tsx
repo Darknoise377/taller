@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CustomerAuthProvider, useCustomerAuth } from "@/context/CustomerAuthContext";
+import { useCustomerAuth } from "@/context/CustomerAuthContext";
 import { LogOut, Package, User } from "lucide-react";
 
 function CuentaShell({ children }: { children: React.ReactNode }) {
@@ -84,9 +84,5 @@ function CuentaShell({ children }: { children: React.ReactNode }) {
 }
 
 export default function CuentaLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <CustomerAuthProvider initialUser={null}>
-      <CuentaShell>{children}</CuentaShell>
-    </CustomerAuthProvider>
-  );
+  return <CuentaShell>{children}</CuentaShell>;
 }

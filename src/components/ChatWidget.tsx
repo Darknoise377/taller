@@ -150,6 +150,7 @@ export default function ChatWidget() {
   const inputRef = useRef<HTMLInputElement>(null);
   const hasShownLabelRef = useRef(false);
   const pathname = usePathname();
+  const isProductDetail = !!pathname?.match(/^\/products\/[^/]+$/);
 
   const { messages, sendMessage, stop, status, setMessages } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
@@ -212,7 +213,7 @@ export default function ChatWidget() {
   return (
     <>
       {/* ── Floating button ── */}
-      <div className="fixed bottom-20 md:bottom-6 left-4 z-40 flex flex-col items-start gap-2">
+      <div className={`fixed ${isProductDetail ? 'bottom-32' : 'bottom-20'} md:bottom-6 left-4 z-40 flex flex-col items-start gap-2`}>
         {/* Tooltip bubble */}
         <AnimatePresence>
           {showLabel && !open && (

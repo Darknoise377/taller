@@ -27,10 +27,11 @@ export default function FloatingButtons() {
   // Ocultar en checkout y admin
   if (isCheckoutPath(pathname) || pathname?.startsWith('/admin')) return null;
 
+  const isProductDetail = !!pathname?.match(/^\/products\/[^/]+$/);
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
 
   return (
-    <div className="fixed bottom-20 md:bottom-6 right-4 z-40 flex flex-col items-center gap-3">
+    <div className={`fixed ${isProductDetail ? 'bottom-32' : 'bottom-20'} md:bottom-6 right-4 z-40 flex flex-col items-center gap-3`}>
       {/* Back to top */}
       <button
         onClick={scrollToTop}

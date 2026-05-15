@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { useCustomerAuth } from '@/context/CustomerAuthContext';
 import { usePathname } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { isCheckoutPath } from '@/utils/routeUtils';
@@ -15,10 +16,13 @@ import {
   CubeIcon,
   UserIcon,
   PhoneIcon,
+  TruckIcon,
 } from '@heroicons/react/24/outline';
+import { Package } from 'lucide-react';
 
 const Navbar = () => {
   const { totalItems, openCartModal } = useCart();
+  const { user } = useCustomerAuth();
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -96,14 +100,41 @@ const Navbar = () => {
             </Link>
           ))}
 
-          {/* Cuenta (desktop) */}
-          <Link
-            href="/cuenta/login"
-            className={`hidden md:flex items-center gap-2 text-sm font-medium transition-colors text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617] rounded`}
-          >
-            <UserIcon className="w-5 h-5" />
-            Cuenta
-          </Link>
+          {/* Cuenta / Mis pedidos (desktop) */}
+          {user ? (
+            <Link
+              href="/cuenta/pedidos"
+              className={`hidden md:flex items-center gap-2 text-sm font-medium transition-colors pb-0.5 border-b-2 ${
+                pathname.startsWith('/cuenta')
+                  ? 'text-[#0A2A66] dark:text-white border-[#0A2A66] dark:border-white font-semibold'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-transparent hover:border-slate-300 dark:hover:border-slate-600'
+              } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 rounded`}
+            >
+              <Package className="w-5 h-5" />
+              Mis pedidos
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/seguimiento"
+                className={`hidden md:flex items-center gap-2 text-sm font-medium transition-colors pb-0.5 border-b-2 ${
+                  pathname === '/seguimiento'
+                    ? 'text-[#0A2A66] dark:text-white border-[#0A2A66] dark:border-white font-semibold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border-transparent hover:border-slate-300 dark:hover:border-slate-600'
+                } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 rounded`}
+              >
+                <TruckIcon className="w-5 h-5" />
+                Rastrear pedido
+              </Link>
+              <Link
+                href="/cuenta/login"
+                className="hidden md:flex items-center gap-2 text-sm font-medium transition-colors text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 rounded"
+              >
+                <UserIcon className="w-5 h-5" />
+                Cuenta
+              </Link>
+            </>
+          )}
 
           {/* WhatsApp rápido (desktop) */}
           <a
@@ -166,14 +197,32 @@ const Navbar = () => {
           </Link>
         ))}
 
-          {/* Cuenta (móvil) */}
+        {/* Cuenta / Mis pedidos (móvil) */}
+        {user ? (
           <Link
-            href="/cuenta/login"
-            className={`flex flex-col items-center text-xs text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white`}
+            href="/cuenta/pedidos"
+            className={`flex flex-col items-center text-xs ${
+              pathname.startsWith('/cuenta')
+                ? 'text-[#0A2A66] dark:text-white'
+                : 'text-slate-600 dark:text-slate-300'
+            }`}
           >
-            <UserIcon className="w-6 h-6" />
-            Cuenta
+            <Package className="w-6 h-6" />
+            Mis pedidos
           </Link>
+        ) : (
+          <Link
+            href="/seguimiento"
+            className={`flex flex-col items-center text-xs ${
+              pathname === '/seguimiento'
+                ? 'text-[#0A2A66] dark:text-white'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <TruckIcon className="w-6 h-6" />
+            Rastrear
+          </Link>
+        )}
 
         {/* Carrito */}
         <button

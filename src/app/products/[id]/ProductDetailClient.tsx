@@ -428,370 +428,385 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
     "Repuesto para moto de alta calidad. Revisa compatibilidad por marca, modelo y medida antes de comprar.";
 
   return (
-    <div className="overflow-x-hidden bg-white text-slate-900 dark:bg-[#070617] dark:text-slate-100 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 pb-8 sm:pb-14">
-        <nav aria-label="Miga de pan" className="text-sm text-slate-600 dark:text-slate-300 mb-6">
-          <ol className="flex flex-wrap items-center gap-2">
-            <li>
-              <Link
-                href="/"
-                className="hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617] rounded"
-              >
-                Inicio
-              </Link>
-            </li>
-            <li aria-hidden="true" className="text-slate-400">/</li>
-            <li>
-              <Link
-                href="/products"
-                className="hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617] rounded"
-              >
-                Productos
-              </Link>
-            </li>
-            <li aria-hidden="true" className="text-slate-400">/</li>
-            <li>
+    <div className="min-h-screen bg-white dark:bg-[#070617] text-slate-900 dark:text-slate-100 overflow-x-hidden">
+      {/* Breadcrumb compacto */}
+      <nav aria-label="Miga de pan" className="px-4 pt-3 pb-1 text-xs text-slate-400 dark:text-slate-500">
+        <ol className="flex flex-wrap items-center gap-1">
+          <li>
+            <Link href="/" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+              Inicio
+            </Link>
+          </li>
+          <li aria-hidden="true" className="mx-0.5">/</li>
+          <li>
+            <Link href="/products" className="hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+              Productos
+            </Link>
+          </li>
+          <li aria-hidden="true" className="mx-0.5">/</li>
+          <li>
+            <Link href={`/products?category=${product.category}`} className="capitalize hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+              {getProductCategoryLabel(product.category)}
+            </Link>
+          </li>
+          <li aria-hidden="true" className="mx-0.5">/</li>
+          <li className="text-slate-600 dark:text-slate-400 font-medium line-clamp-1 max-w-[140px]" aria-current="page">
+            {product.name}
+          </li>
+        </ol>
+      </nav>
+
+      <div className="max-w-7xl mx-auto pb-36 md:pb-16">
+        {/* Mobile: imagen full-width sin padding lateral */}
+        <div className="md:hidden">
+          <ImageGallery images={images} productName={product.name} />
+        </div>
+
+        {/* Dos columnas en desktop */}
+        <div className="lg:grid lg:grid-cols-[1fr_480px] lg:gap-10 xl:gap-14 lg:items-start lg:px-8 lg:pt-8">
+
+          {/* Galería desktop */}
+          <div className="hidden md:block px-6 pt-6 lg:px-0 lg:pt-0">
+            <ImageGallery images={images} productName={product.name} />
+          </div>
+
+          {/* ===== INFO DEL PRODUCTO ===== */}
+          <div className="px-4 md:px-6 lg:px-0 pt-5 lg:pt-0 space-y-4">
+
+            {/* Chip de categoría + botón compartir */}
+            <div className="flex items-center justify-between">
               <Link
                 href={`/products?category=${product.category}`}
-                className="capitalize hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617] rounded"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0A2A66]/8 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-bold uppercase tracking-wide hover:bg-[#0A2A66]/15 transition-colors"
               >
                 {getProductCategoryLabel(product.category)}
               </Link>
-            </li>
-            <li aria-hidden="true" className="text-slate-400">/</li>
-            <li className="text-slate-700 dark:text-slate-200 line-clamp-1" aria-current="page">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof navigator !== "undefined" && navigator.share) {
+                    navigator.share({ title: product.name, url: window.location.href });
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success("Enlace copiado");
+                  }
+                }}
+                className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                aria-label="Compartir producto"
+              >
+                <ShareIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Título */}
+            <h1 className="text-[1.65rem] sm:text-3xl font-extrabold tracking-tight leading-tight">
               {product.name}
-            </li>
-          </ol>
-        </nav>
+            </h1>
 
-        <article className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-          <ImageGallery images={images} productName={product.name} />
-
-          <div className="bg-white dark:bg-slate-900/60 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-8 lg:sticky lg:top-24">
-            <header>
-              <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-                {product.name}
-              </h1>
-
-              {/* Star Rating (visual display) */}
-              <div className="flex items-center gap-2 mt-3">
-                <div className="flex items-center" aria-label="Calificación: 4.5 de 5 estrellas">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    star <= 4 ? (
-                      <StarIconSolid key={star} className="w-5 h-5 text-amber-400" />
-                    ) : (
-                      <StarIcon key={star} className="w-5 h-5 text-amber-400/40" />
-                    )
-                  ))}
-                </div>
-                <span className="text-sm text-slate-500 dark:text-slate-400">4.5 / 5</span>
-                <span className="text-xs text-slate-400 dark:text-slate-500">(Reseñas próximamente)</span>
-              </div>
-
-              {/* Detalles técnicos rápidos (SKU, categoría, etiquetas, diagrama) */}
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-600 dark:text-slate-300">
-                <div>
-                  <div className="text-xs text-slate-500">SKU</div>
-                  <div className="font-medium mt-1 break-all">{product.sku ?? String(product.id)}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-slate-500">Categoría</div>
-                  <div className="font-medium mt-1">{getProductCategoryLabel(product.category)}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-slate-500">Etiquetas</div>
-                  <div className="mt-1 break-words">{product.tags && product.tags.length > 0 ? product.tags.join(', ') : <span className="text-slate-400">Sin etiquetas</span>}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-slate-500">Número en Diagrama</div>
-                  <div className="font-medium mt-1 break-all">{product.diagramNumber ?? <span className="text-slate-400">—</span>}</div>
-                </div>
-              </div>
-
-              <p className="text-slate-600 dark:text-slate-300 leading-relaxed mt-4">
-                {descriptionText}
-              </p>
-            </header>
-
-            <div className="mt-6 space-y-3">
-              <div className="flex items-center gap-2" id="stock-status">
-                {product.stock > 0 ? (
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1 rounded-full",
-                      product.stock <= lowStockThreshold
-                        ? "text-yellow-900 bg-yellow-100 animate-pulse ring-1 ring-yellow-200/60"
-                        : "text-green-900 bg-green-100"
-                    )}
-                  >
-                    <CheckCircleIcon className="w-5 h-5" />
-                    {product.stock <= lowStockThreshold
-                      ? `¡Últimas ${product.stock}!`
-                      : "Disponible"}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-900 bg-red-100 px-3 py-1 rounded-full">
-                    <XCircleIcon className="w-5 h-5" />
-                    Agotado
-                  </span>
+            {/* Rating */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center" aria-label="Calificación: 4.5 de 5 estrellas">
+                {[1, 2, 3, 4, 5].map((star) =>
+                  star <= 4
+                    ? <StarIconSolid key={star} className="w-4 h-4 text-amber-400" />
+                    : <StarIcon key={star} className="w-4 h-4 text-amber-400/40" />
                 )}
               </div>
+              <span className="text-sm font-bold text-amber-600 dark:text-amber-400">4.5</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">· Calidad verificada</span>
+            </div>
 
-              {/* Urgency callout — only when very low stock */}
-              {product.stock > 0 && product.stock <= 3 && (
-                <div className="flex items-center gap-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-xl px-3.5 py-2.5">
-                  <span className="text-lg leading-none" aria-hidden="true">🔥</span>
-                  <p className="text-sm font-semibold text-red-700 dark:text-red-400 leading-snug">
-                    ¡Alta demanda! Solo quedan <strong>{product.stock}</strong> {product.stock === 1 ? "unidad" : "unidades"} — compra antes que se agoten.
-                  </p>
-                </div>
+            {/* Precio prominente */}
+            <div className="flex items-baseline gap-3 py-1">
+              <span className="text-4xl font-black text-[#0A2A66] dark:text-white tracking-tight">
+                {product.currency} {Number(product.price).toLocaleString("es-CO")}
+              </span>
+            </div>
+
+            {/* Badge de stock */}
+            <div className="flex items-center gap-2" id="stock-status">
+              {product.stock > 0 ? (
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full",
+                    product.stock <= lowStockThreshold
+                      ? "text-orange-800 bg-orange-100 dark:bg-orange-500/20 dark:text-orange-300 animate-pulse"
+                      : "text-emerald-800 bg-emerald-100 dark:bg-emerald-500/20 dark:text-emerald-300"
+                  )}
+                >
+                  <CheckCircleIcon className="w-4 h-4" />
+                  {product.stock <= lowStockThreshold
+                    ? `¡Solo quedan ${product.stock} unidades!`
+                    : "Disponible · En stock"}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-800 bg-red-100 dark:bg-red-500/20 dark:text-red-300 px-3 py-1.5 rounded-full">
+                  <XCircleIcon className="w-4 h-4" /> Agotado
+                </span>
               )}
             </div>
 
+            {/* Urgencia */}
+            {product.stock > 0 && product.stock <= 3 && (
+              <div className="flex items-start gap-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/25 rounded-xl px-3.5 py-2.5">
+                <span className="text-base shrink-0">🔥</span>
+                <p className="text-sm font-semibold text-red-700 dark:text-red-400 leading-snug">
+                  ¡Alta demanda! Solo <strong>{product.stock}</strong> {product.stock === 1 ? "unidad" : "unidades"} disponibles.
+                </p>
+              </div>
+            )}
+
+            {/* Mensaje de validación */}
             {validationMessage && (
               <div
                 role="alert"
-                className="mt-4 rounded-xl border border-red-200 bg-red-50 text-red-900 px-4 py-3 text-sm"
+                className="rounded-xl border border-red-200 bg-red-50 dark:bg-red-500/10 dark:border-red-500/30 text-red-800 dark:text-red-400 px-4 py-3 text-sm font-medium"
               >
                 {validationMessage}
               </div>
             )}
 
-            <div className="mt-6 border-t border-slate-200/80 dark:border-slate-800/80 pt-6 space-y-6">
-              {product.sizes.length > 0 && (
-                <section aria-label="Opciones de medida">
-                  <h2 className="text-base font-semibold">
-                    Medida / referencia:{" "}
-                    <span className="font-normal text-slate-600 dark:text-slate-300">
-                      {selectedSize ?? "Sin seleccionar"}
-                    </span>
-                  </h2>
-                  <div className="mt-3 flex flex-wrap gap-3">
-                    {product.sizes.map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setSelectedSize(s)}
-                        
-                        className={cn(
-                          "px-4 h-10 min-w-[44px] flex items-center justify-center rounded-lg text-sm font-semibold border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0A2A66] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617]",
-                          selectedSize === s
-                            ? "bg-slate-900 text-white border-slate-900 dark:bg-slate-100 dark:text-slate-900 dark:border-slate-100"
-                            : "bg-transparent border-slate-300 dark:border-slate-700 hover:border-slate-900 dark:hover:border-slate-200"
-                        )}
-                      >
-                        {s}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              )}
+            <div className="border-t border-slate-100 dark:border-slate-800" />
 
-              {product.colors.length > 0 && (
-                <section aria-label="Opciones de compatibilidad">
-                  <h2 className="text-base font-semibold">
-                    Compatibilidad:{" "}
-                    <span className="font-normal text-slate-600 dark:text-slate-300 capitalize">
-                      {selectedColor ?? "Sin seleccionar"}
-                    </span>
-                  </h2>
-                  <div className="mt-3 flex flex-wrap gap-3">
-                    {product.colors.map((compatibility) => (
-                      <button
-                        key={compatibility}
-                        type="button"
-                        onClick={() => setSelectedColor(compatibility)}
-                        aria-label={`Seleccionar compatibilidad ${compatibility}`}
-                        
-                        className={cn(
-                          "px-3 h-10 rounded-lg text-sm font-semibold border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2E5FA7] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617]",
-                          selectedColor === compatibility
-                            ? "bg-[#2E5FA7] text-white border-[#2E5FA7]"
-                            : "bg-transparent border-slate-300 dark:border-slate-700 hover:border-[#2E5FA7]"
-                        )}
-                      >
-                        {compatibility}
-                      </button>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              <section aria-label="Cantidad y compra" className="space-y-4">
-                {/* Precio prominente en mobile */}
-                <div className="rounded-2xl bg-[#0A2A66]/5 dark:bg-[#2E5FA7]/10 border border-[#0A2A66]/10 dark:border-[#2E5FA7]/20 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1">Precio unitario</p>
-                  <p className="text-4xl font-extrabold text-[#0A2A66] dark:text-[#2E5FA7]">
-                    {product.currency} {Number(product.price).toLocaleString("es-CO")}
-                  </p>
-                  {quantity > 1 && (
-                    <p className="text-sm text-slate-500 mt-1">Total: {product.currency} {Number(product.price * quantity).toLocaleString("es-CO")}</p>
-                  )}
-                </div>
-
-                {/* Qty + botón siempre visibles */}
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center border-2 border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shrink-0">
-                    <button
-                      type="button"
-                      onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      aria-label="Disminuir cantidad"
-                      className="px-4 py-3 text-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
-                      disabled={quantity <= 1}
-                    >
-                      −
-                    </button>
-                    <span className="text-lg font-bold w-10 text-center" aria-live="polite">{quantity}</span>
-                    <button
-                      type="button"
-                      onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                      aria-label="Aumentar cantidad"
-                      className="px-4 py-3 text-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
-                      disabled={quantity >= product.stock}
-                    >
-                      +
-                    </button>
-                  </div>
-
-                  <button
-                    type="button"
-                    disabled={product.stock <= 0}
-                    onClick={handleAddToCart}
-                    aria-describedby="stock-status"
-                    className="flex-1 flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-bold text-base shadow-lg shadow-[#0A2A66]/30 transition-all duration-200 hover:opacity-95 hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ShoppingCartIcon className="w-5 h-5 shrink-0" />
-                    {product.stock > 0 ? "Añadir al carrito" : "Agotado"}
-                  </button>
-                </div>
-
-                <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                  <span>💡</span> Confirma compatibilidad con tu moto antes de comprar.
+            {/* Medidas */}
+            {product.sizes.length > 0 && (
+              <section aria-label="Opciones de medida">
+                <p className="text-sm font-semibold mb-2.5">
+                  Medida / referencia:{" "}
+                  <span className="font-bold text-[#0A2A66] dark:text-[#5B9BD5]">
+                    {selectedSize ?? <span className="text-slate-400 font-normal">Selecciona</span>}
+                  </span>
                 </p>
-
-                {/* Trust strip */}
-                <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-200/80 dark:border-slate-800/80">
-                  <div className="flex flex-col items-center gap-1 text-center">
-                    <svg className="w-6 h-6 text-[#0A2A66] dark:text-[#2E5FA7]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
-                    </svg>
-                    <p className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 leading-tight">Envío a Colombia</p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">A toda la nación</p>
-                  </div>
-                  <div className="flex flex-col items-center gap-1 text-center">
-                    <svg className="w-6 h-6 text-[#0A2A66] dark:text-[#2E5FA7]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                    </svg>
-                    <p className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 leading-tight">Calidad garantizada</p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">Originales y genéricos</p>
-                  </div>
-                  <div className="flex flex-col items-center gap-1 text-center">
-                    <svg className="w-6 h-6 text-[#0A2A66] dark:text-[#2E5FA7]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                    </svg>
-                    <p className="text-[10px] font-semibold text-slate-700 dark:text-slate-300 leading-tight">Pago seguro</p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight">PayU · Wompi</p>
-                  </div>
-                </div>
-
-                {/* Share buttons */}
-                <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-200/80 dark:border-slate-800/80">
-                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Compartir:</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (typeof navigator !== "undefined" && navigator.share) {
-                        navigator.share({
-                          title: product.name,
-                          text: `Mira este producto: ${product.name}`,
-                          url: window.location.href,
-                        });
-                      } else {
-                        navigator.clipboard.writeText(window.location.href);
-                        toast.success("Enlace copiado al portapapeles");
-                      }
-                    }}
-                    className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
-                    aria-label="Compartir producto"
-                  >
-                    <ShareIcon className="w-5 h-5" />
-                  </button>
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(`Mira este producto: ${product.name} - ` + (typeof window !== "undefined" ? window.location.href : ""))}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
-                    aria-label="Compartir por WhatsApp"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5" aria-hidden="true">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                    </svg>
-                  </a>
-                  {/* Follow links */}
-                  <div className="w-full sm:w-auto sm:ml-2 flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Síguenos:</span>
-                    <a
-                      href="https://www.facebook.com/AlmacenyTallerAYR/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      aria-label="Facebook"
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setSelectedSize(s)}
+                      className={cn(
+                        "px-4 h-10 min-w-[44px] flex items-center justify-center rounded-xl text-sm font-semibold border-2 transition-all",
+                        selectedSize === s
+                          ? "bg-[#0A2A66] dark:bg-[#2E5FA7] text-white border-[#0A2A66] dark:border-[#2E5FA7] shadow-md"
+                          : "border-slate-200 dark:border-slate-700 hover:border-[#0A2A66] dark:hover:border-[#2E5FA7]"
+                      )}
                     >
-                      <Facebook className="w-5 h-5" />
-                    </a>
-                    <a
-                      href="https://www.instagram.com/motoservicioayr/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      aria-label="Instagram"
-                    >
-                      <Instagram className="w-5 h-5" />
-                    </a>
-                    <a
-                      href="https://www.tiktok.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                      aria-label="TikTok"
-                    >
-                      TikTok
-                    </a>
-                  </div>
+                      {s}
+                    </button>
+                  ))}
                 </div>
               </section>
-            </div>
-          </div>
-        </article>
+            )}
 
-        <ProductReviews productId={product.id} />
-        
-        {/* Productos Relacionados */}
-        {relatedProducts.length > 0 && (
-          <section className="mt-20 sm:mt-28">
-            <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-              <div>
-                <h2 className="text-2xl sm:text-3xl font-bold">También te podría interesar</h2>
-                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                  Complementa tu compra con repuestos de la misma categoría.
+            {/* Compatibilidad */}
+            {product.colors.length > 0 && (
+              <section aria-label="Opciones de compatibilidad">
+                <p className="text-sm font-semibold mb-2.5">
+                  Compatibilidad:{" "}
+                  <span className="font-bold text-[#0A2A66] dark:text-[#5B9BD5] capitalize">
+                    {selectedColor ?? <span className="text-slate-400 font-normal">Selecciona</span>}
+                  </span>
                 </p>
+                <div className="flex flex-wrap gap-2">
+                  {product.colors.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setSelectedColor(c)}
+                      aria-label={`Seleccionar compatibilidad ${c}`}
+                      className={cn(
+                        "px-3 h-10 rounded-xl text-sm font-semibold border-2 transition-all",
+                        selectedColor === c
+                          ? "bg-[#2E5FA7] text-white border-[#2E5FA7] shadow-md"
+                          : "border-slate-200 dark:border-slate-700 hover:border-[#2E5FA7]"
+                      )}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Desktop: cantidad + botón añadir */}
+            <div className="hidden md:flex items-center gap-3 pt-2">
+              <div className="flex items-center border-2 border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  disabled={quantity <= 1}
+                  className="px-4 py-3 text-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
+                >
+                  −
+                </button>
+                <span className="text-lg font-bold w-10 text-center" aria-live="polite">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+                  disabled={quantity >= product.stock}
+                  className="px-4 py-3 text-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
+                >
+                  +
+                </button>
+              </div>
+              <button
+                type="button"
+                disabled={product.stock <= 0}
+                onClick={handleAddToCart}
+                aria-describedby="stock-status"
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-bold text-base shadow-lg shadow-[#0A2A66]/25 hover:opacity-95 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                <ShoppingCartIcon className="w-5 h-5" />
+                {product.stock > 0 ? "Añadir al carrito" : "Agotado"}
+              </button>
+            </div>
+
+            <p className="hidden md:flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+              <span>💡</span> Confirma compatibilidad con tu moto antes de comprar.
+            </p>
+
+            {/* Trust badges */}
+            <div className="grid grid-cols-3 gap-2 py-4 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex flex-col items-center text-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/70">
+                <svg className="w-6 h-6 text-[#0A2A66] dark:text-[#2E5FA7]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                </svg>
+                <p className="text-[10px] font-bold text-slate-700 dark:text-slate-300 leading-tight">Envío a Colombia</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-500 leading-tight">A toda la nación</p>
+              </div>
+              <div className="flex flex-col items-center text-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/70">
+                <svg className="w-6 h-6 text-[#0A2A66] dark:text-[#2E5FA7]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                </svg>
+                <p className="text-[10px] font-bold text-slate-700 dark:text-slate-300 leading-tight">Calidad garantizada</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-500 leading-tight">Original y genérico</p>
+              </div>
+              <div className="flex flex-col items-center text-center gap-1.5 p-2.5 rounded-2xl bg-slate-50 dark:bg-slate-900/70">
+                <svg className="w-6 h-6 text-[#0A2A66] dark:text-[#2E5FA7]" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+                <p className="text-[10px] font-bold text-slate-700 dark:text-slate-300 leading-tight">Pago seguro</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-500 leading-tight">Wompi · PayU</p>
+              </div>
+            </div>
+
+            {/* Descripción */}
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-2">Descripción</h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">{descriptionText}</p>
+            </div>
+
+            {/* Ficha técnica */}
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Información técnica</h2>
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                <div>
+                  <dt className="text-xs text-slate-400 dark:text-slate-500">SKU</dt>
+                  <dd className="font-semibold text-slate-700 dark:text-slate-300 mt-0.5 break-all">{product.sku ?? String(product.id)}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-slate-400 dark:text-slate-500">Categoría</dt>
+                  <dd className="font-semibold text-slate-700 dark:text-slate-300 mt-0.5">{getProductCategoryLabel(product.category)}</dd>
+                </div>
+                {product.tags && product.tags.length > 0 && (
+                  <div className="col-span-2">
+                    <dt className="text-xs text-slate-400 dark:text-slate-500 mb-1">Etiquetas</dt>
+                    <dd className="flex flex-wrap gap-1.5">
+                      {product.tags.map((tag) => (
+                        <span key={tag} className="inline-block px-2.5 py-0.5 rounded-full text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">{tag}</span>
+                      ))}
+                    </dd>
+                  </div>
+                )}
+                {product.diagramNumber && (
+                  <div className="col-span-2">
+                    <dt className="text-xs text-slate-400 dark:text-slate-500">N° en diagrama</dt>
+                    <dd className="font-semibold text-slate-700 dark:text-slate-300 mt-0.5">{product.diagramNumber}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+
+            {/* Fila de compartir */}
+            <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <span className="text-xs text-slate-400 dark:text-slate-500 mr-1">Compartir:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof navigator !== "undefined" && navigator.share) {
+                    navigator.share({ title: product.name, text: `Mira este producto: ${product.name}`, url: window.location.href });
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success("Enlace copiado al portapapeles");
+                  }
+                }}
+                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                aria-label="Compartir producto"
+              >
+                <ShareIcon className="w-4 h-4" />
+              </button>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Mira este producto: ${product.name} - ` + (typeof window !== "undefined" ? window.location.href : ""))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
+                aria-label="Compartir por WhatsApp"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4" aria-hidden="true">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                </svg>
+              </a>
+              <a
+                href="https://www.facebook.com/AlmacenyTallerAYR/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                aria-label="Facebook"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.instagram.com/motoservicioayr/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                aria-label="Instagram"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+            </div>
+
+          </div>{/* fin info producto */}
+        </div>{/* fin dos columnas */}
+
+        {/* Reseñas */}
+        <div className="px-4 md:px-8 mt-10">
+          <ProductReviews productId={product.id} />
+        </div>
+
+        {/* Productos relacionados */}
+        {relatedProducts.length > 0 && (
+          <section className="mt-14 px-4 md:px-8" aria-label="Productos relacionados">
+            <div className="flex items-end justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-bold">También te podría interesar</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Complementa tu compra con más repuestos.</p>
               </div>
               <Link
                 href="/products"
-                className="text-sm font-semibold text-[#0A2A66] dark:text-[#2E5FA7] hover:underline"
+                className="text-sm font-bold text-[#0A2A66] dark:text-[#2E5FA7] hover:underline shrink-0"
               >
-                Ver todo el catálogo
+                Ver todo
               </Link>
             </div>
 
+            {/* Scroll horizontal mobile */}
             <div
               ref={relatedScrollerRef}
-              className="md:hidden -mx-4 px-4 flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2"
+              className="md:hidden -mx-4 px-4 flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2"
               onTouchStart={pauseAutoScroll}
               onScroll={(e) => {
                 const target = e.currentTarget;
-                const cardWidth = target.firstElementChild instanceof HTMLElement ? target.firstElementChild.offsetWidth + 16 : 1;
+                const cardWidth = target.firstElementChild instanceof HTMLElement ? target.firstElementChild.offsetWidth + 12 : 1;
                 const index = Math.round(target.scrollLeft / cardWidth);
                 if (!Number.isNaN(index)) setActiveRelatedIndex(Math.max(0, Math.min(index, relatedProducts.length - 1)));
               }}
@@ -799,71 +814,62 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
               {relatedProducts.map((item, idx) => (
                 <article
                   key={item.id}
-                  className="snap-start snap-always min-w-[72%] bg-white/80 dark:bg-slate-900/50 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800"
+                  className="snap-start snap-always flex-shrink-0 w-[46%] bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm"
                 >
-                  <Link href={`/products/${item.id}`} aria-label={`Ver detalles de ${item.name}`} onClick={() => trackRelatedClick(item.id, idx)}>
-                    <div className="relative w-full aspect-square">
+                  <Link href={`/products/${item.id}`} onClick={() => trackRelatedClick(item.id, idx)}>
+                    <div className="relative aspect-square bg-slate-50 dark:bg-slate-800">
                       <Image
                         src={item.imageUrl || "/placeholder.png"}
-                        alt={`Imagen de ${item.name}`}
+                        alt={item.name}
                         fill
                         className="object-cover"
                         placeholder="blur"
                         blurDataURL={BLUR_DATA_URL}
-                        sizes="72vw"
+                        sizes="46vw"
                       />
                     </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-slate-900 dark:text-slate-100 line-clamp-2 min-h-[40px]">
-                        {item.name}
-                      </h3>
-                      <span className="text-[#0A2A66] dark:text-[#2E5FA7] font-bold mt-1 block">
-                        {item.currency} {Number(item.price).toLocaleString("es-CO")}
-                      </span>
-                      <span className="mt-3 inline-flex items-center text-xs font-semibold text-[#0A2A66] dark:text-[#2E5FA7]">
-                        Ver producto →
-                      </span>
+                    <div className="p-3">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug min-h-[40px]">{item.name}</p>
+                      <p className="mt-1.5 text-base font-bold text-[#0A2A66] dark:text-[#5B9BD5]">{item.currency} {Number(item.price).toLocaleString("es-CO")}</p>
                     </div>
                   </Link>
                 </article>
               ))}
             </div>
 
-            <div className="md:hidden mt-3 flex items-center justify-center gap-1.5">
+            {/* Dots indicadores */}
+            <div className="md:hidden mt-3 flex justify-center gap-1.5">
               {relatedProducts.map((item, idx) => (
                 <button
                   key={`dot-${item.id}`}
                   type="button"
                   onClick={() => scrollToRelatedIndex(idx)}
-                  aria-label={`Ir al relacionado ${idx + 1}`}
-                  className={`h-1.5 rounded-full transition-all ${activeRelatedIndex === idx ? 'w-6 bg-[#0A2A66] dark:bg-[#2E5FA7]' : 'w-1.5 bg-slate-300 dark:bg-slate-600'}`}
+                  aria-label={`Relacionado ${idx + 1}`}
+                  className={`h-1.5 rounded-full transition-all ${activeRelatedIndex === idx ? "w-6 bg-[#0A2A66] dark:bg-[#2E5FA7]" : "w-1.5 bg-slate-300 dark:bg-slate-600"}`}
                 />
               ))}
             </div>
 
-            <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {/* Grid desktop */}
+            <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-4">
               {relatedProducts.map((item, idx) => (
-                <article key={item.id} className="bg-white/70 dark:bg-slate-900/40 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 transition-all hover:shadow-xl hover:-translate-y-1">
-                  <Link href={`/products/${item.id}`} aria-label={`Ver detalles de ${item.name}`} onClick={() => trackRelatedClick(item.id, idx)}>
-                    <div className="relative w-full aspect-square">
+                <article key={item.id} className="bg-white dark:bg-slate-900/60 rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-xl hover:-translate-y-1 transition-all">
+                  <Link href={`/products/${item.id}`} onClick={() => trackRelatedClick(item.id, idx)}>
+                    <div className="relative aspect-square">
                       <Image
                         src={item.imageUrl || "/placeholder.png"}
-                        alt={`Imagen de ${item.name}`}
+                        alt={item.name}
                         fill
                         className="object-cover"
                         placeholder="blur"
                         blurDataURL={BLUR_DATA_URL}
-                        sizes="(max-width: 768px) 50vw, 25vw"
+                        sizes="25vw"
                       />
                     </div>
                     <div className="p-4">
-                      <h3 className="font-semibold line-clamp-2 min-h-[40px]">{item.name}</h3>
-                      <span className="text-[#0A2A66] dark:text-[#2E5FA7] font-bold mt-1 block">
-                        {item.currency} {Number(item.price).toLocaleString("es-CO")}
-                      </span>
-                      <span className="mt-2 inline-flex items-center text-xs font-semibold text-[#0A2A66] dark:text-[#2E5FA7]">
-                        Ver producto →
-                      </span>
+                      <p className="font-semibold line-clamp-2 min-h-[40px] text-sm">{item.name}</p>
+                      <p className="text-[#0A2A66] dark:text-[#2E5FA7] font-bold mt-1">{item.currency} {Number(item.price).toLocaleString("es-CO")}</p>
+                      <span className="mt-2 inline-flex items-center text-xs font-semibold text-[#0A2A66] dark:text-[#2E5FA7]">Ver producto →</span>
                     </div>
                   </Link>
                 </article>
@@ -874,33 +880,29 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
 
         {/* Vistos recientemente */}
         {recentlyViewed.length > 0 && (
-          <section className="mt-16 sm:mt-20" aria-label="Vistos recientemente">
-            <h2 className="text-xl sm:text-2xl font-bold mb-5 text-slate-900 dark:text-slate-100">
-              Vistos recientemente
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <section className="mt-10 px-4 md:px-8 pb-4" aria-label="Vistos recientemente">
+            <h2 className="text-lg font-bold mb-4">Vistos recientemente</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {recentlyViewed.map((item) => (
                 <Link
                   key={item.id}
                   href={`/products/${item.id}`}
-                  className="group block rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                  className="group block rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:shadow-lg hover:-translate-y-0.5 transition-all"
                 >
                   <div className="relative aspect-square bg-slate-100 dark:bg-slate-800">
                     <Image
                       src={item.imageUrl}
                       alt={item.name}
                       fill
-                      className="object-contain p-2"
+                      className="object-contain p-2 group-hover:scale-105 transition-transform"
                       placeholder="blur"
                       blurDataURL={BLUR_DATA_URL}
                       sizes="(max-width: 640px) 50vw, 25vw"
                     />
                   </div>
                   <div className="p-3">
-                    <p className="text-sm font-medium line-clamp-2 text-slate-800 dark:text-slate-200">{item.name}</p>
-                    <p className="text-sm font-bold text-[#0A2A66] dark:text-[#2E5FA7] mt-1">
-                      {item.currency} {item.price.toLocaleString("es-CO")}
-                    </p>
+                    <p className="text-xs font-medium line-clamp-2 text-slate-800 dark:text-slate-200">{item.name}</p>
+                    <p className="text-sm font-bold text-[#0A2A66] dark:text-[#2E5FA7] mt-0.5">{item.currency} {item.price.toLocaleString("es-CO")}</p>
                   </div>
                 </Link>
               ))}
@@ -908,6 +910,45 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
           </section>
         )}
       </div>
+
+      {/* ===== BARRA STICKY INFERIOR — Solo móvil ===== */}
+      <div className="md:hidden fixed bottom-14 inset-x-0 z-40 bg-white/96 dark:bg-[#070617]/96 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 px-4 py-2.5 flex items-center gap-3 shadow-[0_-4px_24px_rgba(0,0,0,0.12)]">
+        <div className="flex items-center border-2 border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shrink-0">
+          <button
+            type="button"
+            onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+            disabled={quantity <= 1}
+            aria-label="Disminuir cantidad"
+            className="px-3.5 py-2.5 text-lg font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
+          >
+            −
+          </button>
+          <span className="w-8 text-center font-bold text-base" aria-live="polite">{quantity}</span>
+          <button
+            type="button"
+            onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+            disabled={quantity >= product.stock}
+            aria-label="Aumentar cantidad"
+            className="px-3.5 py-2.5 text-lg font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
+          >
+            +
+          </button>
+        </div>
+        <button
+          type="button"
+          disabled={product.stock <= 0}
+          onClick={handleAddToCart}
+          className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-bold text-[15px] shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+        >
+          <ShoppingCartIcon className="w-5 h-5 shrink-0" />
+          <span className="whitespace-nowrap">
+            {product.stock > 0
+              ? `Añadir · ${product.currency} ${Number(product.price).toLocaleString("es-CO")}`
+              : "Agotado"}
+          </span>
+        </button>
+      </div>
+
     </div>
   );
 };

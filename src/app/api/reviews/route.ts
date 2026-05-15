@@ -3,12 +3,8 @@ import { cookies } from "next/headers";
 
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rateLimit";
-import { COOKIE_NAME } from "@/config/admin";
-import { verifyAdminToken } from "@/lib/auth";
-
-function isValidEmail(email: string) {
-  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
-}
+import { COOKIE_NAME, CUSTOMER_COOKIE_NAME } from "@/config/admin";
+import { verifyAdminToken, verifyCustomerToken } from "@/lib/auth/jwt";
 
 async function isAdminRequest(): Promise<boolean> {
   try {
@@ -47,6 +43,7 @@ export async function GET(req: Request) {
         author: true,
         createdAt: true,
         approved: true,
+        verifiedPurchase: true,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -85,31 +82,42 @@ export async function POST(req: Request) {
   }
 
   try {
+    // Require customer authentication
+    const cookieStore = await cookies();
+    const customerToken = cookieStore.get(CUSTOMER_COOKIE_NAME)?.value;
+
+    if (!customerToken) {
+      return NextResponse.json(
+        { error: "Debes iniciar sesión para dejar una reseña." },
+        { status: 401 }
+      );
+    }
+
+    let customerPayload;
+    try {
+      customerPayload = await verifyCustomerToken(customerToken);
+    } catch {
+      return NextResponse.json(
+        { error: "Sesión inválida. Inicia sesión nuevamente." },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
 
     const productId = String(body?.productId ?? "").trim();
     const rating = Number(body?.rating ?? 0);
-    const author = String(body?.author ?? "").trim();
-    const email = String(body?.email ?? "").trim().toLowerCase();
     const comment = typeof body?.comment === "string" ? body.comment.trim() : "";
 
-    if (!productId || !author || !email || !Number.isFinite(rating)) {
+    if (!productId || !Number.isFinite(rating)) {
       return NextResponse.json(
-        { error: "Campos requeridos: productId, rating, author, email" },
+        { error: "Campos requeridos: productId, rating" },
         { status: 400 }
       );
     }
 
     if (rating < 1 || rating > 5) {
       return NextResponse.json({ error: "Rating debe ser entre 1 y 5" }, { status: 400 });
-    }
-
-    if (author.length < 2) {
-      return NextResponse.json({ error: "Nombre muy corto" }, { status: 400 });
-    }
-
-    if (!isValidEmail(email)) {
-      return NextResponse.json({ error: "Email inválido" }, { status: 400 });
     }
 
     const exists = await prisma.product.findUnique({
@@ -121,6 +129,44 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Producto no encontrado" }, { status: 404 });
     }
 
+    // Verify that the customer has purchased this product
+    const purchaseOrder = await prisma.order.findFirst({
+      where: {
+        OR: [
+          { userId: customerPayload.uid },
+          { customerEmail: customerPayload.sub },
+        ],
+        status: { in: ["APPROVED", "SHIPPED"] },
+        products: {
+          some: { productId },
+        },
+      },
+      select: { id: true },
+    });
+
+    if (!purchaseOrder) {
+      return NextResponse.json(
+        { error: "Solo puedes opinar sobre productos que has comprado." },
+        { status: 403 }
+      );
+    }
+
+    // Prevent duplicate reviews from the same customer for the same product
+    const existing = await prisma.review.findFirst({
+      where: {
+        productId,
+        email: customerPayload.sub,
+      },
+      select: { id: true },
+    });
+
+    if (existing) {
+      return NextResponse.json(
+        { error: "Ya has dejado una reseña para este producto." },
+        { status: 409 }
+      );
+    }
+
     const requireApproval = process.env.REVIEWS_REQUIRE_APPROVAL === "1";
 
     const created = await prisma.review.create({
@@ -128,9 +174,10 @@ export async function POST(req: Request) {
         productId,
         rating: Math.round(rating),
         comment: comment ? comment.slice(0, 500) : null,
-        author: author.slice(0, 100),
-        email,
+        author: (customerPayload.name ?? customerPayload.sub).slice(0, 100),
+        email: customerPayload.sub,
         approved: !requireApproval,
+        verifiedPurchase: true,
       },
       select: { id: true, approved: true },
     });
