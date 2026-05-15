@@ -32,10 +32,13 @@ export default function CountdownTimer({ endTimeIso, className = "", onExpire }:
     return getDefaultEnd();
   };
 
-  const [remaining, setRemaining] = useState(() => Math.max(0, computeEnd() - Date.now()));
+  // Keep SSR and first client paint deterministic to avoid hydration mismatch.
+  const [remaining, setRemaining] = useState(0);
 
   useEffect(() => {
     const end = computeEnd();
+    setRemaining(Math.max(0, end - Date.now()));
+
     const id = setInterval(() => {
       const rem = Math.max(0, end - Date.now());
       setRemaining(rem);
@@ -63,7 +66,7 @@ export default function CountdownTimer({ endTimeIso, className = "", onExpire }:
         role="timer"
         aria-live="polite"
         aria-atomic="true"
-        className="font-mono text-sm bg-white dark:bg-slate-800 px-3 py-1 rounded-lg shadow-sm border border-slate-100 dark:border-slate-800"
+        className="font-mono text-sm bg-white/90 dark:bg-slate-800 px-3 py-1 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"
       >
         {formatted}
       </span>

@@ -160,13 +160,13 @@ export default function Home() {
       {/* ════════════════════════════════════════
           HERO — full-width, dark gradient band
           ════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#07122E] via-[#0A2A66] to-[#0D1F4E]">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#e9f2ff] via-[#f8fbff] to-[#e3edff] dark:from-[#07122E] dark:via-[#0A2A66] dark:to-[#0D1F4E]">
         {/* Background texture rings */}
-        <div className="pointer-events-none absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-[#2E5FA7]/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-32 w-[480px] h-[480px] rounded-full bg-[#0A2A66]/20 blur-3xl" />
+        <div className="pointer-events-none absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-[#2E5FA7]/15 dark:bg-[#2E5FA7]/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-32 w-[480px] h-[480px] rounded-full bg-[#0A2A66]/10 dark:bg-[#0A2A66]/20 blur-3xl" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8 lg:pt-6 lg:pb-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 lg:gap-10 items-start">
 
             {/* LEFT — copy + CTAs */}
             <motion.div
@@ -176,19 +176,19 @@ export default function Home() {
               className="order-1"
             >
               {/* Brand pill */}
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/15 px-4 py-1.5 text-[11px] font-bold tracking-[0.18em] text-white/70 uppercase mb-5">
-                <div className="relative h-5 w-5 rounded-full overflow-hidden border border-white/20 bg-white/10 shrink-0">
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/75 dark:bg-white/10 border border-[#2E5FA7]/20 dark:border-white/15 px-4 py-1.5 text-[11px] font-bold tracking-[0.18em] text-[#0A2A66]/75 dark:text-white/70 uppercase mb-5 backdrop-blur">
+                <div className="relative h-5 w-5 rounded-full overflow-hidden border border-[#2E5FA7]/25 dark:border-white/20 bg-white/60 dark:bg-white/10 shrink-0">
                   <Image src="/logo.png" alt="A&R" fill sizes="20px" className="object-cover" priority />
                 </div>
                 Motoservicio A&amp;R · La Ceja, Ant.
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-[1.1] tracking-tight text-white">
+              <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-extrabold leading-[1.1] tracking-tight text-[#081F4D] dark:text-white">
                 El repuesto exacto<br />
-                <span className="text-[#5B9BD5]">para tu moto.</span>
+                <span className="text-[#2E5FA7] dark:text-[#5B9BD5]">para tu moto.</span>
               </h1>
 
-              <p className="mt-4 text-base sm:text-lg text-white/60 max-w-lg leading-relaxed">
+              <p className="mt-4 text-base sm:text-lg text-[#0A2A66]/75 dark:text-white/60 max-w-lg leading-relaxed">
                 15+ años en el mercado. Piezas originales y genéricas, stock permanente y despachos a todo Colombia.
               </p>
 
@@ -203,7 +203,7 @@ export default function Home() {
               <div className="mt-7 flex flex-wrap gap-3">
                 <Link
                   href="/products"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-[#0A2A66] font-bold text-sm shadow-lg hover:bg-slate-100 transition-colors"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#0A2A66] dark:bg-white text-white dark:text-[#0A2A66] font-bold text-sm shadow-lg hover:bg-[#081F4D] dark:hover:bg-slate-100 transition-colors"
                 >
                   <ShoppingCartIcon className="w-5 h-5" />
                   Ver catálogo
@@ -212,7 +212,7 @@ export default function Home() {
                   href="https://wa.me/573015271104?text=Hola,%20necesito%20un%20repuesto%20para%20mi%20moto"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-white/25 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
+                  className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-[#0A2A66]/30 dark:border-white/25 text-[#0A2A66] dark:text-white font-semibold text-sm hover:bg-[#0A2A66]/10 dark:hover:bg-white/10 transition-colors"
                 >
                   <ChatBubbleLeftRightIcon className="w-5 h-5" />
                   Asesoría WhatsApp
@@ -227,8 +227,8 @@ export default function Home() {
                   { icon: <LockClosedIcon className="w-4 h-4" />, text: "Pago seguro Wompi" },
                   { icon: <StarIcon className="w-4 h-4" />, text: "15+ años de experiencia" },
                 ].map(({ icon, text }) => (
-                  <div key={text} className="flex items-center gap-1.5 text-white/55 text-xs">
-                    <span className="text-[#5B9BD5]">{icon}</span>
+                  <div key={text} className="flex items-center gap-1.5 text-[#0A2A66]/70 dark:text-white/55 text-xs">
+                    <span className="text-[#2E5FA7] dark:text-[#5B9BD5]">{icon}</span>
                     {text}
                   </div>
                 ))}
@@ -242,7 +242,7 @@ export default function Home() {
               transition={{ duration: 0.7, delay: 0.15 }}
               className="order-2 w-full"
             >
-              <div className="rounded-2xl overflow-hidden shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)] border border-white/10">
+              <div className="rounded-2xl overflow-hidden shadow-[0_35px_80px_-35px_rgba(10,42,102,0.35)] dark:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)] border border-[#2E5FA7]/15 dark:border-white/10">
                 <HeroSlider products={sliderProducts} isLoading={isLoading} />
               </div>
               <div className="mt-3">
@@ -384,20 +384,20 @@ export default function Home() {
             CONVERSIÓN — dark CTA band
             ════════════════════════════════════════ */}
         <section>
-          <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-[#060E20] via-[#07122E] to-[#0A1F4E] border border-white/8 shadow-[0_40px_100px_-40px_rgba(10,42,102,0.7)]">
+          <div className="rounded-3xl overflow-hidden bg-gradient-to-br from-[#e9f2ff] via-[#f6f9ff] to-[#e2ecff] dark:from-[#060E20] dark:via-[#07122E] dark:to-[#0A1F4E] border border-[#2E5FA7]/15 dark:border-white/8 shadow-[0_30px_80px_-35px_rgba(10,42,102,0.35)] dark:shadow-[0_40px_100px_-40px_rgba(10,42,102,0.7)]">
             <div className="grid grid-cols-1 lg:grid-cols-2">
               <div className="p-8 sm:p-12 flex flex-col justify-center">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/6 px-3 py-1 text-[10px] font-bold tracking-widest text-[#C7D2E0] uppercase mb-5 w-fit">
+                <span className="inline-flex items-center gap-2 rounded-full border border-[#2E5FA7]/25 dark:border-white/12 bg-white/70 dark:bg-white/6 px-3 py-1 text-[10px] font-bold tracking-widest text-[#2E5FA7] dark:text-[#C7D2E0] uppercase mb-5 w-fit">
                   Asesoría personalizada
                 </span>
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-white">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-[#081F4D] dark:text-white">
                   ¿No encuentras<br />
-                  <span className="text-[#5B9BD5]">el repuesto que buscas?</span>
+                  <span className="text-[#2E5FA7] dark:text-[#5B9BD5]">el repuesto que buscas?</span>
                 </h3>
-                <p className="mt-4 text-slate-300 text-sm sm:text-base max-w-md leading-relaxed">
+                <p className="mt-4 text-[#0A2A66]/75 dark:text-slate-300 text-sm sm:text-base max-w-md leading-relaxed">
                   Escríbenos por WhatsApp con el modelo de tu moto. Te cotizamos en minutos, sin compromiso.
                 </p>
-                <ul className="mt-5 space-y-2.5 text-sm text-slate-300">
+                <ul className="mt-5 space-y-2.5 text-sm text-[#0A2A66]/80 dark:text-slate-300">
                   {[
                     "Cotización sin compromiso en minutos",
                     "Repuestos para todas las marcas y modelos",
@@ -414,14 +414,14 @@ export default function Home() {
                     href="https://wa.me/573015271104?text=Hola,%20busco%20un%20repuesto%20para%20mi%20moto"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-[#0A2A66] font-bold text-sm shadow-lg hover:bg-slate-100 transition-colors"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0A2A66] dark:bg-white text-white dark:text-[#0A2A66] font-bold text-sm shadow-lg hover:bg-[#081F4D] dark:hover:bg-slate-100 transition-colors"
                   >
                     <ChatBubbleLeftRightIcon className="w-4 h-4" />
                     Cotizar por WhatsApp
                   </a>
                   <Link
                     href="/products"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/20 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[#0A2A66]/30 dark:border-white/20 text-[#0A2A66] dark:text-white font-semibold text-sm hover:bg-[#0A2A66]/10 dark:hover:bg-white/10 transition-colors"
                   >
                     <ShoppingCartIcon className="w-4 h-4" />
                     Ver catálogo
@@ -429,7 +429,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="p-8 sm:p-12 flex flex-col justify-center gap-7 border-t lg:border-t-0 lg:border-l border-white/8">
+              <div className="p-8 sm:p-12 flex flex-col justify-center gap-7 border-t lg:border-t-0 lg:border-l border-[#2E5FA7]/20 dark:border-white/8">
                 {[
                   { value: "15+", label: "años vendiendo repuestos", icon: <StarIcon className="w-5 h-5" /> },
                   { value: "5.000+", label: "referencias disponibles", icon: <CubeTransparentIcon className="w-5 h-5" /> },
@@ -443,12 +443,12 @@ export default function Home() {
                     transition={{ duration: 0.5, delay: i * 0.1 }}
                     className="flex items-center gap-5"
                   >
-                    <div className="w-12 h-12 rounded-xl bg-white/8 border border-white/10 flex items-center justify-center text-[#5B9BD5] shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-white/80 dark:bg-white/8 border border-[#2E5FA7]/20 dark:border-white/10 flex items-center justify-center text-[#2E5FA7] dark:text-[#5B9BD5] shrink-0">
                       {icon}
                     </div>
                     <div>
-                      <div className="text-4xl font-extrabold text-white leading-none">{value}</div>
-                      <div className="text-sm text-slate-400 mt-0.5">{label}</div>
+                      <div className="text-4xl font-extrabold text-[#081F4D] dark:text-white leading-none">{value}</div>
+                      <div className="text-sm text-[#0A2A66]/60 dark:text-slate-400 mt-0.5">{label}</div>
                     </div>
                   </motion.div>
                 ))}
@@ -461,20 +461,20 @@ export default function Home() {
             CTA FINAL
             ════════════════════════════════════════ */}
         <section>
-          <div className="rounded-3xl bg-gradient-to-r from-[#07122E] via-[#0A2A66] to-[#153B82] p-8 sm:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 shadow-[0_30px_80px_-30px_rgba(10,42,102,0.5)]">
+          <div className="rounded-3xl bg-gradient-to-r from-[#edf4ff] via-[#f9fbff] to-[#e8f0ff] dark:from-[#07122E] dark:via-[#0A2A66] dark:to-[#153B82] p-8 sm:p-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 border border-[#2E5FA7]/15 dark:border-transparent shadow-[0_24px_60px_-30px_rgba(10,42,102,0.35)] dark:shadow-[0_30px_80px_-30px_rgba(10,42,102,0.5)]">
             <div>
-              <p className="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase">Catálogo completo en línea</p>
-              <h4 className="text-2xl sm:text-3xl font-extrabold text-white mt-1.5">
+              <p className="text-[10px] font-bold tracking-[0.2em] text-[#0A2A66]/45 dark:text-white/40 uppercase">Catálogo completo en línea</p>
+              <h4 className="text-2xl sm:text-3xl font-extrabold text-[#081F4D] dark:text-white mt-1.5">
                 Todo lo que tu moto necesita,<br className="hidden sm:block" /> disponible ahora
               </h4>
-              <p className="mt-2 text-sm text-white/55">
+              <p className="mt-2 text-sm text-[#0A2A66]/70 dark:text-white/55">
                 Stock permanente · Precios directos · Envíos a Colombia · Calle 27 #14-29, La Ceja
               </p>
             </div>
             <div className="flex flex-wrap gap-3 shrink-0">
               <Link
                 href="/products"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-white text-[#0A2A66] font-bold text-sm shadow-lg hover:bg-slate-100 transition-colors"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-[#0A2A66] dark:bg-white text-white dark:text-[#0A2A66] font-bold text-sm shadow-lg hover:bg-[#081F4D] dark:hover:bg-slate-100 transition-colors"
               >
                 <ShoppingCartIcon className="w-5 h-5" />
                 Ver todos los productos
@@ -483,7 +483,7 @@ export default function Home() {
                 href="https://wa.me/573015271104?text=Hola,%20quiero%20hacer%20un%20pedido"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-white/25 text-white font-semibold text-sm hover:bg-white/10 transition-colors"
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-[#0A2A66]/30 dark:border-white/25 text-[#0A2A66] dark:text-white font-semibold text-sm hover:bg-[#0A2A66]/10 dark:hover:bg-white/10 transition-colors"
               >
                 <ChatBubbleLeftRightIcon className="w-5 h-5" />
                 Hacer pedido WhatsApp
@@ -566,7 +566,7 @@ function HeroSlider({ products, isLoading }: HeroSliderProps) {
   if (isLoading) {
     return (
       <div className="relative rounded-2xl shadow-2xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 h-72 md:h-96 lg:h-[520px] flex items-center justify-center">
-        <p className="text-slate-500 animate-pulse">Cargando productos...</p>
+        <p className="text-slate-500 dark:text-slate-400 animate-pulse">Cargando productos...</p>
       </div>
     );
   }
@@ -574,14 +574,14 @@ function HeroSlider({ products, isLoading }: HeroSliderProps) {
   if (slides.length === 0) {
     return (
       <div className="relative rounded-2xl shadow-2xl bg-slate-100 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 h-72 md:h-96 lg:h-[520px] flex items-center justify-center">
-        <p className="text-slate-500">No hay productos destacados.</p>
+        <p className="text-slate-500 dark:text-slate-400">No hay productos destacados.</p>
       </div>
     );
   }
 
   return (
     <div
-      className="relative rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-b from-white/70 to-white/20 dark:from-[#081126]/60 dark:to-[#081126]/30 border border-slate-200 dark:border-slate-800"
+      className="relative rounded-[1.75rem] overflow-hidden shadow-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800"
       onMouseEnter={stopAutoplay}
       onMouseLeave={startAutoplay}
       onTouchStart={handleTouchStart}
@@ -595,67 +595,65 @@ function HeroSlider({ products, isLoading }: HeroSliderProps) {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -40, scale: 0.98 }}
             transition={{ duration: 0.7, ease: "easeInOut" }}
-            className="absolute inset-0 w-full h-full flex flex-col lg:flex-row items-center"
+            className="absolute inset-0"
           >
-            <motion.div
-              className="relative w-full h-3/5 lg:w-1/2 lg:h-full overflow-hidden flex items-center justify-center bg-white"
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.8 }}
-            >
+            <motion.div className="relative w-full h-full" whileHover={{ scale: 1.02 }} transition={{ duration: 0.9 }}>
               <Image
                 src={slides[index].image}
                 alt={slides[index].title}
                 fill
                 priority={index === 0}
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-contain transition-transform duration-[1200ms]"
+                sizes="100vw"
+                className="object-cover transition-transform duration-[1400ms]"
               />
-            </motion.div>
 
-            <div className="w-full h-2/5 lg:w-1/2 lg:h-full p-4 sm:p-6 md:p-10 flex flex-col justify-center pb-8 lg:pb-4">
-              <motion.div
+              <div className="absolute inset-0 bg-gradient-to-t from-[#020817]/90 via-[#07122E]/45 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0A2A66]/20 via-transparent to-transparent dark:from-[#0A2A66]/25" />
+
+              <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 md:p-8 lg:p-9">
+                {slides.length > 1 && (
+                  <div className="mb-4 sm:mb-5 flex items-center gap-2.5">
+                    {slides.map((_, i) => (
+                      <button
+                        key={i}
+                        aria-label={`Ir al slide ${i + 1}`}
+                        onClick={() => handleIndicatorClick(i)}
+                        className={`rounded-full transition-all duration-300 ${
+                          i === index
+                            ? "w-8 h-2 bg-gradient-to-r from-[#39C5F5] to-[#7B4CFF] shadow-md"
+                            : "w-2.5 h-2.5 bg-white/35 hover:bg-white/55"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="bg-[#07122E]/70 backdrop-blur-md border border-white/10 p-3 sm:p-4 rounded-xl shadow-lg"
-              >
-                <h3 className="text-base sm:text-xl md:text-3xl font-bold tracking-tight text-white leading-tight">
-                  {slides[index].title}
-                </h3>
-                <p className="text-white/55 mt-1.5 leading-relaxed text-xs sm:text-sm line-clamp-2">
-                  {slides[index].subtitle}
-                </p>
-                <div className="mt-4">
-                  <Link
-                    href={slides[index].cta.href}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] hover:from-[#081F4D] hover:to-[#1E4F95] text-white font-semibold rounded-full shadow-lg transition-transform duration-300 hover:scale-[1.04]"
-                  >
-                    {slides[index].cta.label}
-                    <ArrowRightIcon className="w-4 h-4" />
-                  </Link>
-                </div>
-              </motion.div>
-            </div>
+                >
+                  <h3 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-[#53BDF0] leading-tight drop-shadow-sm">
+                    {slides[index].title}
+                  </h3>
+                  <p className="mt-2 text-sm sm:text-base text-white/80 max-w-3xl line-clamp-2 sm:line-clamp-3">
+                    {slides[index].subtitle}
+                  </p>
+                  <div className="mt-5">
+                    <Link
+                      href={slides[index].cta.href}
+                      className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-gradient-to-r from-[#39C5F5] to-[#7B4CFF] text-white font-bold text-base shadow-lg shadow-[#0A2A66]/45 transition-transform duration-300 hover:scale-[1.03]"
+                    >
+                      {slides[index].cta.label}
+                      <ArrowRightIcon className="w-5 h-5" />
+                    </Link>
+                  </div>
+                </motion.div>
+              </div>
+            </motion.div>
           </motion.div>
         </AnimatePresence>
       </div>
-
-      {slides.length > 1 && (
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              aria-label={`Ir al slide ${i + 1}`}
-              onClick={() => handleIndicatorClick(i)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                i === index
-                  ? "bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] scale-125 shadow-md"
-                  : "bg-slate-400/40 dark:bg-slate-600/40 hover:scale-110"
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }

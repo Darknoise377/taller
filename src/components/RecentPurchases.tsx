@@ -90,15 +90,15 @@ export default function RecentPurchases({ products = [], maxItems = 4 }: Props) 
   if (!items || items.length === 0) return null;
 
   return (
-    <div role="region" aria-label="Compras en tiempo real" aria-live="polite" className="mt-6 rounded-xl p-3 border border-slate-200 dark:border-white/10 bg-white dark:bg-white/8 shadow-sm">
+    <div role="region" aria-label="Compras en tiempo real" aria-live="polite" className="mt-6 rounded-xl p-3 border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-[#0a1428]/85 shadow-sm">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold">Compras en tiempo real</h4>
-        <span className="text-xs text-slate-500">En línea</span>
+        <h4 className="text-sm font-semibold text-slate-800 dark:text-slate-100">Compras en tiempo real</h4>
+        <span className="text-xs text-slate-500 dark:text-slate-400">En línea</span>
       </div>
-      <ul className="mt-3 space-y-2" role="list" aria-live="polite" aria-atomic="false">
+      <div className="mt-3 space-y-2" aria-live="polite" aria-atomic="false">
         <AnimatePresence initial={false}>
           {items.map((it) => (
-            <motion.li
+            <motion.div
               key={it.id}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -109,15 +109,15 @@ export default function RecentPurchases({ products = [], maxItems = 4 }: Props) 
                 <Image src={it.image || "/placeholder.png"} alt={`Imagen de ${it.product}`} fill className="object-cover" sizes="36px" />
               </div>
               <div className="flex-1">
-                <div className="text-sm font-semibold leading-tight">
+                <div className="text-sm font-semibold leading-tight text-slate-700 dark:text-slate-200">
                   {it.name} compró <span className="text-[#0A2A66] dark:text-[#5B9BD5] font-semibold">{it.product}</span>
                 </div>
-                <div className="text-xs text-slate-500">{timeAgoText(it.minutes)}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">{timeAgoText(it.minutes)}</div>
               </div>
-            </motion.li>
+            </motion.div>
           ))}
         </AnimatePresence>
-      </ul>
+      </div>
     </div>
   );
 }
