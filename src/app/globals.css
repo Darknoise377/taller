@@ -46,7 +46,8 @@ html {
   color: #0A2A66;
 }
 
-/* Animated brand text color (footer credit) */
+/* Animated brand te
+xt color (footer credit) */
 @keyframes brand-color-cycle {
   0%, 100% { color: #0A2A66; }
   25%       { color: #2E5FA7; }

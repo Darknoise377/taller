@@ -38,6 +38,11 @@ model Product {
   owner      User?          @relation(fields: [ownerId], references: [id])
   ownerId     String?
 
+  // 🛒 Mercado Libre
+  meliExport      Boolean  @default(false)
+  meliListingType String   @default("gold_special")  // gold_special (Clásica) | gold_pro (Premium)
+  meliListing     MeliListing?
+
   @@index([category])
   @@index([stock])
 }
@@ -113,6 +118,9 @@ model Order {
   // 🧩 Productos en la orden
   products        OrderProduct[]
 
+  // 🛒 Mercado Libre (si la orden vino de MeLi)
+  meliOrder       MeliOrder?
+
   // --- 👇 LÓGICA HÍBRIDA (Correcto) ---
   
   // 💸 Código de promoción aplicado
@@ -158,6 +166,7 @@ enum PaymentMethod {
   CONTRAENTREGA
   PAYU
   WOMPI
+  MERCADO_LIBRE
 }
 
 //
@@ -314,4 +323,74 @@ model StoreSettings {
   id            Int      @id @default(1)
   shippingRules Json
   updatedAt     DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────────────────────────
+// 🛒 MERCADO LIBRE INTEGRATION
+// ─────────────────────────────────────────────────────────────────
+
+/// OAuth tokens for the connected MeLi seller account.
+/// Only one row ever exists (singleton, id = 1).
+model MeliToken {
+  id           Int      @id @default(1)
+  accessToken  String   @db.Text
+  refreshToken String   @db.Text
+  expiresAt    DateTime          // When access_token expires (6 h from issue)
+  meliUserId   String            // Numeric MeLi user ID
+  nickname     String?           // Seller nickname shown in admin
+  siteId       String   @default("MCO")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+/// Global configuration for the MeLi channel.
+/// Only one row ever exists (singleton, id = 1).
+model MeliConfig {
+  id                Int      @id @default(1)
+  markupPercent     Float    @default(18)   // % added on top of base price
+  fixedCostCOP      Float    @default(3500) // fixed fee per sale (COP)
+  defaultListingType String  @default("gold_special")
+  /// JSON map: local Category enum value → MeLi category_id string
+  /// e.g. { "frenos": "MCO1747", "llantas": "MCO9145" }
+  categoryMap       Json     @default("{}")
+  updatedAt         DateTime @updatedAt
+}
+
+/// Tracks each product published on Mercado Libre.
+model MeliListing {
+  id         Int      @id @default(autoincrement())
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  String   @unique
+  meliItemId String   @unique       // e.g. "MCO1234567890"
+  status     MeliListingStatus @default(ACTIVE)
+  meliPrice  Float               // Last price sent to MeLi (after markup)
+  lastSyncAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([meliItemId])
+}
+
+enum MeliListingStatus {
+  ACTIVE
+  PAUSED
+  CLOSED
+  UNDER_REVIEW
+  ERROR
+}
+
+/// Orders that originated from Mercado Libre.
+/// Linked to the canonical Order row once processed.
+model MeliOrder {
+  id           Int      @id @default(autoincrement())
+  meliOrderId  String   @unique     // MeLi numeric order ID (as string)
+  order        Order?   @relation(fields: [orderId], references: [id])
+  orderId      Int?     @unique
+  rawPayload   Json                 // Full order payload from MeLi API
+  status       String               // MeLi order status
+  shipmentId   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([meliOrderId])
 }

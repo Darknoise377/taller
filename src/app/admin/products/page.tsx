@@ -359,6 +359,27 @@ export default function AdminProductsPage() {
       ),
     },
     {
+      title: 'MeLi',
+      key: 'meliExport',
+      align: 'center',
+      render: (_, record) => (
+        <Tooltip title={record.meliExport ? 'Exportar a MeLi: ON' : 'Exportar a MeLi: OFF'}>
+          <Tag
+            color={record.meliExport ? 'green' : 'default'}
+            style={{ cursor: 'pointer' }}
+            onClick={async () => {
+              try {
+                await productService.updateProduct(record.id, { meliExport: !record.meliExport });
+                await fetchProducts();
+              } catch { message.error('Error al actualizar'); }
+            }}
+          >
+            {record.meliExport ? 'ON' : 'OFF'}
+          </Tag>
+        </Tooltip>
+      ),
+    },
+    {
       title: 'Acciones',
       key: 'actions',
       align: 'center',
@@ -380,7 +401,7 @@ export default function AdminProductsPage() {
         </Space>
       ),
     },
-  ], [handleDeleteProduct, openModal]);
+  ], [handleDeleteProduct, openModal, fetchProducts]);
 
   // --- Renderizado del Componente ---
 return (

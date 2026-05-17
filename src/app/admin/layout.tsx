@@ -3,7 +3,7 @@
 import React from "react";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
-import { BadgePercent, LayoutDashboard, LogOut, Package, PackageSearch, ShieldAlert, Truck, Users } from "lucide-react";
+import { BadgePercent, LayoutDashboard, LogOut, Package, PackageSearch, ShieldAlert, ShoppingCart, Truck, Users } from "lucide-react";
 import type { AdminRole } from "@/types/auth";
 
 const ROLE_RANK: Record<AdminRole, number> = { SUPERADMIN: 3, ADMIN: 2, VENDEDOR: 1 };
@@ -36,6 +36,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/shipping", label: "Envío", icon: Truck, minRole: "ADMIN" },
   { href: "/admin/users", label: "Usuarios", icon: Users, minRole: "SUPERADMIN" },
   { href: "/admin/security-audit", label: "Auditoría", icon: ShieldAlert, minRole: "SUPERADMIN" },
+  { href: "/admin/meli", label: "Mercado Libre", icon: ShoppingCart, minRole: "ADMIN" },
 ];
 
 function AdminShell({ children }: { children: React.ReactNode }) {

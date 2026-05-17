@@ -42,6 +42,9 @@ export interface Product {
   tags?: string[];
   diagramNumber?: string;
   rating?: number;
+  // MeLi integration
+  meliExport?: boolean;
+  meliListingType?: string;
 }
 
 /**
