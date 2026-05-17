@@ -20,7 +20,7 @@ export async function GET() {
 
   const config = await prisma.meliConfig.findUnique({ where: { id: 1 } });
   return NextResponse.json(config ?? {
-    id: 1, markupPercent: 18, fixedCostCOP: 3500,
+    id: 1, extraMarginPercent: 0, fixedCostCOP: 3500,
     defaultListingType: 'gold_special', categoryMap: {},
   });
 }
@@ -29,30 +29,30 @@ export async function PUT(req: Request) {
   if (!(await requireAdmin())) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
 
   const body = await req.json() as {
-    markupPercent?: number;
+    extraMarginPercent?: number;
     fixedCostCOP?: number;
     defaultListingType?: string;
     categoryMap?: Record<string, string>;
   };
 
-  const { markupPercent, fixedCostCOP, defaultListingType, categoryMap } = body;
+  const { extraMarginPercent, fixedCostCOP, defaultListingType, categoryMap } = body;
 
-  // Validate
-  if (markupPercent !== undefined && (markupPercent < 0 || markupPercent >= 100)) {
-    return NextResponse.json({ error: 'markupPercent debe estar entre 0 y 99' }, { status: 400 });
+  // Validate: extra margin can be 0 (none) up to some reasonable max
+  if (extraMarginPercent !== undefined && (extraMarginPercent < 0 || extraMarginPercent >= 80)) {
+    return NextResponse.json({ error: 'extraMarginPercent debe estar entre 0 y 79' }, { status: 400 });
   }
 
   const config = await prisma.meliConfig.upsert({
     where: { id: 1 },
     create: {
       id: 1,
-      markupPercent: markupPercent ?? 18,
+      extraMarginPercent: extraMarginPercent ?? 0,
       fixedCostCOP: fixedCostCOP ?? 3500,
       defaultListingType: defaultListingType ?? 'gold_special',
       categoryMap: categoryMap ?? {},
     },
     update: {
-      ...(markupPercent !== undefined && { markupPercent }),
+      ...(extraMarginPercent !== undefined && { extraMarginPercent }),
       ...(fixedCostCOP !== undefined && { fixedCostCOP }),
       ...(defaultListingType !== undefined && { defaultListingType }),
       ...(categoryMap !== undefined && { categoryMap }),

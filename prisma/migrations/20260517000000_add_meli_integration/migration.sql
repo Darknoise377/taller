@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS "MeliToken" (
 -- 5. MeliConfig singleton table
 CREATE TABLE IF NOT EXISTS "MeliConfig" (
   "id"                 INTEGER     NOT NULL DEFAULT 1,
-  "markupPercent"      FLOAT       NOT NULL DEFAULT 18,
+  "extraMarginPercent" FLOAT       NOT NULL DEFAULT 0,
   "fixedCostCOP"       FLOAT       NOT NULL DEFAULT 3500,
   "defaultListingType" TEXT        NOT NULL DEFAULT 'gold_special',
   "categoryMap"        JSONB       NOT NULL DEFAULT '{}',
@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS "MeliConfig" (
 );
 
 -- Seed default config row
-INSERT INTO "MeliConfig" ("id", "markupPercent", "fixedCostCOP", "defaultListingType", "categoryMap", "updatedAt")
-VALUES (1, 18, 3500, 'gold_special', '{}', NOW())
+INSERT INTO "MeliConfig" ("id", "extraMarginPercent", "fixedCostCOP", "defaultListingType", "categoryMap", "updatedAt")
+VALUES (1, 0, 3500, 'gold_special', '{}', NOW())
 ON CONFLICT ("id") DO NOTHING;
 
 -- 6. MeliListing table (product ↔ MeLi item mapping)

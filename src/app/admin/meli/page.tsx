@@ -11,7 +11,7 @@ import {
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { formatCurrency } from '@/utils/formatCurrency';
-import { previewPrices } from '@/lib/meli/pricing';
+import { previewPrices, MELI_COMMISSION_RATES } from '@/lib/meli/pricing';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -26,7 +26,7 @@ interface MeliStatus {
 
 interface MeliConfig {
   id: number;
-  markupPercent: number;
+  extraMarginPercent: number;
   fixedCostCOP: number;
   defaultListingType: string;
   categoryMap: Record<string, string>;
@@ -71,7 +71,7 @@ export default function AdminMeliPage() {
         const cfg: MeliConfig = await res.json();
         setConfig(cfg);
         form.setFieldsValue({
-          markupPercent: cfg.markupPercent,
+          extraMarginPercent: cfg.extraMarginPercent,
           fixedCostCOP: cfg.fixedCostCOP,
           defaultListingType: cfg.defaultListingType,
         });
@@ -208,9 +208,10 @@ export default function AdminMeliPage() {
           // Preview with current config
           if (config) {
             const [preview] = previewPrices(
-              [{ basePrice: row.basePrice }],
-              config.markupPercent,
+              [{ productPrice: row.basePrice, listingType: config.defaultListingType }],
+              config.extraMarginPercent,
               config.fixedCostCOP,
+              config.defaultListingType,
             );
             return (
               <Tooltip title="Precio estimado (no publicado)">
@@ -341,7 +342,7 @@ export default function AdminMeliPage() {
           form={form}
           layout="vertical"
           initialValues={{
-            markupPercent: 18,
+            extraMarginPercent: 0,
             fixedCostCOP: 3500,
             defaultListingType: 'gold_special',
           }}
@@ -349,15 +350,34 @@ export default function AdminMeliPage() {
           <Row gutter={16}>
             <Col xs={24} sm={8}>
               <Form.Item
-                name="markupPercent"
-                label="Markup MeLi (%)"
-                tooltip="Comisión MeLi + margen adicional. Recomendado: 15–25%"
+                name="defaultListingType"
+                label="Tipo de publicación"
+                tooltip="Selecciona el tipo de publicación. La comisión de MeLi se calcula automáticamente."
+              >
+                <Select>
+                  <Select.Option value="gold_special">
+                    Clásica — MeLi cobra {MELI_COMMISSION_RATES['gold_special']}%
+                  </Select.Option>
+                  <Select.Option value="gold_premium">
+                    Premium — MeLi cobra {MELI_COMMISSION_RATES['gold_premium']}%
+                  </Select.Option>
+                  <Select.Option value="free">
+                    Gratuita — MeLi cobra {MELI_COMMISSION_RATES['free']}%
+                  </Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Form.Item
+                name="extraMarginPercent"
+                label="Margen adicional (%)"
+                tooltip="Porcentaje extra que se suma sobre la comisión de MeLi. Déjalo en 0 si solo quieres recuperar lo que cobra MeLi."
                 rules={[
                   { required: true, message: 'Requerido' },
-                  { type: 'number', min: 0, max: 99, message: '0–99' },
+                  { type: 'number', min: 0, max: 79, message: '0–79' },
                 ]}
               >
-                <InputNumber min={0} max={99} step={0.5} suffix="%" className="w-full" />
+                <InputNumber min={0} max={79} step={0.5} suffix="%" className="w-full" />
               </Form.Item>
             </Col>
             <Col xs={24} sm={8}>
@@ -368,19 +388,6 @@ export default function AdminMeliPage() {
                 rules={[{ required: true, message: 'Requerido' }]}
               >
                 <InputNumber min={0} step={500} prefix="$" className="w-full" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Form.Item
-                name="defaultListingType"
-                label="Tipo de publicación"
-                tooltip="gold_special = Clásica. gold_premium = Premium."
-              >
-                <Select>
-                  <Select.Option value="gold_special">Clásica (gold_special)</Select.Option>
-                  <Select.Option value="gold_premium">Premium (gold_premium)</Select.Option>
-                  <Select.Option value="free">Gratis</Select.Option>
-                </Select>
               </Form.Item>
             </Col>
           </Row>

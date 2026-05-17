@@ -346,14 +346,16 @@ model MeliToken {
 /// Global configuration for the MeLi channel.
 /// Only one row ever exists (singleton, id = 1).
 model MeliConfig {
-  id                Int      @id @default(1)
-  markupPercent     Float    @default(18)   // % added on top of base price
-  fixedCostCOP      Float    @default(3500) // fixed fee per sale (COP)
-  defaultListingType String  @default("gold_special")
+  id                 Int      @id @default(1)
+  /// Extra seller margin (%) added on top of MeLi's own commission.
+  /// Set to 0 to only recover MeLi's fee. MeLi rates are hard-coded per listing type.
+  extraMarginPercent Float    @default(0)
+  fixedCostCOP       Float    @default(3500) // fixed fee per sale in COP (packaging, etc.)
+  defaultListingType String   @default("gold_special")
   /// JSON map: local Category enum value → MeLi category_id string
   /// e.g. { "frenos": "MCO1747", "llantas": "MCO9145" }
-  categoryMap       Json     @default("{}")
-  updatedAt         DateTime @updatedAt
+  categoryMap        Json     @default("{}")
+  updatedAt          DateTime @updatedAt
 }
 
 /// Tracks each product published on Mercado Libre.

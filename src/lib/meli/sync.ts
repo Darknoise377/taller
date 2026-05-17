@@ -16,8 +16,8 @@ async function buildPayload(
   product: Product,
   categoryId: string,
 ): Promise<MeliItemPayload> {
-  const { meliPrice } = await calculateMeliPrice(product.price);
   const listingType = product.meliListingType || 'gold_special';
+  const { meliPrice } = await calculateMeliPrice(product.price, listingType);
 
   const pictures =
     product.images?.length
