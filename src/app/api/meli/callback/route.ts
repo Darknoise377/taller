@@ -24,9 +24,10 @@ export async function GET(req: Request) {
     await exchangeCode(code);
     return NextResponse.redirect(new URL(`${ADMIN_MELI_PAGE}?connected=1`, url.origin));
   } catch (err) {
-    console.error('[meli/callback]', err);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[meli/callback] token_exchange_failed:', msg);
     return NextResponse.redirect(
-      new URL(`${ADMIN_MELI_PAGE}?error=token_exchange_failed`, url.origin),
+      new URL(`${ADMIN_MELI_PAGE}?error=token_exchange_failed&detail=${encodeURIComponent(msg)}`, url.origin),
     );
   }
 }
