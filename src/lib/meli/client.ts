@@ -78,6 +78,9 @@ export const meliApi = {
       `/sites/${siteId}/domain_discovery/search?q=${encodeURIComponent(title)}`,
     ),
 
+  getCategoryAttributes: (categoryId: string) =>
+    meliRequest<MeliCategoryAttribute[]>('GET', `/categories/${categoryId}/attributes`),
+
   // ─── Account ───────────────────────────────────────────────────────────────
   getMe: () => meliRequest<MeliUser>('GET', '/users/me'),
 };
@@ -95,6 +98,7 @@ export interface MeliItemPayload {
   listing_type_id: string;      // 'gold_special' | 'gold_pro'
   description?: { plain_text: string };
   pictures?: { source: string }[];
+  attributes?: { id: string; value_name: string }[];
   sale_terms?: { id: string; value_name: string }[];
   shipping?: {
     mode: string;
@@ -149,4 +153,18 @@ export interface MeliCategoryPrediction {
   domain_name: string;
   category_id: string;
   category_name: string;
+}
+
+export interface MeliCategoryAttribute {
+  id: string;
+  name: string;
+  value_type: string;   // 'string' | 'number' | 'list' | 'boolean' | ...
+  tags: {
+    required?: boolean;
+    hidden?: boolean;
+    read_only?: boolean;
+    variation_attribute?: boolean;
+  };
+  allowed_units?: { id: string; name: string }[];
+  values?: { id: string; name: string }[];
 }

@@ -47,7 +47,11 @@ function validateSignature(req: Request, rawBody: string): boolean {
   const manifest = `id:${dataId};request-id:${xRequestId ?? ''};ts:${ts};`;
   const expected = crypto.createHmac('sha256', MELI_SECRET).update(manifest).digest('hex');
 
-  return crypto.timingSafeEqual(Buffer.from(v1, 'hex'), Buffer.from(expected, 'hex'));
+  // timingSafeEqual throws if buffer lengths differ — guard explicitly
+  const v1Buf = Buffer.from(v1, 'hex');
+  const expectedBuf = Buffer.from(expected, 'hex');
+  if (v1Buf.length !== expectedBuf.length) return false;
+  return crypto.timingSafeEqual(v1Buf, expectedBuf);
 }
 
 export async function POST(req: Request) {

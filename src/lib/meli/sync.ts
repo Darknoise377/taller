@@ -11,6 +11,47 @@ import { meliApi, type MeliItemPayload } from './client';
 import { calculateMeliPrice, getMeliConfig } from './pricing';
 import type { Product } from '@prisma/client';
 
+// Known attribute IDs that we can map from local product fields.
+const SELLER_SKU = 'SELLER_SKU';
+const BRAND      = 'BRAND';
+
+/**
+ * Fetch required attributes for a MeLi category and map what we can from the product.
+ * Attributes we cannot fill are omitted (MeLi will reject fake values for list types).
+ * A warning is logged for any required attribute we could not resolve.
+ */
+async function buildAttributes(
+  product: Product,
+  categoryId: string,
+): Promise<{ id: string; value_name: string }[]> {
+  let categoryAttrs;
+  try {
+    categoryAttrs = await meliApi.getCategoryAttributes(categoryId);
+  } catch {
+    return []; // Non-fatal: proceed without attributes if the call fails
+  }
+
+  const required = categoryAttrs.filter((a) => a.tags.required && !a.tags.hidden && !a.tags.read_only);
+  const result: { id: string; value_name: string }[] = [];
+
+  for (const attr of required) {
+    if (attr.id === SELLER_SKU && product.sku) {
+      result.push({ id: SELLER_SKU, value_name: product.sku });
+    } else if (attr.id === BRAND) {
+      // Try to find brand in tags (first tag that isn't a category keyword)
+      const brand = product.tags?.[0];
+      if (brand) result.push({ id: BRAND, value_name: brand });
+      else console.warn(`[meli/sync] Required attribute BRAND missing for product ${product.id}`);
+    } else {
+      console.warn(
+        `[meli/sync] Required attribute "${attr.id}" (${attr.name}) not resolved for product ${product.id} category ${categoryId}`,
+      );
+    }
+  }
+
+  return result;
+}
+
 // ─── Build a MeLi item payload from a local product ─────────────────────────
 async function buildPayload(
   product: Product,
@@ -26,6 +67,8 @@ async function buildPayload(
       ? [{ source: product.imageUrl }]
       : [];
 
+  const attributes = await buildAttributes(product, categoryId);
+
   return {
     title: product.name,
     category_id: categoryId,
@@ -37,6 +80,7 @@ async function buildPayload(
     listing_type_id: listingType,
     description: { plain_text: product.description },
     pictures,
+    ...(attributes.length > 0 && { attributes }),
     shipping: {
       mode: 'me2',      // Mercado Envíos
       local_pick_up: true,
@@ -123,6 +167,22 @@ export async function syncProduct(productId: string): Promise<{ action: 'publish
 }
 
 // ─── Bulk sync all products with meliExport = true ───────────────────────────
+/** Process `items` in chunks of `size`, awaiting a `delayMs` pause between each chunk. */
+async function runInBatches<T>(
+  items: T[],
+  size: number,
+  delayMs: number,
+  fn: (item: T) => Promise<void>,
+): Promise<void> {
+  for (let i = 0; i < items.length; i += size) {
+    const batch = items.slice(i, i + size);
+    await Promise.all(batch.map(fn));
+    if (i + size < items.length) {
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
 export async function bulkSyncProducts(): Promise<{
   synced: number;
   errors: { productId: string; error: string }[];
@@ -135,14 +195,14 @@ export async function bulkSyncProducts(): Promise<{
   let synced = 0;
   const errors: { productId: string; error: string }[] = [];
 
-  for (const { id } of products) {
+  await runInBatches(products, 5, 1000, async ({ id }) => {
     try {
       await syncProduct(id);
       synced++;
     } catch (err) {
       errors.push({ productId: id, error: err instanceof Error ? err.message : String(err) });
     }
-  }
+  });
 
   return { synced, errors };
 }
