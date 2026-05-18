@@ -81,12 +81,15 @@ export default function AdminMeliPage() {
 
   const loadListings = useCallback(async () => {
     try {
-      const res = await fetch('/api/products?all=true&limit=200');
+      const res = await fetch('/api/products?all=true&limit=500');
       if (!res.ok) return;
-      const products: {
-        id: string; name: string; price: number; meliExport: boolean;
-        meliListing?: { meliItemId: string; status: string; meliPrice: number; lastSyncAt: string };
-      }[] = await res.json();
+      const data: {
+        items: {
+          id: string; name: string; price: number; meliExport: boolean;
+          meliListing?: { meliItemId: string; status: string; meliPrice: number; lastSyncAt: string };
+        }[];
+      } = await res.json();
+      const products = data.items ?? [];
 
       const rows: ListingRow[] = products.map((p) => ({
         productId: p.id,
@@ -268,7 +271,9 @@ export default function AdminMeliPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Spin size="large" tip="Cargando integración MeLi..." />
+        <Spin size="large">
+          <div className="mt-3 text-gray-500 text-sm">Cargando integración MeLi...</div>
+        </Spin>
       </div>
     );
   }

@@ -13,7 +13,10 @@ export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
     const page = Math.max(1, Number(url.searchParams.get('page') || '1'));
-    const limit = Math.min(100, Math.max(1, Number(url.searchParams.get('limit') || '24')));
+    const all = url.searchParams.get('all') === 'true';
+    const limit = all
+      ? Math.min(500, Math.max(1, Number(url.searchParams.get('limit') || '500')))
+      : Math.min(100, Math.max(1, Number(url.searchParams.get('limit') || '24')));
     const q = (url.searchParams.get('q') || '').trim();
     const category = url.searchParams.get('category') || '';
     const sort = url.searchParams.get('sort') || 'relevance';
@@ -84,6 +87,15 @@ export async function GET(req: Request) {
           stock: true,
           createdAt: true,
           updatedAt: true,
+          meliExport: true,
+          meliListing: {
+            select: {
+              meliItemId: true,
+              status: true,
+              meliPrice: true,
+              lastSyncAt: true,
+            },
+          },
         },
       }),
       prisma.product.count({ where }),
