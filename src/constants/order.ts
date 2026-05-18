@@ -12,4 +12,5 @@ export const PaymentMethodLabels: Record<PaymentMethod, string> = {
   CONTRAENTREGA: "Contraentrega",
   PAYU: "PayU",
   WOMPI: "Wompi",
+  MERCADO_LIBRE: "Mercado Libre",
 };
