@@ -9,11 +9,12 @@
  * Security: we validate the X-Signature header using HMAC-SHA256.
  * Docs: https://developers.mercadolibre.com.ar/es_ar/notificaciones-de-estados
  *
- * We return 200 immediately and process via a Job row.
+ * We return 200 immediately and process orders inline.
  */
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
+import { processMeliOrder } from '@/lib/meli/sync';
 
 const MELI_SECRET = process.env.MELI_SECRET_KEY ?? '';
 
@@ -38,16 +39,12 @@ function validateSignature(req: Request): boolean {
   const v1 = parts['v1'];
   if (!ts || !v1) return false;
 
-  // MeLi signs: "ts" + dataId (from query string)
-  // dataId comes from the `data.id` in the body or the `id` query param
   const url = new URL(req.url);
   const dataId = url.searchParams.get('id') ?? '';
-  url.searchParams.get('user_id');
 
   const manifest = `id:${dataId};request-id:${xRequestId ?? ''};ts:${ts};`;
   const expected = crypto.createHmac('sha256', MELI_SECRET).update(manifest).digest('hex');
 
-  // timingSafeEqual throws if buffer lengths differ — guard explicitly
   const v1Buf = Buffer.from(v1, 'hex');
   const expectedBuf = Buffer.from(expected, 'hex');
   if (v1Buf.length !== expectedBuf.length) return false;
@@ -62,7 +59,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
 
-  // Validate signature
   if (!validateSignature(req)) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
@@ -76,7 +72,22 @@ export async function POST(req: Request) {
 
   const { topic, resource } = body;
 
-  // Enqueue for async processing
+  // ─── orders_v2: process synchronously (reduce stock, save record) ──────────
+  if (topic === 'orders_v2' && resource) {
+    // resource is like "/orders/2000003801"
+    const orderId = resource.split('/').filter(Boolean).pop();
+    if (orderId) {
+      try {
+        await processMeliOrder(orderId);
+      } catch (err) {
+        console.error('[meli/webhook] Failed to process order', orderId, err);
+        // Still return 200 — MeLi will retry if we return non-2xx
+      }
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  // ─── Other topics: enqueue for async processing ─────────────────────────────
   try {
     await prisma.job.create({
       data: {
@@ -86,7 +97,6 @@ export async function POST(req: Request) {
     });
   } catch (err) {
     console.error('[meli/webhook] Failed to enqueue job:', err);
-    // Still return 200 to prevent MeLi from retrying immediately
   }
 
   return NextResponse.json({ ok: true });

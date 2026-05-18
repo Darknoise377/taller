@@ -219,3 +219,63 @@ export async function unpublishProduct(productId: string): Promise<void> {
     data: { status: 'CLOSED', lastSyncAt: new Date() },
   });
 }
+
+// ─── Process a MeLi order: reduce stock, save record (idempotent) ─────────────
+export async function processMeliOrder(meliOrderId: string): Promise<void> {
+  // Idempotency — skip if already processed
+  const existing = await prisma.meliOrder.findUnique({ where: { meliOrderId } });
+  if (existing) return;
+
+  // Fetch order details from MeLi
+  const order = await meliApi.getOrder(meliOrderId);
+
+  // Only process orders where payment is confirmed
+  const processableStatuses = ['paid', 'payment_required', 'partially_refunded'];
+  if (!processableStatuses.includes(order.status)) {
+    // Save record but don't touch stock (e.g. cancelled / pending)
+    await prisma.meliOrder.create({
+      data: {
+        meliOrderId,
+        rawPayload: order as unknown as import('@prisma/client').Prisma.InputJsonValue,
+        status: order.status,
+        shipmentId: order.shipping?.id ? String(order.shipping.id) : null,
+      },
+    });
+    return;
+  }
+
+  // Reduce stock for each item sold
+  for (const orderItem of order.order_items) {
+    const listing = await prisma.meliListing.findFirst({
+      where: { meliItemId: orderItem.item.id },
+      select: { productId: true },
+    });
+    if (!listing) {
+      console.warn(`[meli/order] No local product found for MeLi item ${orderItem.item.id}`);
+      continue;
+    }
+
+    // Decrement local stock (floor at 0)
+    await prisma.product.update({
+      where: { id: listing.productId },
+      data: { stock: { decrement: orderItem.quantity } },
+    });
+
+    // Push updated stock back to MeLi listing
+    try {
+      await updateStockAndPrice(listing.productId);
+    } catch (err) {
+      console.error(`[meli/order] Failed to sync stock back to MeLi for ${listing.productId}:`, err);
+    }
+  }
+
+  // Persist the order record
+  await prisma.meliOrder.create({
+    data: {
+      meliOrderId,
+      rawPayload: order as unknown as import('@prisma/client').Prisma.InputJsonValue,
+      status: order.status,
+      shipmentId: order.shipping?.id ? String(order.shipping.id) : null,
+    },
+  });
+}
