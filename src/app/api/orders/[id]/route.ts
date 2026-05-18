@@ -66,7 +66,7 @@ export async function PATCH(
           customerEmail: string;
           total: number;
           currency: string;
-          paymentMethod: "PAYU" | "CONTRAENTREGA" | "WOMPI";
+          paymentMethod: "PAYU" | "CONTRAENTREGA" | "WOMPI" | "MERCADO_LIBRE";
           status: OrderStatus;
           products: { quantity: number; product: { name: string; price: number } }[];
         }

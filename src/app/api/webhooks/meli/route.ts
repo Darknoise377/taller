@@ -23,7 +23,7 @@ const MELI_SECRET = process.env.MELI_SECRET_KEY ?? '';
  * Signed content: ts + "." + userId + "." + dataId
  * Ref: https://developers.mercadolibre.com/es_ar/notificaciones-de-estados#Configurar-notificaciones
  */
-function validateSignature(req: Request, rawBody: string): boolean {
+function validateSignature(req: Request, _rawBody: string): boolean {
   // Skip validation in local dev when secret is not set
   if (!MELI_SECRET) return true;
 
@@ -42,7 +42,7 @@ function validateSignature(req: Request, rawBody: string): boolean {
   // dataId comes from the `data.id` in the body or the `id` query param
   const url = new URL(req.url);
   const dataId = url.searchParams.get('id') ?? '';
-  const userId = url.searchParams.get('user_id') ?? '';
+  const _userId = url.searchParams.get('user_id') ?? '';
 
   const manifest = `id:${dataId};request-id:${xRequestId ?? ''};ts:${ts};`;
   const expected = crypto.createHmac('sha256', MELI_SECRET).update(manifest).digest('hex');
