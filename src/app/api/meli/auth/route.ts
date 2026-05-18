@@ -4,7 +4,7 @@
  */
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { buildAuthUrl } from '@/lib/meli/auth';
+import { buildAuthUrl, generateCodeVerifier } from '@/lib/meli/auth';
 import { verifyAdminToken } from '@/lib/auth';
 import { COOKIE_NAME } from '@/config/admin';
 
@@ -15,8 +15,17 @@ export async function GET() {
   await verifyAdminToken(token);
 
   try {
-    const url = buildAuthUrl();
-    return NextResponse.redirect(url);
+    const codeVerifier = generateCodeVerifier();
+    const url = buildAuthUrl(codeVerifier);
+    const res = NextResponse.redirect(url);
+    res.cookies.set('meli_pkce_verifier', codeVerifier, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 600, // 10 minutes — enough time to complete OAuth
+    });
+    return res;
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Configuration error';
     return NextResponse.json({ error: msg }, { status: 500 });

@@ -3,6 +3,7 @@
  * Handles token exchange, refresh (access_token expires every 6h),
  * and secure persistence in the MeliToken singleton row.
  */
+import { randomBytes, createHash } from 'crypto';
 import { prisma } from '@/lib/prisma';
 
 const MELI_AUTH_URL = 'https://auth.mercadolibre.com.co/authorization';
@@ -20,8 +21,17 @@ export interface MeliTokenRow {
   nickname?: string | null;
 }
 
+// ─── PKCE helpers ────────────────────────────────────────────────────────────
+export function generateCodeVerifier(): string {
+  return randomBytes(32).toString('base64url'); // 43-char URL-safe string
+}
+
+export function generateCodeChallenge(verifier: string): string {
+  return createHash('sha256').update(verifier).digest('base64url');
+}
+
 // ─── Build the OAuth redirect URL ────────────────────────────────────────────
-export function buildAuthUrl(): string {
+export function buildAuthUrl(codeVerifier: string): string {
   const appId = process.env.MELI_APP_ID;
   const redirectUri = process.env.MELI_REDIRECT_URI;
   if (!appId || !redirectUri) throw new Error('MELI_APP_ID / MELI_REDIRECT_URI not set');
@@ -30,12 +40,14 @@ export function buildAuthUrl(): string {
     response_type: 'code',
     client_id: appId,
     redirect_uri: redirectUri,
+    code_challenge: generateCodeChallenge(codeVerifier),
+    code_challenge_method: 'S256',
   });
   return `${MELI_AUTH_URL}?${params.toString()}`;
 }
 
 // ─── Exchange authorization code for tokens ───────────────────────────────────
-export async function exchangeCode(code: string): Promise<void> {
+export async function exchangeCode(code: string, codeVerifier: string): Promise<void> {
   const appId = process.env.MELI_APP_ID;
   const secret = process.env.MELI_SECRET_KEY;
   const redirectUri = process.env.MELI_REDIRECT_URI;
@@ -52,6 +64,7 @@ export async function exchangeCode(code: string): Promise<void> {
       client_secret: secret,
       code,
       redirect_uri: redirectUri,
+      code_verifier: codeVerifier,
     }),
   });
 
