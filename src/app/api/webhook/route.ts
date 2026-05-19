@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { processWhatsAppMessage } from '@/lib/whatsapp/processMessage';
 
+export const maxDuration = 60; // allow up to 60s for AI processing (Vercel Pro)
+
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
 const WHATSAPP_APP_SECRET = process.env.WHATSAPP_APP_SECRET;
 
