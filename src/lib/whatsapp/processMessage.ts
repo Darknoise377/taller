@@ -31,6 +31,7 @@ Muestra máximo 3 resultados. Formato fijo:
   👉 ${BASE_URL}/products/[id]
 Si el stock es ≤ 3, agrega "(¡últimas unidades!)" en la misma línea.
 Sin tablas, sin headers, sin listas anidadas.
+IMPORTANTE: el enlace 👉 va solo en su línea, sin paréntesis, sin corchetes, sin nada más.
 
 ━━━ DATOS TIENDA ━━━
 Dirección: Calle 27 #14-29, La Ceja — WhatsApp: 301 527 1104 — L–S 8am–6pm
@@ -186,11 +187,14 @@ export async function processWhatsAppMessage(
     stopWhen: stepCountIs(5),
   });
 
+  // Strip trailing ) the model sometimes adds after product URLs (markdown artifact)
+  const cleanedReply = aiReply.replace(/^(👉\s+https?:\/\/[^\s)]+)\)*\s*$/gm, '$1');
+
   // Save assistant reply
   await prisma.chatMessage.create({
     data: { sessionId: session.id, role: 'assistant', content: aiReply },
   });
 
   // Send reply via WhatsApp
-  await sendWhatsAppText(sender, aiReply);
+  await sendWhatsAppText(sender, cleanedReply);
 }
