@@ -360,26 +360,35 @@ export async function processWhatsAppMessage(
     },
   });
 
-  // Fetch conversation history (last 20 messages for context)
+  // Fetch conversation history — only the 8 most recent VALID messages.
+  // Keep the window small: large/polluted history causes timeouts and bad responses.
   const messages = await prisma.chatMessage.findMany({
     where: { sessionId: session.id },
     orderBy: { createdAt: 'desc' },
-    take: 20,
+    take: 30, // over-fetch so we have enough after filtering
   });
 
   type ChatHistoryItem = { role: 'user' | 'assistant'; content: string };
 
-  // Filter out fallback/error messages that pollute the model's context,
-  // then reverse to get chronological order (oldest first).
+  // Bad responses to exclude: fallback errors, single-char garbage, known wrong phrases.
+  const BAD_PATTERNS = [
+    FALLBACK_MSG,
+    '?',
+    '¡A la orden!',
+    '¡Mucho gusto!',
+    'Siempre a la orden.',
+    'Estoy para ayudarte con tus repuestos y dudas.',
+  ];
+
   const history: ChatHistoryItem[] = messages
     .reverse()
     .filter(
       (m) =>
         (m.role === 'user' || m.role === 'assistant') &&
-        m.content.trim() !== FALLBACK_MSG &&
-        m.content.trim() !== '?' &&
+        !BAD_PATTERNS.includes(m.content.trim()) &&
         m.content.trim().length > 0,
     )
+    .slice(-8) // keep only last 8 clean messages
     .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
 
   const systemPrompt = process.env.WA_AI_SYSTEM_PROMPT ?? WA_SYSTEM_PROMPT;
