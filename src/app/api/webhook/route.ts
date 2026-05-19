@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import crypto from 'crypto';
+import { processWhatsAppMessage } from '@/lib/whatsapp/processMessage';
 
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
 const WHATSAPP_APP_SECRET = process.env.WHATSAPP_APP_SECRET;
@@ -65,20 +65,11 @@ export async function POST(request: Request) {
     const userText = message?.text?.body ?? (message?.type === 'text' ? message?.text?.body : null);
 
     if (userText && sender) {
-      console.log('Incoming WA message queued from', sender, userText.substring(0, 200));
+      console.log('Incoming WA message from', sender, userText.substring(0, 200));
 
-      // Create a job in the DB for background processing (worker will pick it up)
-      await prisma.job.create({
-        data: {
-          type: 'whatsapp_message',
-          payload: {
-            sender,
-            userText,
-            raw: message,
-            contact,
-          },
-        },
-      });
+      // Process inline — generates AI reply and sends it via WhatsApp API.
+      // Runs synchronously before returning 200 (Vercel timeout: up to 30s).
+      await processWhatsAppMessage(sender, userText, message);
     }
   } catch (error) {
     console.error('Error handling webhook POST', error);
