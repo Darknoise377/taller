@@ -297,7 +297,23 @@ const searchProductsTool: Tool<SearchParams, SearchResult> = {
   },
 };
 
-export async function sendWhatsAppText(to: string, text: string): Promise<void> {
+// Few-shot examples that teach the model to always call searchProducts before answering
+// about products. Mirrors the FEW_SHOT_MESSAGES pattern from api/chat/route.ts.
+const WA_FEW_SHOT: Array<{ role: 'user' | 'assistant'; content: string }> = [
+  { role: 'user', content: '¿A qué hora abren?' },
+  { role: 'assistant', content: 'Lunes a sábado 8am–6pm. Calle 27 #14-29, La Ceja.' },
+  { role: 'user', content: 'Necesito pastillas de freno para la cb190' },
+  { role: 'assistant', content: '[llama searchProducts → resultado encontrado]\n*Pastillas de Freno Honda CB190* — $28.000 COP (stock: 7 uds)\n👉 ' + BASE_URL + '/products/ejemplo\n¿Las pedimos?' },
+  { role: 'user', content: 'Cuánto cuesta un vuelo a Bogotá' },
+  { role: 'assistant', content: 'Solo manejo motos y repuestos — ¿en qué te ayudo?' },
+  { role: 'user', content: 'Se me dañó la moto y no arranca' },
+  { role: 'assistant', content: 'Qué mal momento, pero tiene solución. ¿Hace algún ruido cuando intentas arrancarla?' },
+];
+
+// Fallback message text — used to filter polluted history entries
+const FALLBACK_MSG = 'Tuve un problema procesando tu mensaje. Por favor intenta de nuevo.';
+
+to: string, text: string): Promise<void> {
   if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
     console.warn('[WhatsApp] token or phone id not configured');
     return;
@@ -344,25 +360,36 @@ export async function processWhatsAppMessage(
     },
   });
 
-  // Fetch conversation history (last 50 messages for context)
+  // Fetch conversation history (last 20 messages for context)
   const messages = await prisma.chatMessage.findMany({
     where: { sessionId: session.id },
-    orderBy: { createdAt: 'asc' },
-    take: 50,
+    orderBy: { createdAt: 'desc' },
+    take: 20,
   });
 
-  type ChatHistoryItem = { role: 'user' | 'assistant' | 'system'; content: string };
-  const history: ChatHistoryItem[] = messages.map((m) => ({
-    role: (m.role === 'user' || m.role === 'assistant' || m.role === 'system') ? m.role : 'user',
-    content: m.content,
-  }));
+  type ChatHistoryItem = { role: 'user' | 'assistant'; content: string };
+
+  // Filter out fallback/error messages that pollute the model's context,
+  // then reverse to get chronological order (oldest first).
+  const history: ChatHistoryItem[] = messages
+    .reverse()
+    .filter(
+      (m) =>
+        (m.role === 'user' || m.role === 'assistant') &&
+        m.content.trim() !== FALLBACK_MSG &&
+        m.content.trim() !== '?' &&
+        m.content.trim().length > 0,
+    )
+    .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
 
   const systemPrompt = process.env.WA_AI_SYSTEM_PROMPT ?? WA_SYSTEM_PROMPT;
 
+  // Prepend few-shot examples so the model sees correct tool-usage patterns
+  // before the real conversation history.
   const stream = streamText({
     model: getAIModel(),
     system: systemPrompt,
-    messages: history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+    messages: [...WA_FEW_SHOT, ...history],
     tools: { searchProducts: searchProductsTool, createOrder: createOrderTool },
     stopWhen: stepCountIs(8),
   });
@@ -373,7 +400,7 @@ export async function processWhatsAppMessage(
 
   const aiReply =
     rawReply.trim() ||
-    'Tuve un problema procesando tu mensaje. Por favor intenta de nuevo.';
+    FALLBACK_MSG;
 
   // Strip trailing ) the model sometimes adds after product URLs (markdown artifact)
   const cleanedReply = aiReply.replace(/^(👉\s+https?:\/\/[^\s)]+)\)*\s*$/gm, '$1');
