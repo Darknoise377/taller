@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
-import sendToAI from '@/lib/ai';
+import { generateText } from 'ai';
+import { getAIModel } from '@/lib/ai-provider';
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_API_TOKEN;
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
@@ -70,7 +71,12 @@ export async function processWhatsAppMessage(
     process.env.WA_AI_SYSTEM_PROMPT ??
     'Eres un asistente de ventas para Motoservicio A&R, una tienda online de repuestos de motos en Colombia. Responde en español, sé amable y conciso.';
 
-  const aiReply = await sendToAI({ userText, systemPrompt, history });
+  const { text: aiReply } = await generateText({
+    model: getAIModel(),
+    system: systemPrompt,
+    messages: history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+    maxTokens: 512,
+  });
 
   // Save assistant reply
   await prisma.chatMessage.create({
