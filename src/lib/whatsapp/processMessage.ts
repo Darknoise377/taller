@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import { PaymentMethod } from '@prisma/client';
-import { generateText, stepCountIs } from 'ai';
+import { streamText, stepCountIs } from 'ai';
 import type { Tool } from '@ai-sdk/provider-utils';
 import { z } from 'zod';
 import { getAIModel } from '@/lib/ai-provider';
@@ -359,7 +359,7 @@ export async function processWhatsAppMessage(
 
   const systemPrompt = process.env.WA_AI_SYSTEM_PROMPT ?? WA_SYSTEM_PROMPT;
 
-  const result = await generateText({
+  const stream = streamText({
     model: getAIModel(),
     system: systemPrompt,
     messages: history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
@@ -367,11 +367,12 @@ export async function processWhatsAppMessage(
     stopWhen: stepCountIs(8),
   });
 
-  // generateText returns empty text when the last step is a tool call with no follow-up text.
-  // Fall back to the last non-empty text from any step, then a generic fallback.
+  // streamText.text resolves to the full accumulated text after all tool steps complete.
+  // generateText was returning empty text when the last step was a tool call in AI SDK v6.
+  const rawReply = await stream.text;
+
   const aiReply =
-    result.text.trim() ||
-    [...(result.steps ?? [])].reverse().find((s) => s.text?.trim())?.text?.trim() ||
+    rawReply.trim() ||
     'Tuve un problema procesando tu mensaje. Por favor intenta de nuevo.';
 
   // Strip trailing ) the model sometimes adds after product URLs (markdown artifact)
