@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
-import { generateText, tool } from 'ai';
+import { generateText } from 'ai';
+import type { Tool } from '@ai-sdk/provider-utils';
 import { z } from 'zod';
 import { getAIModel } from '@/lib/ai-provider';
 import { PRODUCT_CATEGORIES } from '@/constants/productCategories';
@@ -38,14 +39,33 @@ Categorías: ${PRODUCT_CATEGORIES.join(', ')}
 Sin stock tras buscar → "No lo tenemos ahora. Escríbenos al 301 527 1104 para confirmar reabastecimiento."
 Fuera de tema → "Solo manejo motos y repuestos — ¿en qué te ayudo?"`;
 
-const searchProductsTool = tool({
+const searchParamsSchema = z.object({
+  query: z.string().describe('Términos de búsqueda, ej: "pastillas de freno cb190"'),
+  category: z.string().optional().describe(`Categoría opcional. Opciones: ${PRODUCT_CATEGORIES.join(', ')}`),
+  maxResults: z.number().int().min(1).max(5).optional().default(3),
+});
+
+type SearchParams = z.infer<typeof searchParamsSchema>;
+
+type SearchResult = {
+  found: boolean;
+  message?: string;
+  total?: number;
+  products: Array<{
+    id: string;
+    name: string;
+    price: string;
+    category: string;
+    stock: number;
+    sku: string | null;
+    url: string;
+  }>;
+};
+
+const searchProductsTool: Tool<SearchParams, SearchResult> = {
   description: 'Busca productos en el catálogo de la tienda. Úsalo siempre que el cliente pregunte por un repuesto.',
-  parameters: z.object({
-    query: z.string().describe('Términos de búsqueda, ej: "pastillas de freno cb190"'),
-    category: z.string().optional().describe(`Categoría opcional. Opciones: ${PRODUCT_CATEGORIES.join(', ')}`),
-    maxResults: z.number().int().min(1).max(5).optional().default(3),
-  }),
-  execute: async ({ query, category, maxResults }) => {
+  inputSchema: searchParamsSchema,
+  execute: async ({ query, category, maxResults }: SearchParams): Promise<SearchResult> => {
     const limit = maxResults ?? 3;
     const words = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
     const singulars = words.map((w) => (w.endsWith('s') ? w.slice(0, -1) : w));
@@ -94,7 +114,7 @@ const searchProductsTool = tool({
       return { found: false, message: 'Error al consultar el catálogo.', products: [] };
     }
   },
-});
+};
 
 export async function sendWhatsAppText(to: string, text: string): Promise<void> {
   if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
