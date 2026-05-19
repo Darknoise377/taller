@@ -359,7 +359,7 @@ export async function processWhatsAppMessage(
 
   const systemPrompt = process.env.WA_AI_SYSTEM_PROMPT ?? WA_SYSTEM_PROMPT;
 
-  const { text: aiReply } = await generateText({
+  const result = await generateText({
     model: getAIModel(),
     system: systemPrompt,
     messages: history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
@@ -367,12 +367,19 @@ export async function processWhatsAppMessage(
     stopWhen: stepCountIs(8),
   });
 
+  // generateText returns empty text when the last step is a tool call with no follow-up text.
+  // Fall back to the last non-empty text from any step, then a generic fallback.
+  const aiReply =
+    result.text.trim() ||
+    [...(result.steps ?? [])].reverse().find((s) => s.text?.trim())?.text?.trim() ||
+    'Tuve un problema procesando tu mensaje. Por favor intenta de nuevo.';
+
   // Strip trailing ) the model sometimes adds after product URLs (markdown artifact)
   const cleanedReply = aiReply.replace(/^(👉\s+https?:\/\/[^\s)]+)\)*\s*$/gm, '$1');
 
   // Save assistant reply
   await prisma.chatMessage.create({
-    data: { sessionId: session.id, role: 'assistant', content: aiReply },
+    data: { sessionId: session.id, role: 'assistant', content: cleanedReply },
   });
 
   // Send reply via WhatsApp
