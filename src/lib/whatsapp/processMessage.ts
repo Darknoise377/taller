@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
-import { generateText } from 'ai';
+import { generateText, stepCountIs } from 'ai';
 import type { Tool } from '@ai-sdk/provider-utils';
 import { z } from 'zod';
 import { getAIModel } from '@/lib/ai-provider';
@@ -183,7 +183,7 @@ export async function processWhatsAppMessage(
     system: systemPrompt,
     messages: history.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
     tools: { searchProducts: searchProductsTool },
-    maxSteps: 5,
+    stopWhen: stepCountIs(5),
   });
 
   // Save assistant reply
