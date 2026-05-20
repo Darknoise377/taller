@@ -191,7 +191,7 @@ export default function Home() {
               </h1>
 
               <p className="mt-4 text-base sm:text-lg text-[#0A2A66]/75 dark:text-white/60 max-w-lg leading-relaxed">
-                15+ años en el mercado. Piezas originales y genéricas, stock permanente y despachos a todo Colombia.
+                10+ años en el mercado. Piezas originales y genéricas, stock permanente y despachos a todo Colombia.
               </p>
 
               <div className="mt-5">
@@ -227,7 +227,7 @@ export default function Home() {
                   { icon: <TruckIcon className="w-4 h-4" />, text: "Envíos a Colombia" },
                   { icon: <ShieldCheckIcon className="w-4 h-4" />, text: "Garantía incluida" },
                   { icon: <LockClosedIcon className="w-4 h-4" />, text: "Pago seguro Wompi" },
-                  { icon: <StarIcon className="w-4 h-4" />, text: "15+ años de experiencia" },
+                  { icon: <StarIcon className="w-4 h-4" />, text: "10+ años de experiencia" },
                 ].map(({ icon, text }) => (
                   <div key={text} className="flex items-center gap-1.5 text-[#0A2A66]/70 dark:text-white/55 text-xs">
                     <span className="text-[#2E5FA7] dark:text-[#5B9BD5]">{icon}</span>
@@ -433,7 +433,7 @@ export default function Home() {
 
               <div className="p-8 sm:p-12 flex flex-col justify-center gap-7 border-t lg:border-t-0 lg:border-l border-[#2E5FA7]/20 dark:border-white/8">
                 {[
-                  { value: "15+", label: "años vendiendo repuestos", icon: <StarIcon className="w-5 h-5" /> },
+                  { value: "10+", label: "años vendiendo repuestos", icon: <StarIcon className="w-5 h-5" /> },
                   { value: "5.000+", label: "referencias disponibles", icon: <CubeTransparentIcon className="w-5 h-5" /> },
                   { value: "100%", label: "garantía en cada pieza vendida", icon: <ShieldCheckIcon className="w-5 h-5" /> },
                 ].map(({ value, label, icon }, i) => (

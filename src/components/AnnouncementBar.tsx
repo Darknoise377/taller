@@ -7,7 +7,7 @@ import { isCheckoutPath } from "@/utils/routeUtils";
 const MESSAGES = [
   "🚚 Envíos a todo Colombia · Despacho el mismo día hábil",
   "🔒 Pago 100% seguro · Wompi · Transferencia · Contraentrega",
-  "⭐ 15+ años de experiencia · Repuestos originales y genéricos",
+  "⭐ 10+ años de experiencia · Repuestos originales y genéricos",
   "📦 Pedidos antes de las 3:00 PM salen el mismo día",
 ];
 
