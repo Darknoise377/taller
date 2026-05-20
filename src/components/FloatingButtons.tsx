@@ -124,7 +124,7 @@ export default function FloatingButtons() {
                         Criss
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">
-                        Asistente virtual IA
+                        Asistente servicios virtuales y pedidos
                       </p>
                     </div>
                     <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -150,7 +150,7 @@ export default function FloatingButtons() {
                         Línea directa
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">
-                        Atención humana
+                        Cotizaciones y consultas generales
                       </p>
                     </div>
                     <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">

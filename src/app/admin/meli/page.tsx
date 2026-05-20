@@ -113,6 +113,10 @@ export default function AdminMeliPage() {
     Promise.all([loadStatus(), loadConfig(), loadListings()]).finally(() =>
       setLoading(false),
     );
+
+    // Re-check token status every 60 s so the UI reacts when it expires
+    const interval = setInterval(loadStatus, 60_000);
+    return () => clearInterval(interval);
   }, [loadStatus, loadConfig, loadListings]);
 
   // ─── Handlers ──────────────────────────────────────────────────────────────

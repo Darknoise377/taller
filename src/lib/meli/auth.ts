@@ -177,5 +177,19 @@ export async function getMeliConnectionStatus(): Promise<{
 }> {
   const token = await prisma.meliToken.findUnique({ where: { id: 1 } });
   if (!token) return { connected: false };
-  return { connected: true, nickname: token.nickname ?? undefined, expiresAt: token.expiresAt };
+
+  // If token is still valid, return immediately
+  if (token.expiresAt.getTime() - Date.now() >= REFRESH_BUFFER_MS) {
+    return { connected: true, nickname: token.nickname ?? undefined, expiresAt: token.expiresAt };
+  }
+
+  // Token is expired or near expiry — try to silently refresh
+  try {
+    const refreshed = await refreshAccessToken(token);
+    return { connected: true, nickname: token.nickname ?? undefined, expiresAt: refreshed.expiresAt };
+  } catch {
+    // Refresh token is also expired — clear stored credentials and force reconnect
+    await prisma.meliToken.deleteMany({ where: { id: 1 } });
+    return { connected: false };
+  }
 }

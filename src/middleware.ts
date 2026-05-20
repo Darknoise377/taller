@@ -168,6 +168,7 @@ export async function middleware(req: NextRequest) {
   const isPublicOrderStatus = pathname.startsWith("/api/orders/status/") && req.method === "GET";
   const isPublicProductsRead = pathname.startsWith("/api/products") && req.method === "GET";
   const isPublicCartRead = pathname === "/api/cart" && req.method === "GET";
+  const isPublicCartWrite = pathname === "/api/cart" && req.method === "PUT";
 
   const isProtectedApi = (
     pathname.startsWith("/api/admin/") ||
@@ -183,7 +184,8 @@ export async function middleware(req: NextRequest) {
     isPublicOrderStatus ||
     isCodesValidate ||
     isPublicProductsRead ||
-    isPublicCartRead
+    isPublicCartRead ||
+    isPublicCartWrite
   );
 
   // Mitigación CSRF

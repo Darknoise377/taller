@@ -68,7 +68,6 @@ async function buildPayload(
   categoryId: string,
 ): Promise<MeliItemPayload> {
   const listingType = product.meliListingType || 'gold_special';
-  const config = await getMeliConfig();
   const { meliPrice } = await calculateMeliPrice(product.price, listingType);
   const pictures =
     product.images?.length
@@ -78,12 +77,6 @@ async function buildPayload(
       : [];
 
   const attributes = await buildAttributes(product, categoryId);
-
-  // Cuotas sin interés: 3 (default) o 6 (cuotas extra)
-  const freeInstallments = config.freeInstallments ?? 3;
-  const saleTerms = [
-    { id: 'FREE_INSTALLMENTS', value_name: String(freeInstallments) },
-  ];
 
   return {
     title: product.name,
@@ -97,9 +90,8 @@ async function buildPayload(
     description: { plain_text: product.description },
     pictures,
     ...(attributes.length > 0 && { attributes }),
-    sale_terms: saleTerms,
     shipping: {
-      mode: 'me2',      // Mercado Envíos
+      mode: 'me2',
       local_pick_up: true,
       free_shipping: false,
     },
