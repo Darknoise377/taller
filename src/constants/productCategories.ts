@@ -14,6 +14,7 @@ export const PRODUCT_CATEGORIES = [
   "carenaje",
   "accesorios",
   "motor",
+  "refrigeracion",
 ] as const;
 
 export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
@@ -34,6 +35,7 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {
   carenaje: "Carenaje",
   accesorios: "Accesorios",
   motor: "Motor",
+  refrigeracion: "Sistema de refrigeración",
 };
 
 export const PRODUCT_CATEGORY_OPTIONS = PRODUCT_CATEGORIES.map((value) => ({
@@ -57,6 +59,7 @@ export const PRODUCT_CATEGORY_DESCRIPTIONS: Record<ProductCategory, string> = {
   carenaje: "Plasticos, tapas y piezas de carroceria para restauracion estetica.",
   accesorios: "Accesorios funcionales para personalizar y proteger tu moto.",
   motor: "Repuestos y componentes internos del motor para mantenimiento y reparacion.",
+  refrigeracion: "Radiadores, termostatos, mangueras y partes del sistema de refrigeracion.",
 };
 
 export function isProductCategory(value: string): value is ProductCategory {

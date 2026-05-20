@@ -80,6 +80,7 @@ enum Category {
   carenaje
   accesorios
   motor
+  refrigeracion
 }
 
 //
