@@ -224,11 +224,31 @@ const CheckoutPage: React.FC = () => {
     const shipping = shippingEstimate?.total ?? 0;
     if (validatedCode?.type === 'promotion') {
       const promo = validatedCode.data as PromotionCode;
+
+      // If promotion targets specific categories or products, apply discount
+      // only to matching cart items (preview — server recalculates on order creation)
+      if (promo.appliesTo === 'CATEGORY' && promo.targetCategories?.length) {
+        const discountableTotal = items
+          .filter((i) => promo.targetCategories!.includes(i.product.category as string))
+          .reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+        const nonDiscountable = cartTotal - discountableTotal;
+        const { finalTotal: discounted, discountAmount } = calculateDiscountedTotal(discountableTotal, promo.discount);
+        return { finalTotal: discounted + nonDiscountable + shipping, discountAmount };
+      }
+      if (promo.appliesTo === 'PRODUCT' && promo.targetProductIds?.length) {
+        const discountableTotal = items
+          .filter((i) => promo.targetProductIds!.includes(i.product.id))
+          .reduce((sum, i) => sum + i.product.price * i.quantity, 0);
+        const nonDiscountable = cartTotal - discountableTotal;
+        const { finalTotal: discounted, discountAmount } = calculateDiscountedTotal(discountableTotal, promo.discount);
+        return { finalTotal: discounted + nonDiscountable + shipping, discountAmount };
+      }
+
       const { finalTotal: discounted, discountAmount } = calculateDiscountedTotal(cartTotal, promo.discount);
       return { finalTotal: discounted + shipping, discountAmount };
     }
     return { finalTotal: cartTotal + shipping, discountAmount: 0 };
-  }, [cartTotal, validatedCode, shippingEstimate]);
+  }, [cartTotal, validatedCode, shippingEstimate, items]);
 
   // --- Efectos de Carga (de V1) ---
   useEffect(() => {
@@ -917,6 +937,24 @@ const CheckoutPage: React.FC = () => {
                       <strong>
                         {(validatedCode.data as PromotionCode).description}
                       </strong>
+                      {(() => {
+                        const promo = validatedCode.data as PromotionCode;
+                        if (promo.appliesTo === 'CATEGORY' && promo.targetCategories?.length) {
+                          return (
+                            <span className="block mt-0.5 text-xs text-green-700">
+                              Aplica solo a: {promo.targetCategories.join(', ')}
+                            </span>
+                          );
+                        }
+                        if (promo.appliesTo === 'PRODUCT' && promo.targetProductIds?.length) {
+                          return (
+                            <span className="block mt-0.5 text-xs text-green-700">
+                              Aplica a productos específicos seleccionados
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                   )}
                 </div>

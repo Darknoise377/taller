@@ -4,23 +4,27 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const appliesTo = ['ALL', 'CATEGORY', 'PRODUCT'].includes(body.appliesTo) ? body.appliesTo : 'ALL';
     const data = {
-      code: String(body.code ?? "").trim().toUpperCase(),
+      code: String(body.code ?? '').trim().toUpperCase(),
       discount: Number(body.discount),
-      description: String(body.description ?? "").trim(),
+      description: String(body.description ?? '').trim(),
       isActive: body.isActive === undefined ? true : Boolean(body.isActive),
       expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
+      appliesTo,
+      targetCategories: Array.isArray(body.targetCategories) ? body.targetCategories.map(String) : [],
+      targetProductIds: Array.isArray(body.targetProductIds) ? body.targetProductIds.map(String) : [],
     };
 
     if (!data.code || !data.description || !Number.isFinite(data.discount) || data.discount <= 0 || data.discount > 100) {
-      return NextResponse.json({ error: "Datos de promoción inválidos. El descuento debe ser entre 1 y 100." }, { status: 400 });
+      return NextResponse.json({ error: 'Datos de promoción inválidos. El descuento debe ser entre 1 y 100.' }, { status: 400 });
     }
 
     const promo = await prisma.promotion.create({ data });
     return NextResponse.json(promo);
   } catch (error) {
-    console.error("Error creando promoción:", error);
-    return NextResponse.json({ error: "Error creando promoción" }, { status: 500 });
+    console.error('Error creando promoción:', error);
+    return NextResponse.json({ error: 'Error creando promoción' }, { status: 500 });
   }
 }
 
@@ -38,19 +42,25 @@ export async function PUT(req: Request) {
       description?: string;
       isActive?: boolean;
       expiresAt?: Date | null;
+      appliesTo?: string;
+      targetCategories?: string[];
+      targetProductIds?: string[];
     } = {};
 
     if (body.code !== undefined) data.code = String(body.code).trim().toUpperCase();
     if (body.discount !== undefined) {
       const discount = Number(body.discount);
       if (!Number.isFinite(discount) || discount <= 0 || discount > 100) {
-        return NextResponse.json({ error: "Descuento inválido. Debe ser entre 1 y 100." }, { status: 400 });
+        return NextResponse.json({ error: 'Descuento inválido. Debe ser entre 1 y 100.' }, { status: 400 });
       }
       data.discount = discount;
     }
     if (body.description !== undefined) data.description = String(body.description).trim();
     if (body.isActive !== undefined) data.isActive = Boolean(body.isActive);
     if (body.expiresAt !== undefined) data.expiresAt = body.expiresAt ? new Date(body.expiresAt) : null;
+    if (['ALL', 'CATEGORY', 'PRODUCT'].includes(body.appliesTo)) data.appliesTo = body.appliesTo;
+    if (Array.isArray(body.targetCategories)) data.targetCategories = body.targetCategories.map(String);
+    if (Array.isArray(body.targetProductIds)) data.targetProductIds = body.targetProductIds.map(String);
 
     const promo = await prisma.promotion.update({
       where: { id },

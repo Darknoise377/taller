@@ -57,7 +57,18 @@ export async function GET(req: NextRequest) {
     const promotion = await db.promotion.findUnique({
       where: {
         code,
-        isActive: true, // ¡Importante! Asegúrate que la promo esté activa
+        isActive: true,
+      },
+      select: {
+        id: true,
+        code: true,
+        description: true,
+        discount: true,
+        isActive: true,
+        expiresAt: true,
+        appliesTo: true,
+        targetCategories: true,
+        targetProductIds: true,
       },
     });
 

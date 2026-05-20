@@ -5,9 +5,17 @@ import type { SellerCode as Seller, PromotionCode as Promotion } from '@/types/c
 import * as codeService from '@/services/codeService';
 import { toast } from 'sonner';
 import { Pencil, Trash2, X } from 'lucide-react';
+import { PRODUCT_CATEGORY_OPTIONS } from '@/constants/productCategories';
 
 const initialSellerState = { name: '', code: '' };
-const initialPromoState = { code: '', description: '', discount: 0 };
+const initialPromoState = {
+  code: '',
+  description: '',
+  discount: 0,
+  appliesTo: 'ALL' as 'ALL' | 'CATEGORY' | 'PRODUCT',
+  targetCategories: [] as string[],
+  targetProductIds: [] as string[],
+};
 
 export default function AdminCodesPage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
@@ -105,7 +113,12 @@ export default function AdminCodesPage() {
       return;
     }
     try {
-      await codeService.createPromotion({ ...newPromo, code: newPromo.code.toUpperCase() });
+      await codeService.createPromotion({
+        ...newPromo,
+        code: newPromo.code.toUpperCase(),
+        targetCategories: newPromo.appliesTo === 'CATEGORY' ? newPromo.targetCategories : [],
+        targetProductIds: newPromo.appliesTo === 'PRODUCT' ? newPromo.targetProductIds : [],
+      });
       toast.success('Promoción creada');
       setNewPromo(initialPromoState);
       loadData();
@@ -126,6 +139,9 @@ export default function AdminCodesPage() {
         code: newPromo.code.toUpperCase(),
         description: newPromo.description,
         discount: newPromo.discount,
+        appliesTo: newPromo.appliesTo,
+        targetCategories: newPromo.appliesTo === 'CATEGORY' ? newPromo.targetCategories : [],
+        targetProductIds: newPromo.appliesTo === 'PRODUCT' ? newPromo.targetProductIds : [],
       });
       toast.success('Promoción actualizada');
       setEditingPromo(null);
@@ -154,7 +170,14 @@ export default function AdminCodesPage() {
 
   const startEditPromo = (promo: Promotion) => {
     setEditingPromo(promo);
-    setNewPromo({ code: promo.code, description: promo.description, discount: promo.discount });
+    setNewPromo({
+      code: promo.code,
+      description: promo.description,
+      discount: promo.discount,
+      appliesTo: (promo.appliesTo as 'ALL' | 'CATEGORY' | 'PRODUCT') ?? 'ALL',
+      targetCategories: promo.targetCategories ?? [],
+      targetProductIds: promo.targetProductIds ?? [],
+    });
   };
 
   const cancelEdit = () => {
@@ -266,6 +289,81 @@ export default function AdminCodesPage() {
               <label className={labelClass}>Descuento (1-100%)</label>
               <input type="number" name="discount" min={1} max={100} value={newPromo.discount} onChange={handlePromoChange} required className={inputClass} />
             </div>
+
+            {/* Targeting */}
+            <div>
+              <label className={labelClass}>Aplica a</label>
+              <select
+                title="Aplica a"
+                value={newPromo.appliesTo}
+                onChange={(e) => setNewPromo((p) => ({ ...p, appliesTo: e.target.value as 'ALL' | 'CATEGORY' | 'PRODUCT', targetCategories: [], targetProductIds: [] }))}
+                className={inputClass}
+              >
+                <option value="ALL">Todos los productos</option>
+                <option value="CATEGORY">Categoría específica</option>
+                <option value="PRODUCT">Productos específicos</option>
+              </select>
+            </div>
+
+            {newPromo.appliesTo === 'CATEGORY' && (
+              <div>
+                <label className={labelClass}>Categorías (selecciona una o más)</label>
+                <div className="mt-1 flex flex-wrap gap-2">
+                  {PRODUCT_CATEGORY_OPTIONS.map(({ value, label }) => {
+                    const selected = newPromo.targetCategories.includes(value);
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() =>
+                          setNewPromo((p) => ({
+                            ...p,
+                            targetCategories: selected
+                              ? p.targetCategories.filter((c) => c !== value)
+                              : [...p.targetCategories, value],
+                          }))
+                        }
+                        className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                          selected
+                            ? 'bg-emerald-600 text-white border-emerald-600'
+                            : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-600 hover:border-emerald-500'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+                {newPromo.targetCategories.length === 0 && (
+                  <p className="text-xs text-amber-600 mt-1">Selecciona al menos una categoría</p>
+                )}
+              </div>
+            )}
+
+            {newPromo.appliesTo === 'PRODUCT' && (
+              <div>
+                <label className={labelClass}>IDs de productos (uno por línea)</label>
+                <textarea
+                  rows={3}
+                  placeholder="Pega aquí los IDs de los productos, uno por línea"
+                  value={newPromo.targetProductIds.join('\n')}
+                  onChange={(e) =>
+                    setNewPromo((p) => ({
+                      ...p,
+                      targetProductIds: e.target.value
+                        .split('\n')
+                        .map((s) => s.trim())
+                        .filter(Boolean),
+                    }))
+                  }
+                  className={inputClass}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Puedes copiar los IDs desde la página de Productos del admin.
+                </p>
+              </div>
+            )}
+
             <button type="submit" className="w-full bg-emerald-600 text-white py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium">
               {editingPromo ? 'Guardar Cambios' : 'Crear Promoción'}
             </button>
@@ -283,6 +381,15 @@ export default function AdminCodesPage() {
                       <span className="ml-2 text-emerald-600 dark:text-emerald-400 text-sm font-medium">{promo.discount}%</span>
                     </span>
                     <span className="text-sm text-gray-500 dark:text-slate-400 block truncate">{promo.description}</span>
+                    {promo.appliesTo === 'CATEGORY' && promo.targetCategories?.length ? (
+                      <span className="text-xs text-blue-600 dark:text-blue-400">
+                        Categorías: {promo.targetCategories.join(', ')}
+                      </span>
+                    ) : promo.appliesTo === 'PRODUCT' && promo.targetProductIds?.length ? (
+                      <span className="text-xs text-blue-600 dark:text-blue-400">
+                        {promo.targetProductIds.length} producto(s) específico(s)
+                      </span>
+                    ) : null}
                   </div>
                   <div className="flex gap-2 shrink-0">
                     <button onClick={() => startEditPromo(promo)} className="text-[#0A2A66] dark:text-blue-400 hover:underline p-1" title="Editar">

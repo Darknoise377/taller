@@ -225,12 +225,16 @@ model Seller {
 // ¡Este modelo también es esencial!
 //
 model Promotion {
-  id          String    @id @default(cuid())
-  code        String    @unique // El código que ingresará el cliente
-  discount    Float
-  description String
-  isActive    Boolean   @default(true)
-  expiresAt   DateTime?
+  id               String    @id @default(cuid())
+  code             String    @unique // El código que ingresará el cliente
+  discount         Float
+  description      String
+  isActive         Boolean   @default(true)
+  expiresAt        DateTime?
+  // Targeting: "ALL" | "CATEGORY" | "PRODUCT"
+  appliesTo        String    @default("ALL")
+  targetCategories String[]  @default([])
+  targetProductIds String[]  @default([])
 }
 
 // --- CHAT / AI / EMBEDDINGS ---

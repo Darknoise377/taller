@@ -4,6 +4,8 @@ export interface SellerCode {
   code: string;
 }
 
+export type PromotionAppliesTo = 'ALL' | 'CATEGORY' | 'PRODUCT';
+
 export interface PromotionCode {
   id: string;
   code: string;
@@ -11,4 +13,7 @@ export interface PromotionCode {
   discount: number;
   isActive?: boolean;
   expiresAt?: string | Date | null;
+  appliesTo?: PromotionAppliesTo;
+  targetCategories?: string[];
+  targetProductIds?: string[];
 }

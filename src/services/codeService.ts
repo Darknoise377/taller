@@ -7,8 +7,11 @@ interface SellerData {
 interface PromotionData {
   code: string;
   description: string;
-  discount: number; // Porcentaje (ej. 10 para 10%)
+  discount: number;
   isActive?: boolean;
+  appliesTo?: 'ALL' | 'CATEGORY' | 'PRODUCT';
+  targetCategories?: string[];
+  targetProductIds?: string[];
 }
 
 /**

@@ -135,7 +135,7 @@ export async function POST(req: Request) {
     // Cargar precios/stock desde DB (fuente de verdad)
     const dbProducts = await prisma.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, price: true, stock: true },
+      select: { id: true, price: true, stock: true, category: true },
     });
 
     if (dbProducts.length !== productIds.length) {
@@ -172,7 +172,14 @@ export async function POST(req: Request) {
           code: normalizedPromoCode,
           isActive: true,
         },
-        select: { code: true, discount: true, expiresAt: true },
+        select: {
+          code: true,
+          discount: true,
+          expiresAt: true,
+          appliesTo: true,
+          targetCategories: true,
+          targetProductIds: true,
+        },
       });
 
       if (!promotion) {
@@ -186,7 +193,33 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: 'Promoción inválida' }, { status: 400 });
       }
 
-      finalTotal = calculateDiscountedTotal(subtotal, normalizedDiscount).finalTotal;
+      // Apply discount only to matching products based on promotion targeting
+      if (promotion.appliesTo === 'ALL') {
+        finalTotal = calculateDiscountedTotal(subtotal, normalizedDiscount).finalTotal;
+      } else {
+        // Calculate discount only on matching items
+        let discountableSubtotal = 0;
+        let nonDiscountableSubtotal = 0;
+
+        for (const p of dbProducts) {
+          const qty = quantitiesByProductId.get(p.id) ?? 0;
+          const lineTotal = normalizeAmount(p.price) * qty;
+          const matches =
+            promotion.appliesTo === 'CATEGORY'
+              ? promotion.targetCategories.includes(p.category as string)
+              : promotion.targetProductIds.includes(p.id);
+
+          if (matches) {
+            discountableSubtotal += lineTotal;
+          } else {
+            nonDiscountableSubtotal += lineTotal;
+          }
+        }
+
+        const discounted = calculateDiscountedTotal(discountableSubtotal, normalizedDiscount).finalTotal;
+        finalTotal = discounted + nonDiscountableSubtotal;
+      }
+
       promoCodeToStore = promotion.code;
     }
 
