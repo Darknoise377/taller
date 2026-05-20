@@ -12,8 +12,9 @@ import { calculateMeliPrice, getMeliConfig } from './pricing';
 import type { Product } from '@prisma/client';
 
 // Known attribute IDs that we can map from local product fields.
-const SELLER_SKU = 'SELLER_SKU';
-const BRAND      = 'BRAND';
+const SELLER_SKU  = 'SELLER_SKU';
+const BRAND       = 'BRAND';
+const PART_NUMBER = 'PART_NUMBER';
 
 /**
  * Fetch required attributes for a MeLi category and map what we can from the product.
@@ -38,10 +39,13 @@ async function buildAttributes(
     if (attr.id === SELLER_SKU && product.sku) {
       result.push({ id: SELLER_SKU, value_name: product.sku });
     } else if (attr.id === BRAND) {
-      // Try to find brand in tags (first tag that isn't a category keyword)
-      const brand = product.tags?.[0];
+      // Use dedicated brand field; fall back to first tag if brand is unset
+      const brand = (product as Product & { brand?: string }).brand || product.tags?.[0];
       if (brand) result.push({ id: BRAND, value_name: brand });
       else console.warn(`[meli/sync] Required attribute BRAND missing for product ${product.id}`);
+    } else if (attr.id === PART_NUMBER && product.sku) {
+      // Part number = seller's SKU (OEM reference for moto parts)
+      result.push({ id: PART_NUMBER, value_name: product.sku });
     } else {
       console.warn(
         `[meli/sync] Required attribute "${attr.id}" (${attr.name}) not resolved for product ${product.id} category ${categoryId}`,

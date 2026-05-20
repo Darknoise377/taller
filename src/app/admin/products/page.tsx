@@ -663,19 +663,25 @@ return (
 
         {/* --- SKU, Número diagrama y etiquetas --- */}
         <Row gutter={16}>
-          <Col xs={24} md={8}>
+          <Col xs={24} md={6}>
             <Form.Item label="SKU (opcional)" name="sku">
               <Input placeholder="Ej: SKU-12345" />
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={8}>
+          <Col xs={24} md={6}>
+            <Form.Item label="Marca / Brand (MeLi)" name="brand">
+              <Input placeholder="Ej: Honda, Yamaha, Genérico" />
+            </Form.Item>
+          </Col>
+
+          <Col xs={24} md={6}>
             <Form.Item label="Número en Diagrama (opcional)" name="diagramNumber">
               <Input placeholder="Ej: 14A" />
             </Form.Item>
           </Col>
 
-          <Col xs={24} md={8}>
+          <Col xs={24} md={6}>
             <Form.Item label="Etiquetas (opcional)" name="tags">
               <Select mode="tags" allowClear placeholder="Ej: motor, filtro" />
             </Form.Item>

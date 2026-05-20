@@ -23,6 +23,7 @@ model Product {
   imageUrl    String?
   images      String[]
   sku         String?        @unique
+  brand       String?
   tags        String[]       @default([])
   diagramNumber String?
   category    Category
