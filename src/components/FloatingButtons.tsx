@@ -210,9 +210,6 @@ export default function FloatingButtons() {
   );
 }
 
-
-// Número del asistente IA (WhatsApp Business registrado)
-const WHATSAPP_AI_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_AI_NUMBER ?? "573203267829";
 const WHATSAPP_AI_MESSAGE = "Hola, necesito ayuda para encontrar un repuesto";
 
 export default function FloatingButtons() {
