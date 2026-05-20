@@ -158,7 +158,8 @@ export default function AdminMeliPage() {
       const res = await fetch(`/api/meli/sync/${productId}`, { method: 'POST' });
       const body = await res.json();
       if (res.ok) {
-        message.success(`Producto ${body.action === 'published' ? 'publicado' : 'actualizado'} en MeLi`);
+        const actionLabel = body.action === 'published' ? 'publicado' : body.action === 'republished' ? 'republicado (ítem anterior estaba cerrado)' : 'actualizado';
+        message.success(`Producto ${actionLabel} en MeLi`);
         await loadListings();
       } else {
         message.error(body.error ?? 'Error al sincronizar');

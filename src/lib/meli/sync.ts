@@ -171,12 +171,30 @@ export async function updateStockAndPrice(productId: string): Promise<void> {
 }
 
 // ─── Smart upsert ─────────────────────────────────────────────────────────────
-export async function syncProduct(productId: string): Promise<{ action: 'published' | 'updated' }> {
+export async function syncProduct(productId: string): Promise<{ action: 'published' | 'updated' | 'republished' }> {
   const listing = await prisma.meliListing.findUnique({ where: { productId } });
 
   if (!listing) {
     await publishProduct(productId);
     return { action: 'published' };
+  }
+
+  // Check real status on MeLi before attempting update.
+  // If the seller deleted the item on MeLi it comes back as 'closed' and
+  // price/quantity updates are rejected — we must re-publish instead.
+  try {
+    const meliItem = await meliApi.getItem(listing.meliItemId);
+    if (meliItem.status === 'closed') {
+      // Remove stale listing and create a new one
+      await prisma.meliListing.delete({ where: { productId } });
+      await publishProduct(productId);
+      return { action: 'republished' };
+    }
+  } catch {
+    // If getItem itself fails (e.g. 404 — item gone), also re-publish
+    await prisma.meliListing.delete({ where: { productId } });
+    await publishProduct(productId);
+    return { action: 'republished' };
   }
 
   await updateStockAndPrice(productId);
