@@ -7,13 +7,14 @@ import { z } from 'zod';
 import { getAIModel } from '@/lib/ai-provider';
 import { PRODUCT_CATEGORIES } from '@/constants/productCategories';
 import { buildWompiIntegritySignature } from '@/lib/payments/wompi';
+import { sendOrderCreatedEmail } from '@/lib/email/orderEmails';
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_API_TOKEN;
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
 const GRAPH_API_VERSION = process.env.WHATSAPP_GRAPH_API_VERSION ?? 'v17.0';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://www.motoservicioayr.com';
 
-const WA_SYSTEM_PROMPT = `Eres Mecha, el asesor digital de Almacén y Taller Motoservicio A&R — La Ceja, Antioquia.
+const WA_SYSTEM_PROMPT = `Eres Criss, la asesora digital de Almacén y Taller Motoservicio A&R — La Ceja, Antioquia.
 
 ━━━ PRESENTACIÓN (PRIMER MENSAJE) ━━━
 Si es el PRIMER mensaje del cliente (no hay historial previo), preséntate siempre así:
@@ -50,11 +51,12 @@ Recopila los datos de uno en uno, en orden. NO pidas un dato que ya fue proporci
 Orden de recopilación:
 1. Confirma producto(s) + cantidad — usa searchProducts para obtener el ID exacto del producto
 2. Nombre completo del cliente (puede ya estar disponible del saludo inicial)
-3. Email de contacto
-4. Teléfono de contacto
-5. Dirección de entrega completa
-6. Ciudad y departamento
-7. Método de pago: CONTRAENTREGA (paga al recibir) o WOMPI (pago en línea seguro)
+3. Cédula de ciudadanía (número de documento de identidad)
+4. Email de contacto
+5. Teléfono de contacto
+6. Dirección de entrega completa
+7. Ciudad y departamento
+8. Método de pago: CONTRAENTREGA (paga al recibir) o WOMPI (pago en línea seguro)
 
 ⚠️ OBLIGATORIO ANTES DE LLAMAR createOrder:
 Muestra SIEMPRE este resumen completo y espera confirmación explícita del cliente:
@@ -63,6 +65,7 @@ Muestra SIEMPRE este resumen completo y espera confirmación explícita del clie
 
 📦 *Producto:* [nombre y cantidad]
 👤 *Nombre:* [nombre completo]
+🪪 *Cédula:* [número de cédula]
 📧 *Email:* [email]
 📱 *Teléfono:* [teléfono]
 📍 *Dirección:* [dirección], [ciudad], [departamento]
@@ -110,14 +113,15 @@ type SearchResult = {
 
 const createOrderParamsSchema = z.object({
   customerName: z.string().describe('Nombre completo del cliente'),
+  cedula: z.string().describe('Número de cédula de ciudadanía del cliente (requerido para el envío)'),
   customerEmail: z.string().email().describe('Email del cliente'),
   phone: z.string().describe('Teléfono del cliente'),
-  address: z.string().describe('Dirección de entrega'),
+  address: z.string().describe('Dirección de entrega completa'),
   city: z.string().describe('Ciudad de entrega'),
   department: z.string().optional().describe('Departamento de entrega'),
   paymentMethod: z
     .enum(['CONTRAENTREGA', 'WOMPI'])
-    .describe('Método de pago: CONTRAENTREGA (pago al recibir) o WOMPI (pago online)'),
+    .describe('Método de pago: CONTRAENTREGA (paga al recibir) o WOMPI (pago online)'),
   products: z
     .array(
       z.object({
@@ -142,7 +146,7 @@ type CreateOrderResult = {
 
 const createOrderTool: Tool<CreateOrderParams, CreateOrderResult> = {
   description:
-    'Crea una orden de compra con los datos del cliente. Llámala solo cuando tengas TODOS los datos: nombre, email, teléfono, dirección, ciudad, método de pago y productos.',
+    'Crea una orden de compra con los datos del cliente. Llámala solo cuando tengas TODOS los datos: nombre completo, cédula, email, teléfono, dirección, ciudad, método de pago y productos.',
   inputSchema: createOrderParamsSchema,
   execute: async (params: CreateOrderParams): Promise<CreateOrderResult> => {
     try {
@@ -155,7 +159,7 @@ const createOrderTool: Tool<CreateOrderParams, CreateOrderResult> = {
 
       const dbProducts = await prisma.product.findMany({
         where: { id: { in: productIds } },
-        select: { id: true, price: true, stock: true, currency: true },
+        select: { id: true, name: true, price: true, stock: true, currency: true },
       });
 
       if (dbProducts.length !== productIds.length) {
@@ -184,6 +188,7 @@ const createOrderTool: Tool<CreateOrderParams, CreateOrderResult> = {
           paymentMethod,
           customerName: params.customerName,
           customerEmail: params.customerEmail,
+          cedula: params.cedula,
           address: params.address,
           city: params.city,
           department: params.department ?? null,
@@ -236,6 +241,29 @@ const createOrderTool: Tool<CreateOrderParams, CreateOrderResult> = {
 
           wompiPaymentUrl = checkoutUrl.toString();
         }
+      }
+
+      // Send confirmation email (non-blocking — order is already created if this fails)
+      try {
+        await sendOrderCreatedEmail({
+          referenceCode: order.referenceCode,
+          customerName: order.customerName,
+          customerEmail: order.customerEmail,
+          total: order.total,
+          currency,
+          paymentMethod: order.paymentMethod,
+          status: order.status,
+          products: Array.from(quantitiesByProductId.entries()).map(([productId, quantity]) => {
+            const p = dbProducts.find((d) => d.id === productId)!;
+            return { quantity, product: { name: p.name, price: Number(p.price) } };
+          }),
+          address: order.address,
+          city: order.city,
+          department: order.department ?? undefined,
+          phone: order.phone,
+        });
+      } catch (mailError) {
+        console.error('[createOrder WA] Email confirmation failed:', mailError);
       }
 
       return {
