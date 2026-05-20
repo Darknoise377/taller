@@ -186,6 +186,14 @@ function makeCreateOrderTool(sessionId: number): Tool<CreateOrderParams, CreateO
       const referenceCode = `AR-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
       const paymentMethod = params.paymentMethod as PaymentMethod;
 
+      // Attribute the order to the WhatsApp AI seller record.
+      // Requires a Seller row with code='ASISTENTE_VIRTUAL' in the DB.
+      // If it doesn't exist yet the order is created normally (graceful fallback).
+      const aiSeller = await prisma.seller.findUnique({
+        where: { code: 'ASISTENTE_VIRTUAL' },
+        select: { id: true },
+      });
+
       const order = await prisma.order.create({
         data: {
           referenceCode,
@@ -200,6 +208,7 @@ function makeCreateOrderTool(sessionId: number): Tool<CreateOrderParams, CreateO
           department: params.department ?? null,
           phone: params.phone,
           status: 'PENDING',
+          sellerId: aiSeller?.id ?? null,
           products: {
             create: Array.from(quantitiesByProductId.entries()).map(([productId, quantity]) => {
               const p = dbProducts.find((d) => d.id === productId)!;

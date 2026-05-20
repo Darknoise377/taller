@@ -3,7 +3,7 @@
 import React from "react";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
-import { BadgePercent, LayoutDashboard, LogOut, Package, PackageSearch, ShieldAlert, ShoppingCart, Truck, Users } from "lucide-react";
+import { BadgePercent, LayoutDashboard, LogOut, MessageCircleMore, Package, PackageSearch, ShieldAlert, ShoppingCart, Truck, Users } from "lucide-react";
 import type { AdminRole } from "@/types/auth";
 
 const ROLE_RANK: Record<AdminRole, number> = { SUPERADMIN: 3, ADMIN: 2, VENDEDOR: 1 };
@@ -32,6 +32,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true, minRole: "VENDEDOR" },
   { href: "/admin/products", label: "Productos", icon: Package, minRole: "VENDEDOR" },
   { href: "/admin/orders", label: "Órdenes", icon: PackageSearch, minRole: "VENDEDOR" },
+  { href: "/admin/chat-analytics", label: "Chat IA", icon: MessageCircleMore, minRole: "ADMIN" },
   { href: "/admin/codes", label: "Códigos", icon: BadgePercent, minRole: "VENDEDOR" },
   { href: "/admin/shipping", label: "Envío", icon: Truck, minRole: "ADMIN" },
   { href: "/admin/users", label: "Usuarios", icon: Users, minRole: "SUPERADMIN" },
