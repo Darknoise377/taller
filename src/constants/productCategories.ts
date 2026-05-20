@@ -13,6 +13,7 @@ export const PRODUCT_CATEGORIES = [
   "iluminacion",
   "carenaje",
   "accesorios",
+  "motor",
 ] as const;
 
 export type ProductCategory = (typeof PRODUCT_CATEGORIES)[number];
@@ -32,6 +33,7 @@ export const PRODUCT_CATEGORY_LABELS: Record<ProductCategory, string> = {
   iluminacion: "Iluminacion",
   carenaje: "Carenaje",
   accesorios: "Accesorios",
+  motor: "Motor",
 };
 
 export const PRODUCT_CATEGORY_OPTIONS = PRODUCT_CATEGORIES.map((value) => ({
@@ -54,6 +56,7 @@ export const PRODUCT_CATEGORY_DESCRIPTIONS: Record<ProductCategory, string> = {
   iluminacion: "Farolas, bombillos y luces LED para mejor visibilidad.",
   carenaje: "Plasticos, tapas y piezas de carroceria para restauracion estetica.",
   accesorios: "Accesorios funcionales para personalizar y proteger tu moto.",
+  motor: "Repuestos y componentes internos del motor para mantenimiento y reparacion.",
 };
 
 export function isProductCategory(value: string): value is ProductCategory {

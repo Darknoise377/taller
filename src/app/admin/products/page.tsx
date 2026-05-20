@@ -24,12 +24,13 @@ import {
   Divider,
   Tooltip,
 } from 'antd';
-import { CalculatorOutlined } from '@ant-design/icons';
 import {
+  CalculatorOutlined,
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   DownloadOutlined,
+  RobotOutlined,
 } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
 import type { ColumnsType } from 'antd/es/table';
@@ -61,6 +62,37 @@ export default function AdminProductsPage() {
   const [calcCost, setCalcCost] = useState<number>(0);
   const [calcMargin, setCalcMargin] = useState<number>(35);
   const [calcContraentregaPct, setCalcContraentregaPct] = useState<number>(40);
+  const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
+
+  const handleGenerateDescription = useCallback(async () => {
+    const name = form.getFieldValue('name') as string | undefined;
+    if (!name?.trim()) {
+      message.warning('Primero ingresa el nombre del producto.');
+      return;
+    }
+    setIsGeneratingDesc(true);
+    try {
+      const res = await fetch('/api/admin/products/generate-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          category: form.getFieldValue('category') as string | undefined,
+          brand: form.getFieldValue('brand') as string | undefined,
+          sku: form.getFieldValue('sku') as string | undefined,
+          tags: form.getFieldValue('tags') as string[] | undefined,
+        }),
+      });
+      const data = await res.json() as { description?: string; error?: string };
+      if (!res.ok || !data.description) throw new Error(data.error ?? 'Error al generar');
+      form.setFieldsValue({ description: data.description });
+      message.success('Descripción generada con IA');
+    } catch (err) {
+      message.error((err as Error).message ?? 'Error al generar descripción');
+    } finally {
+      setIsGeneratingDesc(false);
+    }
+  }, [form]);
 
   useEffect(() => {
     fetch('/api/store-settings')
@@ -469,7 +501,20 @@ return (
 
         {/* --- Descripción --- */}
         <Form.Item
-          label="Descripción"
+          label={
+            <Space size={8}>
+              <span>Descripción</span>
+              <Button
+                size="small"
+                icon={<RobotOutlined />}
+                loading={isGeneratingDesc}
+                onClick={handleGenerateDescription}
+                style={{ fontSize: 12 }}
+              >
+                Generar con IA
+              </Button>
+            </Space>
+          }
           name="description"
           rules={[
             { required: true, message: "La descripción es obligatoria" },
