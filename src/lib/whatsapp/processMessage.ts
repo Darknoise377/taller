@@ -16,10 +16,11 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://www.motoservicioay
 
 const WA_SYSTEM_PROMPT = `Eres Criss, la asesora digital de Almacén y Taller Motoservicio A&R — La Ceja, Antioquia.
 
-━━━ PRESENTACIÓN (PRIMER MENSAJE) ━━━
-Si es el PRIMER mensaje del cliente (no hay historial previo), preséntate siempre así:
-"Hola, soy Criss, Tu asesora digital de Motoservicio A&R 👋. Con gusto te ayudo. ¿Con quién tengo el gusto?"
-Una vez conozcas el nombre, úsalo naturalmente en la conversación.
+━━━ PRESENTACIÓN ━━━
+Si no hay historial previo (primera conversación), preséntate así:
+"Hola, soy Criss, tu asesora digital de Motoservicio A&R 👋. Con gusto te ayudo. ¿Con quién tengo el gusto?"
+Cualquier mensaje corto de saludo — "h", "hola", "ola", "buenas", "hi", "hey", "k tal", "buen día", "buenas tardes", o incluso una sola letra — trátalo como inicio de conversación y responde con la presentación si no hay historial previo.
+Una vez conozcas el nombre, úsalo naturalmente en toda la conversación.
 
 ━━━ TONO PROFESIONAL ━━━
 - Trato respetuoso, cálido y profesional. NUNCA uses "parcero", "parce", "viejo", "loco", "amigo" ni términos que asuman género.
@@ -42,7 +43,7 @@ Una vez conozcas el nombre, úsalo naturalmente en la conversación.
 Formato fijo (máximo 3 resultados):
   *Nombre* — $precio COP (stock: X uds)
   👉 URL
-Si stock ≤ 3: agrega "(¡últimas unidades!)" en la misma línea del nombre.
+Si stock ≤ 3: agrega "(¡son las últimas unidades!)" en la misma línea del nombre.
 IMPORTANTE: la URL va sola en su línea, sin paréntesis, sin corchetes, sin nada más.
 
 ━━━ CREAR PEDIDO — FLUJO OBLIGATORIO ━━━
@@ -144,7 +145,11 @@ type CreateOrderResult = {
   error?: string;
 };
 
-const createOrderTool: Tool<CreateOrderParams, CreateOrderResult> = {
+// Factory: returns a createOrder tool bound to the current session so that
+// after a successful order the customer profile (name, cedula, address, etc.)
+// is persisted as a 'profile' message and can be pre-filled on the next order.
+function makeCreateOrderTool(sessionId: number): Tool<CreateOrderParams, CreateOrderResult> {
+  return {
   description:
     'Crea una orden de compra con los datos del cliente. Llámala solo cuando tengas TODOS los datos: nombre completo, cédula, email, teléfono, dirección, ciudad, método de pago y productos.',
   inputSchema: createOrderParamsSchema,
@@ -266,6 +271,24 @@ const createOrderTool: Tool<CreateOrderParams, CreateOrderResult> = {
         console.error('[createOrder WA] Email confirmation failed:', mailError);
       }
 
+      // Persist customer profile for future sessions — so returning customers
+      // don't have to re-enter their data. Stored as a 'profile' role message.
+      await prisma.chatMessage.create({
+        data: {
+          sessionId,
+          role: 'profile',
+          content: JSON.stringify({
+            customerName: params.customerName,
+            cedula: params.cedula,
+            customerEmail: params.customerEmail,
+            phone: params.phone,
+            address: params.address,
+            city: params.city,
+            department: params.department ?? null,
+          }),
+        },
+      });
+
       return {
         success: true,
         referenceCode: order.referenceCode,
@@ -278,7 +301,8 @@ const createOrderTool: Tool<CreateOrderParams, CreateOrderResult> = {
       return { success: false, error: 'No se pudo crear la orden. Intenta de nuevo.' };
     }
   },
-};
+  };
+}
 
 // ── searchProducts ────────────────────────────────────────────────────────────
 
@@ -435,14 +459,13 @@ export async function processWhatsAppMessage(
     },
   });
 
-  // Fetch conversation history — keep the 20 most recent VALID messages.
-  // An order flow requires at minimum ~16 back-and-forth exchanges (product → name →
-  // email → phone → address → city → payment → summary → confirm). 20 ensures we
-  // never lose collected order data mid-conversation.
+  // Fetch conversation history — keep the 30 most recent VALID messages.
+  // 30 gives enough room for a full order flow (~18 exchanges) plus interruptions
+  // (questions, product changes, corrections) without losing collected data.
   const messages = await prisma.chatMessage.findMany({
     where: { sessionId: session.id },
     orderBy: { createdAt: 'desc' },
-    take: 60, // over-fetch so we have enough after filtering
+    take: 90, // over-fetch so we have enough after filtering
   });
 
   type ChatHistoryItem = { role: 'user' | 'assistant'; content: string };
@@ -467,10 +490,50 @@ export async function processWhatsAppMessage(
         !BAD_PATTERNS.includes(m.content.trim()) &&
         m.content.trim().length > 0,
     )
-    .slice(-20) // keep only last 20 clean messages
+    .slice(-30) // keep only last 30 clean messages
     .map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content }));
 
-  const systemPrompt = process.env.WA_AI_SYSTEM_PROMPT ?? WA_SYSTEM_PROMPT;
+  // Load the most recent customer profile saved after a previous order.
+  // This lets returning customers skip re-entering their name, address, etc.
+  const profileMsg = await prisma.chatMessage.findFirst({
+    where: { sessionId: session.id, role: 'profile' },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  let systemPrompt = process.env.WA_AI_SYSTEM_PROMPT ?? WA_SYSTEM_PROMPT;
+
+  if (profileMsg) {
+    try {
+      const p = JSON.parse(profileMsg.content) as {
+        customerName?: string;
+        cedula?: string;
+        customerEmail?: string;
+        phone?: string;
+        address?: string;
+        city?: string;
+        department?: string | null;
+      };
+      const fields = [
+        p.customerName && `Nombre: ${p.customerName}`,
+        p.cedula && `Cédula: ${p.cedula}`,
+        p.customerEmail && `Email: ${p.customerEmail}`,
+        p.phone && `Teléfono: ${p.phone}`,
+        p.address && `Dirección: ${p.address}`,
+        p.city && `Ciudad: ${p.city}`,
+        p.department && `Departamento: ${p.department}`,
+      ].filter(Boolean);
+
+      if (fields.length > 0) {
+        systemPrompt +=
+          `\n\n━━━ DATOS PREVIOS DE ESTE CLIENTE ━━━\n` +
+          `Este cliente ya realizó un pedido antes. Sus datos registrados son:\n${fields.join('\n')}\n\n` +
+          `Cuando quiera hacer un pedido, muéstrale estos datos y pregunta si siguen siendo correctos. ` +
+          `Si confirma, úsalos directamente sin pedirlos de nuevo. Si quiere cambiar alguno, usa el nuevo valor.`;
+      }
+    } catch {
+      // Ignore malformed profile — just proceed without pre-fill
+    }
+  }
 
   // Prepend few-shot examples so the model sees correct tool-usage patterns
   // before the real conversation history.
@@ -478,7 +541,7 @@ export async function processWhatsAppMessage(
     model: getAIModel(),
     system: systemPrompt,
     messages: [...WA_FEW_SHOT, ...history],
-    tools: { searchProducts: searchProductsTool, createOrder: createOrderTool },
+    tools: { searchProducts: searchProductsTool, createOrder: makeCreateOrderTool(session.id) },
     stopWhen: stepCountIs(8),
   });
 
