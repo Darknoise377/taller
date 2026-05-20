@@ -63,7 +63,6 @@ Responde ÚNICAMENTE con el texto de la descripción, sin comillas, sin introduc
     const { text } = await generateText({
       model: getAIModel(),
       prompt,
-      maxTokens: 200,
     });
 
     return NextResponse.json({ description: text.trim() });
