@@ -313,7 +313,7 @@ const WA_FEW_SHOT: Array<{ role: 'user' | 'assistant'; content: string }> = [
 // Fallback message text — used to filter polluted history entries
 const FALLBACK_MSG = 'Tuve un problema procesando tu mensaje. Por favor intenta de nuevo.';
 
-to: string, text: string): Promise<void> {
+async function sendWhatsAppText(to: string, text: string): Promise<void> {
   if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
     console.warn('[WhatsApp] token or phone id not configured');
     return;
