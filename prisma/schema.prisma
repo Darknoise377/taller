@@ -79,6 +79,7 @@ enum Category {
   iluminacion
   carenaje
   accesorios
+  motor
 }
 
 //
