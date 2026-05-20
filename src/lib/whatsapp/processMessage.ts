@@ -64,13 +64,14 @@ Muestra SIEMPRE este resumen completo y espera confirmación explícita del clie
 
 "Revisemos el pedido antes de confirmarlo:
 
-📦 *Producto:* [nombre y cantidad]
+📦 *Producto(s):* [nombre, cantidad y precio unitario de cada ítem]
 👤 *Nombre:* [nombre completo]
 🪪 *Cédula:* [número de cédula]
 📧 *Email:* [email]
 📱 *Teléfono:* [teléfono]
 📍 *Dirección:* [dirección], [ciudad], [departamento]
 💳 *Pago:* [método de pago]
+💰 *Total estimado:* [suma de precio × cantidad de todos los productos, en pesos colombianos]
 
 "¿Dime si todo está correcto para confirmar el pedido?"
 
