@@ -40,12 +40,19 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 export default function PedidosPage() {
-  useCustomerAuth();
+  const { user } = useCustomerAuth();
   const router = useRouter();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Redirect when user logs out while on this page
+  useEffect(() => {
+    if (!loading && user === null) {
+      router.replace("/cuenta/login");
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     // Redirect to login if not authenticated
