@@ -35,6 +35,7 @@ export async function getMeliConfig() {
     extraMarginPercent: config?.extraMarginPercent ?? 0,
     fixedCostCOP: config?.fixedCostCOP ?? 3500,
     defaultListingType: config?.defaultListingType ?? 'gold_special',
+    freeInstallments: config?.freeInstallments ?? 3,
     categoryMap: (config?.categoryMap ?? {}) as Record<string, string>,
   };
 }

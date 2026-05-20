@@ -29,6 +29,7 @@ interface MeliConfig {
   extraMarginPercent: number;
   fixedCostCOP: number;
   defaultListingType: string;
+  freeInstallments: number;
   categoryMap: Record<string, string>;
 }
 
@@ -74,6 +75,7 @@ export default function AdminMeliPage() {
           extraMarginPercent: cfg.extraMarginPercent,
           fixedCostCOP: cfg.fixedCostCOP,
           defaultListingType: cfg.defaultListingType,
+          freeInstallments: cfg.freeInstallments ?? 3,
         });
       }
     } catch { /* ignore */ }
@@ -350,10 +352,11 @@ export default function AdminMeliPage() {
             extraMarginPercent: 0,
             fixedCostCOP: 3500,
             defaultListingType: 'gold_special',
+            freeInstallments: 3,
           }}
         >
           <Row gutter={16}>
-            <Col xs={24} sm={8}>
+            <Col xs={24} sm={6}>
               <Form.Item
                 name="defaultListingType"
                 label="Tipo de publicación"
@@ -372,7 +375,20 @@ export default function AdminMeliPage() {
                 </Select>
               </Form.Item>
             </Col>
-            <Col xs={24} sm={8}>
+            <Col xs={24} sm={6}>
+              <Form.Item
+                name="freeInstallments"
+                label="Cuotas sin interés"
+                tooltip="Cargo por venta y cuotas. 6 cuotas aplica tarifa adicional de MeLi (Cuotas Extra)."
+                rules={[{ required: true, message: 'Requerido' }]}
+              >
+                <Select>
+                  <Select.Option value={3}>3 cuotas — sin costo extra</Select.Option>
+                  <Select.Option value={6}>6 cuotas — Cuotas Extra MeLi</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col xs={24} sm={6}>
               <Form.Item
                 name="extraMarginPercent"
                 label="Margen adicional (%)"
@@ -385,7 +401,7 @@ export default function AdminMeliPage() {
                 <InputNumber min={0} max={79} step={0.5} suffix="%" className="w-full" />
               </Form.Item>
             </Col>
-            <Col xs={24} sm={8}>
+            <Col xs={24} sm={6}>
               <Form.Item
                 name="fixedCostCOP"
                 label="Costo fijo por venta (COP)"

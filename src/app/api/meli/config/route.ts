@@ -32,10 +32,11 @@ export async function PUT(req: Request) {
     extraMarginPercent?: number;
     fixedCostCOP?: number;
     defaultListingType?: string;
+    freeInstallments?: number;
     categoryMap?: Record<string, string>;
   };
 
-  const { extraMarginPercent, fixedCostCOP, defaultListingType, categoryMap } = body;
+  const { extraMarginPercent, fixedCostCOP, defaultListingType, freeInstallments, categoryMap } = body;
 
   // Validate: extra margin can be 0 (none) up to some reasonable max
   if (extraMarginPercent !== undefined && (extraMarginPercent < 0 || extraMarginPercent >= 80)) {
@@ -49,12 +50,14 @@ export async function PUT(req: Request) {
       extraMarginPercent: extraMarginPercent ?? 0,
       fixedCostCOP: fixedCostCOP ?? 3500,
       defaultListingType: defaultListingType ?? 'gold_special',
+      freeInstallments: freeInstallments ?? 3,
       categoryMap: categoryMap ?? {},
     },
     update: {
       ...(extraMarginPercent !== undefined && { extraMarginPercent }),
       ...(fixedCostCOP !== undefined && { fixedCostCOP }),
       ...(defaultListingType !== undefined && { defaultListingType }),
+      ...(freeInstallments !== undefined && { freeInstallments }),
       ...(categoryMap !== undefined && { categoryMap }),
     },
   });

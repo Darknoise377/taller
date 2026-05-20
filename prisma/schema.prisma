@@ -357,6 +357,8 @@ model MeliConfig {
   extraMarginPercent Float    @default(0)
   fixedCostCOP       Float    @default(3500) // fixed fee per sale in COP (packaging, etc.)
   defaultListingType String   @default("gold_special")
+  /// Free installments (cuotas sin interés): 3 = default, 6 = cuotas extra
+  freeInstallments   Int      @default(3)
   /// JSON map: local Category enum value → MeLi category_id string
   /// e.g. { "frenos": "MCO1747", "llantas": "MCO9145" }
   categoryMap        Json     @default("{}")
