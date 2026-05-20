@@ -39,13 +39,19 @@ async function buildAttributes(
     if (attr.id === SELLER_SKU && product.sku) {
       result.push({ id: SELLER_SKU, value_name: product.sku });
     } else if (attr.id === BRAND) {
-      // Use dedicated brand field; fall back to first tag if brand is unset
-      const brand = (product as Product & { brand?: string }).brand || product.tags?.[0];
-      if (brand) result.push({ id: BRAND, value_name: brand });
-      else console.warn(`[meli/sync] Required attribute BRAND missing for product ${product.id}`);
-    } else if (attr.id === PART_NUMBER && product.sku) {
-      // Part number = seller's SKU (OEM reference for moto parts)
-      result.push({ id: PART_NUMBER, value_name: product.sku });
+      // Dedicated brand field → first tag → fallback to "Genérico" (accepted by MeLi for unbranded parts)
+      const brand =
+        (product as Product & { brand?: string | null }).brand ||
+        product.tags?.[0] ||
+        'Genérico';
+      result.push({ id: BRAND, value_name: brand });
+    } else if (attr.id === PART_NUMBER) {
+      // OEM part number: sku → diagramNumber → truncated product name
+      const partNumber =
+        product.sku ||
+        product.diagramNumber ||
+        product.name.slice(0, 40);
+      result.push({ id: PART_NUMBER, value_name: partNumber });
     } else {
       console.warn(
         `[meli/sync] Required attribute "${attr.id}" (${attr.name}) not resolved for product ${product.id} category ${categoryId}`,
