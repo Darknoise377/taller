@@ -7,7 +7,7 @@
  * - unpublishProduct: Close the listing on MeLi.
  */
 import { prisma } from '@/lib/prisma';
-import { meliApi, type MeliItemPayload } from './client';
+import { meliApi, type MeliItemPayload, type MeliCategoryAttribute } from './client';
 import { calculateMeliPrice, getMeliConfig } from './pricing';
 import type { Product } from '@prisma/client';
 
@@ -16,10 +16,53 @@ const SELLER_SKU  = 'SELLER_SKU';
 const BRAND       = 'BRAND';
 const PART_NUMBER = 'PART_NUMBER';
 
+type UnresolvedAttr = Pick<MeliCategoryAttribute, 'id' | 'name' | 'value_type' | 'values'>;
+
+/**
+ * Uses AI to infer values for required MeLi attributes that couldn't be resolved
+ * from product fields alone. For list-type attrs the AI picks from allowed values.
+ */
+async function resolveAttributesWithAI(
+  product: Product,
+  unresolved: UnresolvedAttr[],
+): Promise<{ id: string; value_name: string }[]> {
+  if (unresolved.length === 0) return [];
+
+  const productBrand = (product as Product & { brand?: string | null }).brand;
+  const context = [
+    `Producto: ${product.name}`,
+    productBrand ? `Marca: ${productBrand}` : null,
+    product.sku ? `SKU: ${product.sku}` : null,
+    product.tags?.length ? `Etiquetas: ${product.tags.join(', ')}` : null,
+    product.description ? `Descripción: ${product.description.slice(0, 200)}` : null,
+  ].filter(Boolean).join('\n');
+
+  const attrsDesc = unresolved.map((a) => {
+    if (a.values && a.values.length > 0) {
+      return `- ${a.name} (ID: ${a.id}): elige EXACTAMENTE uno de: ${a.values.map((v) => `"${v.name}"`).join(', ')}`;
+    }
+    return `- ${a.name} (ID: ${a.id}): texto libre, máximo 60 caracteres`;
+  }).join('\n');
+
+  const prompt = `Eres un experto en repuestos de motos para Colombia y Mercado Libre.\nDado este producto, asigna el valor más apropiado para cada atributo requerido.\n\n${context}\n\nAtributos a completar:\n${attrsDesc}\n\nResponde únicamente con un JSON con este formato (sin texto adicional):\n{"attributes":[{"id":"ATTR_ID","value_name":"valor"}]}`;
+
+  try {
+    const { generateText } = await import('ai');
+    const { getAIModel } = await import('@/lib/ai-provider');
+    const { text } = await generateText({ model: getAIModel(), prompt });
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return [];
+    const parsed = JSON.parse(match[0]) as { attributes?: { id: string; value_name: string }[] };
+    return parsed.attributes ?? [];
+  } catch (err) {
+    console.warn('[meli/sync] AI attribute fallback failed:', err instanceof Error ? err.message : err);
+    return [];
+  }
+}
+
 /**
  * Fetch required attributes for a MeLi category and map what we can from the product.
- * Attributes we cannot fill are omitted (MeLi will reject fake values for list types).
- * A warning is logged for any required attribute we could not resolve.
+ * Any attribute that cannot be resolved from product fields is sent to the AI for inference.
  */
 async function buildAttributes(
   product: Product,
@@ -34,29 +77,60 @@ async function buildAttributes(
 
   const required = categoryAttrs.filter((a) => a.tags.required && !a.tags.hidden && !a.tags.read_only);
   const result: { id: string; value_name: string }[] = [];
+  const unresolved: UnresolvedAttr[] = [];
 
   for (const attr of required) {
     if (attr.id === SELLER_SKU && product.sku) {
       result.push({ id: SELLER_SKU, value_name: product.sku });
     } else if (attr.id === BRAND) {
-      // Dedicated brand field → first tag → fallback to "Genérico" (accepted by MeLi for unbranded parts)
       const brand =
         (product as Product & { brand?: string | null }).brand ||
         product.tags?.[0] ||
         'Genérico';
       result.push({ id: BRAND, value_name: brand });
     } else if (attr.id === PART_NUMBER) {
-      // OEM part number: sku → diagramNumber → truncated product name
       const partNumber =
         product.sku ||
         product.diagramNumber ||
         product.name.slice(0, 40);
       result.push({ id: PART_NUMBER, value_name: partNumber });
+    } else if (attr.id === 'MODEL') {
+      const brand = (product as Product & { brand?: string | null }).brand;
+      const modelVal = brand
+        ? `${brand} ${product.sku ?? product.name}`.slice(0, 60)
+        : (product.sku ?? product.name).slice(0, 60);
+      result.push({ id: 'MODEL', value_name: modelVal });
+    } else if (attr.value_type === 'list' && attr.values && attr.values.length > 0) {
+      // Try to match a product tag to an allowed value
+      const tags = product.tags ?? [];
+      const matched = attr.values.find((v) =>
+        tags.some(
+          (t) =>
+            t.toLowerCase() === v.name.toLowerCase() ||
+            v.name.toLowerCase().includes(t.toLowerCase()),
+        ),
+      );
+      if (matched) {
+        result.push({ id: attr.id, value_name: matched.name });
+      } else {
+        // Cannot resolve deterministically — let AI pick from allowed values
+        unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: attr.values });
+      }
+    } else if (attr.value_type === 'string' || attr.value_type === 'number') {
+      // Free-text required attr — let AI infer a contextual value
+      unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: undefined });
     } else {
       console.warn(
         `[meli/sync] Required attribute "${attr.id}" (${attr.name}) not resolved for product ${product.id} category ${categoryId}`,
       );
     }
+  }
+
+  // AI fallback for any unresolved required attributes
+  if (unresolved.length > 0) {
+    console.info(`[meli/sync] Asking AI to resolve ${unresolved.length} attribute(s): ${unresolved.map((a) => a.id).join(', ')}`);
+    const aiResolved = await resolveAttributesWithAI(product, unresolved);
+    result.push(...aiResolved);
   }
 
   return result;
