@@ -153,7 +153,7 @@ async function buildPayload(
   const attributes = await buildAttributes(product, categoryId);
 
   return {
-    title: product.name,
+    title: product.name.slice(0, 60).trimEnd(),
     category_id: categoryId,
     price: meliPrice,
     currency_id: 'COP',
