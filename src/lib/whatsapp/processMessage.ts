@@ -149,7 +149,7 @@ type CreateOrderResult = {
 // Factory: returns a createOrder tool bound to the current session so that
 // after a successful order the customer profile (name, cedula, address, etc.)
 // is persisted as a 'profile' message and can be pre-filled on the next order.
-function makeCreateOrderTool(sessionId: number): Tool<CreateOrderParams, CreateOrderResult> {
+export function makeCreateOrderTool(sessionId: number): Tool<CreateOrderParams, CreateOrderResult> {
   return {
   description:
     'Crea una orden de compra con los datos del cliente. Llámala solo cuando tengas TODOS los datos: nombre completo, cédula, email, teléfono, dirección, ciudad, método de pago y productos.',
@@ -316,7 +316,7 @@ function makeCreateOrderTool(sessionId: number): Tool<CreateOrderParams, CreateO
 
 // ── searchProducts ────────────────────────────────────────────────────────────
 
-const searchProductsTool: Tool<SearchParams, SearchResult> = {
+export const searchProductsTool: Tool<SearchParams, SearchResult> = {
   description: 'Busca productos en el catálogo de la tienda. Úsalo siempre que el cliente pregunte por un repuesto.',
   inputSchema: searchParamsSchema,
   execute: async ({ query, category, maxResults }: SearchParams): Promise<SearchResult> => {
@@ -372,7 +372,7 @@ const searchProductsTool: Tool<SearchParams, SearchResult> = {
 
 // Few-shot examples: teach the model the correct patterns for introduction,
 // product search, and professional tone. Mirrors FEW_SHOT_MESSAGES from api/chat/route.ts.
-const WA_FEW_SHOT: Array<{ role: 'user' | 'assistant'; content: string }> = [
+export const WA_FEW_SHOT: Array<{ role: 'user' | 'assistant'; content: string }> = [
   {
     role: 'user',
     content: 'Hola',
@@ -420,7 +420,7 @@ const WA_FEW_SHOT: Array<{ role: 'user' | 'assistant'; content: string }> = [
 ];
 
 // Fallback message text — used to filter polluted history entries
-const FALLBACK_MSG = 'Tuve un problema procesando tu mensaje. Por favor intenta de nuevo.';
+export const FALLBACK_MSG = 'Tuve un problema procesando tu mensaje. Por favor intenta de nuevo.';
 
 async function sendWhatsAppText(to: string, text: string): Promise<void> {
   if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
