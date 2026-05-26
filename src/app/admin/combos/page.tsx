@@ -81,6 +81,7 @@ export default function AdminCombosPage() {
   const [hasSurpriseGift, setHasSurpriseGift] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [form] = Form.useForm();
 
   const loadCombos = useCallback(async () => {
@@ -112,6 +113,51 @@ export default function AdminCombosPage() {
     loadCombos();
     loadProducts();
   }, [loadCombos, loadProducts]);
+
+  const handleAnalyzeImage = useCallback(async () => {
+    // If there's a new local file, upload it first, then analyze
+    const newFile = fileList.find((f) => f.originFileObj);
+    const existingUrl = fileList.find((f) => f.url)?.url;
+
+    let imageUrl: string | undefined = existingUrl;
+
+    if (newFile?.originFileObj) {
+      setIsAnalyzingImage(true);
+      try {
+        const uploaded = await uploadImage(newFile.originFileObj as File);
+        imageUrl = uploaded.url;
+        // Update fileList to reflect the uploaded URL
+        setFileList([{ uid: newFile.uid, name: newFile.name, status: 'done', url: imageUrl }]);
+      } catch {
+        message.error('Error al subir la imagen antes de analizar');
+        setIsAnalyzingImage(false);
+        return;
+      }
+    }
+
+    if (!imageUrl) {
+      message.warning('Sube una imagen primero para analizar con IA.');
+      setIsAnalyzingImage(false);
+      return;
+    }
+
+    setIsAnalyzingImage(true);
+    try {
+      const res = await fetch('/api/admin/combos/analyze-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageUrl }),
+      });
+      const data = await res.json() as { name?: string; description?: string; error?: string };
+      if (!res.ok || !data.name) throw new Error(data.error ?? 'Error al analizar');
+      form.setFieldsValue({ name: data.name, description: data.description });
+      message.success('Nombre y descripción generados con IA ✨');
+    } catch (err) {
+      message.error((err as Error).message ?? 'Error al analizar imagen');
+    } finally {
+      setIsAnalyzingImage(false);
+    }
+  }, [fileList, form]);
 
   const handleGenerateDescription = useCallback(async () => {
     const name = form.getFieldValue('name') as string | undefined;
@@ -411,6 +457,19 @@ export default function AdminCombosPage() {
                 </div>
               )}
             </Upload>
+            {fileList.length > 0 && (
+              <Tooltip title="Analiza la imagen con IA y rellena nombre + descripción automáticamente">
+                <Button
+                  icon={isAnalyzingImage ? <LoadingOutlined /> : <RobotOutlined />}
+                  onClick={handleAnalyzeImage}
+                  disabled={isAnalyzingImage}
+                  type="dashed"
+                  style={{ marginTop: 8 }}
+                >
+                  {isAnalyzingImage ? 'Analizando...' : '✨ Generar nombre + descripción con IA'}
+                </Button>
+              </Tooltip>
+            )}
           </Form.Item>
           <Form.Item name="expiresAt" label="Fecha de expiración (opcional)">
             <DatePicker showTime style={{ width: '100%' }} />
