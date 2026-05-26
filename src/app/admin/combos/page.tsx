@@ -110,7 +110,7 @@ export default function AdminCombosPage() {
 
   const loadProducts = useCallback(async () => {
     try {
-      const r = await fetch('/api/admin/products?limit=200&active=true');
+      const r = await fetch('/api/products?all=true&limit=500');
       if (!r.ok) return;
       const data = await r.json();
       const list = Array.isArray(data) ? data : data.products ?? [];
