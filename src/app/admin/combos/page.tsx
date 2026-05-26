@@ -208,8 +208,8 @@ export default function AdminCombosPage() {
       dataIndex: 'price',
       render: (price: number, record) => (
         <Space direction="vertical" size={0}>
-          <Text strong>{formatCurrency(price, record.currency)}</Text>
-          <Text delete type="secondary" style={{ fontSize: 12 }}>{formatCurrency(record.originalPrice, record.currency)}</Text>
+          <Text strong>{formatCurrency(price, record.currency as 'COP' | 'USD' | 'EUR')}</Text>
+          <Text delete type="secondary" style={{ fontSize: 12 }}>{formatCurrency(record.originalPrice, record.currency as 'COP' | 'USD' | 'EUR')}</Text>
         </Space>
       ),
     },
