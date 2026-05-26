@@ -88,7 +88,7 @@ export default function ComboCard({ combo, idx = 0 }: ComboCardProps) {
         <div className="bg-amber-50 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2 flex items-center gap-2 text-amber-700 dark:text-amber-300 text-xs font-medium">
           <FireIcon className="w-3.5 h-3.5 shrink-0" />
           <span>Oferta termina en:</span>
-          <CountdownTimer endTimeIso={combo.expiresAt instanceof Date ? combo.expiresAt.toISOString() : combo.expiresAt} className="font-mono font-bold" />
+          <CountdownTimer endTimeIso={typeof combo.expiresAt === 'string' ? combo.expiresAt : undefined} className="font-mono font-bold" />
         </div>
       )}
 
