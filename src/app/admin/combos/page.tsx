@@ -19,16 +19,22 @@ import {
   Switch,
   Divider,
   DatePicker,
+  Upload,
+  Tooltip,
 } from 'antd';
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
   GiftOutlined,
+  RobotOutlined,
+  LoadingOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import type { UploadFile } from 'antd/es/upload/interface';
 import dayjs from 'dayjs';
 import { formatCurrency } from '@/utils/formatCurrency';
+import { uploadImage } from '@/services/productService';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -73,6 +79,8 @@ export default function AdminCombosPage() {
   const [editingCombo, setEditingCombo] = useState<ComboData | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [hasSurpriseGift, setHasSurpriseGift] = useState(false);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
   const [form] = Form.useForm();
 
   const loadCombos = useCallback(async () => {
@@ -105,9 +113,31 @@ export default function AdminCombosPage() {
     loadProducts();
   }, [loadCombos, loadProducts]);
 
+  const handleGenerateDescription = useCallback(async () => {
+    const name = form.getFieldValue('name') as string | undefined;
+    if (!name?.trim()) { message.warning('Primero ingresa el nombre del combo.'); return; }
+    setIsGeneratingDesc(true);
+    try {
+      const res = await fetch('/api/admin/products/generate-description', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      const data = await res.json() as { description?: string; error?: string };
+      if (!res.ok || !data.description) throw new Error(data.error ?? 'Error al generar');
+      form.setFieldsValue({ description: data.description });
+      message.success('Descripción generada con IA ✨');
+    } catch (err) {
+      message.error((err as Error).message ?? 'Error al generar descripción');
+    } finally {
+      setIsGeneratingDesc(false);
+    }
+  }, [form]);
+
   const openCreate = () => {
     setEditingCombo(null);
     setHasSurpriseGift(false);
+    setFileList([]);
     form.resetFields();
     setModalOpen(true);
   };
@@ -115,6 +145,7 @@ export default function AdminCombosPage() {
   const openEdit = (combo: ComboData) => {
     setEditingCombo(combo);
     setHasSurpriseGift(!!combo.surpriseGift);
+    setFileList(combo.imageUrl ? [{ uid: '-1', name: 'imagen-actual', status: 'done', url: combo.imageUrl }] : []);
     form.setFieldsValue({
       name: combo.name,
       slug: combo.slug,
@@ -141,6 +172,22 @@ export default function AdminCombosPage() {
       const values = await form.validateFields();
       setIsSaving(true);
 
+      // Upload image if a new file was selected
+      let finalImageUrl: string | undefined = editingCombo?.imageUrl;
+      const newFile = fileList.find((f) => f.originFileObj);
+      if (newFile?.originFileObj) {
+        try {
+          const uploaded = await uploadImage(newFile.originFileObj as File);
+          finalImageUrl = uploaded.url;
+        } catch {
+          message.error('Error al subir la imagen');
+          setIsSaving(false);
+          return;
+        }
+      } else if (fileList.length === 0) {
+        finalImageUrl = undefined;
+      }
+
       const payload = {
         name: values.name,
         slug: values.slug,
@@ -148,7 +195,7 @@ export default function AdminCombosPage() {
         price: values.price,
         originalPrice: values.originalPrice,
         currency: values.currency ?? 'COP',
-        imageUrl: values.imageUrl,
+        imageUrl: finalImageUrl,
         isActive: values.isActive ?? true,
         isFeatured: values.isFeatured ?? false,
         stock: values.stock,
@@ -307,8 +354,27 @@ export default function AdminCombosPage() {
           <Form.Item name="slug" label="Slug (URL amigable)" extra="Déjalo vacío para generarlo automáticamente">
             <Input placeholder="combo-frenos-premium" />
           </Form.Item>
-          <Form.Item name="description" label="Descripción" rules={[{ required: true }]}>
-            <TextArea rows={3} />
+          <Form.Item
+            label={
+              <Space>
+                <span>Descripción</span>
+                <Tooltip title="Generar con IA (requiere nombre)">
+                  <Button
+                    size="small"
+                    type="dashed"
+                    icon={isGeneratingDesc ? <LoadingOutlined /> : <RobotOutlined />}
+                    onClick={handleGenerateDescription}
+                    disabled={isGeneratingDesc}
+                  >
+                    IA
+                  </Button>
+                </Tooltip>
+              </Space>
+            }
+            name="description"
+            rules={[{ required: true, message: 'Ingresa una descripción' }]}
+          >
+            <TextArea rows={3} placeholder="Describe qué incluye el combo y sus beneficios" />
           </Form.Item>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -329,8 +395,22 @@ export default function AdminCombosPage() {
           <Form.Item name="badge" label="Badge (ej: NUEVO, HOT)">
             <Input placeholder="LIMITADO" />
           </Form.Item>
-          <Form.Item name="imageUrl" label="URL de imagen">
-            <Input placeholder="https://..." />
+          <Form.Item label="Imagen del combo">
+            <Upload
+              listType="picture-card"
+              fileList={fileList}
+              onRemove={() => setFileList([])}
+              beforeUpload={() => false}
+              onChange={({ fileList: newList }) => setFileList(newList.slice(-1))}
+              accept="image/*"
+            >
+              {fileList.length === 0 && (
+                <div>
+                  <PlusOutlined />
+                  <div style={{ marginTop: 8 }}>Subir imagen</div>
+                </div>
+              )}
+            </Upload>
           </Form.Item>
           <Form.Item name="expiresAt" label="Fecha de expiración (opcional)">
             <DatePicker showTime style={{ width: '100%' }} />
