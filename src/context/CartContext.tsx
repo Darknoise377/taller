@@ -10,6 +10,7 @@ import React, {
 } from "react";
 import { Product } from "@/types/product";
 import { CartItem, CartContextType } from "@/types/cart";
+import type { Combo, ComboCartItem } from "@/types/combo";
 import { toast } from "sonner";
 
 // ✅ Creamos el contexto del carrito
@@ -62,13 +63,15 @@ function sanitizeCartItems(value: unknown): CartItem[] {
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [comboItems, setComboItems] = useState<ComboCartItem[]>([]);
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
   const [isCartLoaded, setIsCartLoaded] = useState(false);
 
   /** 🔢 Totales calculados */
   const totalItems = useMemo(
-    () => items.reduce((sum, item) => sum + (item.quantity || 0), 0),
-    [items]
+    () => items.reduce((sum, item) => sum + (item.quantity || 0), 0)
+        + comboItems.reduce((sum, ci) => sum + (ci.quantity || 0), 0),
+    [items, comboItems]
   );
 
   const cartTotal = useMemo(
@@ -209,7 +212,41 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   const clearCart = () => {
     setItems([]);
+    setComboItems([]);
     setIsCartModalOpen(false);
+  };
+
+  /** 🎁 Combo cart functions */
+  const comboTotal = useMemo(
+    () => comboItems.reduce((sum, ci) => sum + (ci.combo.price || 0) * (ci.quantity || 0), 0),
+    [comboItems]
+  );
+
+  const addComboToCart = (combo: Combo, quantity = 1) => {
+    if (!combo?.id) return;
+    setComboItems((prev) => {
+      const idx = prev.findIndex((ci) => ci.combo.id === combo.id);
+      if (idx > -1) {
+        const updated = [...prev];
+        updated[idx] = { ...updated[idx], quantity: updated[idx].quantity + quantity };
+        return updated;
+      }
+      return [...prev, { combo, quantity }];
+    });
+    toast.success(`Combo "${combo.name}" añadido al carrito 🎁`);
+  };
+
+  const removeComboFromCart = (comboId: string) => {
+    setComboItems((prev) => prev.filter((ci) => ci.combo.id !== comboId));
+  };
+
+  const updateComboQuantity = (comboId: string, newQuantity: number) => {
+    setComboItems((prev) => {
+      if (newQuantity <= 0) return prev.filter((ci) => ci.combo.id !== comboId);
+      return prev.map((ci) =>
+        ci.combo.id === comboId ? { ...ci, quantity: newQuantity } : ci
+      );
+    });
   };
 
   /** 📦 Control del modal */
@@ -229,6 +266,11 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         removeItem,
         updateItemQuantity,
         clearCart,
+        comboItems,
+        comboTotal,
+        addComboToCart,
+        removeComboFromCart,
+        updateComboQuantity,
         isCartModalOpen,
         openCartModal,
         closeCartModal,

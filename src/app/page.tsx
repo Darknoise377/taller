@@ -26,7 +26,9 @@ import HomeSearch from '@/components/HomeSearch';
 import CountdownTimer from '@/components/CountdownTimer';
 import RecentPurchases from '@/components/RecentPurchases';
 import { ProductCard } from '@/components/ProductCard';
+import ComboCard from '@/components/ComboCard';
 import { makeProductPlaceholder } from '@/lib/placeholder';
+import type { Combo } from '@/types/combo';
 
 // TIPOS DE DATOS
 interface SlideData {
@@ -352,6 +354,11 @@ export default function Home() {
           </div>
           <FeaturedProductsRow />
         </section>
+
+        {/* ════════════════════════════════════════
+            COMBOS Y OFERTAS ESPECIALES
+            ════════════════════════════════════════ */}
+        <FeaturedCombosRow />
 
         {/* ════════════════════════════════════════
             BENEFICIOS
@@ -885,5 +892,57 @@ function FeaturedProductsRow() {
         ))}
       </div>
     </div>
+  );
+}
+
+function FeaturedCombosRow() {
+  const [combos, setCombos] = useState<Combo[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/combos?featured=true&limit=3')
+      .then((r) => r.ok ? r.json() : [])
+      .then((data) => { if (Array.isArray(data)) setCombos(data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (!loading && combos.length === 0) return null;
+
+  return (
+    <section id="combos" className="mt-8">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+        <div>
+          <p className="text-xs font-bold tracking-[0.18em] text-purple-600 dark:text-purple-400 uppercase">Ofertas exclusivas</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mt-1 text-slate-900 dark:text-white">
+            Combos con Regalo Sorpresa 🎁
+          </h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-xl">
+            Ahorra más comprando en combo. Cada paquete incluye un regalo sorpresa.
+          </p>
+        </div>
+        <Link
+          href="/combos"
+          className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200 transition-colors"
+        >
+          Ver todos los combos
+          <ArrowRightIcon className="w-4 h-4" />
+        </Link>
+      </div>
+
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="h-96 rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {combos.map((combo, idx) => (
+            <ComboCard key={combo.id} combo={combo} idx={idx} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }

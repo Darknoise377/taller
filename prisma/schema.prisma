@@ -34,9 +34,10 @@ model Product {
   updatedAt   DateTime       @updatedAt
 
   // 🔗 Relaciones
-  orderItems OrderProduct[]
-  reviews    Review[]
-  owner      User?          @relation(fields: [ownerId], references: [id])
+  orderItems  OrderProduct[]
+  reviews     Review[]
+  comboItems  ComboItem[]
+  owner       User?          @relation(fields: [ownerId], references: [id])
   ownerId     String?
 
   // 🛒 Mercado Libre
@@ -120,6 +121,9 @@ model Order {
 
   // 🧩 Productos en la orden
   products        OrderProduct[]
+
+  // 🎁 Combos en la orden
+  orderCombos     OrderCombo[]
 
   // 🛒 Mercado Libre (si la orden vino de MeLi)
   meliOrder       MeliOrder?
@@ -238,6 +242,77 @@ model Promotion {
   appliesTo        String    @default("ALL")
   targetCategories String[]  @default([])
   targetProductIds String[]  @default([])
+}
+
+//
+// 🎁 COMBOS — Paquetes de productos con regalo sorpresa
+//
+
+model Combo {
+  id            String      @id @default(cuid())
+  name          String
+  slug          String      @unique
+  description   String      @db.Text
+  /// Precio del combo (ya con descuento aplicado)
+  price         Float
+  /// Suma de precios individuales — se muestra tachado para mostrar el ahorro
+  originalPrice Float
+  currency      String      @default("COP")
+  imageUrl      String?
+  isActive      Boolean     @default(true)
+  isFeatured    Boolean     @default(false)
+  stock         Int         @default(0)
+  soldCount     Int         @default(0)
+  /// Etiqueta visible en la card: "Más vendido", "Nuevo", "Recomendado"…
+  badge         String?
+  /// Si se establece, el combo expira en esa fecha (para ofertas temporales)
+  expiresAt     DateTime?
+
+  items         ComboItem[]
+  surpriseGift  SurpriseGift?
+  orderCombos   OrderCombo[]
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([isActive, isFeatured])
+  @@index([slug])
+}
+
+model ComboItem {
+  id        Int     @id @default(autoincrement())
+  combo     Combo   @relation(fields: [comboId], references: [id], onDelete: Cascade)
+  comboId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int     @default(1)
+}
+
+/// El regalo sorpresa se asocia 1:1 a un combo.
+/// La descripción pública solo muestra un "hint"; el nombre real se revela
+/// únicamente en el correo de confirmación de pedido.
+model SurpriseGift {
+  id        Int    @id @default(autoincrement())
+  combo     Combo  @relation(fields: [comboId], references: [id], onDelete: Cascade)
+  comboId   String @unique
+  /// Pista pública, ej: "para proteger tu equipo" (NO revela el regalo)
+  hint      String?
+  /// Nombre real del regalo — solo visible en el email de confirmación
+  giftName  String
+  /// Valor aproximado en COP — opcional, para mostrar el ahorro total
+  giftValue Float?
+}
+
+/// Registra qué combos se compraron en una orden (para historial y analítica).
+/// Los productos del combo también se guardan en OrderProduct de forma normal.
+model OrderCombo {
+  id        Int    @id @default(autoincrement())
+  order     Order  @relation(fields: [orderId], references: [id])
+  orderId   Int
+  combo     Combo  @relation(fields: [comboId], references: [id])
+  comboId   String
+  quantity  Int    @default(1)
+  unitPrice Float  // Precio al momento de la compra
 }
 
 // --- CHAT / AI / EMBEDDINGS ---

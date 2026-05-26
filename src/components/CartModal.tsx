@@ -8,6 +8,7 @@ import { useCart } from "@/hooks/useCart";
 import { CartItem as ICartItem } from "@/types/cart";
 import CartItem from "./CartItem";
 import ShippingPromo from "./ShippingPromo";
+import { GiftIcon, MinusIcon, PlusIcon, TrashIcon as TrashMiniIcon } from "@heroicons/react/24/outline";
 
 import {
   XMarkIcon,
@@ -23,11 +24,15 @@ export default function CartModal() {
   const pathname = usePathname();
   const {
     items,
+    comboItems,
     totalItems,
     cartTotal,
+    comboTotal,
     clearCart,
     isCartModalOpen,
     closeCartModal,
+    removeComboFromCart,
+    updateComboQuantity,
   } = useCart();
 
   const modalRef = useRef<HTMLDivElement>(null);
@@ -88,9 +93,10 @@ export default function CartModal() {
   if (isCheckoutPath(pathname)) return null;
 
   const overlayActive = isCartModalOpen;
+  const grandTotal = cartTotal + comboTotal;
   const FREE_SHIPPING_THRESHOLD = shippingConfig.freeShippingAll ? 0 : shippingConfig.freeShippingThreshold;
-  const isFreeShipping = shippingConfig.freeShippingAll || cartTotal >= FREE_SHIPPING_THRESHOLD;
-  const missingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - cartTotal);
+  const isFreeShipping = shippingConfig.freeShippingAll || grandTotal >= FREE_SHIPPING_THRESHOLD;
+  const missingForFreeShipping = Math.max(0, FREE_SHIPPING_THRESHOLD - grandTotal);
 
   return (
     <div
@@ -134,8 +140,7 @@ export default function CartModal() {
 
             {/* CONTENIDO */}
             <div className="flex-grow overflow-y-auto p-4">
-              {items.length === 0 ? (
-                // ✨ MEJORA: Estado de carrito vacío rediseñado
+              {items.length === 0 && comboItems.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center text-slate-500 dark:text-slate-400">
                   <ShoppingCartIcon className="w-24 h-24 mb-4 text-slate-300 dark:text-slate-700" />
                   <h4 className="text-xl font-semibold text-slate-700 dark:text-slate-200">
@@ -146,22 +151,67 @@ export default function CartModal() {
                   </p>
                 </div>
               ) : (
-                <ul className="space-y-4">
-                  {items.map((item: ICartItem) => (
-                    <CartItem
-                      key={`${item.product.id}-${item.selectedSize || ""}-${item.selectedColor || ""}`}
-                      item={item}
-                    />
-                  ))}
-                </ul>
+                <div className="space-y-4">
+                  {/* Regular products */}
+                  {items.length > 0 && (
+                    <ul className="space-y-4">
+                      {items.map((item: ICartItem) => (
+                        <CartItem
+                          key={`${item.product.id}-${item.selectedSize || ""}-${item.selectedColor || ""}`}
+                          item={item}
+                        />
+                      ))}
+                    </ul>
+                  )}
+
+                  {/* Combo items */}
+                  {comboItems.length > 0 && (
+                    <div>
+                      {items.length > 0 && <hr className="border-slate-200 dark:border-slate-700 my-2" />}
+                      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Combos</p>
+                      <ul className="space-y-3">
+                        {comboItems.map((ci) => (
+                          <li key={ci.combo.id} className="flex gap-3 rounded-2xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 p-3">
+                            <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-800 flex items-center justify-center shrink-0">
+                              <GiftIcon className="w-6 h-6 text-purple-500" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{ci.combo.name}</p>
+                              <p className="text-xs text-purple-600 dark:text-purple-400">
+                                {ci.combo.surpriseGift ? '🎁 Incluye regalo sorpresa' : ''}
+                              </p>
+                              <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+                                ${(ci.combo.price * ci.quantity).toLocaleString('es-CO')}
+                              </p>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <button aria-label="Eliminar combo" onClick={() => removeComboFromCart(ci.combo.id)} className="text-slate-400 hover:text-red-500 transition-colors">
+                                <TrashMiniIcon className="w-4 h-4" />
+                              </button>
+                              <div className="flex items-center gap-1">
+                                <button aria-label="Disminuir cantidad" onClick={() => updateComboQuantity(ci.combo.id, ci.quantity - 1)} className="w-6 h-6 rounded-full border border-slate-300 dark:border-slate-600 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                                  <MinusIcon className="w-3 h-3" />
+                                </button>
+                                <span className="text-sm w-5 text-center">{ci.quantity}</span>
+                                <button aria-label="Aumentar cantidad" onClick={() => updateComboQuantity(ci.combo.id, ci.quantity + 1)} className="w-6 h-6 rounded-full border border-slate-300 dark:border-slate-600 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                                  <PlusIcon className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
             {/* FOOTER */}
-            {items.length > 0 && (
+            {(items.length > 0 || comboItems.length > 0) && (
               <footer className="p-4 border-t border-slate-200 dark:border-slate-800 flex-shrink-0 space-y-4 bg-white/95 dark:bg-[#070617]/95">
                 <ShippingPromo
-                  subtotal={cartTotal}
+                  subtotal={grandTotal}
                   freeShippingThreshold={FREE_SHIPPING_THRESHOLD}
                   missingForFreeShipping={missingForFreeShipping}
                   isFreeShipping={isFreeShipping}
@@ -170,7 +220,7 @@ export default function CartModal() {
                 <div className="flex justify-between items-center text-lg font-semibold text-slate-900 dark:text-slate-100">
                   <span>Subtotal:</span>
                   <span className="text-[#0A2A66] dark:text-[#2E5FA7]">
-                    ${cartTotal.toLocaleString("es-CO")}
+                    ${grandTotal.toLocaleString("es-CO")}
                   </span>
                 </div>
 

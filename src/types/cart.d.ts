@@ -1,6 +1,7 @@
 // src/types/cart.ts
 
 import { Product } from './product';
+import { Combo, ComboCartItem } from './combo';
 
 /**
  * @interface CartItem
@@ -46,6 +47,13 @@ export interface CartContextType {
   ) => void;
 
   clearCart: () => void;
+
+  // 🎁 Combos en el carrito
+  comboItems: ComboCartItem[];
+  comboTotal: number;
+  addComboToCart: (combo: Combo, quantity?: number) => void;
+  removeComboFromCart: (comboId: string) => void;
+  updateComboQuantity: (comboId: string, newQuantity: number) => void;
 
   // 📦 Control modal
   isCartModalOpen: boolean;

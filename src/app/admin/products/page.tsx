@@ -23,6 +23,7 @@ import {
   Tag,
   Divider,
   Tooltip,
+  Checkbox,
 } from 'antd';
 import {
   CalculatorOutlined,
@@ -62,6 +63,8 @@ export default function AdminProductsPage() {
   const [calcCost, setCalcCost] = useState<number>(0);
   const [calcMargin, setCalcMargin] = useState<number>(35);
   const [calcContraentregaPct, setCalcContraentregaPct] = useState<number>(40);
+  const [calcAbsorbShipping, setCalcAbsorbShipping] = useState(true);
+  const [calcAbsorbContraentrega, setCalcAbsorbContraentrega] = useState(true);
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
 
   const handleGenerateDescription = useCallback(async () => {
@@ -107,12 +110,17 @@ export default function AdminProductsPage() {
     return Math.round(rates.reduce((a, b) => a + b, 0) / rates.length);
   }, [shippingConfig]);
 
+  const contraentregaUnit = useMemo(() => {
+    return Math.round((calcContraentregaPct / 100) * shippingConfig.contraentregaSurcharge);
+  }, [calcContraentregaPct, shippingConfig.contraentregaSurcharge]);
+
   const suggestedPrice = useMemo(() => {
     if (calcCost <= 0 || calcMargin >= 100) return 0;
-    const contraentregaAbsorbed = (calcContraentregaPct / 100) * shippingConfig.contraentregaSurcharge;
-    const totalCost = calcCost + avgShippingRate + contraentregaAbsorbed;
+    const shippingCost = calcAbsorbShipping ? avgShippingRate : 0;
+    const contraentregaCost = calcAbsorbContraentrega ? contraentregaUnit : 0;
+    const totalCost = calcCost + shippingCost + contraentregaCost;
     return Math.ceil(totalCost / (1 - calcMargin / 100) / 100) * 100;
-  }, [calcCost, calcMargin, calcContraentregaPct, avgShippingRate, shippingConfig.contraentregaSurcharge]);
+  }, [calcCost, calcMargin, calcAbsorbShipping, calcAbsorbContraentrega, avgShippingRate, contraentregaUnit]);
 
   const getErrorMessage = (err: unknown): string => {
     if (err instanceof Error) return err.message;
@@ -582,7 +590,7 @@ return (
             <div style={{ marginTop: 12, padding: '12px 16px', background: '#f0f5ff', borderRadius: 8, border: '1px solid #adc6ff' }}>
               <Typography.Text strong style={{ fontSize: 13 }}>Calculadora de precio</Typography.Text>
               <Typography.Paragraph type="secondary" style={{ fontSize: 12, margin: '4px 0 12px' }}>
-                Calcula el precio mínimo para cubrir costos, envío gratis y comisión contraentrega.
+                Calcula el precio sugerido eligiendo qué costos absorbes en el precio de venta.
               </Typography.Paragraph>
 
               <Row gutter={12}>
@@ -636,13 +644,29 @@ return (
                 </Col>
               </Row>
 
+              <div style={{ marginTop: 10, display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+                <Checkbox checked={calcAbsorbShipping} onChange={e => setCalcAbsorbShipping(e.target.checked)}>
+                  <Typography.Text style={{ fontSize: 12 }}>
+                    Absorber envío
+                    <span style={{ color: '#8c8c8c' }}> ({formatCurrency(avgShippingRate, 'COP')} promedio)</span>
+                  </Typography.Text>
+                </Checkbox>
+                <Checkbox checked={calcAbsorbContraentrega} onChange={e => setCalcAbsorbContraentrega(e.target.checked)}>
+                  <Typography.Text style={{ fontSize: 12 }}>
+                    Absorber contraentrega
+                    <span style={{ color: '#8c8c8c' }}> ({formatCurrency(contraentregaUnit, 'COP')} ponderado)</span>
+                  </Typography.Text>
+                </Checkbox>
+              </div>
+
               <Divider style={{ margin: '10px 0' }} />
 
               <Row gutter={8} align="middle">
                 <Col flex="auto">
                   <div style={{ fontSize: 12, color: '#8c8c8c', lineHeight: 1.8 }}>
-                    <div>Envío promedio absorbido: <strong>{formatCurrency(avgShippingRate, 'COP')}</strong></div>
-                    <div>Recargo contraentrega ponderado: <strong>{formatCurrency(Math.round((calcContraentregaPct / 100) * shippingConfig.contraentregaSurcharge), 'COP')}</strong></div>
+                    <div>Costo base: <strong style={{ color: '#262626' }}>{formatCurrency(calcCost, 'COP')}</strong></div>
+                    <div>+ Envío:{' '}{calcAbsorbShipping ? <strong style={{ color: '#262626' }}>{formatCurrency(avgShippingRate, 'COP')}</strong> : <span style={{ color: '#52c41a' }}>cliente paga</span>}</div>
+                    <div>+ Contraentrega:{' '}{calcAbsorbContraentrega ? <strong style={{ color: '#262626' }}>{formatCurrency(contraentregaUnit, 'COP')}</strong> : <span style={{ color: '#52c41a' }}>cliente paga</span>}</div>
                     {suggestedPrice > 0 && suggestedPrice < shippingConfig.freeShippingThreshold && (
                       <div style={{ color: '#fa8c16' }}>⚠ Queda bajo el umbral de envío gratis ({formatCurrency(shippingConfig.freeShippingThreshold, 'COP')})</div>
                     )}

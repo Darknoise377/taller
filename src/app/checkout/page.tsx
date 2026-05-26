@@ -166,7 +166,7 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
 // --- Componente Principal: CheckoutPage ---
 const CheckoutPage: React.FC = () => {
   const router = useRouter();
-  const { items, totalItems, cartTotal, clearCart, isCartLoaded } = useCart();
+  const { items, comboItems, totalItems, cartTotal, comboTotal, clearCart, isCartLoaded } = useCart();
   const { user } = useCustomerAuth();
 
   // --- Estado del Formulario de Envío (de V1) ---
@@ -203,8 +203,9 @@ const CheckoutPage: React.FC = () => {
   const [countdownSeconds, setCountdownSeconds] = useState(15 * 60);
 
   const freeShippingThreshold = shippingConfig.freeShippingThreshold;
-  const isFreeShipping = shippingConfig.freeShippingAll || cartTotal >= freeShippingThreshold;
-  const missingForFreeShipping = Math.max(0, freeShippingThreshold - cartTotal);
+  const productAndComboTotal = cartTotal + comboTotal;
+  const isFreeShipping = shippingConfig.freeShippingAll || productAndComboTotal >= freeShippingThreshold;
+  const missingForFreeShipping = Math.max(0, freeShippingThreshold - productAndComboTotal);
 
   // --- Estimado de envío reactivo ---
   const shippingEstimate = useMemo(() => {
@@ -214,10 +215,10 @@ const CheckoutPage: React.FC = () => {
     return estimateShippingWithConfig(
       shippingInfo.state,
       paymentMethod as 'WOMPI' | 'CONTRAENTREGA',
-      cartTotal,
+      productAndComboTotal,
       shippingConfig,
     );
-  }, [shippingInfo.state, paymentMethod, cartTotal, shippingConfig]);
+  }, [shippingInfo.state, paymentMethod, productAndComboTotal, shippingConfig]);
 
   // --- ✨ AÑADIDO: Cálculos de Totales Dinámicos (de V2) ---
   const { finalTotal, discountAmount } = useMemo(() => {
@@ -233,7 +234,7 @@ const CheckoutPage: React.FC = () => {
           .reduce((sum, i) => sum + i.product.price * i.quantity, 0);
         const nonDiscountable = cartTotal - discountableTotal;
         const { finalTotal: discounted, discountAmount } = calculateDiscountedTotal(discountableTotal, promo.discount);
-        return { finalTotal: discounted + nonDiscountable + shipping, discountAmount };
+        return { finalTotal: discounted + nonDiscountable + comboTotal + shipping, discountAmount };
       }
       if (promo.appliesTo === 'PRODUCT' && promo.targetProductIds?.length) {
         const discountableTotal = items
@@ -241,14 +242,14 @@ const CheckoutPage: React.FC = () => {
           .reduce((sum, i) => sum + i.product.price * i.quantity, 0);
         const nonDiscountable = cartTotal - discountableTotal;
         const { finalTotal: discounted, discountAmount } = calculateDiscountedTotal(discountableTotal, promo.discount);
-        return { finalTotal: discounted + nonDiscountable + shipping, discountAmount };
+        return { finalTotal: discounted + nonDiscountable + comboTotal + shipping, discountAmount };
       }
 
-      const { finalTotal: discounted, discountAmount } = calculateDiscountedTotal(cartTotal, promo.discount);
+      const { finalTotal: discounted, discountAmount } = calculateDiscountedTotal(productAndComboTotal, promo.discount);
       return { finalTotal: discounted + shipping, discountAmount };
     }
-    return { finalTotal: cartTotal + shipping, discountAmount: 0 };
-  }, [cartTotal, validatedCode, shippingEstimate, items]);
+    return { finalTotal: productAndComboTotal + shipping, discountAmount: 0 };
+  }, [cartTotal, comboTotal, productAndComboTotal, validatedCode, shippingEstimate, items]);
 
   // --- Efectos de Carga (de V1) ---
   useEffect(() => {
@@ -414,7 +415,7 @@ const CheckoutPage: React.FC = () => {
       return;
     }
 
-    if (items.length === 0) {
+    if (items.length === 0 && comboItems.length === 0) {
       setError('Tu carrito está vacío.');
       return;
     }
@@ -443,6 +444,13 @@ const CheckoutPage: React.FC = () => {
       products: items.map((item: ICartItem) => ({
         productId: item.product.id,
         quantity: item.quantity,
+      })),
+
+      // Combo items for the order
+      combos: comboItems.map((ci) => ({
+        comboId: ci.combo.id,
+        quantity: ci.quantity,
+        unitPrice: ci.combo.price,
       })),
 
       // --- ✨ AÑADIDO: Lógica de Códigos Híbridos ---
@@ -962,7 +970,7 @@ const CheckoutPage: React.FC = () => {
                 {/* --- ✨ MODIFICADO: Resumen de Totales Dinámico (V1 + V2) --- */}
                 <div className="space-y-3">
                   <ShippingPromo
-                    subtotal={cartTotal}
+                    subtotal={productAndComboTotal}
                     freeShippingThreshold={freeShippingThreshold}
                     missingForFreeShipping={missingForFreeShipping}
                     isFreeShipping={isFreeShipping}
@@ -974,7 +982,7 @@ const CheckoutPage: React.FC = () => {
                       {totalItems === 1 ? 'artículo' : 'artículos'})
                     </span>
                     <span className="font-semibold text-gray-800 dark:text-slate-200">
-                      {formatCurrency(cartTotal)}
+                      {formatCurrency(productAndComboTotal)}
                     </span>
                   </div>
 
