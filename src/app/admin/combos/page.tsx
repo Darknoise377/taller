@@ -113,7 +113,7 @@ export default function AdminCombosPage() {
       const r = await fetch('/api/products?all=true&limit=500');
       if (!r.ok) return;
       const data = await r.json();
-      const list = Array.isArray(data) ? data : data.products ?? [];
+      const list = Array.isArray(data) ? data : data.items ?? [];
       setProducts(list.map((p: { id: string; name: string; price: number; stock: number }) => ({ id: p.id, name: p.name, price: p.price, stock: p.stock })));
     } catch {
       // non-critical
