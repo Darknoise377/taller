@@ -36,6 +36,17 @@ import dayjs from 'dayjs';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { uploadImage } from '@/services/productService';
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+}
+
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 
@@ -150,7 +161,7 @@ export default function AdminCombosPage() {
       });
       const data = await res.json() as { name?: string; description?: string; error?: string };
       if (!res.ok || !data.name) throw new Error(data.error ?? 'Error al analizar');
-      form.setFieldsValue({ name: data.name, description: data.description });
+      form.setFieldsValue({ name: data.name, description: data.description, slug: slugify(data.name) });
       message.success('Nombre y descripción generados con IA ✨');
     } catch (err) {
       message.error((err as Error).message ?? 'Error al analizar imagen');
@@ -164,10 +175,14 @@ export default function AdminCombosPage() {
     if (!name?.trim()) { message.warning('Primero ingresa el nombre del combo.'); return; }
     setIsGeneratingDesc(true);
     try {
-      const res = await fetch('/api/admin/products/generate-description', {
+      const formItems = (form.getFieldValue('items') as ComboItemForm[] | undefined) ?? [];
+      const itemNames = formItems
+        .map((i) => products.find((p) => p.id === i.productId)?.name)
+        .filter(Boolean) as string[];
+      const res = await fetch('/api/admin/combos/generate-description', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() }),
+        body: JSON.stringify({ name: name.trim(), items: itemNames }),
       });
       const data = await res.json() as { description?: string; error?: string };
       if (!res.ok || !data.description) throw new Error(data.error ?? 'Error al generar');

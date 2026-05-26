@@ -25,12 +25,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Se requiere imageUrl' }, { status: 400 });
   }
 
-  const prompt = `Eres un experto en ventas de repuestos y accesorios para motos en Colombia.
-Analiza la imagen de un combo de productos para una tienda de motos llamada "Motoservicio A&R".
+  const prompt = `Eres un copywriter experto en ventas de repuestos y accesorios para motos en Colombia, especializado en crear textos que generan deseo de compra inmediato.
 
-Basándote en lo que ves en la imagen, genera:
-1. Un nombre comercial atractivo para el combo (máximo 6 palabras, ej: "Combo Frenos y Llantas Premium")
-2. Una descripción de venta corta (máximo 2 oraciones, 40-60 palabras) resaltando los beneficios del combo y mencionando el regalo sorpresa que viene incluido
+Analiza la imagen de un COMBO de productos de la tienda "Motoservicio A&R" y genera contenido de venta de alto impacto.
+
+REGLAS para el NOMBRE (máximo 6 palabras):
+- Usa palabras de poder: "Kit", "Combo", "Pack", "Premium", "Pro", "Completo", "Total", "Esencial"
+- Menciona el beneficio principal o los productos clave
+- Ejemplo bueno: "Kit Mantenimiento Completo Premium", "Combo Frenos Pro + Regalo"
+- Ejemplo malo: "Combo de productos varios"
+
+REGLAS para la DESCRIPCIÓN (exactamente 3 oraciones, 55-75 palabras):
+- Oración 1: Menciona los productos específicos que ves en la imagen y el beneficio principal que le dan al motero — qué problema le resuelven o qué mejoran en la moto. Sé concreto con los productos que ves.
+- Oración 2: Urgencia o escasez + valor del ahorro (ej: "Ahorra hasta un 30% comprando en combo versus piezas individuales — stock limitado.")
+- Oración 3: Mención del regalo sorpresa como gancho final (ej: "Incluye un regalo sorpresa exclusivo revelado al momento de tu compra.")
+- Tono: directo, confiable, con energía. Nada genérico. Habla como vendedor colombiano que conoce motos y le habla al cliente de tú.
+- Usa verbos de acción: "protege", "garantiza", "ahorra", "mantén", "lleva", "asegura"
+- NO uses emojis, NO menciones precios, NO repitas el nombre del combo.
 
 Responde ÚNICAMENTE en este formato JSON exacto (sin markdown, sin bloques de código):
 {"name":"...","description":"..."}`;
