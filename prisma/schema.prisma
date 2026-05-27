@@ -259,6 +259,7 @@ model Combo {
   originalPrice Float
   currency      String      @default("COP")
   imageUrl      String?
+  images        String[]    @default([])
   isActive      Boolean     @default(true)
   isFeatured    Boolean     @default(false)
   stock         Int         @default(0)

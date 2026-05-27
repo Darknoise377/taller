@@ -11,6 +11,7 @@ import type { Product as ProductType, ProductSize } from "@/types/product";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { makeProductPlaceholder, BLUR_DATA_URL } from "@/lib/placeholder";
+import { useShippingConfig } from "@/hooks/useShippingConfig";
 
 interface ProductCardProps {
   product: ProductType;
@@ -26,6 +27,8 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
   const [added, setAdded] = useState(false);
   const { toggle: toggleWishlist, isLiked } = useWishlist();
   const liked = isLiked(product.id);
+  const { freeShippingThreshold, minShippingRate, isFreeShippingAll } = useShippingConfig();
+  const hasFreeShipping = isFreeShippingAll || product.price >= freeShippingThreshold;
 
   const imageSrc = useMemo(
     () => product.images?.[0] ?? product.imageUrl ?? makeProductPlaceholder(product.name, product.id),
@@ -144,6 +147,17 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
           <p className="mt-1 text-lg sm:text-2xl font-extrabold text-[#0A2A66] dark:text-[#5B8DD9]">
             ${Number(product.price).toLocaleString("es-CO")}
           </p>
+          {/* Shipping badge */}
+          {hasFreeShipping ? (
+            <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-green-700 dark:text-green-400">
+              <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              Envío gratis incluido
+            </p>
+          ) : (
+            <p className="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
+              Envío desde ${minShippingRate.toLocaleString("es-CO")}
+            </p>
+          )}
         </div>
 
         {/* Opciones de medida */}

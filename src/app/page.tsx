@@ -900,9 +900,17 @@ function FeaturedCombosRow() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/combos?featured=true&limit=3')
+    // Try featured first; if none, load all active combos
+    fetch('/api/combos?featured=true&limit=6')
       .then((r) => r.ok ? r.json() : [])
-      .then((data) => { if (Array.isArray(data)) setCombos(data); })
+      .then(async (data: Combo[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCombos(data);
+        } else {
+          const fallback = await fetch('/api/combos?limit=6').then((r) => r.ok ? r.json() : []);
+          if (Array.isArray(fallback)) setCombos(fallback);
+        }
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -911,23 +919,29 @@ function FeaturedCombosRow() {
 
   return (
     <section id="combos" className="mt-8">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-        <div>
-          <p className="text-xs font-bold tracking-[0.18em] text-purple-600 dark:text-purple-400 uppercase">Ofertas exclusivas</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mt-1 text-slate-900 dark:text-white">
-            Combos con Regalo Sorpresa 🎁
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-w-xl">
-            Ahorra más comprando en combo. Cada paquete incluye un regalo sorpresa.
-          </p>
+      {/* Flash-sale header */}
+      <div className="rounded-2xl bg-gradient-to-r from-orange-500 via-red-500 to-rose-600 dark:from-orange-600 dark:via-red-600 dark:to-rose-700 p-5 sm:p-6 mb-6 shadow-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <FireIcon className="w-5 h-5 text-yellow-300 animate-pulse" />
+              <p className="text-xs font-bold tracking-[0.18em] text-orange-100 uppercase">Oferta Relámpago</p>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+              Combos con Ahorro Real 🎁
+            </h2>
+            <p className="text-sm text-orange-100/80 mt-1 max-w-xl">
+              Paquetes armados para darte más por menos. Cada combo incluye un regalo sorpresa.
+            </p>
+          </div>
+          <Link
+            href="/combos"
+            className="shrink-0 inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-4 py-2 rounded-xl border border-white/30 transition-colors"
+          >
+            Ver todos los combos
+            <ArrowRightIcon className="w-4 h-4" />
+          </Link>
         </div>
-        <Link
-          href="/combos"
-          className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-200 transition-colors"
-        >
-          Ver todos los combos
-          <ArrowRightIcon className="w-4 h-4" />
-        </Link>
       </div>
 
       {loading ? (
@@ -939,7 +953,7 @@ function FeaturedCombosRow() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {combos.map((combo, idx) => (
-            <ComboCard key={combo.id} combo={combo} idx={idx} />
+            <ComboCard key={combo.id} combo={combo} idx={idx} showDescription />
           ))}
         </div>
       )}

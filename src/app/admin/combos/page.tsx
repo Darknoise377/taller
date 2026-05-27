@@ -206,7 +206,13 @@ export default function AdminCombosPage() {
   const openEdit = (combo: ComboData) => {
     setEditingCombo(combo);
     setHasSurpriseGift(!!combo.surpriseGift);
-    setFileList(combo.imageUrl ? [{ uid: '-1', name: 'imagen-actual', status: 'done', url: combo.imageUrl }] : []);
+    setFileList([]);
+    // Pre-load existing images (multiple)
+    if (combo.images && combo.images.length > 0) {
+      setFileList(combo.images.map((url, i) => ({ uid: `-${i + 1}`, name: `imagen-${i + 1}`, status: 'done' as const, url })));
+    } else if (combo.imageUrl) {
+      setFileList([{ uid: '-1', name: 'imagen-actual', status: 'done', url: combo.imageUrl }]);
+    }
     form.setFieldsValue({
       name: combo.name,
       slug: combo.slug,
@@ -233,21 +239,27 @@ export default function AdminCombosPage() {
       const values = await form.validateFields();
       setIsSaving(true);
 
-      // Upload image if a new file was selected
-      let finalImageUrl: string | undefined = editingCombo?.imageUrl;
-      const newFile = fileList.find((f) => f.originFileObj);
-      if (newFile?.originFileObj) {
+      // Upload all new files in parallel, keep already-uploaded ones
+      let finalImageUrl: string | undefined;
+      const uploadedUrls: string[] = [];
+      const newFiles = fileList.filter((f) => f.originFileObj);
+      const existingUrls = fileList.filter((f) => f.url && !f.originFileObj).map((f) => f.url as string);
+
+      if (newFiles.length > 0) {
         try {
-          const uploaded = await uploadImage(newFile.originFileObj as File);
-          finalImageUrl = uploaded.url;
+          const results = await Promise.all(
+            newFiles.map((f) => uploadImage(f.originFileObj as File))
+          );
+          uploadedUrls.push(...results.map((r) => r.url));
         } catch {
-          message.error('Error al subir la imagen');
+          message.error('Error al subir imágenes');
           setIsSaving(false);
           return;
         }
-      } else if (fileList.length === 0) {
-        finalImageUrl = undefined;
       }
+
+      const allImages = [...existingUrls, ...uploadedUrls];
+      finalImageUrl = allImages[0] ?? editingCombo?.imageUrl;
 
       const payload = {
         name: values.name,
@@ -256,7 +268,8 @@ export default function AdminCombosPage() {
         price: values.price,
         originalPrice: values.originalPrice,
         currency: values.currency ?? 'COP',
-        imageUrl: finalImageUrl,
+        imageUrl: finalImageUrl ?? null,
+        images: allImages.length > 0 ? allImages : (editingCombo?.images ?? []),
         isActive: values.isActive ?? true,
         isFeatured: values.isFeatured ?? false,
         stock: values.stock,
@@ -460,12 +473,13 @@ export default function AdminCombosPage() {
             <Upload
               listType="picture-card"
               fileList={fileList}
-              onRemove={() => setFileList([])}
+              onRemove={(file) => setFileList((prev) => prev.filter((f) => f.uid !== file.uid))}
               beforeUpload={() => false}
-              onChange={({ fileList: newList }) => setFileList(newList.slice(-1))}
+              onChange={({ fileList: newList }) => setFileList(newList)}
               accept="image/*"
+              multiple
             >
-              {fileList.length === 0 && (
+              {fileList.length < 6 && (
                 <div>
                   <PlusOutlined />
                   <div style={{ marginTop: 8 }}>Subir imagen</div>

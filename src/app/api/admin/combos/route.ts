@@ -66,6 +66,7 @@ export async function POST(req: Request) {
       originalPrice: number;
       currency?: string;
       imageUrl?: string;
+      images?: string[];
       isActive?: boolean;
       isFeatured?: boolean;
       stock: number;
@@ -96,6 +97,7 @@ export async function POST(req: Request) {
         originalPrice: Number(body.originalPrice),
         currency: body.currency ?? 'COP',
         imageUrl: body.imageUrl ?? null,
+        images: body.images ?? [],
         isActive: body.isActive ?? true,
         isFeatured: body.isFeatured ?? false,
         stock: Number(body.stock),

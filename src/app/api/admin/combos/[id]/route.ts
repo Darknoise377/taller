@@ -55,6 +55,7 @@ export async function PUT(
       originalPrice?: number;
       currency?: string;
       imageUrl?: string;
+      images?: string[];
       isActive?: boolean;
       isFeatured?: boolean;
       stock?: number;
@@ -89,6 +90,7 @@ export async function PUT(
           ...(body.originalPrice !== undefined ? { originalPrice: Number(body.originalPrice) } : {}),
           ...(body.currency !== undefined ? { currency: body.currency } : {}),
           ...(body.imageUrl !== undefined ? { imageUrl: body.imageUrl } : {}),
+          ...(body.images !== undefined ? { images: body.images } : {}),
           ...(body.isActive !== undefined ? { isActive: body.isActive } : {}),
           ...(body.isFeatured !== undefined ? { isFeatured: body.isFeatured } : {}),
           ...(body.stock !== undefined ? { stock: Number(body.stock) } : {}),

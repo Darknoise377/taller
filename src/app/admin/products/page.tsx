@@ -24,6 +24,7 @@ import {
   Divider,
   Tooltip,
   Checkbox,
+  Alert,
 } from 'antd';
 import {
   CalculatorOutlined,
@@ -121,6 +122,31 @@ export default function AdminProductsPage() {
     const totalCost = calcCost + shippingCost + contraentregaCost;
     return Math.ceil(totalCost / (1 - calcMargin / 100) / 100) * 100;
   }, [calcCost, calcMargin, calcAbsorbShipping, calcAbsorbContraentrega, avgShippingRate, contraentregaUnit]);
+
+  /** Ratio del envío sobre el precio sugerido, en % */
+  const shippingRatioOfPrice = useMemo(() => {
+    if (!calcAbsorbShipping || suggestedPrice <= 0 || avgShippingRate <= 0) return 0;
+    return Math.round((avgShippingRate / suggestedPrice) * 100);
+  }, [calcAbsorbShipping, suggestedPrice, avgShippingRate]);
+
+  /** Recomendación automática basada en la relación costo/envío */
+  const calcRecommendation = useMemo((): { type: 'ok' | 'warn' | 'danger'; text: string } | null => {
+    if (calcCost <= 0 || suggestedPrice <= 0) return null;
+    if (!calcAbsorbShipping) return null;
+    if (shippingRatioOfPrice >= 30) {
+      return {
+        type: 'danger',
+        text: `El envío representa el ${shippingRatioOfPrice}% del precio final. Para productos económicos conviene NO absorber el envío — el cliente lo paga al checkout, igual que en MercadoLibre. Desmarca "Absorber envío" para obtener un precio más competitivo.`,
+      };
+    }
+    if (shippingRatioOfPrice >= 20) {
+      return {
+        type: 'warn',
+        text: `El envío representa el ${shippingRatioOfPrice}% del precio. Considera si vale la pena ofrecerlo gratis o cobrar envío por separado para mantener un precio más atractivo en la tarjeta.`,
+      };
+    }
+    return null;
+  }, [calcAbsorbShipping, shippingRatioOfPrice, calcCost, suggestedPrice]);
 
   const getErrorMessage = (err: unknown): string => {
     if (err instanceof Error) return err.message;
@@ -661,14 +687,33 @@ return (
 
               <Divider style={{ margin: '10px 0' }} />
 
+              {/* Alerta de recomendación inteligente */}
+              {calcRecommendation && (
+                <Alert
+                  type={calcRecommendation.type === 'danger' ? 'error' : 'warning'}
+                  showIcon
+                  style={{ marginBottom: 10, fontSize: 12 }}
+                  message={calcRecommendation.text}
+                />
+              )}
+
               <Row gutter={8} align="middle">
                 <Col flex="auto">
                   <div style={{ fontSize: 12, color: '#8c8c8c', lineHeight: 1.8 }}>
                     <div>Costo base: <strong style={{ color: '#262626' }}>{formatCurrency(calcCost, 'COP')}</strong></div>
-                    <div>+ Envío:{' '}{calcAbsorbShipping ? <strong style={{ color: '#262626' }}>{formatCurrency(avgShippingRate, 'COP')}</strong> : <span style={{ color: '#52c41a' }}>cliente paga</span>}</div>
+                    <div>+ Envío:{' '}{calcAbsorbShipping
+                      ? <><strong style={{ color: '#262626' }}>{formatCurrency(avgShippingRate, 'COP')}</strong>{shippingRatioOfPrice > 0 && <span style={{ color: shippingRatioOfPrice >= 30 ? '#f5222d' : shippingRatioOfPrice >= 20 ? '#fa8c16' : '#52c41a', marginLeft: 4 }}>({shippingRatioOfPrice}% del precio)</span>}</>
+                      : <span style={{ color: '#52c41a' }}>cliente paga</span>}
+                    </div>
                     <div>+ Contraentrega:{' '}{calcAbsorbContraentrega ? <strong style={{ color: '#262626' }}>{formatCurrency(contraentregaUnit, 'COP')}</strong> : <span style={{ color: '#52c41a' }}>cliente paga</span>}</div>
+                    {suggestedPrice > 0 && suggestedPrice >= shippingConfig.freeShippingThreshold && (
+                      <div style={{ color: '#52c41a', fontWeight: 600 }}>✓ A este precio el comprador tiene envío gratis automático</div>
+                    )}
                     {suggestedPrice > 0 && suggestedPrice < shippingConfig.freeShippingThreshold && (
-                      <div style={{ color: '#fa8c16' }}>⚠ Queda bajo el umbral de envío gratis ({formatCurrency(shippingConfig.freeShippingThreshold, 'COP')})</div>
+                      <div style={{ color: '#fa8c16' }}>
+                        ⚠ Precio bajo el umbral de envío gratis ({formatCurrency(shippingConfig.freeShippingThreshold, 'COP')})
+                        {!calcAbsorbShipping && ' — el cliente paga el envío al checkout'}
+                      </div>
                     )}
                   </div>
                 </Col>

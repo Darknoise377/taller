@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { SparklesIcon, TruckIcon } from "@heroicons/react/24/outline";
+import { SparklesIcon, TruckIcon, GiftIcon } from "@heroicons/react/24/outline";
 
 type ShippingPromoProps = {
   subtotal: number;
@@ -22,6 +23,12 @@ export default function ShippingPromo({
       ? Math.min(100, (subtotal / freeShippingThreshold) * 100)
       : 100;
 
+  // Show combo suggestion when the buyer still needs more than 40% of the threshold
+  const showComboSuggestion =
+    !isFreeShipping &&
+    freeShippingThreshold > 0 &&
+    missingForFreeShipping > freeShippingThreshold * 0.4;
+
   return (
     <div className="space-y-3 px-4 py-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-slate-800/50 dark:to-slate-700/50 rounded-lg border border-blue-200 dark:border-slate-700">
       {!isFreeShipping ? (
@@ -31,7 +38,7 @@ export default function ShippingPromo({
           className="space-y-2"
         >
           <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300 font-semibold">
-            <TruckIcon className="w-4 h-4" />
+            <TruckIcon className="w-4 h-4 shrink-0" />
             Faltan ${missingForFreeShipping.toLocaleString("es-CO")} para envio gratis
           </div>
           <div className="relative h-2 bg-white dark:bg-slate-600 rounded-full overflow-hidden">
@@ -42,6 +49,25 @@ export default function ShippingPromo({
               transition={{ duration: 0.6, ease: "easeOut" }}
             />
           </div>
+          {showComboSuggestion && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              transition={{ delay: 0.3 }}
+              className="flex items-center justify-between gap-2 pt-1"
+            >
+              <div className="flex items-center gap-1.5 text-xs text-purple-700 dark:text-purple-300">
+                <GiftIcon className="w-4 h-4 shrink-0" />
+                <span>¿Sabías que nuestros combos incluyen envío gratis?</span>
+              </div>
+              <Link
+                href="/products?category=combos"
+                className="shrink-0 text-xs font-bold text-purple-700 dark:text-purple-300 underline underline-offset-2 hover:text-purple-900 dark:hover:text-purple-100 transition-colors"
+              >
+                Ver combos →
+              </Link>
+            </motion.div>
+          )}
         </motion.div>
       ) : (
         <motion.div

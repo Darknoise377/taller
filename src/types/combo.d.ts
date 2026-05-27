@@ -36,6 +36,7 @@ export interface Combo {
   originalPrice: number;
   currency: string;
   imageUrl?: string | null;
+  images?: string[];
   isActive: boolean;
   isFeatured: boolean;
   stock: number;

@@ -14,13 +14,14 @@ import { BLUR_DATA_URL } from "@/lib/placeholder";
 interface ComboCardProps {
   combo: Combo;
   idx?: number;
+  showDescription?: boolean;
 }
 
 function formatCOP(value: number) {
   return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(value);
 }
 
-export default function ComboCard({ combo, idx = 0 }: ComboCardProps) {
+export default function ComboCard({ combo, idx = 0, showDescription = false }: ComboCardProps) {
   const { addComboToCart, openCartModal } = useCart();
   const [added, setAdded] = useState(false);
 
@@ -97,6 +98,13 @@ export default function ComboCard({ combo, idx = 0 }: ComboCardProps) {
         <Link href={`/combos/${combo.slug}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
           <h3 className="font-bold text-slate-900 dark:text-white text-base leading-snug line-clamp-2">{combo.name}</h3>
         </Link>
+
+        {/* Description snippet */}
+        {showDescription && combo.description && (
+          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed -mt-1">
+            {combo.description}
+          </p>
+        )}
 
         {/* Products included */}
         {combo.items && combo.items.length > 0 && (
