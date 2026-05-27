@@ -193,7 +193,7 @@ export default function AdminCombosPage() {
     } finally {
       setIsGeneratingDesc(false);
     }
-  }, [form]);
+  }, [form, products]);
 
   const openCreate = () => {
     setEditingCombo(null);
@@ -240,7 +240,6 @@ export default function AdminCombosPage() {
       setIsSaving(true);
 
       // Upload all new files in parallel, keep already-uploaded ones
-      let finalImageUrl: string | undefined;
       const uploadedUrls: string[] = [];
       const newFiles = fileList.filter((f) => f.originFileObj);
       const existingUrls = fileList.filter((f) => f.url && !f.originFileObj).map((f) => f.url as string);
@@ -259,7 +258,7 @@ export default function AdminCombosPage() {
       }
 
       const allImages = [...existingUrls, ...uploadedUrls];
-      finalImageUrl = allImages[0] ?? editingCombo?.imageUrl;
+      const finalImageUrl = allImages[0] ?? editingCombo?.imageUrl;
 
       const payload = {
         name: values.name,
