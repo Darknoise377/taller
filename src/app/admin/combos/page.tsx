@@ -71,6 +71,7 @@ interface ComboData {
   originalPrice: number;
   currency: string;
   imageUrl?: string;
+  images?: string[];
   isActive: boolean;
   isFeatured: boolean;
   stock: number;
