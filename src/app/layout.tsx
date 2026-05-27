@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "../styles/globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import { CartProvider } from '@/context/CartContext';
 import { CustomerAuthProvider } from '@/context/CustomerAuthContext';
 import CartModal from '@/components/CartModal';
@@ -169,6 +170,8 @@ export default function RootLayout({
               <DynamicFooter />
               {/* Vercel Speed Insights: solo activo en producción */}
               {process.env.NODE_ENV === 'production' && <SpeedInsights />}
+              {/* Vercel Analytics: conteo de visitas y páginas */}
+              {process.env.NODE_ENV === 'production' && <Analytics />}
             </CartProvider>
           </CustomerAuthProvider>
         </ThemeProvider>
