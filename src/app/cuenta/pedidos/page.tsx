@@ -14,7 +14,7 @@ interface OrderProduct {
 }
 
 interface Order {
-  id: string;
+  id: number;
   referenceCode: string;
   customerName: string;
   total: number;
@@ -25,18 +25,18 @@ interface Order {
 
 const STATUS_LABEL: Record<string, string> = {
   PENDING: "Pendiente",
-  PAID: "Pagado",
+  APPROVED: "Aprobado",
+  DECLINED: "Rechazado",
   SHIPPED: "Enviado",
-  DELIVERED: "Entregado",
   CANCELLED: "Cancelado",
 };
 
 const STATUS_COLOR: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-  PAID: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  SHIPPED: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  DELIVERED: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  CANCELLED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  APPROVED: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+  DECLINED: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
+  SHIPPED: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+  CANCELLED: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
 };
 
 export default function PedidosPage() {
@@ -176,11 +176,19 @@ export default function PedidosPage() {
                 ))}
               </ul>
 
-              <div className="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-slate-800">
+              <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-slate-800">
                 <span className="text-sm text-gray-500 dark:text-slate-400">Total</span>
-                <span className="font-bold text-[#0A2A66] dark:text-slate-100">
-                  {formatCurrency(order.total)}
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-[#0A2A66] dark:text-slate-100">
+                    {formatCurrency(order.total)}
+                  </span>
+                  <Link
+                    href={`/cuenta/pedidos/${order.id}`}
+                    className="text-xs font-medium text-[#0A2A66] dark:text-blue-400 hover:underline"
+                  >
+                    Ver detalle →
+                  </Link>
+                </div>
               </div>
             </div>
           ))}
