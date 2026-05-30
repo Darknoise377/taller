@@ -22,12 +22,13 @@ export async function generateSitemaps() {
 }
 
 export default async function sitemap(
-  { id }: { id: number } = { id: 0 },
+  { id }: { id: number | string } = { id: 0 },
 ): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseUrl();
+  const numericId = Number(id);
 
   // ── id=0: rutas estáticas, categorías y combos ──────────────────────────
-  if (id === 0) {
+  if (numericId === 0) {
     const staticRoutes: MetadataRoute.Sitemap = [
       { url: `${baseUrl}/`, changeFrequency: 'daily', priority: 1, lastModified: new Date() },
       { url: `${baseUrl}/products`, changeFrequency: 'daily', priority: 0.9, lastModified: new Date() },
@@ -63,7 +64,7 @@ export default async function sitemap(
   }
 
   // ── id≥1: bloque de productos paginado ──────────────────────────────────
-  const skip = (id - 1) * PRODUCTS_PER_SITEMAP;
+  const skip = (numericId - 1) * PRODUCTS_PER_SITEMAP;
   let productRoutes: MetadataRoute.Sitemap = [];
   try {
     const products = await prisma.product.findMany({
@@ -79,7 +80,7 @@ export default async function sitemap(
       priority: 0.8,
     }));
   } catch (error) {
-    console.error(`Error generando sitemap de productos (id=${id}):`, error);
+    console.error(`Error generando sitemap de productos (id=${numericId}):`, error);
   }
 
   return productRoutes;
