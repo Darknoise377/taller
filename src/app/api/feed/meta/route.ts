@@ -37,6 +37,7 @@ export async function GET() {
       imageUrl: true,
       images: true,
       sku: true,
+      brand: true,
       tags: true,
       stock: true,
       category: true,
@@ -55,7 +56,11 @@ export async function GET() {
         .join('\n');
 
       // Use first tag as brand, fallback to store name
-      const brand = p.tags?.[0] ? xml(p.tags[0]) : 'Motoservicio AyR';
+      const brand = p.brand?.trim()
+        ? xml(p.brand.trim())
+        : p.tags?.[0]
+          ? xml(p.tags[0])
+          : 'Motoservicio A&R';
       const productUrl = `${base}/products/${p.id}`;
       const priceFormatted = `${p.price.toFixed(2)} COP`;
 

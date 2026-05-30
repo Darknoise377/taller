@@ -68,7 +68,8 @@ export async function middleware(req: NextRequest) {
     ["POST", "PUT", "PATCH", "DELETE"].includes(req.method) &&
     (
       (pathname.startsWith("/api/auth/") && pathname !== "/api/auth/login") ||
-      pathname.startsWith("/api/cuenta/")
+      pathname.startsWith("/api/cuenta/") ||
+      pathname === "/api/chat"
     );
 
   if (isCustomerMutation) {
@@ -329,6 +330,7 @@ export const config = {
     "/api/users/:path*",
     "/api/users",
     "/api/cart",
+    "/api/chat",
   ],
 };
 

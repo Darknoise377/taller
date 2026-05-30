@@ -22,6 +22,9 @@ import { ProductCard } from '../../components/ProductCard';
 type ProductsClientProps = {
   initialProducts: ProductType[];
   totalCount?: number;
+  initialCategory?: string;
+  heroTitle?: string;
+  heroSubtitle?: string;
 };
 
 function normalizeForSearch(value: string): string {
@@ -32,7 +35,13 @@ function normalizeForSearch(value: string): string {
     .trim();
 }
 
-export default function ProductsClient({ initialProducts, totalCount: initialTotal }: ProductsClientProps) {
+export default function ProductsClient({
+  initialProducts,
+  totalCount: initialTotal,
+  initialCategory,
+  heroTitle,
+  heroSubtitle,
+}: ProductsClientProps) {
   const [products, setProducts] = useState<ProductType[]>(initialProducts ?? []);
   const [totalCount, setTotalCount] = useState<number>(initialTotal ?? initialProducts?.length ?? 0);
   const [page, setPage] = useState<number>(1);
@@ -43,7 +52,7 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
 
   // Filtros
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory ?? "all");
   const [selectedSize, setSelectedSize] = useState<string>("all");
   const [selectedColor, setSelectedColor] = useState<string>("all");
   const [selectedModel, setSelectedModel] = useState<string>("all");
@@ -59,9 +68,9 @@ export default function ProductsClient({ initialProducts, totalCount: initialTot
     if (typeof window !== "undefined") {
       setPathname(window.location.pathname);
       const params = new URLSearchParams(window.location.search);
-      const q = params.get("q") || params.get("model") || "";
+      const q = params.get("q") || params.get("search") || params.get("model") || "";
       setSearchTerm(q);
-      setSelectedCategory(params.get("category") || "all");
+      setSelectedCategory(params.get("category") || initialCategory || "all");
       setSelectedSize(params.get("size") || "all");
       setSelectedColor(params.get("color") || "all");
       setSelectedModel(params.get("model") || "all");

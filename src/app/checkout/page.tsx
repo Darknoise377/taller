@@ -7,7 +7,6 @@ import React, {
   FormEvent,
   useMemo, // ✨ AÑADIDO: Para calcular totales dinámicos
 } from 'react';
-import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -610,10 +609,6 @@ const CheckoutPage: React.FC = () => {
 
   return (
     <>
-      <Head>
-        <title>Finalizar Compra - TALLER DE MOTOS A&amp;R</title>
-      </Head>
-
       <main className="bg-gray-50 dark:bg-[#070617] min-h-screen">
         <div className="container mx-auto px-4 py-10 md:py-16">
           <motion.h1

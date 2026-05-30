@@ -15,6 +15,7 @@ import ClientOnlyWidgets from '@/components/ClientOnlyWidgets';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from "./theme-provider";
 import { getBaseUrl, getBaseUrlAsUrl } from "@/lib/site";
+import { SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from "@/lib/seo/brand";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -24,7 +25,7 @@ const baseUrl = getBaseUrl();
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "AutoRepair",
-  name: "Almacén y Taller Motoservicio A&R",
+  name: SITE_NAME,
   url: baseUrl,
   logo: `${baseUrl}/logo.png`,
   image: `${baseUrl}/logo.png`,
@@ -66,23 +67,25 @@ const organizationJsonLd = {
 const websiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  name: "Almacén y Taller Motoservicio A&R",
+  name: SITE_NAME,
   url: baseUrl,
   inLanguage: "es-CO",
   description: "Repuestos para motos, servicio técnico especializado y accesorios. Atendemos todas las marcas en La Ceja, Antioquia.",
   potentialAction: {
     "@type": "SearchAction",
-    target: `${baseUrl}/products?search={search_term_string}`,
+    target: `${baseUrl}/products?q={search_term_string}`,
     "query-input": "required name=search_term_string",
   },
 };
 
 export const metadata: Metadata = {
   metadataBase,
-  title: "Almacén y Taller Motoservicio A&R | Repuestos y Servicio Técnico",
-  description:
-    "Venta de repuestos originales y genéricos para motos. Servicio técnico especializado, mantenimiento preventivo y correctivo. Ubicados en La Ceja, Antioquia. WhatsApp: 301 527 1104",
-  keywords: ["repuestos motos", "taller motos La Ceja", "servicio técnico motos", "accesorios motos", "mantenimiento motos Antioquia"],
+  title: {
+    default: `${SITE_NAME} | Repuestos y Servicio Técnico`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
   alternates: {
     canonical: "/",
   },
@@ -97,25 +100,23 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_CO",
-    siteName: "Almacén y Taller Motoservicio A&R",
+    siteName: SITE_NAME,
     url: "/",
-    title: "Almacén y Taller Motoservicio A&R | Repuestos y Servicio Técnico",
-    description:
-      "Repuestos para todas las marcas de motos y servicio técnico especializado en La Ceja, Antioquia. Calidad garantizada y precios justos.",
+    title: `${SITE_NAME} | Repuestos y Servicio Técnico`,
+    description: SITE_DESCRIPTION,
     images: [
       {
         url: `${baseUrl}/logo.png`,
         width: 800,
         height: 600,
-        alt: "Almacén y Taller Motoservicio A&R",
+        alt: SITE_NAME,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Almacén y Taller Motoservicio A&R | Repuestos y Servicio Técnico",
-    description:
-      "Repuestos para todas las marcas de motos y servicio técnico especializado en La Ceja, Antioquia. Calidad garantizada y precios justos.",
+    title: `${SITE_NAME} | Repuestos y Servicio Técnico`,
+    description: SITE_DESCRIPTION,
     images: [`${baseUrl}/logo.png`],
   },
 };

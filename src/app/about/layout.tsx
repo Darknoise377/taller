@@ -4,31 +4,19 @@ import React from 'react';
 import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 
-// Metadata específica para la página "Sobre Nosotros"
+import { SITE_NAME } from '@/lib/seo/brand';
+
 export const metadata: Metadata = {
-  title: 'Sobre Nosotros - TALLER DE MOTOS A&R',
+  title: 'Sobre nosotros',
   description:
-    'Conoce la historia, misión y valores de TALLER DE MOTOS A&R en Colombia. Repuestos y accesorios para moto con compra clara y confiable.',
-  alternates: {
-    canonical: '/about',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+    'Negocio familiar con más de 15 años de experiencia en motos. Servicio técnico especializado y venta de repuestos para todas las marcas en La Ceja, Antioquia.',
+  alternates: { canonical: '/about' },
   openGraph: {
-    title: 'Sobre Nosotros - TALLER DE MOTOS A&R',
-    description:
-      'Conoce la historia, misión y valores de TALLER DE MOTOS A&R en Colombia. Repuestos y accesorios para moto con compra clara y confiable.',
+    title: `Sobre nosotros | ${SITE_NAME}`,
+    description: 'Conoce nuestra historia, misión y compromiso con el servicio técnico de motos en La Ceja, Antioquia.',
     url: '/about',
     type: 'website',
     locale: 'es_CO',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Sobre Nosotros - TALLER DE MOTOS A&R',
-    description:
-      'Conoce la historia, misión y valores de TALLER DE MOTOS A&R en Colombia.',
   },
 };
 

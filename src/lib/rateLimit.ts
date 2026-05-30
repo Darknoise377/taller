@@ -27,6 +27,21 @@ type RateLimitResult = {
 // ─── Upstash initialisation (lazy, only when env vars present) ───────────────
 
 let upstashLimiterCache: Map<string, Ratelimit> | null = null;
+let warnedMissingUpstash = false;
+
+function isUpstashConfigured(): boolean {
+  return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+}
+
+function warnMissingUpstashOnce(): void {
+  if (warnedMissingUpstash || process.env.NODE_ENV !== 'production') return;
+  if (isUpstashConfigured()) return;
+  warnedMissingUpstash = true;
+  console.error(
+    '[rateLimit] CRITICAL: UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN are required in production. ' +
+      'Rate limits are per-instance only until Upstash is configured.',
+  );
+}
 
 function getUpstashLimiter(options: RateLimitOptions): Ratelimit | null {
   const url = process.env.UPSTASH_REDIS_REST_URL;
@@ -127,7 +142,14 @@ export async function rateLimit(req: Request, options: RateLimitOptions): Promis
     };
   }
 
-  // In-memory fallback (dev / missing env vars)
-  return inMemoryRateLimit(ip, options);
+  warnMissingUpstashOnce();
+
+  // In production without Upstash, apply a stricter per-instance cap.
+  const effectiveOptions =
+    process.env.NODE_ENV === 'production'
+      ? { ...options, max: Math.min(options.max, 5) }
+      : options;
+
+  return inMemoryRateLimit(ip, effectiveOptions);
 }
 

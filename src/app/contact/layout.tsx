@@ -3,32 +3,19 @@ import type { Metadata } from 'next';
 import React from 'react';
 import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import { SITE_NAME } from '@/lib/seo/brand';
 
-// Metadata específica para la página "Contacto"
 export const metadata: Metadata = {
-  title: 'Contacto - TALLER DE MOTOS A&R',
+  title: 'Contacto',
   description:
-    'Contacto de TALLER DE MOTOS A&R en Colombia. Soporte para pedidos, repuestos para moto, cambios y atención por canales oficiales.',
-  alternates: {
-    canonical: '/contact',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+    'Contáctanos por WhatsApp al 301 527 1104, por correo o visítanos en Calle 27 #14-29, La Ceja, Antioquia. Atención de lunes a sábado.',
+  alternates: { canonical: '/contact' },
   openGraph: {
-    title: 'Contacto - TALLER DE MOTOS A&R',
-    description:
-      'Soporte para pedidos, cambios, preguntas de producto y atención general en Colombia por canales oficiales.',
+    title: `Contacto | ${SITE_NAME}`,
+    description: 'Escríbenos por WhatsApp, correo o visítanos en La Ceja, Antioquia.',
     url: '/contact',
     type: 'website',
     locale: 'es_CO',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Contacto - TALLER DE MOTOS A&R',
-    description:
-      'Habla con nuestro equipo para pedidos, soporte y consultas de repuestos para moto.',
   },
 };
 

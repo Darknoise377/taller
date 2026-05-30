@@ -6,7 +6,12 @@ import { PaymentMethod } from '@prisma/client';
 import { getAIModel } from '@/lib/ai-provider';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import { PRODUCT_CATEGORIES } from '@/constants/productCategories';
-import { buildWompiIntegritySignature } from '@/lib/payments/wompi';
+import {
+  createOrderWithStock,
+  toAssistantOrderResult,
+  generateBrandedReferenceCode,
+  CreateOrderError,
+} from '@/lib/orders/createOrder';
 import type { UIMessage, ModelMessage } from 'ai';
 
 export const maxDuration = 30;
@@ -288,112 +293,25 @@ const createOrderTool: Tool<CreateOrderParams, CreateOrderResult> = {
   inputSchema: createOrderParamsSchema,
   execute: async (params: CreateOrderParams): Promise<CreateOrderResult> => {
     try {
-      // Consolidar productos
-      const quantitiesByProductId = new Map<string, number>();
-      for (const item of params.products) {
-        const id = item.productId.trim();
-        quantitiesByProductId.set(id, (quantitiesByProductId.get(id) ?? 0) + item.quantity);
-      }
-      const productIds = Array.from(quantitiesByProductId.keys());
-
-      const dbProducts = await prisma.product.findMany({
-        where: { id: { in: productIds } },
-        select: { id: true, price: true, stock: true, currency: true },
-      });
-
-      if (dbProducts.length !== productIds.length) {
-        return { success: false, error: 'Uno o más productos no existen en el catálogo.' };
-      }
-
-      let subtotal = 0;
-      for (const p of dbProducts) {
-        const qty = quantitiesByProductId.get(p.id) ?? 0;
-        if (p.stock < qty) {
-          return { success: false, error: `No hay suficiente stock para el producto ${p.id}.` };
-        }
-        subtotal += Number(p.price) * qty;
-      }
-
-      const total = Math.round(subtotal * 100) / 100;
-      const currency = dbProducts[0]?.currency ?? 'COP';
-
-      // Generar referenceCode único
-      const referenceCode = `AR-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-
       const paymentMethod = params.paymentMethod as PaymentMethod;
-
-      const order = await prisma.order.create({
-        data: {
-          referenceCode,
-          total,
-          currency,
-          paymentMethod,
-          customerName: params.customerName,
-          customerEmail: params.customerEmail,
-          address: params.address,
-          city: params.city,
-          department: params.department ?? null,
-          phone: params.phone,
-          status: 'PENDING',
-          products: {
-            create: Array.from(quantitiesByProductId.entries()).map(([productId, quantity]) => {
-              const p = dbProducts.find((d) => d.id === productId)!;
-              return { productId, quantity, unitPrice: Number(p.price) };
-            }),
-          },
-        },
+      const result = await createOrderWithStock({
+        products: params.products,
+        paymentMethod,
+        customerName: params.customerName,
+        customerEmail: params.customerEmail,
+        address: params.address,
+        city: params.city,
+        department: params.department,
+        phone: params.phone,
+        referenceCode: generateBrandedReferenceCode(),
+        sellerCode: 'ASISTENTE_VIRTUAL',
+        sendConfirmationEmail: true,
       });
-
-      const totalFormatted = new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: 0,
-      }).format(order.total);
-
-      // Generar link de pago Wompi si aplica
-      let wompiPaymentUrl: string | undefined;
-      if (paymentMethod === 'WOMPI') {
-        const publicKey = process.env.WOMPI_PUBLIC_KEY;
-        const integritySecret = process.env.WOMPI_INTEGRITY_SECRET;
-        const checkoutBase = process.env.WOMPI_CHECKOUT_URL ?? 'https://checkout.wompi.co/p/';
-        const baseUrl = BASE_URL;
-
-        if (publicKey && integritySecret) {
-          const amountInCents = Math.round(Number(order.total) * 100);
-          const redirectUrl = new URL('/checkout/response', baseUrl);
-          redirectUrl.searchParams.set('referenceCode', order.referenceCode);
-          redirectUrl.searchParams.set('provider', 'wompi');
-
-          const integrity = buildWompiIntegritySignature({
-            reference: order.referenceCode,
-            amountInCents,
-            currency,
-            integritySecret,
-          });
-
-          const checkoutUrl = new URL(checkoutBase);
-          checkoutUrl.searchParams.set('public-key', publicKey);
-          checkoutUrl.searchParams.set('currency', currency);
-          checkoutUrl.searchParams.set('amount-in-cents', String(amountInCents));
-          checkoutUrl.searchParams.set('reference', order.referenceCode);
-          checkoutUrl.searchParams.set('redirect-url', redirectUrl.toString());
-          checkoutUrl.searchParams.set('signature:integrity', integrity);
-          checkoutUrl.searchParams.set('customer-data:email', order.customerEmail);
-          checkoutUrl.searchParams.set('customer-data:full-name', order.customerName);
-          checkoutUrl.searchParams.set('customer-data:phone-number', order.phone);
-
-          wompiPaymentUrl = checkoutUrl.toString();
-        }
-      }
-
-      return {
-        success: true,
-        referenceCode: order.referenceCode,
-        total: totalFormatted,
-        paymentMethod: paymentMethod === 'WOMPI' ? 'Pago online (Wompi)' : 'Contraentrega',
-        wompiPaymentUrl,
-      };
+      return toAssistantOrderResult(result, paymentMethod);
     } catch (err) {
+      if (err instanceof CreateOrderError) {
+        return { success: false, error: err.message };
+      }
       console.error('[createOrder tool]', err);
       return { success: false, error: 'No se pudo crear la orden. Intenta de nuevo.' };
     }
@@ -402,7 +320,7 @@ const createOrderTool: Tool<CreateOrderParams, CreateOrderResult> = {
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
-  const rl = await rateLimit(req, { keyPrefix: 'chat', windowMs: 60_000, max: 20 });
+  const rl = await rateLimit(req, { keyPrefix: 'chat', windowMs: 60_000, max: 12 });
   if (!rl.ok) {
     return new Response(
       JSON.stringify({ error: 'Demasiadas solicitudes. Intenta de nuevo en unos segundos.' }),

@@ -7,6 +7,7 @@ import type { Product } from "@/types/product";
 import { cache } from "react";
 import Link from "next/link";
 import { getBaseUrl } from "@/lib/site";
+import { SITE_NAME } from "@/lib/seo/brand";
 import { getProductCategoryLabel, isProductCategory } from "@/constants/productCategories";
 
 // La interfaz sigue siendo la misma
@@ -31,6 +32,8 @@ const getProductById = cache(async (id: string) => {
       sizes: true,
       colors: true,
       stock: true,
+      sku: true,
+      brand: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -125,12 +128,12 @@ export async function generateMetadata(
     title: product.name,
     description,
     alternates: {
-      canonical: productUrl,
+      canonical: `/products/${product.id}`,
     },
     openGraph: {
       title: product.name,
       description,
-      url: productUrl,
+      url: `/products/${product.id}`,
       type: "website",
       images: [
         {
@@ -188,14 +191,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   if (!productRaw) return notFound();
 
-  // Normalizamos los datos para que coincidan con la interfaz 'Product' del frontend
   const product: Product = {
-    ...productRaw,
+    id: productRaw.id,
+    name: productRaw.name,
     description: productRaw.description ?? undefined,
+    price: productRaw.price,
     imageUrl: productRaw.imageUrl ?? undefined,
-    currency: (productRaw.currency || "COP") as "USD" | "EUR" | "COP",
+    images: productRaw.images ?? [],
+    currency: (productRaw.currency || 'COP') as 'USD' | 'EUR' | 'COP',
     sizes: productRaw.sizes || [],
-    // Convertimos las fechas a string para serialización
+    colors: productRaw.colors || [],
+    stock: productRaw.stock,
     createdAt: productRaw.createdAt.toISOString(),
     updatedAt: productRaw.updatedAt.toISOString(),
     category: (isProductCategory(productRaw.category) ? productRaw.category : 'accesorios') as Product['category'],
@@ -234,11 +240,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
     name: product.name,
     image: imageUrls,
     description: product.description ?? `Compra ${product.name} al mejor precio en nuestra tienda.`,
-    sku: String(product.id),
+    sku: productRaw.sku?.trim() || product.id,
+    ...(productRaw.sku?.trim() ? { mpn: productRaw.sku.trim() } : {}),
     category: getProductCategoryLabel(product.category),
     brand: {
       "@type": "Brand",
-      name: "TALLER DE MOTOS A&R",
+      name: productRaw.brand?.trim() || SITE_NAME,
     },
     offers: {
       "@type": "Offer",
@@ -252,7 +259,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           : "https://schema.org/OutOfStock",
       seller: {
         "@type": "Organization",
-        name: "TALLER DE MOTOS A&R",
+        name: SITE_NAME,
       },
     },
     additionalProperty: [
@@ -294,7 +301,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         "@type": "ListItem",
         position: 3,
         name: getProductCategoryLabel(product.category),
-        item: `${baseUrl}/products?category=${product.category}`,
+        item: `${baseUrl}/products/category/${product.category}`,
       },
       {
         "@type": "ListItem",

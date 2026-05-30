@@ -1,14 +1,5 @@
-﻿import type { Metadata } from "next";
-import Link from "next/link";
+﻿import Link from "next/link";
 import { ShieldCheckIcon, LockClosedIcon } from "@heroicons/react/24/outline";
-
-export const metadata: Metadata = {
-  title: "Política de Privacidad | Almacén y Taller Motoservicio A&R",
-  description:
-    "Lee nuestra política de privacidad y conoce cómo recopilamos, usamos y protegemos tu información personal en nuestra tienda de repuestos.",
-  alternates: { canonical: "/privacy" },
-  robots: { index: false, follow: true },
-};
 
 const LAST_UPDATED = "19 de enero de 2026";
 

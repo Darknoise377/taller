@@ -445,7 +445,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
           </li>
           <li aria-hidden="true" className="mx-0.5">/</li>
           <li>
-            <Link href={`/products?category=${product.category}`} className="capitalize hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+            <Link href={`/products/category/${product.category}`} className="capitalize hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
               {getProductCategoryLabel(product.category)}
             </Link>
           </li>
@@ -476,7 +476,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
             {/* Chip de categoría + botón compartir */}
             <div className="flex items-center justify-between">
               <Link
-                href={`/products?category=${product.category}`}
+                href={`/products/category/${product.category}`}
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0A2A66]/8 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-bold uppercase tracking-wide hover:bg-[#0A2A66]/15 transition-colors"
               >
                 {getProductCategoryLabel(product.category)}

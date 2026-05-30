@@ -4,11 +4,34 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import type { UIMessage } from "ai";
+import { CSRF_COOKIE_NAME, CSRF_HEADER_NAME } from "@/lib/csrf";
 import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 
 const STORAGE_KEY = "ar-chat-messages";
 const MAX_STORED_MESSAGES = 40; // keep last 40 to avoid bloat
+
+function readCsrfCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(`${CSRF_COOKIE_NAME}=`));
+  return match ? (match.split("=")[1] ?? null) : null;
+}
+
+async function getCsrfHeaderValue(): Promise<string | null> {
+  let token = readCsrfCookie();
+  if (!token) {
+    try {
+      const res = await fetch("/api/csrf");
+      const data = (await res.json()) as { csrfToken?: string };
+      token = data.csrfToken ?? null;
+    } catch {
+      return null;
+    }
+  }
+  return token;
+}
 
 function loadStoredMessages(): UIMessage[] {
   if (typeof window === "undefined") return [];
@@ -152,8 +175,21 @@ export default function ChatWidget() {
   const pathname = usePathname();
   const isProductDetail = !!pathname?.match(/^\/products\/[^/]+$/);
 
+  useEffect(() => {
+    if (!readCsrfCookie()) {
+      fetch("/api/csrf").catch(() => undefined);
+    }
+  }, []);
+
   const { messages, sendMessage, stop, status, setMessages } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+      headers: async (): Promise<Record<string, string>> => {
+        const token = await getCsrfHeaderValue();
+        if (!token) return {};
+        return { [CSRF_HEADER_NAME]: token };
+      },
+    }),
     messages: initialMessages,
     onFinish: () => {
       if (!open) setHasNewMessage(true);

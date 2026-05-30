@@ -4,30 +4,19 @@ import React from 'react';
 import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 
-// Metadata específica para la página "Política de Privacidad"
+import { SITE_NAME } from '@/lib/seo/brand';
+
 export const metadata: Metadata = {
-  title: 'Política de Privacidad - TALLER DE MOTOS A&R',
+  title: 'Política de privacidad',
   description:
-    'Política de Privacidad de TALLER DE MOTOS A&R: cómo recopilamos, usamos y protegemos tus datos personales al navegar o comprar en Colombia.',
-  alternates: {
-    canonical: '/privacy',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+    `Cómo recopilamos, usamos y protegemos tus datos personales al navegar o comprar en ${SITE_NAME}.`,
+  alternates: { canonical: '/privacy' },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: 'Política de Privacidad - TALLER DE MOTOS A&R',
-    description:
-      'Cómo recopilamos, usamos y protegemos tus datos al navegar o comprar en TALLER DE MOTOS A&R.',
+    title: `Política de privacidad | ${SITE_NAME}`,
     url: '/privacy',
     type: 'website',
     locale: 'es_CO',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Política de Privacidad - TALLER DE MOTOS A&R',
-    description: 'Información clara sobre tratamiento de datos personales y privacidad en nuestra tienda.',
   },
 };
 

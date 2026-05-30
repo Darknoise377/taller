@@ -15,6 +15,7 @@ export interface OrderCreatePayload {
   postalCode?: string;
   cedula?: string;
   products: { productId: string; quantity: number }[];
+  combos?: { comboId: string; quantity: number; unitPrice?: number }[];
   sellerId?: string;
   promoCodeApplied?: string;
   status?: OrderStatus;

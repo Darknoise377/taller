@@ -4,30 +4,19 @@ import React from 'react';
 import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 
-// Metadata específica para la página "Términos y Condiciones"
+import { SITE_NAME } from '@/lib/seo/brand';
+
 export const metadata: Metadata = {
-  title: 'Términos y Condiciones - TALLER DE MOTOS A&R',
+  title: 'Términos y condiciones',
   description:
-    'Términos y Condiciones de TALLER DE MOTOS A&R en Colombia: reglas de uso, compras, pagos, envíos, devoluciones y limitaciones aplicables.',
-  alternates: {
-    canonical: '/terms',
-  },
-  robots: {
-    index: true,
-    follow: true,
-  },
+    `Reglas de uso, compras, pagos, envíos y devoluciones de ${SITE_NAME} en Colombia.`,
+  alternates: { canonical: '/terms' },
+  robots: { index: true, follow: true },
   openGraph: {
-    title: 'Términos y Condiciones - TALLER DE MOTOS A&R',
-    description:
-      'Reglas de uso del sitio, compras, pagos, envíos, devoluciones y limitaciones aplicables en Colombia.',
+    title: `Términos y condiciones | ${SITE_NAME}`,
     url: '/terms',
     type: 'website',
     locale: 'es_CO',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Términos y Condiciones - TALLER DE MOTOS A&R',
-    description: 'Consulta condiciones legales, pagos, envíos y devoluciones de nuestra tienda online.',
   },
 };
 

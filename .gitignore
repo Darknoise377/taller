@@ -46,6 +46,7 @@ next-env.d.ts
 
 # Local secrets & temp artifacts (ignored to avoid leaking credentials)
 admin_cookies.txt
+cookies.txt
 scripts/create-product-test.ps1
 .eslintcache
 

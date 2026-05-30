@@ -6,8 +6,12 @@ import type { Tool } from '@ai-sdk/provider-utils';
 import { z } from 'zod';
 import { getAIModel } from '@/lib/ai-provider';
 import { PRODUCT_CATEGORIES } from '@/constants/productCategories';
-import { buildWompiIntegritySignature } from '@/lib/payments/wompi';
-import { sendOrderCreatedEmail } from '@/lib/email/orderEmails';
+import {
+  createOrderWithStock,
+  toAssistantOrderResult,
+  generateBrandedReferenceCode,
+  CreateOrderError,
+} from '@/lib/orders/createOrder';
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_API_TOKEN;
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
@@ -156,133 +160,22 @@ export function makeCreateOrderTool(sessionId: number): Tool<CreateOrderParams, 
   inputSchema: createOrderParamsSchema,
   execute: async (params: CreateOrderParams): Promise<CreateOrderResult> => {
     try {
-      const quantitiesByProductId = new Map<string, number>();
-      for (const item of params.products) {
-        const id = item.productId.trim();
-        quantitiesByProductId.set(id, (quantitiesByProductId.get(id) ?? 0) + item.quantity);
-      }
-      const productIds = Array.from(quantitiesByProductId.keys());
-
-      const dbProducts = await prisma.product.findMany({
-        where: { id: { in: productIds } },
-        select: { id: true, name: true, price: true, stock: true, currency: true },
-      });
-
-      if (dbProducts.length !== productIds.length) {
-        return { success: false, error: 'Uno o más productos no existen en el catálogo.' };
-      }
-
-      let subtotal = 0;
-      for (const p of dbProducts) {
-        const qty = quantitiesByProductId.get(p.id) ?? 0;
-        if (p.stock < qty) {
-          return { success: false, error: `No hay suficiente stock para el producto ${p.id}.` };
-        }
-        subtotal += Number(p.price) * qty;
-      }
-
-      const total = Math.round(subtotal * 100) / 100;
-      const currency = dbProducts[0]?.currency ?? 'COP';
-      const referenceCode = `AR-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
       const paymentMethod = params.paymentMethod as PaymentMethod;
-
-      // Attribute the order to the WhatsApp AI seller record.
-      // Requires a Seller row with code='ASISTENTE_VIRTUAL' in the DB.
-      // If it doesn't exist yet the order is created normally (graceful fallback).
-      const aiSeller = await prisma.seller.findUnique({
-        where: { code: 'ASISTENTE_VIRTUAL' },
-        select: { id: true },
+      const result = await createOrderWithStock({
+        products: params.products,
+        paymentMethod,
+        customerName: params.customerName,
+        customerEmail: params.customerEmail,
+        cedula: params.cedula,
+        address: params.address,
+        city: params.city,
+        department: params.department,
+        phone: params.phone,
+        referenceCode: generateBrandedReferenceCode(),
+        sellerCode: 'ASISTENTE_VIRTUAL',
+        sendConfirmationEmail: true,
       });
 
-      const order = await prisma.order.create({
-        data: {
-          referenceCode,
-          total,
-          currency,
-          paymentMethod,
-          customerName: params.customerName,
-          customerEmail: params.customerEmail,
-          cedula: params.cedula,
-          address: params.address,
-          city: params.city,
-          department: params.department ?? null,
-          phone: params.phone,
-          status: 'PENDING',
-          sellerId: aiSeller?.id ?? null,
-          products: {
-            create: Array.from(quantitiesByProductId.entries()).map(([productId, quantity]) => {
-              const p = dbProducts.find((d) => d.id === productId)!;
-              return { productId, quantity, unitPrice: Number(p.price) };
-            }),
-          },
-        },
-      });
-
-      const totalFormatted = new Intl.NumberFormat('es-CO', {
-        style: 'currency',
-        currency,
-        minimumFractionDigits: 0,
-      }).format(order.total);
-
-      let wompiPaymentUrl: string | undefined;
-      if (paymentMethod === 'WOMPI') {
-        const publicKey = process.env.WOMPI_PUBLIC_KEY;
-        const integritySecret = process.env.WOMPI_INTEGRITY_SECRET;
-        const checkoutBase = process.env.WOMPI_CHECKOUT_URL ?? 'https://checkout.wompi.co/p/';
-
-        if (publicKey && integritySecret) {
-          const amountInCents = Math.round(Number(order.total) * 100);
-          const redirectUrl = new URL('/checkout/response', BASE_URL);
-          redirectUrl.searchParams.set('referenceCode', order.referenceCode);
-          redirectUrl.searchParams.set('provider', 'wompi');
-
-          const integrity = buildWompiIntegritySignature({
-            reference: order.referenceCode,
-            amountInCents,
-            currency,
-            integritySecret,
-          });
-
-          const checkoutUrl = new URL(checkoutBase);
-          checkoutUrl.searchParams.set('public-key', publicKey);
-          checkoutUrl.searchParams.set('currency', currency);
-          checkoutUrl.searchParams.set('amount-in-cents', String(amountInCents));
-          checkoutUrl.searchParams.set('reference', order.referenceCode);
-          checkoutUrl.searchParams.set('redirect-url', redirectUrl.toString());
-          checkoutUrl.searchParams.set('signature:integrity', integrity);
-          checkoutUrl.searchParams.set('customer-data:email', order.customerEmail);
-          checkoutUrl.searchParams.set('customer-data:full-name', order.customerName);
-          checkoutUrl.searchParams.set('customer-data:phone-number', order.phone);
-
-          wompiPaymentUrl = checkoutUrl.toString();
-        }
-      }
-
-      // Send confirmation email (non-blocking — order is already created if this fails)
-      try {
-        await sendOrderCreatedEmail({
-          referenceCode: order.referenceCode,
-          customerName: order.customerName,
-          customerEmail: order.customerEmail,
-          total: order.total,
-          currency,
-          paymentMethod: order.paymentMethod,
-          status: order.status,
-          products: Array.from(quantitiesByProductId.entries()).map(([productId, quantity]) => {
-            const p = dbProducts.find((d) => d.id === productId)!;
-            return { quantity, product: { name: p.name, price: Number(p.price) } };
-          }),
-          address: order.address,
-          city: order.city,
-          department: order.department ?? undefined,
-          phone: order.phone,
-        });
-      } catch (mailError) {
-        console.error('[createOrder WA] Email confirmation failed:', mailError);
-      }
-
-      // Persist customer profile for future sessions — so returning customers
-      // don't have to re-enter their data. Stored as a 'profile' role message.
       await prisma.chatMessage.create({
         data: {
           sessionId,
@@ -299,14 +192,11 @@ export function makeCreateOrderTool(sessionId: number): Tool<CreateOrderParams, 
         },
       });
 
-      return {
-        success: true,
-        referenceCode: order.referenceCode,
-        total: totalFormatted,
-        paymentMethod: paymentMethod === 'WOMPI' ? 'Pago online (Wompi)' : 'Contraentrega',
-        wompiPaymentUrl,
-      };
+      return toAssistantOrderResult(result, paymentMethod);
     } catch (err) {
+      if (err instanceof CreateOrderError) {
+        return { success: false, error: err.message };
+      }
       console.error('[createOrder WA]', err);
       return { success: false, error: 'No se pudo crear la orden. Intenta de nuevo.' };
     }

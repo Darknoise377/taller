@@ -30,6 +30,51 @@ export function buildWompiIntegritySignature(input: {
   return crypto.createHash('sha256').update(data).digest('hex');
 }
 
+const DEFAULT_WOMPI_CHECKOUT_URL = 'https://checkout.wompi.co/p/';
+
+/** Builds a Wompi checkout URL for an order, or undefined if credentials are missing. */
+export function buildWompiCheckoutUrl(order: {
+  referenceCode: string;
+  total: number;
+  currency: string;
+  customerEmail: string;
+  customerName: string;
+  phone: string;
+  baseUrl?: string;
+}): string | undefined {
+  const publicKey = process.env.WOMPI_PUBLIC_KEY;
+  const integritySecret = process.env.WOMPI_INTEGRITY_SECRET;
+  if (!publicKey || !integritySecret) return undefined;
+
+  const baseUrl = order.baseUrl ?? process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
+  const checkoutBase = process.env.WOMPI_CHECKOUT_URL ?? DEFAULT_WOMPI_CHECKOUT_URL;
+  const amountInCents = Math.round(Number(order.total) * 100);
+
+  const redirectUrl = new URL('/checkout/response', baseUrl);
+  redirectUrl.searchParams.set('referenceCode', order.referenceCode);
+  redirectUrl.searchParams.set('provider', 'wompi');
+
+  const integrity = buildWompiIntegritySignature({
+    reference: order.referenceCode,
+    amountInCents,
+    currency: order.currency,
+    integritySecret,
+  });
+
+  const checkoutUrl = new URL(checkoutBase);
+  checkoutUrl.searchParams.set('public-key', publicKey);
+  checkoutUrl.searchParams.set('currency', order.currency);
+  checkoutUrl.searchParams.set('amount-in-cents', String(amountInCents));
+  checkoutUrl.searchParams.set('reference', order.referenceCode);
+  checkoutUrl.searchParams.set('redirect-url', redirectUrl.toString());
+  checkoutUrl.searchParams.set('signature:integrity', integrity);
+  checkoutUrl.searchParams.set('customer-data:email', order.customerEmail);
+  checkoutUrl.searchParams.set('customer-data:full-name', order.customerName);
+  checkoutUrl.searchParams.set('customer-data:phone-number', order.phone);
+
+  return checkoutUrl.toString();
+}
+
 function getValueByPath(source: unknown, path: string): string {
   const resolved = path.split('.').reduce<unknown>((acc, key) => {
     if (!acc || typeof acc !== 'object') return undefined;

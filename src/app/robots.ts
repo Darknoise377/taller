@@ -1,5 +1,5 @@
-import type { MetadataRoute } from "next";
-import { getBaseUrl } from "@/lib/site";
+import type { MetadataRoute } from 'next';
+import { getBaseUrl } from '@/lib/site';
 
 export default function robots(): MetadataRoute.Robots {
   const baseUrl = getBaseUrl();
@@ -7,9 +7,9 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: "*",
-        allow: ["/", "/products", "/products/", "/about", "/contact", "/privacy", "/terms"],
-        disallow: ["/admin", "/checkout", "/cuenta", "/api/"],
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/admin', '/checkout', '/cuenta', '/api/'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

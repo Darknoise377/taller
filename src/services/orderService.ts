@@ -33,12 +33,15 @@ export const orderService = {
     // El payload ya viene casi listo, solo normalizamos los productos
     const payload = {
       ...orderData,
-      status: orderData.status ?? 'PENDING', // Valor por defecto
+      status: orderData.status ?? 'PENDING',
       products: orderData.products.map((p) => ({
         productId: String(p.productId),
         quantity: p.quantity,
       })),
-      // El status se define por defecto en la DB
+      combos: (orderData.combos ?? []).map((c) => ({
+        comboId: String(c.comboId),
+        quantity: c.quantity,
+      })),
     };
     // Asegurarnos de que el email no tenga espacios al inicio/fin
     const mutablePayload = payload as Record<string, unknown>;
