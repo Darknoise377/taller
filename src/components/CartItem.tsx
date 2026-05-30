@@ -43,7 +43,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
 
       {/* Detalles */}
       <div className="flex-1 min-w-0">
-        <Link href={`/products/${item.product.id}`}>
+        <Link href={`/products/${item.product.slug ?? item.product.id}`}>
           <h4 className="text-slate-900 dark:text-slate-100 text-sm font-semibold line-clamp-2 hover:text-[#0A2A66] dark:hover:text-[#2E5FA7] transition-colors duration-200">
             {item.product.name}
           </h4>

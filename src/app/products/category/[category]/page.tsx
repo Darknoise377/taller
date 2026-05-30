@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ProductsClient from '../../products-client';
 import { getCatalogProducts } from '@/lib/seo/queries';
-import { getProductCategoryLabel, isProductCategory } from '@/constants/productCategories';
+import { getProductCategoryLabel, isProductCategory, getProductCategoryDescription } from '@/constants/productCategories';
 import { getBaseUrl } from '@/lib/site';
 import { SITE_NAME } from '@/lib/seo/brand';
 
@@ -64,6 +64,8 @@ export default async function ProductCategoryPage({ params }: PageProps) {
     },
   };
 
+  const categoryDescription = getProductCategoryDescription(category);
+
   return (
     <>
       <script
@@ -72,11 +74,16 @@ export default async function ProductCategoryPage({ params }: PageProps) {
       />
       <header className="relative overflow-hidden bg-gradient-to-br from-[#050F2C] via-[#0A2A66] to-[#0d3580] py-4 sm:py-7 md:py-10 px-4">
         <div className="relative max-w-7xl mx-auto z-10">
-          <p className="text-[#7BA4D9] text-xs font-bold uppercase tracking-widest mb-2">Categoría</p>
+          <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#7BA4D9' }}>Categoría</p>
           <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">{label}</h1>
           <p className="mt-2 text-[#9DC0E8] text-sm max-w-xl">
             {totalCount} productos disponibles · Envíos a Colombia
           </p>
+          {categoryDescription && (
+            <p className="mt-3 text-[#C8DCEF] text-sm max-w-xl leading-relaxed">
+              {categoryDescription}
+            </p>
+          )}
         </div>
       </header>
       <ProductsClient

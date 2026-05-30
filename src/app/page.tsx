@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     url: '/',
     type: 'website',
     locale: 'es_CO',
-    images: [{ url: '/logo.png', width: 800, height: 600, alt: SITE_NAME }],
+    images: [{ url: '/og-home.jpg', width: 1200, height: 630, alt: `${SITE_NAME} | Repuestos y servicio técnico en La Ceja` }],
   },
 };
 

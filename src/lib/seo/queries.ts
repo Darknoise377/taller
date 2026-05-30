@@ -41,6 +41,7 @@ export async function getCategoriesForSeo(): Promise<CategoryItem[]> {
 
 export type HomeSliderProduct = {
   id: string;
+  slug?: string;
   name: string;
   description?: string;
   images?: string[];
@@ -51,12 +52,13 @@ export async function getHomeSliderProducts(): Promise<HomeSliderProduct[]> {
     const rows = await prisma.product.findMany({
       orderBy: { createdAt: 'desc' },
       take: 3,
-      select: { id: true, name: true, description: true, images: true },
+      select: { id: true, slug: true, name: true, description: true, images: true },
     });
     return rows
       .filter((p) => p.images && p.images.length > 0)
       .map((p) => ({
         id: p.id,
+        slug: p.slug ?? undefined,
         name: p.name,
         description: p.description ?? undefined,
         images: p.images,

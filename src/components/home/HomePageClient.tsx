@@ -34,6 +34,7 @@ import type { Combo } from '@/types/combo';
 // TIPOS DE DATOS
 interface SlideData {
   id: string;
+  slug?: string;
   name: string;
   description: string;
   images: string[];
@@ -505,7 +506,7 @@ function HeroSlider({ products, isLoading }: HeroSliderProps) {
     subtitle:
       (product.description?.substring(0, 80) || "") +
       (product.description?.length > 80 ? "..." : ""),
-    cta: { label: "Ver producto", href: `/products/${product.id}` },
+    cta: { label: "Ver producto", href: `/products/${product.slug ?? product.id}` },
     image: product.images?.[0] || makeProductPlaceholder(product.name),
   }));
 

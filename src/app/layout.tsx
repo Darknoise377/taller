@@ -109,7 +109,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: `${baseUrl}/logo.png`,
+        url: `${baseUrl}/og-home.jpg`,
         width: 1200,
         height: 630,
         alt: SITE_NAME,
@@ -120,7 +120,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: `${SITE_NAME} | Repuestos y Servicio Técnico`,
     description: SITE_DESCRIPTION,
-    images: [`${baseUrl}/logo.png`],
+    images: [`${baseUrl}/og-home.jpg`],
     creator: '@motoservicioayr',
     site: '@motoservicioayr',
   },
