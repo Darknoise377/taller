@@ -217,6 +217,7 @@ const searchProductsTool: Tool<SearchParams, SearchResult> = {
           category: true,
           stock: true,
           sku: true,
+          slug: true,
         },
         orderBy: { stock: 'desc' },
       });
@@ -243,7 +244,7 @@ const searchProductsTool: Tool<SearchParams, SearchResult> = {
           category: p.category as string,
           stock: p.stock,
           sku: p.sku ?? null,
-          url: `/products/${p.id}`,
+          url: `/products/${p.slug ?? p.id}`,
         })),
       };
     } catch {

@@ -21,6 +21,11 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       title: `${label} para moto`,
       description: `Compra ${label.toLowerCase()} para moto en Colombia. ${SITE_NAME}.`,
       alternates: { canonical: `/products/category/${category}` },
+      twitter: {
+        card: 'summary_large_image',
+        title: `${label} para moto | ${SITE_NAME}`,
+        description: `Catálogo de ${label.toLowerCase()} para moto en Colombia.`,
+      },
     };
   }
 
@@ -44,6 +49,11 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
       url: '/products',
       type: 'website',
       locale: 'es_CO',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Catálogo de repuestos y accesorios para moto | ${SITE_NAME}`,
+      description: SITE_DESCRIPTION,
     },
   };
 }
@@ -73,7 +83,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
       itemListElement: products.slice(0, 48).map((product, index) => ({
         '@type': 'ListItem',
         position: index + 1,
-        url: `${baseUrl}/products/${product.id}`,
+        url: `${baseUrl}/products/${product.slug ?? product.id}`,
         name: product.name,
       })),
     },

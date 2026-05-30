@@ -33,8 +33,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: 'website',
       locale: 'es_CO',
       images: image
-        ? [{ url: toAbsoluteImageUrl(image), alt: combo.name }]
+        ? [{ url: toAbsoluteImageUrl(image), width: 1200, height: 630, alt: combo.name }]
         : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: combo.name,
+      description,
+      images: image ? [toAbsoluteImageUrl(image)] : undefined,
     },
   };
 }

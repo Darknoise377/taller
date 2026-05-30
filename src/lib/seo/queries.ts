@@ -78,6 +78,7 @@ function mapDbProductToClient(p: {
   sizes: string[];
   colors: string[];
   stock: number;
+  slug?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): Product {
@@ -93,6 +94,7 @@ function mapDbProductToClient(p: {
     sizes: (p.sizes ?? []) as Product['sizes'],
     colors: p.colors ?? [],
     stock: p.stock ?? 0,
+    slug: p.slug ?? undefined,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   };
@@ -132,6 +134,7 @@ export async function getFeaturedProductsForHome(limit = 8): Promise<Product[]> 
         sizes: true,
         colors: true,
         stock: true,
+        slug: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -302,6 +305,7 @@ export async function getCatalogProducts(options: {
           stock: true,
           createdAt: true,
           updatedAt: true,
+          slug: true,
         },
       }),
       prisma.product.count({ where: categoryFilter }),

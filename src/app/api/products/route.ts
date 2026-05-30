@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import { isProductCategory, PRODUCT_CATEGORIES } from '@/constants/productCategories';
 import { createAndStoreEmbedding } from '@/lib/embeddings';
+import { generateProductSlug } from '@/lib/seo/slug';
 
 function buildProductText(p: { name: string; description: string; sku?: string | null; tags?: string[]; diagramNumber?: string | null; category: string }): string {
   return [p.name, p.category, p.description, p.sku ? `SKU: ${p.sku}` : '', (p.tags ?? []).join(', '), p.diagramNumber ? `Diagrama: ${p.diagramNumber}` : ''].filter(Boolean).join(' | ');
@@ -180,6 +181,12 @@ export async function POST(req: Request) {
     if (diagramNumber !== undefined) data.diagramNumber = diagramNumber ?? null;
 
     const product = await prisma.product.create({ data });
+
+    // Generate SEO slug asynchronously after we have the product ID
+    void prisma.product.update({
+      where: { id: product.id },
+      data: { slug: generateProductSlug(product.name, product.id) },
+    }).catch((e) => console.error('[slug] product create:', e));
 
     // Indexar embedding de forma asíncrona (no bloquea la respuesta)
     void createAndStoreEmbedding({

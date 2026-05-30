@@ -83,7 +83,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
     >
       {/* ── Imagen ──────────────────────────────── */}
       <Link
-        href={`/products/${product.id}`}
+        href={`/products/${product.slug ?? product.id}`}
         className="relative block overflow-hidden bg-slate-100 dark:bg-slate-800 aspect-square"
         tabIndex={-1}
         aria-hidden="true"
@@ -139,7 +139,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
       <div className="flex flex-col flex-1 p-3 sm:p-4 gap-2 sm:gap-3">
         {/* Nombre + precio */}
         <div>
-          <Link href={`/products/${product.id}`}>
+          <Link href={`/products/${product.slug ?? product.id}`}>
             <h3 className="font-bold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2 text-sm sm:text-base hover:text-[#0A2A66] dark:hover:text-[#2E5FA7] transition-colors">
               {product.name}
             </h3>

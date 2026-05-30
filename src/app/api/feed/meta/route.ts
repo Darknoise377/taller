@@ -41,6 +41,7 @@ export async function GET() {
       tags: true,
       stock: true,
       category: true,
+      slug: true,
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -61,7 +62,7 @@ export async function GET() {
         : p.tags?.[0]
           ? xml(p.tags[0])
           : 'Motoservicio A&R';
-      const productUrl = `${base}/products/${p.id}`;
+      const productUrl = `${base}/products/${p.slug ?? p.id}`;
       const priceFormatted = `${p.price.toFixed(2)} COP`;
 
       return `    <item>

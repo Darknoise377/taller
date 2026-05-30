@@ -30,6 +30,8 @@ model Product {
   sizes       String[]
   colors      String[]
   stock       Int
+  slug        String?        @unique
+
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 

@@ -1,8 +1,8 @@
-import { redirect } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
 
 export default function RepuestosPage() {
-  // Redirige a la página principal de productos para evitar duplicación
-  redirect('/products');
+  // Redirige permanentemente (308) para transferir link equity a la página principal de productos
+  permanentRedirect('/products');
 }

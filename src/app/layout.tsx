@@ -84,6 +84,9 @@ export const metadata: Metadata = {
     default: `${SITE_NAME} | Repuestos y Servicio Técnico`,
     template: `%s | ${SITE_NAME}`,
   },
+  verification: {
+    google: 'LrpGkdzMiwUUroB6f4C6m3xBPZRa749YcGknw0_Rvjo',
+  },
   description: SITE_DESCRIPTION,
   keywords: SITE_KEYWORDS,
   alternates: {
@@ -107,8 +110,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: `${baseUrl}/logo.png`,
-        width: 800,
-        height: 600,
+        width: 1200,
+        height: 630,
         alt: SITE_NAME,
       },
     ],
@@ -118,6 +121,8 @@ export const metadata: Metadata = {
     title: `${SITE_NAME} | Repuestos y Servicio Técnico`,
     description: SITE_DESCRIPTION,
     images: [`${baseUrl}/logo.png`],
+    creator: '@motoservicioayr',
+    site: '@motoservicioayr',
   },
 };
 

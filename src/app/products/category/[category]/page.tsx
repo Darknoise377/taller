@@ -29,6 +29,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       type: 'website',
       locale: 'es_CO',
     },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${label} para moto | ${SITE_NAME}`,
+      description: `Catálogo de ${label.toLowerCase()} para moto. Stock visible y envíos a Colombia.`,
+    },
   };
 }
 
@@ -53,7 +58,7 @@ export default async function ProductCategoryPage({ params }: PageProps) {
       itemListElement: products.slice(0, 48).map((product, index) => ({
         '@type': 'ListItem',
         position: index + 1,
-        url: `${baseUrl}/products/${product.id}`,
+        url: `${baseUrl}/products/${product.slug ?? product.id}`,
         name: product.name,
       })),
     },

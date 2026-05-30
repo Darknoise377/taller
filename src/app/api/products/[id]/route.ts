@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import { createAndStoreEmbedding } from '@/lib/embeddings';
+import { generateProductSlug } from '@/lib/seo/slug';
 
 function buildProductText(p: { name: string; description: string; sku?: string | null; tags?: string[]; diagramNumber?: string | null; category: string }): string {
   return [p.name, p.category, p.description, p.sku ? `SKU: ${p.sku}` : '', (p.tags ?? []).join(', '), p.diagramNumber ? `Diagrama: ${p.diagramNumber}` : ''].filter(Boolean).join(' | ');
@@ -89,6 +90,14 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
     // en entornos donde la migración aún no se aplicó.
     if (body.tags !== undefined) {
       updateData.tags = Array.isArray(body.tags) ? body.tags : existingProduct.tags;
+    }
+
+    // Backfill slug if the product doesn't have one yet
+    if (!existingProduct.slug) {
+      updateData.slug = generateProductSlug(
+        (body.name ?? existingProduct.name) as string,
+        existingProduct.id,
+      );
     }
 
     const updatedProduct = await prisma.product.update({

@@ -39,6 +39,7 @@ export interface Product {
   updatedAt?: string;
   // Opcionales para detalles extendidos
   sku?: string;
+  slug?: string;
   tags?: string[];
   diagramNumber?: string;
   rating?: number;

@@ -1,7 +1,7 @@
 ﻿// src/app/products/[id]/page.tsx
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import ProductDetailClient from "./ProductDetailClient";
 import type { Product } from "@/types/product";
 import { cache } from "react";
@@ -9,6 +9,7 @@ import Link from "next/link";
 import { getBaseUrl } from "@/lib/site";
 import { SITE_NAME } from "@/lib/seo/brand";
 import { getProductCategoryLabel, isProductCategory } from "@/constants/productCategories";
+import { isUUID } from "@/lib/seo/slug";
 
 // La interfaz sigue siendo la misma
 interface ProductPageProps {
@@ -17,27 +18,45 @@ interface ProductPageProps {
 
 export const revalidate = 60;
 
-const getProductById = cache(async (id: string) => {
-  return prisma.product.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      price: true,
-      currency: true,
-      imageUrl: true,
-      images: true,
-      category: true,
-      sizes: true,
-      colors: true,
-      stock: true,
-      sku: true,
-      brand: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-  });
+/** Pre-generate top 100 products (by stock) at build time */
+export async function generateStaticParams() {
+  try {
+    const products = await prisma.product.findMany({
+      select: { id: true, slug: true },
+      orderBy: { stock: 'desc' },
+      take: 100,
+    });
+    return products.map((p) => ({ id: p.slug ?? p.id }));
+  } catch {
+    return [];
+  }
+}
+
+const productSelect = {
+  id: true,
+  name: true,
+  description: true,
+  price: true,
+  currency: true,
+  imageUrl: true,
+  images: true,
+  category: true,
+  sizes: true,
+  colors: true,
+  stock: true,
+  sku: true,
+  brand: true,
+  slug: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+/** Looks up a product by slug (non-UUID) or by id (UUID). */
+const getProductBySlugOrId = cache(async (param: string) => {
+  if (isUUID(param)) {
+    return prisma.product.findUnique({ where: { id: param }, select: productSelect });
+  }
+  return prisma.product.findUnique({ where: { slug: param }, select: productSelect });
 });
 
 const getRelatedProducts = cache(async (category: string, excludeId: string) => {
@@ -59,6 +78,7 @@ const getRelatedProducts = cache(async (category: string, excludeId: string) => 
       sizes: true,
       colors: true,
       stock: true,
+      slug: true,
       createdAt: true,
       updatedAt: true,
     },
@@ -81,6 +101,19 @@ const getReviewStats = cache(async (productId: string) => {
   }
 });
 
+const getRecentReviews = cache(async (productId: string, limit = 5) => {
+  try {
+    return await prisma.review.findMany({
+      where: { productId, approved: true },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: { id: true, rating: true, comment: true, author: true, createdAt: true, verifiedPurchase: true },
+    });
+  } catch {
+    return [];
+  }
+});
+
 // ✅ Metadata dinámico para SEO
 export async function generateMetadata(
   { params }: ProductPageProps
@@ -94,9 +127,9 @@ export async function generateMetadata(
     };
   }
 
-  let product: Awaited<ReturnType<typeof getProductById>> = null;
+  let product: Awaited<ReturnType<typeof getProductBySlugOrId>> = null;
   try {
-    product = await getProductById(id);
+    product = await getProductBySlugOrId(id);
   } catch (err) {
     console.error("Error consultando producto (BD no disponible):", err);
     return {
@@ -123,17 +156,19 @@ export async function generateMetadata(
     ? firstImage
     : `${baseUrl}${firstImage.startsWith("/") ? "" : "/"}${firstImage}`;
 
+  const canonicalSlug = product.slug ?? product.id;
+
   return {
     title: product.name,
     description,
     alternates: {
-      canonical: `/products/${product.id}`,
+      canonical: `/products/${canonicalSlug}`,
     },
     openGraph: {
       title: product.name,
       description,
-      url: `/products/${product.id}`,
-      type: "website",
+      url: `/products/${canonicalSlug}`,
+      // type se define como "product" en `other` (valor no-estándar no soportado por el tipo TS de Next.js)
       images: [
         {
           url: ogImage,
@@ -149,6 +184,15 @@ export async function generateMetadata(
       description,
       images: [ogImage],
     },
+    // Meta tags de producto para Facebook / Google Shopping
+    other: {
+      "og:type": "product",
+      "product:price:amount": String(product.price),
+      "product:price:currency": product.currency ?? "COP",
+      "product:availability": product.stock > 0 ? "in stock" : "out of stock",
+      "product:condition": "new",
+      ...(product.sku?.trim() ? { "product:retailer_item_id": product.sku.trim() } : {}),
+    },
   };
 }
 
@@ -158,9 +202,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const id = String(idParam);
   if (!id) return notFound();
 
-  let productRaw: Awaited<ReturnType<typeof getProductById>> = null;
+  let productRaw: Awaited<ReturnType<typeof getProductBySlugOrId>> = null;
   try {
-    productRaw = await getProductById(id);
+    productRaw = await getProductBySlugOrId(id);
   } catch (err) {
     console.error("Error consultando producto (BD no disponible):", err);
     return (
@@ -190,6 +234,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   if (!productRaw) return notFound();
 
+  // 308 redirect: if accessed by UUID and product has a slug URL, redirect permanently
+  if (isUUID(id) && productRaw.slug) {
+    permanentRedirect(`/products/${productRaw.slug}`);
+  }
+
   const product: Product = {
     id: productRaw.id,
     name: productRaw.name,
@@ -201,6 +250,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     sizes: productRaw.sizes || [],
     colors: productRaw.colors || [],
     stock: productRaw.stock,
+    slug: productRaw.slug ?? undefined,
     createdAt: productRaw.createdAt.toISOString(),
     updatedAt: productRaw.updatedAt.toISOString(),
     category: (isProductCategory(productRaw.category) ? productRaw.category : 'accesorios') as Product['category'],
@@ -220,6 +270,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     imageUrl: p.imageUrl ?? undefined,
     currency: (p.currency || "COP") as "USD" | "EUR" | "COP",
     sizes: p.sizes || [],
+    slug: p.slug ?? undefined,
     // Convertimos también las fechas de los productos relacionados
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
@@ -227,10 +278,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
   }));
 
   const baseUrl = getBaseUrl();
-  const productUrl = `${baseUrl}/products/${product.id}`;
+  const canonicalSlug = product.slug ?? product.id;
+  const productUrl = `${baseUrl}/products/${canonicalSlug}`;
   const imageUrls = imagesToAbsoluteUrls(product.images, product.imageUrl, baseUrl);
 
-  const reviewStats = await getReviewStats(product.id);
+  const [reviewStats, recentReviews] = await Promise.all([
+    getReviewStats(product.id),
+    getRecentReviews(product.id),
+  ]);
 
   const productJsonLd = {
     "@context": "https://schema.org",
@@ -277,6 +332,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
         bestRating: 5,
         worstRating: 1,
       },
+    }),
+    ...(recentReviews.length > 0 && {
+      review: recentReviews.map((r) => ({
+        "@type": "Review",
+        author: { "@type": "Person", name: r.author },
+        datePublished: r.createdAt.toISOString().split('T')[0],
+        reviewBody: r.comment ?? '',
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: r.rating,
+          bestRating: 5,
+          worstRating: 1,
+        },
+      })),
     }),
   };
 

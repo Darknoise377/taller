@@ -233,7 +233,7 @@ export const searchProductsTool: Tool<SearchParams, SearchResult> = {
           ],
         },
         take: limit,
-        select: { id: true, name: true, price: true, currency: true, category: true, stock: true, sku: true },
+        select: { id: true, name: true, price: true, currency: true, category: true, stock: true, sku: true, slug: true },
         orderBy: { stock: 'desc' },
       });
 
@@ -251,7 +251,7 @@ export const searchProductsTool: Tool<SearchParams, SearchResult> = {
           category: p.category as string,
           stock: p.stock,
           sku: p.sku ?? null,
-          url: `${BASE_URL}/products/${p.id}`,
+          url: `${BASE_URL}/products/${p.slug ?? p.id}`,
         })),
       };
     } catch {
