@@ -4,72 +4,32 @@ import { getBaseUrl } from '@/lib/site';
 import { getComboSlugsForSitemap } from '@/lib/seo/queries';
 import { PRODUCT_CATEGORIES } from '@/constants/productCategories';
 
-const PRODUCTS_PER_SITEMAP = 500;
+export const revalidate = 3600; // regenerar cada hora
 
-/**
- * Next.js split-sitemap: devuelve los IDs disponibles.
- * id=0 → rutas estáticas + categorías + combos
- * id≥1 → productos paginados (500 por bloque)
- */
-export async function generateSitemaps() {
-  try {
-    const total = await prisma.product.count();
-    const productPages = Math.max(1, Math.ceil(total / PRODUCTS_PER_SITEMAP));
-    return Array.from({ length: productPages + 1 }, (_, i) => ({ id: i }));
-  } catch {
-    return [{ id: 0 }];
-  }
-}
-
-export default async function sitemap(
-  { id }: { id: number | string } = { id: 0 },
-): Promise<MetadataRoute.Sitemap> {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseUrl();
-  const numericId = Number(id);
 
-  // ── id=0: rutas estáticas, categorías y combos ──────────────────────────
-  if (numericId === 0) {
-    const staticRoutes: MetadataRoute.Sitemap = [
-      { url: `${baseUrl}/`, changeFrequency: 'daily', priority: 1, lastModified: new Date() },
-      { url: `${baseUrl}/products`, changeFrequency: 'daily', priority: 0.9, lastModified: new Date() },
-      { url: `${baseUrl}/combos`, changeFrequency: 'daily', priority: 0.85, lastModified: new Date() },
-      { url: `${baseUrl}/about`, changeFrequency: 'monthly', priority: 0.6, lastModified: new Date() },
-      { url: `${baseUrl}/contact`, changeFrequency: 'monthly', priority: 0.6, lastModified: new Date() },
-      { url: `${baseUrl}/seguimiento`, changeFrequency: 'monthly', priority: 0.5, lastModified: new Date() },
-      { url: `${baseUrl}/privacy`, changeFrequency: 'yearly', priority: 0.3, lastModified: new Date() },
-      { url: `${baseUrl}/terms`, changeFrequency: 'yearly', priority: 0.3, lastModified: new Date() },
-    ];
+  const staticRoutes: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/`, changeFrequency: 'daily', priority: 1, lastModified: new Date() },
+    { url: `${baseUrl}/products`, changeFrequency: 'daily', priority: 0.9, lastModified: new Date() },
+    { url: `${baseUrl}/combos`, changeFrequency: 'daily', priority: 0.85, lastModified: new Date() },
+    { url: `${baseUrl}/about`, changeFrequency: 'monthly', priority: 0.6, lastModified: new Date() },
+    { url: `${baseUrl}/contact`, changeFrequency: 'monthly', priority: 0.6, lastModified: new Date() },
+    { url: `${baseUrl}/seguimiento`, changeFrequency: 'monthly', priority: 0.5, lastModified: new Date() },
+    { url: `${baseUrl}/privacy`, changeFrequency: 'yearly', priority: 0.3, lastModified: new Date() },
+    { url: `${baseUrl}/terms`, changeFrequency: 'yearly', priority: 0.3, lastModified: new Date() },
+  ];
 
-    const categoryRoutes: MetadataRoute.Sitemap = PRODUCT_CATEGORIES.map((category) => ({
-      url: `${baseUrl}/products/category/${category}`,
-      changeFrequency: 'weekly' as const,
-      priority: 0.75,
-      lastModified: new Date(),
-    }));
+  const categoryRoutes: MetadataRoute.Sitemap = PRODUCT_CATEGORIES.map((category) => ({
+    url: `${baseUrl}/products/category/${category}`,
+    changeFrequency: 'weekly' as const,
+    priority: 0.75,
+    lastModified: new Date(),
+  }));
 
-    let comboRoutes: MetadataRoute.Sitemap = [];
-    try {
-      const combos = await getComboSlugsForSitemap();
-      comboRoutes = combos.map((combo) => ({
-        url: `${baseUrl}/combos/${combo.slug}`,
-        lastModified: combo.updatedAt,
-        changeFrequency: 'weekly' as const,
-        priority: 0.75,
-      }));
-    } catch (error) {
-      console.error('Error generando sitemap de combos:', error);
-    }
-
-    return [...staticRoutes, ...categoryRoutes, ...comboRoutes];
-  }
-
-  // ── id≥1: bloque de productos paginado ──────────────────────────────────
-  const skip = (numericId - 1) * PRODUCTS_PER_SITEMAP;
   let productRoutes: MetadataRoute.Sitemap = [];
   try {
     const products = await prisma.product.findMany({
-      skip,
-      take: PRODUCTS_PER_SITEMAP,
       select: { id: true, slug: true, updatedAt: true, createdAt: true },
       orderBy: { createdAt: 'asc' },
     });
@@ -80,8 +40,21 @@ export default async function sitemap(
       priority: 0.8,
     }));
   } catch (error) {
-    console.error(`Error generando sitemap de productos (id=${numericId}):`, error);
+    console.error('Error generando sitemap de productos:', error);
   }
 
-  return productRoutes;
+  let comboRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const combos = await getComboSlugsForSitemap();
+    comboRoutes = combos.map((combo) => ({
+      url: `${baseUrl}/combos/${combo.slug}`,
+      lastModified: combo.updatedAt,
+      changeFrequency: 'weekly' as const,
+      priority: 0.75,
+    }));
+  } catch (error) {
+    console.error('Error generando sitemap de combos:', error);
+  }
+
+  return [...staticRoutes, ...categoryRoutes, ...productRoutes, ...comboRoutes];
 }
