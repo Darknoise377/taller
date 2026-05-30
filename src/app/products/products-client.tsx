@@ -23,8 +23,6 @@ type ProductsClientProps = {
   initialProducts: ProductType[];
   totalCount?: number;
   initialCategory?: string;
-  heroTitle?: string;
-  heroSubtitle?: string;
 };
 
 function normalizeForSearch(value: string): string {
@@ -39,8 +37,6 @@ export default function ProductsClient({
   initialProducts,
   totalCount: initialTotal,
   initialCategory,
-  heroTitle,
-  heroSubtitle,
 }: ProductsClientProps) {
   const [products, setProducts] = useState<ProductType[]>(initialProducts ?? []);
   const [totalCount, setTotalCount] = useState<number>(initialTotal ?? initialProducts?.length ?? 0);
@@ -78,7 +74,7 @@ export default function ProductsClient({
       setMinPrice(params.get("minPrice") || "");
       setMaxPrice(params.get("maxPrice") || "");
     }
-  }, []);
+  }, [initialCategory]);
 
   const uniqueSizes = useMemo(
     () => Array.from(new Set(products.flatMap((p) => p.sizes ?? []))).filter(Boolean),

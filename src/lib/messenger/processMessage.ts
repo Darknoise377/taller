@@ -20,8 +20,6 @@ import {
 } from '@/lib/whatsapp/processMessage';
 import { sendMessengerMessage } from './client';
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://www.motoservicioayr.com';
-
 // Messenger-specific system prompt — same Criss persona but adapted:
 //  - Messenger allows longer responses than WhatsApp (2000 char limit per bubble)
 //  - Formatting: plain text, no *bold* WhatsApp markdown

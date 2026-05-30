@@ -68,15 +68,6 @@ const orderInclude = {
   seller: true,
 } as const;
 
-type ProductRow = {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-  category: string;
-  currency: string;
-};
-
 export function consolidateProductLines(products: OrderLineInput[]): Map<string, number> {
   const map = new Map<string, number>();
   for (const item of products) {
@@ -266,7 +257,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
     }
   }
 
-  let subtotal = normalizeAmount(directSubtotal + comboSubtotal);
+  const subtotal = normalizeAmount(directSubtotal + comboSubtotal);
   let promoCodeToStore: string | undefined;
   let finalTotal = subtotal;
 

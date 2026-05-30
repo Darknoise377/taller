@@ -117,7 +117,6 @@ export async function generateMetadata(
     product.description?.slice(0, 150) ||
     `Compra ${product.name} al mejor precio en nuestra tienda.`;
   const baseUrl = getBaseUrl();
-  const productUrl = `${baseUrl}/products/${product.id}`;
 
   const firstImage = product.images?.[0] || product.imageUrl || "/placeholder.png";
   const ogImage = firstImage.startsWith("http")
