@@ -418,7 +418,7 @@ export default function AdminProductsPage() {
   const handleApplyLookup = useCallback(() => {
     if (!lookupResult) return;
     const patch: Record<string, unknown> = {};
-    if (lookupResult.name) patch.name = lookupResult.name;
+    if (lookupResult.name) patch.name = lookupResult.name.toUpperCase();
     if (lookupResult.description) patch.description = lookupResult.description;
     if (lookupResult.category) patch.category = lookupResult.category;
     if (lookupResult.brand) patch.brand = lookupResult.brand;
