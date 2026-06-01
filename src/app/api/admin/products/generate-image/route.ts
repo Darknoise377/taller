@@ -20,7 +20,7 @@ export const maxDuration = 60;
  * Builds a @google/genai client using the same credential priority as getAIModel.
  * Returns null when no Google provider is configured (i.e. OpenAI-only setup).
  */
-function buildGenAI(): GoogleGenAI | null {
+function buildGenAI(): InstanceType<typeof GoogleGenAI> | null {
   // 1. Vertex AI via service account
   const raw = process.env.VERTEX_SA_JSON_BASE64
     ? Buffer.from(process.env.VERTEX_SA_JSON_BASE64, 'base64').toString('utf-8')
