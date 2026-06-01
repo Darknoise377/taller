@@ -4,14 +4,21 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   Truck,
   Sparkles,
+  Globe,
+  Palette,
   CheckCircle2,
   AlertCircle,
   RefreshCw,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import type { ShippingConfig, ShippingRegion } from "@/config/shippingRates";
-import { DEFAULT_SHIPPING_CONFIG } from "@/config/shippingRates";
+import {
+  DEFAULT_SEASONAL_CAMPAIGN,
+  DEFAULT_SHIPPING_CONFIG,
+  type SeasonalThemeKey,
+  type ShippingConfig,
+  type ShippingRegion,
+} from "@/config/shippingRates";
 
 function formatCOP(n: number) {
   return "$" + n.toLocaleString("es-CO");
@@ -19,6 +26,15 @@ function formatCOP(n: number) {
 
 type ToastState = { ok: boolean; msg: string } | null;
 type ShippingMode = "always_free" | "threshold";
+
+const SEASON_OPTIONS: Array<{ value: SeasonalThemeKey; label: string }> = [
+  { value: "none", label: "Sin temporada" },
+  { value: "mundial_2026", label: "Mundial 2026" },
+  { value: "independencia", label: "Independencia" },
+  { value: "amor_amistad", label: "Amor y amistad" },
+  { value: "black_week", label: "Black Week" },
+  { value: "navidad", label: "Navidad" },
+];
 
 export default function ShippingSettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -46,6 +62,10 @@ export default function ShippingSettingsPage() {
         freeShippingThreshold: fetched?.freeShippingThreshold ?? DEFAULT_SHIPPING_CONFIG.freeShippingThreshold,
         contraentregaSurcharge: fetched?.contraentregaSurcharge ?? DEFAULT_SHIPPING_CONFIG.contraentregaSurcharge,
         regions: fetched?.regions?.length ? fetched.regions : DEFAULT_SHIPPING_CONFIG.regions,
+        seasonalCampaign: {
+          ...DEFAULT_SEASONAL_CAMPAIGN,
+          ...(fetched?.seasonalCampaign ?? {}),
+        },
       });
     } catch (err) {
       console.error("Error loading shipping settings", err);
@@ -87,6 +107,21 @@ export default function ShippingSettingsPage() {
       );
       return { ...c, regions };
     });
+  };
+
+  const seasonalCampaign = config.seasonalCampaign ?? DEFAULT_SEASONAL_CAMPAIGN;
+
+  const updateSeasonal = <K extends keyof typeof seasonalCampaign>(
+    key: K,
+    value: (typeof seasonalCampaign)[K],
+  ) => {
+    setConfig((c) => ({
+      ...c,
+      seasonalCampaign: {
+        ...(c.seasonalCampaign ?? DEFAULT_SEASONAL_CAMPAIGN),
+        [key]: value,
+      },
+    }));
   };
 
   if (loading) {
@@ -282,6 +317,110 @@ export default function ShippingSettingsPage() {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Seasonal Home Theme */}
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-700 p-5 space-y-4">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100 flex items-center gap-2">
+              <Globe size={16} className="text-[#0A2A66] dark:text-blue-400" />
+              Temporada visual del Home
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
+              Activa una campaña global y actualiza textos sin tocar código.
+            </p>
+          </div>
+
+          <label className="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-slate-300">
+            <input
+              type="checkbox"
+              checked={seasonalCampaign.enabled}
+              onChange={(e) => updateSeasonal("enabled", e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-[#0A2A66] focus:ring-[#0A2A66]"
+            />
+            Activa
+          </label>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1.5">
+              Temporada
+            </label>
+            <select
+              title="Temporada visual"
+              value={seasonalCampaign.key}
+              onChange={(e) => updateSeasonal("key", e.target.value as SeasonalThemeKey)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0A2A66]"
+            >
+              {SEASON_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1.5">
+              CTA enlace
+            </label>
+            <input
+              type="text"
+              value={seasonalCampaign.ctaHref}
+              onChange={(e) => updateSeasonal("ctaHref", e.target.value)}
+              placeholder="/combos"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0A2A66]"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1.5">
+              Título
+            </label>
+            <input
+              type="text"
+              value={seasonalCampaign.title}
+              onChange={(e) => updateSeasonal("title", e.target.value)}
+              placeholder="Vibra mundialista: repuestos listos para rodar"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0A2A66]"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1.5">
+              Subtítulo
+            </label>
+            <textarea
+              value={seasonalCampaign.subtitle}
+              onChange={(e) => updateSeasonal("subtitle", e.target.value)}
+              placeholder="Campaña activa en toda la tienda para esta temporada."
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0A2A66]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1.5">
+              Texto botón
+            </label>
+            <input
+              type="text"
+              value={seasonalCampaign.ctaLabel}
+              onChange={(e) => updateSeasonal("ctaLabel", e.target.value)}
+              placeholder="Ver campaña"
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0A2A66]"
+            />
+          </div>
+
+          <div className="flex items-end">
+            <div className="w-full rounded-lg border border-dashed border-gray-300 dark:border-slate-600 px-3 py-2 text-xs text-gray-500 dark:text-slate-400 flex items-center gap-2">
+              <Palette size={14} />
+              La paleta y animación del home cambian según la temporada seleccionada.
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Actions */}

@@ -30,6 +30,11 @@ import { ProductCard } from '@/components/ProductCard';
 import ComboCard from '@/components/ComboCard';
 import { makeProductPlaceholder } from '@/lib/placeholder';
 import type { Combo } from '@/types/combo';
+import {
+  DEFAULT_SEASONAL_CAMPAIGN,
+  type SeasonalCampaignConfig,
+  type SeasonalThemeKey,
+} from '@/config/shippingRates';
 
 // TIPOS DE DATOS
 interface SlideData {
@@ -121,6 +126,71 @@ const categoryConfig: Partial<Record<
   },
 };
 
+const seasonVisuals: Record<SeasonalThemeKey, {
+  heroBg: string;
+  badgeBg: string;
+  badgeText: string;
+  glowPrimary: string;
+  glowSecondary: string;
+  pulseOne: string;
+  pulseTwo: string;
+}> = {
+  none: {
+    heroBg: "bg-gradient-to-br from-[#e9f2ff] via-[#f8fbff] to-[#e3edff] dark:from-[#07122E] dark:via-[#0A2A66] dark:to-[#0D1F4E]",
+    badgeBg: "bg-[#0A2A66]/10 dark:bg-white/10",
+    badgeText: "text-[#0A2A66] dark:text-[#5B9BD5]",
+    glowPrimary: "bg-[#2E5FA7]/15 dark:bg-[#2E5FA7]/10",
+    glowSecondary: "bg-[#0A2A66]/10 dark:bg-[#0A2A66]/20",
+    pulseOne: "bg-[#2E5FA7]/20 dark:bg-[#5B9BD5]/20",
+    pulseTwo: "bg-[#0A2A66]/15 dark:bg-[#8FA8CC]/20",
+  },
+  mundial_2026: {
+    heroBg: "bg-gradient-to-br from-[#f5fff8] via-[#eef7ff] to-[#e5f0ff] dark:from-[#041A2D] dark:via-[#0A2A66] dark:to-[#06213D]",
+    badgeBg: "bg-[#22A06B]/15 dark:bg-[#22A06B]/25",
+    badgeText: "text-[#0F6B47] dark:text-[#7EE0B4]",
+    glowPrimary: "bg-[#22A06B]/20 dark:bg-[#22A06B]/20",
+    glowSecondary: "bg-[#1E88E5]/15 dark:bg-[#1E88E5]/20",
+    pulseOne: "bg-[#22A06B]/30 dark:bg-[#22A06B]/30",
+    pulseTwo: "bg-[#1E88E5]/30 dark:bg-[#1E88E5]/30",
+  },
+  independencia: {
+    heroBg: "bg-gradient-to-br from-[#fff6e6] via-[#ffe8d0] to-[#ffd8b6] dark:from-[#2A1500] dark:via-[#3A1E04] dark:to-[#5A2F0A]",
+    badgeBg: "bg-[#F57C00]/15 dark:bg-[#F57C00]/25",
+    badgeText: "text-[#C15E00] dark:text-[#FFC67B]",
+    glowPrimary: "bg-[#F57C00]/20 dark:bg-[#F57C00]/25",
+    glowSecondary: "bg-[#C62828]/15 dark:bg-[#C62828]/20",
+    pulseOne: "bg-[#F57C00]/30 dark:bg-[#F57C00]/30",
+    pulseTwo: "bg-[#C62828]/30 dark:bg-[#C62828]/30",
+  },
+  amor_amistad: {
+    heroBg: "bg-gradient-to-br from-[#fff0f4] via-[#ffe4ec] to-[#fde0ff] dark:from-[#2B0D1F] dark:via-[#3B1232] dark:to-[#4A1642]",
+    badgeBg: "bg-[#D81B60]/15 dark:bg-[#D81B60]/25",
+    badgeText: "text-[#B0144E] dark:text-[#FF97C2]",
+    glowPrimary: "bg-[#D81B60]/20 dark:bg-[#D81B60]/25",
+    glowSecondary: "bg-[#8E24AA]/15 dark:bg-[#8E24AA]/20",
+    pulseOne: "bg-[#D81B60]/30 dark:bg-[#D81B60]/30",
+    pulseTwo: "bg-[#8E24AA]/30 dark:bg-[#8E24AA]/30",
+  },
+  black_week: {
+    heroBg: "bg-gradient-to-br from-[#f3f4f6] via-[#e5e7eb] to-[#d1d5db] dark:from-[#050505] dark:via-[#0b0b0b] dark:to-[#171717]",
+    badgeBg: "bg-black/10 dark:bg-white/10",
+    badgeText: "text-black dark:text-white",
+    glowPrimary: "bg-black/15 dark:bg-white/10",
+    glowSecondary: "bg-slate-500/15 dark:bg-slate-300/10",
+    pulseOne: "bg-black/20 dark:bg-white/20",
+    pulseTwo: "bg-slate-500/30 dark:bg-slate-300/25",
+  },
+  navidad: {
+    heroBg: "bg-gradient-to-br from-[#effbf4] via-[#f5fff8] to-[#ecf7ff] dark:from-[#06210F] dark:via-[#0A3D20] dark:to-[#0A2A66]",
+    badgeBg: "bg-[#1E8E3E]/15 dark:bg-[#1E8E3E]/25",
+    badgeText: "text-[#11662A] dark:text-[#9BE6AE]",
+    glowPrimary: "bg-[#1E8E3E]/20 dark:bg-[#1E8E3E]/25",
+    glowSecondary: "bg-[#C62828]/15 dark:bg-[#C62828]/20",
+    pulseOne: "bg-[#1E8E3E]/30 dark:bg-[#1E8E3E]/30",
+    pulseTwo: "bg-[#C62828]/30 dark:bg-[#C62828]/30",
+  },
+};
+
 export type HomePageClientProps = {
   initialCategories: CategoryItem[];
   initialSliderProducts: SlideData[];
@@ -141,7 +211,35 @@ export default function HomePageClient({
 }: HomePageClientProps) {
   const [categories] = useState<CategoryItem[]>(initialCategories);
   const [sliderProducts] = useState<SlideData[]>(initialSliderProducts);
+  const [seasonalCampaign, setSeasonalCampaign] = useState<SeasonalCampaignConfig>(
+    DEFAULT_SEASONAL_CAMPAIGN,
+  );
   const isLoading = false;
+
+  useEffect(() => {
+    fetch('/api/store-settings')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const fromApi = data?.seasonalCampaign ?? data?.shippingRules?.seasonalCampaign;
+        if (!fromApi || typeof fromApi !== 'object') return;
+        setSeasonalCampaign((prev) => ({ ...prev, ...fromApi }));
+      })
+      .catch(() => {
+        // Keep default visual if settings are unavailable.
+      });
+  }, []);
+
+  const activeSeasonKey =
+    seasonalCampaign.enabled && seasonalCampaign.key ? seasonalCampaign.key : 'none';
+  const activeVisual = seasonVisuals[activeSeasonKey];
+  const campaignTitle =
+    seasonalCampaign.title.trim() ||
+    (activeSeasonKey === 'mundial_2026' ? 'Temporada mundialista en toda la tienda' : 'Temporada especial activa');
+  const campaignSubtitle =
+    seasonalCampaign.subtitle.trim() ||
+    'Promociones destacadas, piezas listas para despachar y atención prioritaria.';
+  const campaignHref = seasonalCampaign.ctaHref.trim() || '/products';
+  const campaignCtaLabel = seasonalCampaign.ctaLabel.trim() || 'Ver campaña';
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#060D1F] text-slate-900 dark:text-slate-100 antialiased">
@@ -149,10 +247,27 @@ export default function HomePageClient({
       {/* ════════════════════════════════════════
           HERO — full-width, dark gradient band
           ════════════════════════════════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#e9f2ff] via-[#f8fbff] to-[#e3edff] dark:from-[#07122E] dark:via-[#0A2A66] dark:to-[#0D1F4E]">
+      <section className={`relative overflow-hidden ${activeVisual.heroBg}`}>
         {/* Background texture rings */}
-        <div className="pointer-events-none absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-[#2E5FA7]/15 dark:bg-[#2E5FA7]/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-32 w-[480px] h-[480px] rounded-full bg-[#0A2A66]/10 dark:bg-[#0A2A66]/20 blur-3xl" />
+        <div className={`pointer-events-none absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full ${activeVisual.glowPrimary} blur-3xl`} />
+        <div className={`pointer-events-none absolute -bottom-32 -left-32 w-[480px] h-[480px] rounded-full ${activeVisual.glowSecondary} blur-3xl`} />
+
+        {activeSeasonKey !== 'none' && (
+          <>
+            <motion.div
+              aria-hidden
+              className={`pointer-events-none absolute top-16 right-[12%] w-16 h-16 rounded-full ${activeVisual.pulseOne}`}
+              animate={{ y: [0, -14, 0], rotate: [0, 8, 0] }}
+              transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+              aria-hidden
+              className={`pointer-events-none absolute bottom-10 left-[10%] w-12 h-12 rounded-full ${activeVisual.pulseTwo}`}
+              animate={{ y: [0, 10, 0], x: [0, -6, 0] }}
+              transition={{ duration: 5.4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </>
+        )}
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-8 lg:pt-6 lg:pb-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-7 lg:gap-10 items-start">
@@ -164,6 +279,36 @@ export default function HomePageClient({
               transition={{ duration: 0.6 }}
               className="order-1"
             >
+              {activeSeasonKey !== 'none' && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.45 }}
+                  className={`mb-4 rounded-2xl border border-white/35 dark:border-white/10 ${activeVisual.badgeBg} backdrop-blur px-4 py-3`}
+                >
+                  <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
+                    <div>
+                      <p className={`text-xs font-bold tracking-[0.18em] uppercase ${activeVisual.badgeText}`}>
+                        Campana de temporada
+                      </p>
+                      <h2 className="mt-1 text-base sm:text-lg font-extrabold text-[#081F4D] dark:text-white">
+                        {campaignTitle}
+                      </h2>
+                      <p className="text-xs sm:text-sm text-[#0A2A66]/75 dark:text-white/70 mt-0.5">
+                        {campaignSubtitle}
+                      </p>
+                    </div>
+                    <Link
+                      href={campaignHref}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#0A2A66] dark:bg-white text-white dark:text-[#0A2A66] text-xs font-bold hover:bg-[#081F4D] dark:hover:bg-slate-100 transition-colors"
+                    >
+                      {campaignCtaLabel}
+                      <ArrowRightIcon className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Brand pill */}
               <div className="inline-flex items-center gap-2 rounded-full bg-white/75 dark:bg-white/10 border border-[#2E5FA7]/20 dark:border-white/15 px-4 py-1.5 text-[11px] font-bold tracking-[0.18em] text-[#0A2A66]/75 dark:text-white/70 uppercase mb-5 backdrop-blur">
                 <div className="relative h-5 w-5 rounded-full overflow-hidden border border-[#2E5FA7]/25 dark:border-white/20 bg-white/60 dark:bg-white/10 shrink-0">

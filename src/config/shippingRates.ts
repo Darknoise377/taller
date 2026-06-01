@@ -8,6 +8,23 @@ export interface ShippingRegion {
   departments: string[];
 }
 
+export type SeasonalThemeKey =
+  | "none"
+  | "mundial_2026"
+  | "independencia"
+  | "amor_amistad"
+  | "black_week"
+  | "navidad";
+
+export interface SeasonalCampaignConfig {
+  enabled: boolean;
+  key: SeasonalThemeKey;
+  title: string;
+  subtitle: string;
+  ctaLabel: string;
+  ctaHref: string;
+}
+
 /**
  * Configuración global de envío — se persiste en StoreSettings.shippingRules.
  * Los valores por defecto se usan como fallback si la BD no tiene registro.
@@ -17,10 +34,20 @@ export interface ShippingConfig {
   freeShippingThreshold: number;
   contraentregaSurcharge: number;
   regions: ShippingRegion[];
+  seasonalCampaign?: SeasonalCampaignConfig;
 }
 
 /** Recargo fijo que cobran las transportadoras por servicio contraentrega (COD) */
 export const CONTRAENTREGA_SURCHARGE = 8_000;
+
+export const DEFAULT_SEASONAL_CAMPAIGN: SeasonalCampaignConfig = {
+  enabled: false,
+  key: "none",
+  title: "",
+  subtitle: "",
+  ctaLabel: "Ver ofertas",
+  ctaHref: "/products",
+};
 
 /** Tarifa base por región. Ajusta los valores según tu contrato. */
 export const SHIPPING_REGIONS: ShippingRegion[] = [
@@ -96,6 +123,7 @@ export const DEFAULT_SHIPPING_CONFIG: ShippingConfig = {
   freeShippingThreshold: 200_000,
   contraentregaSurcharge: CONTRAENTREGA_SURCHARGE,
   regions: SHIPPING_REGIONS,
+  seasonalCampaign: DEFAULT_SEASONAL_CAMPAIGN,
 };
 
 export interface ShippingEstimate {
