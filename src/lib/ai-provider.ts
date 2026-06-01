@@ -1,7 +1,7 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createVertex } from '@ai-sdk/google-vertex';
-import type { LanguageModel } from 'ai';
+import type { LanguageModel, ImageModel } from 'ai';
 
 /**
  * Parses and returns the Google service account credentials from env vars.
@@ -66,5 +66,43 @@ export function getAIModel(): LanguageModel {
 
   throw new Error(
     'No AI provider configured. Set VERTEX_SA_JSON_BASE64, GEMINI_API_KEY, or OPENAI_API_KEY.'
+  );
+}
+
+/**
+ * Returns a Vercel AI SDK ImageModel based on available environment variables.
+ * Priority: Vertex AI (service account) → Google Gemini API key → OpenAI DALL-E 3
+ */
+export function getAIImageModel(): ImageModel {
+  // 1. Vertex AI via service account (same credentials as getAIModel)
+  const vtxCreds = getVertexCredentials();
+  if (vtxCreds) {
+    const vertexProvider = createVertex({
+      project: process.env.VERTEX_PROJECT_ID,
+      location: process.env.VERTEX_LOCATION ?? 'us-central1',
+      googleAuthOptions: {
+        credentials: {
+          client_email: vtxCreds.client_email,
+          private_key: vtxCreds.private_key,
+        },
+      },
+    });
+    return vertexProvider.image(process.env.IMAGEN_MODEL ?? 'imagen-3.0-generate-002');
+  }
+
+  // 2. Google Gemini API key
+  if (process.env.GEMINI_API_KEY) {
+    const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
+    return google.image(process.env.IMAGEN_MODEL ?? 'imagen-3.0-generate-002');
+  }
+
+  // 3. OpenAI fallback
+  if (process.env.OPENAI_API_KEY) {
+    const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    return openai.image(process.env.IMAGE_MODEL ?? 'dall-e-3');
+  }
+
+  throw new Error(
+    'No image AI provider configured. Set VERTEX_SA_JSON_BASE64, GEMINI_API_KEY, or OPENAI_API_KEY.'
   );
 }

@@ -36,6 +36,7 @@ import {
   RobotOutlined,
   SearchOutlined,
   ClearOutlined,
+  FileImageOutlined,
 } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
 import type { ColumnsType } from 'antd/es/table';
@@ -72,6 +73,12 @@ export default function AdminProductsPage() {
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+
+  // --- Generador de imágenes IA ---
+  const [aiImgOpen, setAiImgOpen] = useState(false);
+  const [aiImgPrompt, setAiImgPrompt] = useState('');
+  const [aiImgResult, setAiImgResult] = useState<string | null>(null);
+  const [isGeneratingImg, setIsGeneratingImg] = useState(false);
 
   const handleGenerateDescription = useCallback(async () => {
     const name = form.getFieldValue('name') as string | undefined;
@@ -364,8 +371,47 @@ export default function AdminProductsPage() {
       form.resetFields();
       setFileList([]);
     }
+    setAiImgOpen(false);
+    setAiImgPrompt('');
+    setAiImgResult(null);
     setModalOpen(true);
   }, [form]);
+
+  const handleGenerateImage = useCallback(async () => {
+    if (!aiImgPrompt.trim()) return;
+    setIsGeneratingImg(true);
+    try {
+      const mainImageUrl = fileList[0]?.url;
+      const res = await fetch('/api/admin/products/generate-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: aiImgPrompt.trim(), mainImageUrl }),
+      });
+      const data = await res.json() as { url?: string; error?: string };
+      if (!res.ok || !data.url) throw new Error(data.error ?? 'Error al generar imagen');
+      setAiImgResult(data.url);
+      message.success('Imagen generada con IA');
+    } catch (err) {
+      message.error((err as Error).message ?? 'Error al generar imagen');
+    } finally {
+      setIsGeneratingImg(false);
+    }
+  }, [aiImgPrompt, fileList]);
+
+  const handleAddAiImage = useCallback(() => {
+    if (!aiImgResult) return;
+    if (fileList.length >= 5) {
+      message.warning('Ya tienes el máximo de 5 imágenes.');
+      return;
+    }
+    setFileList(prev => [
+      ...prev,
+      { uid: `ai-${Date.now()}`, name: `ai-${Date.now()}.png`, status: 'done' as const, url: aiImgResult },
+    ]);
+    setAiImgResult(null);
+    setAiImgPrompt('');
+    message.success('Imagen agregada al producto');
+  }, [aiImgResult, fileList.length]);
 
   // --- Definición de Columnas para la Tabla ---
   const columns: ColumnsType<Product> = useMemo(() => [
@@ -948,6 +994,86 @@ return (
             )}
           </Upload>
         </Form.Item>
+
+        {/* --- Generador de variantes con IA --- */}
+        <div style={{ marginTop: -4, marginBottom: 8 }}>
+          <Button
+            type="link"
+            icon={<FileImageOutlined />}
+            style={{ padding: 0, fontSize: 13 }}
+            onClick={() => setAiImgOpen(o => !o)}
+          >
+            {aiImgOpen ? 'Ocultar generador de imágenes IA' : 'Generar variante de imagen con IA'}
+          </Button>
+
+          {aiImgOpen && (
+            <div style={{ marginTop: 10, padding: '14px 16px', background: '#f9f0ff', borderRadius: 8, border: '1px solid #d3adf7' }}>
+              <Typography.Text strong style={{ fontSize: 13 }}>Generador de imágenes con IA (DALL-E 3)</Typography.Text>
+              <Typography.Paragraph type="secondary" style={{ fontSize: 12, margin: '4px 0 10px' }}>
+                Describe la variante que quieres crear. Si ya subiste la imagen principal, se usará como referencia automáticamente.
+              </Typography.Paragraph>
+
+              <Input.TextArea
+                rows={3}
+                placeholder="Ej: mismo producto sobre fondo blanco, iluminación de estudio, vista lateral derecha"
+                value={aiImgPrompt}
+                onChange={e => setAiImgPrompt(e.target.value)}
+                style={{ marginBottom: 10 }}
+              />
+
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+                <Button
+                  type="primary"
+                  icon={<FileImageOutlined />}
+                  loading={isGeneratingImg}
+                  disabled={!aiImgPrompt.trim() || fileList.length >= 5}
+                  onClick={handleGenerateImage}
+                  style={{ background: '#722ed1', borderColor: '#722ed1' }}
+                >
+                  {isGeneratingImg ? 'Generando...' : 'Generar imagen'}
+                </Button>
+                {fileList.length > 0 && (
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    ✓ Se usará la imagen principal como referencia
+                  </Typography.Text>
+                )}
+                {fileList.length >= 5 && (
+                  <Typography.Text type="warning" style={{ fontSize: 12 }}>
+                    Máximo de imágenes alcanzado (5)
+                  </Typography.Text>
+                )}
+              </div>
+
+              {aiImgResult && (
+                <div style={{ marginTop: 14, padding: '10px 12px', background: '#fff', borderRadius: 8, border: '1px solid #d3adf7', display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                  <Image
+                    src={aiImgResult}
+                    width={110}
+                    height={110}
+                    style={{ objectFit: 'cover', borderRadius: 6, border: '1px solid #f0f0f0' }}
+                    alt="Imagen generada por IA"
+                  />
+                  <div style={{ flex: 1 }}>
+                    <Typography.Text strong style={{ fontSize: 13, display: 'block', marginBottom: 4 }}>
+                      Imagen generada
+                    </Typography.Text>
+                    <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 10 }}>
+                      Revisa el resultado. Puedes agregarla directamente al producto o descartarla y generar una nueva.
+                    </Typography.Text>
+                    <Space>
+                      <Button size="small" type="primary" onClick={handleAddAiImage} style={{ background: '#722ed1', borderColor: '#722ed1' }}>
+                        Agregar al producto
+                      </Button>
+                      <Button size="small" onClick={() => { setAiImgResult(null); }}>
+                        Descartar
+                      </Button>
+                    </Space>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </Form>
     </Modal>
   </div>
