@@ -37,7 +37,12 @@ import {
   SearchOutlined,
   ClearOutlined,
   FileImageOutlined,
+  BulbOutlined,
+  CheckCircleOutlined,
+  InfoCircleOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
+import type { SkuLookupResult } from '@/app/api/admin/products/lookup-sku/route';
 import type { UploadFile } from 'antd/es/upload/interface';
 import type { ColumnsType } from 'antd/es/table';
 import { productService, uploadImage } from '@/services/productService';
@@ -79,6 +84,11 @@ export default function AdminProductsPage() {
   const [aiImgPrompt, setAiImgPrompt] = useState('');
   const [aiImgResult, setAiImgResult] = useState<string | null>(null);
   const [isGeneratingImg, setIsGeneratingImg] = useState(false);
+
+  // --- Búsqueda inteligente por referencia ---
+  const [skuLookupRef, setSkuLookupRef] = useState('');
+  const [isLookingUp, setIsLookingUp] = useState(false);
+  const [lookupResult, setLookupResult] = useState<SkuLookupResult | null>(null);
 
   const handleGenerateDescription = useCallback(async () => {
     const name = form.getFieldValue('name') as string | undefined;
@@ -376,8 +386,51 @@ export default function AdminProductsPage() {
     setAiImgOpen(false);
     setAiImgPrompt('');
     setAiImgResult(null);
+    setSkuLookupRef('');
+    setLookupResult(null);
     setModalOpen(true);
   }, [form]);
+
+  const handleLookupSku = useCallback(async () => {
+    const ref = skuLookupRef.trim() || (form.getFieldValue('sku') as string | undefined)?.trim();
+    if (!ref) {
+      message.warning('Ingresa un código de referencia para buscar.');
+      return;
+    }
+    setIsLookingUp(true);
+    setLookupResult(null);
+    try {
+      const res = await fetch('/api/admin/products/lookup-sku', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reference: ref }),
+      });
+      const data = await res.json() as SkuLookupResult & { error?: string };
+      if (!res.ok) throw new Error(data.error ?? 'Error al buscar');
+      setLookupResult(data);
+    } catch (err) {
+      message.error((err as Error).message ?? 'Error al buscar referencia');
+    } finally {
+      setIsLookingUp(false);
+    }
+  }, [skuLookupRef, form]);
+
+  const handleApplyLookup = useCallback(() => {
+    if (!lookupResult) return;
+    const patch: Record<string, unknown> = {};
+    if (lookupResult.name) patch.name = lookupResult.name;
+    if (lookupResult.description) patch.description = lookupResult.description;
+    if (lookupResult.category) patch.category = lookupResult.category;
+    if (lookupResult.brand) patch.brand = lookupResult.brand;
+    if (lookupResult.tags?.length) patch.tags = lookupResult.tags;
+    if (lookupResult.sizes?.length) patch.sizes = lookupResult.sizes;
+    if (lookupResult.diagramNumber) patch.diagramNumber = lookupResult.diagramNumber;
+    if (skuLookupRef.trim()) patch.sku = skuLookupRef.trim();
+    form.setFieldsValue(patch);
+    setLookupResult(null);
+    setSkuLookupRef('');
+    message.success('Datos aplicados al formulario. Revisa y completa los faltantes.');
+  }, [lookupResult, form, skuLookupRef]);
 
   const handleGenerateImage = useCallback(async () => {
     if (!aiImgPrompt.trim()) return;
@@ -654,31 +707,130 @@ return (
 
     <Modal
       open={modalOpen}
-      title={editingProduct ? "Editar Producto" : "Crear Nuevo Producto"}
+      title={
+        <Space>
+          {editingProduct ? <EditOutlined style={{ color: '#0A2A66' }} /> : <PlusOutlined style={{ color: '#0A2A66' }} />}
+          <span>{editingProduct ? 'Editar Producto' : 'Crear Nuevo Producto'}</span>
+        </Space>
+      }
       onCancel={() => setModalOpen(false)}
       onOk={handleSaveProduct}
       confirmLoading={isSaving}
-      okText="Guardar"
+      okText={isSaving ? 'Guardando...' : 'Guardar producto'}
       cancelText="Cancelar"
-      width="min(720px, 92vw)"
+      width="min(820px, 95vw)"
       forceRender
+      styles={{ body: { maxHeight: '78vh', overflowY: 'auto', paddingRight: 4 } }}
     >
       <Form
         layout="vertical"
         form={form}
         name="product_form"
-        initialValues={{ stock: 0, currency: "USD" }}
+        initialValues={{ stock: 0, currency: 'COP' }}
       >
-        {/* --- Nombre del producto --- */}
-        <Form.Item
-          label="Nombre del Producto"
-          name="name"
-          rules={[{ required: true, message: "El nombre es obligatorio" }]}
-        >
-          <Input placeholder="Ej: Cilindro AKT 125, Llanta 90/90-17" />
-        </Form.Item>
 
-        {/* --- Descripción --- */}
+        {/* ══════════════════════════════════════════════════════════
+             SECCIÓN 0 · BÚSQUEDA INTELIGENTE POR CÓDIGO/REFERENCIA
+        ══════════════════════════════════════════════════════════ */}
+        <div style={{ marginBottom: 20, padding: '14px 16px', background: 'linear-gradient(135deg, #f0f5ff 0%, #f9f0ff 100%)', borderRadius: 10, border: '1px solid #d6e4ff' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <ThunderboltOutlined style={{ color: '#722ed1', fontSize: 15 }} />
+            <Typography.Text strong style={{ fontSize: 13, color: '#1d1d1d' }}>Búsqueda inteligente por referencia</Typography.Text>
+            <Tag color="purple" style={{ fontSize: 11, marginLeft: 2 }}>IA</Tag>
+          </div>
+          <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 10 }}>
+            Escribe el código OEM, SKU o nombre de referencia y la IA completará automáticamente los datos del producto.
+          </Typography.Text>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+            <Input
+              size="large"
+              placeholder="Ej: 13101-KVB-305, 90/90-17, AKT125 cilindro, FZ16 disco freno..."
+              value={skuLookupRef}
+              onChange={e => setSkuLookupRef(e.target.value)}
+              onPressEnter={handleLookupSku}
+              prefix={<SearchOutlined style={{ color: '#722ed1' }} />}
+              allowClear
+              style={{ flex: 1 }}
+            />
+            <Button
+              size="large"
+              type="primary"
+              icon={<RobotOutlined />}
+              loading={isLookingUp}
+              onClick={handleLookupSku}
+              style={{ background: '#722ed1', borderColor: '#722ed1', minWidth: 130 }}
+            >
+              {isLookingUp ? 'Buscando...' : 'Buscar con IA'}
+            </Button>
+          </div>
+
+          {/* Resultado del lookup */}
+          {lookupResult && (
+            <div style={{ marginTop: 12, padding: '12px 14px', background: '#fff', borderRadius: 8, border: `2px solid ${lookupResult.confidence === 'high' ? '#52c41a' : lookupResult.confidence === 'medium' ? '#faad14' : '#ff7875'}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                <Space>
+                  <CheckCircleOutlined style={{ color: lookupResult.confidence === 'high' ? '#52c41a' : lookupResult.confidence === 'medium' ? '#faad14' : '#ff7875' }} />
+                  <Typography.Text strong style={{ fontSize: 13 }}>Resultado encontrado</Typography.Text>
+                  <Tag color={lookupResult.confidence === 'high' ? 'success' : lookupResult.confidence === 'medium' ? 'warning' : 'error'}>
+                    Confianza {lookupResult.confidence === 'high' ? 'alta' : lookupResult.confidence === 'medium' ? 'media' : 'baja'}
+                  </Tag>
+                </Space>
+                <Button size="small" type="text" onClick={() => setLookupResult(null)}>✕</Button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px', fontSize: 12, marginBottom: 10 }}>
+                {lookupResult.name && <div><span style={{ color: '#8c8c8c' }}>Nombre:</span> <strong>{lookupResult.name}</strong></div>}
+                {lookupResult.category && <div><span style={{ color: '#8c8c8c' }}>Categoría:</span> <strong>{getProductCategoryLabel(lookupResult.category)}</strong></div>}
+                {lookupResult.brand && <div><span style={{ color: '#8c8c8c' }}>Marca:</span> <strong>{lookupResult.brand}</strong></div>}
+                {lookupResult.sizes?.length ? <div><span style={{ color: '#8c8c8c' }}>Compatibilidad:</span> <strong>{lookupResult.sizes.join(', ')}</strong></div> : null}
+                {lookupResult.tags?.length ? <div style={{ gridColumn: '1 / -1' }}><span style={{ color: '#8c8c8c' }}>Tags:</span> {lookupResult.tags.map(t => <Tag key={t} style={{ fontSize: 11 }}>{t}</Tag>)}</div> : null}
+                {lookupResult.description && <div style={{ gridColumn: '1 / -1', marginTop: 2 }}><span style={{ color: '#8c8c8c' }}>Descripción:</span> <span>{lookupResult.description}</span></div>}
+              </div>
+
+              {lookupResult.notes && (
+                <Alert type="info" showIcon icon={<InfoCircleOutlined />} style={{ fontSize: 12, marginBottom: 8 }} message={lookupResult.notes} />
+              )}
+
+              <Space>
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<CheckCircleOutlined />}
+                  onClick={handleApplyLookup}
+                  style={{ background: '#52c41a', borderColor: '#52c41a' }}
+                >
+                  Aplicar datos al formulario
+                </Button>
+                <Button size="small" onClick={() => setLookupResult(null)}>Descartar</Button>
+              </Space>
+            </div>
+          )}
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════
+             SECCIÓN 1 · INFORMACIÓN BÁSICA
+        ══════════════════════════════════════════════════════════ */}
+        <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', borderColor: '#d9d9d9', margin: '0 0 14px' }}>
+          <Space size={6}><BulbOutlined />Información básica</Space>
+        </Divider>
+
+        <Row gutter={16}>
+          <Col xs={24} md={16}>
+            <Form.Item
+              label="Nombre del Producto"
+              name="name"
+              rules={[{ required: true, message: 'El nombre es obligatorio' }]}
+            >
+              <Input size="large" placeholder="Ej: Cilindro AKT 125 STD, Llanta 90/90-17 Pirelli" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item label="Marca / Brand" name="brand">
+              <Input size="large" placeholder="Ej: Honda, Yamaha" />
+            </Form.Item>
+          </Col>
+        </Row>
+
         <Form.Item
           label={
             <Space size={8}>
@@ -688,66 +840,62 @@ return (
                 icon={<RobotOutlined />}
                 loading={isGeneratingDesc}
                 onClick={handleGenerateDescription}
-                style={{ fontSize: 12 }}
+                style={{ fontSize: 11, color: '#722ed1', borderColor: '#d3adf7' }}
               >
                 Generar con IA
               </Button>
             </Space>
           }
           name="description"
-          rules={[
-            { required: true, message: "La descripción es obligatoria" },
-          ]}
+          rules={[{ required: true, message: 'La descripción es obligatoria' }]}
         >
           <Input.TextArea
-            rows={4}
-            placeholder="Describe la referencia, uso, compatibilidad y recomendaciones de instalacion."
+            rows={3}
+            placeholder="Describe el repuesto: uso, compatibilidad, materiales y recomendaciones de instalación."
           />
         </Form.Item>
 
-        {/* --- Precio y moneda --- */}
+        {/* ══════════════════════════════════════════════════════════
+             SECCIÓN 2 · PRECIO Y STOCK
+        ══════════════════════════════════════════════════════════ */}
+        <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', borderColor: '#d9d9d9', margin: '0 0 14px' }}>
+          <Space size={6}><CalculatorOutlined />Precio y stock</Space>
+        </Divider>
+
         <Row gutter={16}>
           <Col xs={24} md={12}>
             <Form.Item
               label="Precio"
               name="price"
-              rules={[{ required: true, message: "El precio es obligatorio" }]}
+              rules={[{ required: true, message: 'El precio es obligatorio' }]}
             >
               <InputNumber<number>
                 min={0}
-                style={{ width: "100%" }}
-                formatter={(value) =>
-                  value
-                    ? `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                    : ""
-                }
-                parser={(value) =>
-                  Number(value?.replace(/\$\s?|(,*)/g, "") || 0)
-                }
-                placeholder="Ej: 49.99"
+                size="large"
+                style={{ width: '100%' }}
+                formatter={(value) => value ? `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''}
+                parser={(value) => Number(value?.replace(/\$\s?|(,*)/g, '') || 0)}
+                placeholder="Ej: 45.000"
               />
             </Form.Item>
           </Col>
-
-          <Col xs={24} md={12}>
-            <Form.Item
-              label="Moneda"
-              name="currency"
-              rules={[{ required: true, message: "La moneda es obligatoria" }]}
-            >
+          <Col xs={24} md={6}>
+            <Form.Item label="Moneda" name="currency" rules={[{ required: true }]}>
               <Select
-                options={CURRENCY_OPTIONS.map((c) => ({
-                  value: c,
-                  label: c,
-                }))}
-                placeholder="Selecciona la moneda"
+                size="large"
+                options={CURRENCY_OPTIONS.map((c) => ({ value: c, label: c }))}
               />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={6}>
+            <Form.Item label="Stock" name="stock" rules={[{ required: true }]}>
+              <InputNumber min={0} size="large" style={{ width: '100%' }} placeholder="0" />
             </Form.Item>
           </Col>
         </Row>
 
         {/* --- Calculadora de precio mínimo --- */}
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 20 }}>
           <Button
             type="link"
             icon={<CalculatorOutlined />}
@@ -888,95 +1036,126 @@ return (
           )}
         </div>
 
-        {/* --- Categoría y Stock --- */}
+        {/* ══════════════════════════════════════════════════════════
+             SECCIÓN 3 · CLASIFICACIÓN Y REFERENCIAS
+        ══════════════════════════════════════════════════════════ */}
+        <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', borderColor: '#d9d9d9', margin: '0 0 14px' }}>
+          <Space size={6}><SearchOutlined />Clasificación y referencias</Space>
+        </Divider>
+
         <Row gutter={16}>
           <Col xs={24} md={12}>
             <Form.Item
               label="Categoría"
               name="category"
-              rules={[
-                { required: true, message: "La categoría es obligatoria" },
-              ]}
+              rules={[{ required: true, message: 'La categoría es obligatoria' }]}
             >
               <Select
+                size="large"
                 options={CATEGORY_OPTIONS}
                 placeholder="Selecciona una categoría"
+                showSearch
+                filterOption={(input, option) =>
+                  (option?.label as string)?.toLowerCase().includes(input.toLowerCase())
+                }
               />
             </Form.Item>
           </Col>
+          <Col xs={24} md={12}>
+            <Form.Item label="SKU / Código OEM" name="sku">
+              <Input
+                size="large"
+                placeholder="Ej: 13101-KVB-305"
+                suffix={
+                  <Tooltip title="Busca este código con IA para autocompletar">
+                    <Button
+                      size="small"
+                      type="text"
+                      icon={<ThunderboltOutlined style={{ color: '#722ed1' }} />}
+                      onClick={() => {
+                        const sku = form.getFieldValue('sku') as string;
+                        if (sku) { setSkuLookupRef(sku); }
+                        // scroll to top of modal
+                        document.querySelector('.ant-modal-body')?.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                    />
+                  </Tooltip>
+                }
+              />
+            </Form.Item>
+          </Col>
+        </Row>
 
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item label="Etiquetas" name="tags">
+              <Select size="large" mode="tags" allowClear placeholder="Ej: motor, filtro, desgaste" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={6}>
+            <Form.Item label="Número en Diagrama" name="diagramNumber">
+              <Input size="large" placeholder="Ej: 14A" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={6}>
+            <Form.Item label="Exportar a MercadoLibre" name="meliExport" valuePropName="checked">
+              <Checkbox style={{ marginTop: 8 }}>Activar exportación MeLi</Checkbox>
+            </Form.Item>
+          </Col>
+        </Row>
+
+        {/* ══════════════════════════════════════════════════════════
+             SECCIÓN 4 · COMPATIBILIDAD
+        ══════════════════════════════════════════════════════════ */}
+        <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', borderColor: '#d9d9d9', margin: '0 0 14px' }}>
+          <Space size={6}><InfoCircleOutlined />Compatibilidad y atributos</Space>
+        </Divider>
+
+        <Row gutter={16}>
           <Col xs={24} md={12}>
             <Form.Item
-              label="Stock disponible"
-              name="stock"
-              rules={[{ required: true, message: "El stock es obligatorio" }]}
+              label="Medidas / Modelos compatibles"
+              tooltip="Ej: 90/90-17, AKT125, FZ16 — se muestran como filtros en la tienda"
+              name="sizes"
             >
-              <InputNumber
-                min={0}
-                style={{ width: "100%" }}
-                placeholder="Ej: 25"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        {/* --- SKU, Número diagrama y etiquetas --- */}
-        <Row gutter={16}>
-          <Col xs={24} md={6}>
-            <Form.Item label="SKU (opcional)" name="sku">
-              <Input placeholder="Ej: SKU-12345" />
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} md={6}>
-            <Form.Item label="Marca / Brand (MeLi)" name="brand">
-              <Input placeholder="Ej: Honda, Yamaha, Genérico" />
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} md={6}>
-            <Form.Item label="Número en Diagrama (opcional)" name="diagramNumber">
-              <Input placeholder="Ej: 14A" />
-            </Form.Item>
-          </Col>
-
-          <Col xs={24} md={6}>
-            <Form.Item label="Etiquetas (opcional)" name="tags">
-              <Select mode="tags" allowClear placeholder="Ej: motor, filtro" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        {/* --- Medidas y atributos --- */}
-        <Row gutter={16}>
-          <Col xs={24} md={12}>
-            <Form.Item label="Medidas / compatibilidad (opcional)" name="sizes">
               <Select
+                size="large"
                 mode="tags"
                 allowClear
-                placeholder="Ej: 90/90-17, CG150, FZ16"
+                placeholder="Ej: 90/90-17, CG150, FZ16, AKT125"
               />
             </Form.Item>
           </Col>
-
           <Col xs={24} md={12}>
             <Form.Item
-              label="Colores disponibles (opcional)"
+              label="Variantes / Colores"
+              tooltip="Usado para variantes de color, terminado o especificación"
               name="colors"
             >
               <Select
+                size="large"
                 mode="tags"
-                placeholder="Ej: NKD125, FZ16, Gixxer150"
+                placeholder="Ej: Negro, Cromado, Estándar"
               />
             </Form.Item>
           </Col>
         </Row>
 
-        {/* --- Imágenes del producto --- */}
+        {/* ══════════════════════════════════════════════════════════
+             SECCIÓN 5 · IMÁGENES
+        ══════════════════════════════════════════════════════════ */}
+        <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', borderColor: '#d9d9d9', margin: '0 0 14px' }}>
+          <Space size={6}><FileImageOutlined />Imágenes del producto</Space>
+        </Divider>
+
         <Form.Item
-          label="Imágenes del Producto"
+          label={
+            <Space size={6}>
+              <span>Imágenes</span>
+              <Typography.Text type="secondary" style={{ fontSize: 11 }}>(máx. 5 — la primera será la imagen principal)</Typography.Text>
+            </Space>
+          }
           required
-          tooltip="Puedes subir hasta 5 imágenes"
         >
           <Upload
             listType="picture-card"
@@ -998,21 +1177,27 @@ return (
         </Form.Item>
 
         {/* --- Generador de variantes con IA --- */}
-        <div style={{ marginTop: -4, marginBottom: 8 }}>
+        <div style={{ marginTop: 4, marginBottom: 8 }}>
           <Button
             type="link"
-            icon={<FileImageOutlined />}
-            style={{ padding: 0, fontSize: 13 }}
+            icon={<RobotOutlined style={{ color: '#722ed1' }} />}
+            style={{ padding: 0, fontSize: 13, color: '#722ed1' }}
             onClick={() => setAiImgOpen(o => !o)}
           >
-            {aiImgOpen ? 'Ocultar generador de imágenes IA' : 'Generar variante de imagen con IA'}
+            {aiImgOpen ? 'Ocultar generador de imágenes IA' : '✨ Generar variante de imagen con IA'}
           </Button>
 
           {aiImgOpen && (
             <div style={{ marginTop: 10, padding: '14px 16px', background: '#f9f0ff', borderRadius: 8, border: '1px solid #d3adf7' }}>
-              <Typography.Text strong style={{ fontSize: 13 }}>Generador de imágenes con IA (DALL-E 3)</Typography.Text>
+              <Space style={{ marginBottom: 6 }}>
+                <RobotOutlined style={{ color: '#722ed1' }} />
+                <Typography.Text strong style={{ fontSize: 13 }}>Generador de imágenes con IA</Typography.Text>
+                <Tag color="purple" style={{ fontSize: 11 }}>Gemini Vision</Tag>
+              </Space>
               <Typography.Paragraph type="secondary" style={{ fontSize: 12, margin: '4px 0 10px' }}>
-                Describe la variante que quieres crear. Si ya subiste la imagen principal, se usará como referencia automáticamente.
+                {fileList.length > 0
+                  ? '✓ Se usará la imagen subida como referencia — la IA generará una variante fiel al producto.'
+                  : 'Describe el producto y la IA generará una imagen de estudio para e-commerce.'}
               </Typography.Paragraph>
 
               <Input.TextArea
