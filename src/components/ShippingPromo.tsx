@@ -61,7 +61,7 @@ export default function ShippingPromo({
                 <span>¿Sabías que nuestros combos incluyen envío gratis?</span>
               </div>
               <Link
-                href="/products?category=combos"
+                href="/combos"
                 className="shrink-0 text-xs font-bold text-purple-700 dark:text-purple-300 underline underline-offset-2 hover:text-purple-900 dark:hover:text-purple-100 transition-colors"
               >
                 Ver combos →

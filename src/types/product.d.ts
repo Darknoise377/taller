@@ -40,6 +40,7 @@ export interface Product {
   // Opcionales para detalles extendidos
   sku?: string;
   slug?: string;
+  brand?: string;
   tags?: string[];
   diagramNumber?: string;
   rating?: number;

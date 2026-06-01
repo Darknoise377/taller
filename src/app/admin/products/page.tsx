@@ -25,6 +25,7 @@ import {
   Tooltip,
   Checkbox,
   Alert,
+  Statistic,
 } from 'antd';
 import {
   CalculatorOutlined,
@@ -33,6 +34,8 @@ import {
   DeleteOutlined,
   DownloadOutlined,
   RobotOutlined,
+  SearchOutlined,
+  ClearOutlined,
 } from '@ant-design/icons';
 import type { UploadFile } from 'antd/es/upload/interface';
 import type { ColumnsType } from 'antd/es/table';
@@ -67,6 +70,8 @@ export default function AdminProductsPage() {
   const [calcAbsorbShipping, setCalcAbsorbShipping] = useState(true);
   const [calcAbsorbContraentrega, setCalcAbsorbContraentrega] = useState(true);
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   const handleGenerateDescription = useCallback(async () => {
     const name = form.getFieldValue('name') as string | undefined;
@@ -147,6 +152,14 @@ export default function AdminProductsPage() {
     }
     return null;
   }, [calcAbsorbShipping, shippingRatioOfPrice, calcCost, suggestedPrice]);
+
+  const filteredProducts = useMemo(() => {
+    return products.filter((p) => {
+      const matchesName = !searchText || p.name.toLowerCase().includes(searchText.toLowerCase());
+      const matchesCategory = !categoryFilter || p.category === categoryFilter;
+      return matchesName && matchesCategory;
+    });
+  }, [products, searchText, categoryFilter]);
 
   const getErrorMessage = (err: unknown): string => {
     if (err instanceof Error) return err.message;
@@ -376,6 +389,17 @@ export default function AdminProductsPage() {
       dataIndex: 'name',
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
+      render: (name: string, record) => (
+        <div>
+          <div style={{ fontWeight: 500 }}>{name}</div>
+          {record.brand && (
+            <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 1 }}>{record.brand}</div>
+          )}
+          {record.sku && !record.brand && (
+            <div style={{ fontSize: 12, color: '#bfbfbf', marginTop: 1, fontFamily: 'monospace' }}>{record.sku}</div>
+          )}
+        </div>
+      ),
     },
     {
       title: 'Precio',
@@ -388,9 +412,7 @@ export default function AdminProductsPage() {
       title: 'Categoría',
       dataIndex: 'category',
       key: 'category',
-      filters: CATEGORY_OPTIONS.map(c => ({ text: c.label, value: c.value })),
-      render: (category: string) => <Tag>{getProductCategoryLabel(category)}</Tag>,
-      onFilter: (value, record) => record.category.indexOf(value as string) === 0,
+      render: (category: string) => <Tag color="blue">{getProductCategoryLabel(category)}</Tag>,
     },
     {
       title: 'SKU',
@@ -413,6 +435,17 @@ export default function AdminProductsPage() {
       dataIndex: 'stock',
       key: 'stock',
       sorter: (a, b) => (a.stock ?? 0) - (b.stock ?? 0),
+      render: (stock: number) => {
+        const s = stock ?? 0;
+        const color = s === 0 ? '#cf1322' : s <= 5 ? '#d46b08' : '#389e0d';
+        const bg    = s === 0 ? '#fff1f0' : s <= 5 ? '#fff7e6' : '#f6ffed';
+        const border = s === 0 ? '#ffa39e' : s <= 5 ? '#ffd591' : '#b7eb8f';
+        return (
+          <span style={{ background: bg, color, border: `1px solid ${border}`, borderRadius: 12, padding: '2px 10px', fontWeight: 600, fontSize: 13 }}>
+            {s}
+          </span>
+        );
+      },
     },
      {
       title: 'Medidas/Compatibilidad',
@@ -495,14 +528,78 @@ return (
         </Space>
       </div>
 
+      {/* --- Stats row --- */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
+        <Col xs={24} sm={8}>
+          <Card size="small" style={{ borderRadius: 10, background: '#f0f5ff', border: '1px solid #adc6ff' }}>
+            <Statistic
+              title="Total productos"
+              value={products.length}
+              valueStyle={{ color: '#0A2A66', fontWeight: 700 }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={8}>
+          <Card size="small" style={{ borderRadius: 10, background: '#fff7e6', border: '1px solid #ffd591' }}>
+            <Statistic
+              title="Stock bajo (≤ 5)"
+              value={products.filter(p => (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5).length}
+              valueStyle={{ color: '#d46b08', fontWeight: 700 }}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={8}>
+          <Card size="small" style={{ borderRadius: 10, background: '#fff1f0', border: '1px solid #ffa39e' }}>
+            <Statistic
+              title="Sin stock"
+              value={products.filter(p => (p.stock ?? 0) === 0).length}
+              valueStyle={{ color: '#cf1322', fontWeight: 700 }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
     <Card>
+      {/* --- Search & filter toolbar --- */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+        <Input
+          allowClear
+          prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+          placeholder="Buscar por nombre..."
+          value={searchText}
+          onChange={e => setSearchText(e.target.value)}
+          style={{ width: 260 }}
+        />
+        <Select
+          allowClear
+          placeholder="Filtrar por categoría"
+          style={{ width: 210 }}
+          value={categoryFilter || undefined}
+          onChange={(v: string | undefined) => setCategoryFilter(v ?? '')}
+          options={CATEGORY_OPTIONS}
+        />
+        {(searchText || categoryFilter) && (
+          <Button
+            icon={<ClearOutlined />}
+            onClick={() => { setSearchText(''); setCategoryFilter(''); }}
+          >
+            Limpiar filtros
+          </Button>
+        )}
+        <Typography.Text type="secondary" style={{ marginLeft: 'auto', fontSize: 13 }}>
+          {filteredProducts.length === products.length
+            ? `${products.length} productos`
+            : `${filteredProducts.length} de ${products.length} productos`}
+        </Typography.Text>
+      </div>
+
       <Spin spinning={loading}>
         <Table
-          dataSource={products}
+          dataSource={filteredProducts}
           columns={columns}
           rowKey="id"
-          scroll={{ x: "max-content" }} // Responsividad
-            pagination={{ pageSize: 10, showSizeChanger: true, responsive: true }}
+          scroll={{ x: 'max-content' }}
+          pagination={{ pageSize: 10, showSizeChanger: true, responsive: true, showTotal: (total) => `${total} productos` }}
         />
       </Spin>
     </Card>
