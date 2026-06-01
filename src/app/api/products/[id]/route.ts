@@ -78,6 +78,7 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
       price,
       currency: body.currency ?? existingProduct.currency,
       images: Array.isArray(body.images) ? body.images : existingProduct.images,
+      imageUrl: body.imageUrl !== undefined ? body.imageUrl : existingProduct.imageUrl,
       sku: body.sku ?? existingProduct.sku,
       diagramNumber: body.diagramNumber ?? existingProduct.diagramNumber,
       category: body.category ?? existingProduct.category,
@@ -87,9 +88,14 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
     };
 
     // Añadimos tags solo si vienen en el payload para evitar errores P2022
-    // en entornos donde la migración aún no se aplicó.
     if (body.tags !== undefined) {
       updateData.tags = Array.isArray(body.tags) ? body.tags : existingProduct.tags;
+    }
+    if (body.brand !== undefined) {
+      updateData.brand = body.brand ?? null;
+    }
+    if (body.meliExport !== undefined) {
+      updateData.meliExport = Boolean(body.meliExport);
     }
 
     // Backfill slug if the product doesn't have one yet
