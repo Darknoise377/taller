@@ -59,7 +59,7 @@ function buildGenAI(): InstanceType<typeof GoogleGenAI> | null {
  * Returns base64 string of the generated image, or null on failure.
  */
 async function generateVariationFromReference(
-  genAI: GoogleGenAI,
+  genAI: InstanceType<typeof GoogleGenAI>,
   refBase64: string,
   mimeType: string,
   extraPrompt: string,
