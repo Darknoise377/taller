@@ -47,7 +47,6 @@ export async function POST(req: Request) {
     try {
       const { text: imageDesc } = await generateText({
         model: getAIModel(),
-        maxTokens: 150,
         messages: [
           {
             role: 'user',
