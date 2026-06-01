@@ -5,11 +5,11 @@ import type { Product } from '@/types/product';
 import type { Combo } from '@/types/combo';
 import type { HomeSearchCatalogItem } from '@/lib/seo/searchSuggestions';
 
-const activeComboWhere = {
+const activeComboWhere = () => ({
   isActive: true,
   stock: { gt: 0 },
   OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }],
-};
+});
 
 export async function getCategoriesForSeo(): Promise<CategoryItem[]> {
   try {
@@ -220,14 +220,14 @@ const comboPublicInclude = {
 export async function getFeaturedCombosForHome(limit = 6): Promise<Combo[]> {
   try {
     let combos = await prisma.combo.findMany({
-      where: { ...activeComboWhere, isFeatured: true },
+      where: { ...activeComboWhere(), isFeatured: true },
       include: comboPublicInclude,
       orderBy: [{ soldCount: 'desc' }, { createdAt: 'desc' }],
       take: limit,
     });
     if (combos.length === 0) {
       combos = await prisma.combo.findMany({
-        where: activeComboWhere,
+        where: activeComboWhere(),
         include: comboPublicInclude,
         orderBy: [{ isFeatured: 'desc' }, { soldCount: 'desc' }],
         take: limit,
@@ -242,7 +242,7 @@ export async function getFeaturedCombosForHome(limit = 6): Promise<Combo[]> {
 export async function getActiveCombosList(): Promise<Combo[]> {
   try {
     const combos = await prisma.combo.findMany({
-      where: activeComboWhere,
+      where: activeComboWhere(),
       include: comboPublicInclude,
       orderBy: [{ isFeatured: 'desc' }, { soldCount: 'desc' }, { createdAt: 'desc' }],
     });
@@ -269,7 +269,7 @@ export async function getComboBySlugForSeo(slug: string): Promise<Combo | null> 
 export async function getComboSlugsForSitemap(): Promise<Array<{ slug: string; updatedAt: Date }>> {
   try {
     return await prisma.combo.findMany({
-      where: activeComboWhere,
+      where: activeComboWhere(),
       select: { slug: true, updatedAt: true },
     });
   } catch {

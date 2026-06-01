@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { verifyAdminToken } from '@/lib/auth';
 import { COOKIE_NAME } from '@/config/admin';
@@ -127,9 +128,9 @@ export async function POST(req: Request) {
       },
     });
 
+    revalidatePath('/combos');
     return NextResponse.json(combo, { status: 201 });
   } catch (err) {
-    console.error('[POST /api/admin/combos]', err);
     return NextResponse.json({ error: 'Error al crear combo' }, { status: 500 });
   }
 }

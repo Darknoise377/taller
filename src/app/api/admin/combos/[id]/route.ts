@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { verifyAdminToken } from '@/lib/auth';
 import { COOKIE_NAME } from '@/config/admin';
@@ -127,6 +128,8 @@ export async function PUT(
       });
     });
 
+    revalidatePath('/combos');
+    revalidatePath(`/combos/${combo.slug}`);
     return NextResponse.json(combo);
   } catch (err) {
     console.error('[PUT /api/admin/combos/[id]]', err);
@@ -151,6 +154,8 @@ export async function DELETE(
     }
 
     await prisma.combo.delete({ where: { id } });
+    revalidatePath('/combos');
+    revalidatePath(`/combos/${existing.slug}`);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('[DELETE /api/admin/combos/[id]]', err);
