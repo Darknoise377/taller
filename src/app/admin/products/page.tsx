@@ -181,7 +181,9 @@ export default function AdminProductsPage() {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await productService.getProducts();
+      const res = await fetch('/api/admin/products');
+      if (!res.ok) throw new Error('Error al obtener productos');
+      const data = await res.json() as Product[];
       setProducts(data);
     } catch (error) {
       console.error('Error fetching products:', error);
