@@ -52,7 +52,18 @@ export const meliApi = {
     meliRequest<MeliItemResponse>('PUT', `/items/${itemId}`, payload),
 
   getItem: (itemId: string) =>
-    meliRequest<MeliItemResponse>('GET', `/items/${itemId}`),
+    meliRequest<MeliItemDetail>('GET', `/items/${itemId}`),
+
+  /** Up to 20 IDs per request (MeLi limit) */
+  getItemsByIds: (itemIds: string[]) => {
+    const ids = itemIds.join(',');
+    const attrs =
+      'id,title,status,sub_status,tags,permalink,price,available_quantity,health';
+    return meliRequest<MeliMultigetEntry[]>(
+      'GET',
+      `/items?ids=${ids}&attributes=${attrs}`,
+    );
+  },
 
   pauseItem: (itemId: string) =>
     meliRequest<MeliItemResponse>('PUT', `/items/${itemId}`, { status: 'paused' }),
@@ -115,6 +126,24 @@ export interface MeliItemResponse {
   status: string;
   permalink: string;
 }
+
+/** Full item payload from GET /items/{id} or multiget body */
+export interface MeliItemDetail {
+  id: string;
+  title: string;
+  price: number;
+  available_quantity: number;
+  status: string;
+  sub_status?: string[];
+  tags?: string[];
+  permalink?: string;
+  health?: number | null;
+}
+
+type MeliMultigetEntry = {
+  code: number;
+  body: MeliItemDetail | null;
+};
 
 export interface MeliOrderResponse {
   id: number;

@@ -116,12 +116,11 @@ export default function FloatingCombos({
 
   const isProductDetail = !!pathname?.match(/^\/products\/[^/]+$/);
   const isComboDetail = !!pathname?.match(/^\/combos\/[^/]+$/);
-  // md:bottom-24 (6rem = 96px) keeps the FAB above the WhatsApp button (h-14=56px at md:bottom-6 → top at 80px)
-  const fabBottom = isComboDetail
-    ? "bottom-[calc(9.25rem+env(safe-area-inset-bottom))] md:bottom-24"
-    : isProductDetail
-      ? "bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-24"
-      : "bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-24";
+  // Mobile: FloatingButtons (WA) sits at bottom-20 (5rem) on normal pages, its 56px button top = ~8.5rem.
+  // On product detail it sits at 8.5rem, top = ~12rem. Add 0.75rem gap above each.
+  const fabBottom = isProductDetail
+    ? "bottom-[calc(12.75rem+env(safe-area-inset-bottom))] md:bottom-24"
+    : "bottom-[calc(9.25rem+env(safe-area-inset-bottom))] md:bottom-24";
 
   const sheet = (
     <AnimatePresence>

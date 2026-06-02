@@ -8,6 +8,7 @@
  */
 import { prisma } from '@/lib/prisma';
 import { meliApi, type MeliItemPayload, type MeliCategoryAttribute } from './client';
+import { mapApiStatusToDb } from './listingStatus';
 import { calculateMeliPrice, getMeliConfig } from './pricing';
 import type { Product } from '@prisma/client';
 
@@ -206,7 +207,7 @@ export async function publishProduct(productId: string): Promise<{ meliItemId: s
     data: {
       productId,
       meliItemId: response.id,
-      status: 'ACTIVE',
+      status: mapApiStatusToDb(response.status),
       meliPrice,
     },
   });
@@ -230,9 +231,17 @@ export async function updateStockAndPrice(productId: string): Promise<void> {
     available_quantity: product.stock,
   });
 
+  let statusUpdate = listing.status;
+  try {
+    const meliItem = await meliApi.getItem(listing.meliItemId);
+    statusUpdate = mapApiStatusToDb(meliItem.status);
+  } catch {
+    // keep previous status if live check fails
+  }
+
   await prisma.meliListing.update({
     where: { productId },
-    data: { meliPrice, lastSyncAt: new Date() },
+    data: { meliPrice, status: statusUpdate, lastSyncAt: new Date() },
   });
 }
 
@@ -290,6 +299,35 @@ export async function bulkSyncProducts(): Promise<{
 }> {
   const products = await prisma.product.findMany({
     where: { meliExport: true, stock: { gt: 0 } },
+    select: { id: true },
+  });
+
+  let synced = 0;
+  const errors: { productId: string; error: string }[] = [];
+
+  await runInBatches(products, 5, 1000, async ({ id }) => {
+    try {
+      await syncProduct(id);
+      synced++;
+    } catch (err) {
+      errors.push({ productId: id, error: err instanceof Error ? err.message : String(err) });
+    }
+  });
+
+  return { synced, errors };
+}
+
+/** Sync only products marked for MeLi that are not published yet (or in ERROR). */
+export async function bulkSyncPendingProducts(): Promise<{
+  synced: number;
+  errors: { productId: string; error: string }[];
+}> {
+  const products = await prisma.product.findMany({
+    where: {
+      meliExport: true,
+      stock: { gt: 0 },
+      OR: [{ meliListing: null }, { meliListing: { status: 'ERROR' } }],
+    },
     select: { id: true },
   });
 
