@@ -115,6 +115,7 @@ export default function SecurityAuditPage() {
         />
         <select
           value={action}
+          aria-label="Filtrar por acción"
           onChange={(e) => {
             setPage(1);
             setAction(e.target.value);

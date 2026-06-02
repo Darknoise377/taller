@@ -17,7 +17,7 @@ const SELLER_SKU  = 'SELLER_SKU';
 const BRAND       = 'BRAND';
 const PART_NUMBER = 'PART_NUMBER';
 
-type UnresolvedAttr = Pick<MeliCategoryAttribute, 'id' | 'name' | 'value_type' | 'values'>;
+type UnresolvedAttr = Pick<MeliCategoryAttribute, 'id' | 'name' | 'value_type' | 'values' | 'allowed_units'>;
 
 /**
  * Uses AI to infer values for required MeLi attributes that couldn't be resolved
@@ -41,6 +41,10 @@ async function resolveAttributesWithAI(
   const attrsDesc = unresolved.map((a) => {
     if (a.values && a.values.length > 0) {
       return `- ${a.name} (ID: ${a.id}): elige EXACTAMENTE uno de: ${a.values.map((v) => `"${v.name}"`).join(', ')}`;
+    }
+    if (a.value_type === 'number_unit') {
+      const units = a.allowed_units?.map((u) => u.name).join(', ');
+      return `- ${a.name} (ID: ${a.id}): número con unidad${units ? `, unidades permitidas: ${units}` : ''}, ej. "1 L" o "500 mL"`;
     }
     return `- ${a.name} (ID: ${a.id}): texto libre, máximo 60 caracteres`;
   }).join('\n');
@@ -117,9 +121,21 @@ async function buildAttributes(
         // Cannot resolve deterministically — let AI pick from allowed values
         unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: attr.values });
       }
-    } else if (attr.value_type === 'string' || attr.value_type === 'number') {
-      // Free-text required attr — let AI infer a contextual value
-      unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: undefined });
+    } else if (attr.id === 'UNIT_VOLUME') {
+      // Try to extract volume directly from product name/description before calling AI
+      const volumeMatch = [product.name, product.description ?? ''].join(' ')
+        .match(/(\d+(?:[.,]\d+)?)\s*(ml|mL|cc|CC|l(?!\w)|L(?!\w)|gal(?:ón|on)?)/i);
+      if (volumeMatch) {
+        const num = volumeMatch[1].replace(',', '.');
+        const rawUnit = volumeMatch[2].toLowerCase();
+        const unit = rawUnit === 'l' ? 'L' : rawUnit === 'ml' || rawUnit === 'cc' ? 'mL' : rawUnit;
+        result.push({ id: 'UNIT_VOLUME', value_name: `${num} ${unit}` });
+      } else {
+        unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: undefined, allowed_units: attr.allowed_units });
+      }
+    } else if (attr.value_type === 'string' || attr.value_type === 'number' || attr.value_type === 'number_unit') {
+      // Free-text / numeric required attr — let AI infer a contextual value
+      unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: undefined, allowed_units: attr.allowed_units });
     } else {
       console.warn(
         `[meli/sync] Required attribute "${attr.id}" (${attr.name}) not resolved for product ${product.id} category ${categoryId}`,
