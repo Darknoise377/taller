@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -28,6 +28,15 @@ function formatCOP(value: number) {
 export default function ComboDetailClient({ combo }: { combo: Combo }) {
   const { addComboToCart, openCartModal } = useCart();
   const [added, setAdded] = useState(false);
+
+  // Registrar visita a este combo en analytics
+  useEffect(() => {
+    fetch('/api/analytics/pageview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: `/combos/${combo.slug}`, label: combo.name }),
+    }).catch(() => {/* ignorar errores de analytics */});
+  }, [combo.slug, combo.name]);
 
   const savings = combo.originalPrice - combo.price;
   const savingsPct = Math.round((savings / combo.originalPrice) * 100);

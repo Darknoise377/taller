@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyAdminToken } from '@/lib/auth';
 import { COOKIE_NAME } from '@/config/admin';
-import { loadAdminMeliListings } from '@/lib/meli/adminListings';
+import { loadAdminMeliListings, summarizeListings } from '@/lib/meli/adminListings';
 
 async function requireAdmin() {
   const cookieStore = await cookies();
@@ -29,12 +29,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const items = await loadAdminMeliListings({ refreshLive: refresh });
-    const summary = {
-      total: items.length,
-      synced: items.filter((i) => i.syncState === 'synced').length,
-      pending: items.filter((i) => i.syncState === 'pending').length,
-      issues: items.filter((i) => i.syncState === 'issues').length,
-    };
+    const summary = summarizeListings(items);
     return NextResponse.json({ items, summary, refreshed: refresh });
   } catch (err) {
     console.error('[meli/listings]', err);

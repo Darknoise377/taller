@@ -54,6 +54,15 @@ export const meliApi = {
   getItem: (itemId: string) =>
     meliRequest<MeliItemDetail>('GET', `/items/${itemId}`),
 
+  /** Total visits per item in a date range (multi-get, up to ~50 ids) */
+  getItemsVisits: (itemIds: string[], dateFrom: string, dateTo: string) => {
+    const ids = itemIds.join(',');
+    return meliRequest<MeliVisitsEntry[]>(
+      'GET',
+      `/items/visits?ids=${ids}&date_from=${dateFrom}&date_to=${dateTo}`,
+    );
+  },
+
   /** Up to 20 IDs per request (MeLi limit) */
   getItemsByIds: (itemIds: string[]) => {
     const ids = itemIds.join(',');
@@ -143,6 +152,11 @@ export interface MeliItemDetail {
 type MeliMultigetEntry = {
   code: number;
   body: MeliItemDetail | null;
+};
+
+export type MeliVisitsEntry = {
+  item_id: string;
+  total_visits?: number;
 };
 
 export interface MeliOrderResponse {

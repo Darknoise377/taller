@@ -130,9 +130,9 @@ body {
 /* Global seasonal themes */
 :root[data-season-theme="mundial_2026"] body {
   background-image:
-    radial-gradient(circle at 90% 5%, rgba(255, 205, 0, 0.28), transparent 42%),
-    radial-gradient(circle at 12% 10%, rgba(0, 56, 147, 0.22), transparent 47%),
-    radial-gradient(circle at 46% 100%, rgba(206, 17, 38, 0.16), transparent 45%);
+    radial-gradient(circle at 88% 6%, rgba(0, 56, 168, 0.18), transparent 44%),
+    radial-gradient(circle at 10% 8%, rgba(252, 209, 22, 0.14), transparent 42%),
+    radial-gradient(circle at 48% 100%, rgba(0, 72, 180, 0.12), transparent 48%);
   background-attachment: fixed;
 }
 
@@ -247,7 +247,7 @@ body {
   left: 0;
   right: 0;
   height: 48px;
-  background: linear-gradient(180deg, rgba(255, 205, 0, 0.28), transparent);
+  background: linear-gradient(180deg, rgba(0, 56, 168, 0.22), transparent);
 }
 
 .seasonal-ribbon {
@@ -307,12 +307,12 @@ body {
   opacity: 0.97;
 }
 
-.seasonal-confetti-0 { background: #ffcd00; }
-.seasonal-confetti-1 { background: #003893; }
-.seasonal-confetti-2 { background: #ce1126; }
+.seasonal-confetti-0 { background: #0038A8; }
+.seasonal-confetti-1 { background: #FCD116; }
+.seasonal-confetti-2 { background: #CE1126; }
 .seasonal-confetti-3 { background: #ffffff; }
-.seasonal-confetti-4 { background: #22a06b; }
-.seasonal-confetti-5 { background: #f57c00; }
+.seasonal-confetti-4 { background: #002D8C; }
+.seasonal-confetti-5 { background: #FFE55A; }
 
 .seasonal-confetti-layer .seasonal-confetti:nth-child(8n + 1) { left: 4%; animation-delay: 0.1s; animation-duration: 7.2s; }
 .seasonal-confetti-layer .seasonal-confetti:nth-child(8n + 2) { left: 16%; animation-delay: 0.7s; animation-duration: 8.6s; }

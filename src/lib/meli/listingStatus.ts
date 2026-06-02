@@ -1,7 +1,7 @@
 import { MeliListingStatus } from '@prisma/client';
 import type { MeliItemDetail } from './client';
 
-export type MeliSyncFilter = 'all' | 'synced' | 'pending' | 'issues';
+export type MeliSyncFilter = 'all' | 'synced' | 'pending' | 'issues' | 'out_of_sync';
 
 export type MeliListingHealth = 'ok' | 'warning' | 'error' | 'unknown';
 
@@ -124,7 +124,7 @@ export function getSyncState(row: {
   meliItemId?: string;
   localStatus?: string;
   live?: ParsedMeliLiveStatus | null;
-}): 'synced' | 'pending' | 'issues' {
+}): 'synced' | 'pending' | 'issues' | 'out_of_sync' {
   if (!row.meliItemId) {
     return row.meliExport ? 'pending' : 'synced';
   }
@@ -138,10 +138,11 @@ export function getSyncState(row: {
 
 export function matchesSyncFilter(
   filter: MeliSyncFilter,
-  syncState: 'synced' | 'pending' | 'issues',
+  syncState: 'synced' | 'pending' | 'issues' | 'out_of_sync',
 ): boolean {
   if (filter === 'all') return true;
   if (filter === 'synced') return syncState === 'synced';
   if (filter === 'pending') return syncState === 'pending';
+  if (filter === 'out_of_sync') return syncState === 'out_of_sync';
   return syncState === 'issues';
 }

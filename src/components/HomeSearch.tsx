@@ -28,6 +28,12 @@ export default function HomeSearch({ products }: HomeSearchProps) {
   const doSearch = (q: string) => {
     const query = q.trim();
     if (!query) return;
+    // Fire-and-forget: registrar búsqueda en analytics (no bloquea navegación)
+    fetch('/api/analytics/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query }),
+    }).catch(() => {/* ignorar errores de analytics */});
     router.push(`/products?q=${encodeURIComponent(query)}`);
   };
 

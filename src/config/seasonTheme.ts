@@ -37,19 +37,20 @@ export const SEASON_THEME_META: Record<SeasonalThemeKey, SeasonThemeMeta> = {
   mundial_2026: {
     label: 'Mundial 2026',
     icon: '⚽',
+    // Estadio nocturno: azul profundo de Colombia + destellos dorados Copa
     heroBg:
-      'bg-gradient-to-br from-[#fff8cf] via-[#ffe89b] to-[#cde2ff] dark:from-[#1d1300] dark:via-[#0b1f4f] dark:to-[#2a0810]',
-    badgeBg: 'bg-[#FCD116]/30 dark:bg-[#FCD116]/20 border-[#FCD116]/50',
-    badgeText: 'text-[#8B6A00] dark:text-[#FFE588]',
-    glowPrimary: 'bg-[#0038A8]/20 dark:bg-[#1A67FF]/25',
-    glowSecondary: 'bg-[#CE1126]/18 dark:bg-[#FF4B63]/24',
-    pulseOne: 'bg-[#FCD116]/35 dark:bg-[#FCD116]/30',
-    pulseTwo: 'bg-[#0038A8]/30 dark:bg-[#0038A8]/34',
+      'bg-gradient-to-br from-[#ddeeff] via-[#edf4ff] to-[#d8f0e2] dark:from-[#00081e] dark:via-[#001038] dark:to-[#000d14]',
+    badgeBg: 'bg-[#0038A8]/15 dark:bg-[#2055CC]/20 border-[#0038A8]/30',
+    badgeText: 'text-[#002880] dark:text-[#7AAEFF]',
+    glowPrimary: 'bg-[#0038A8]/22 dark:bg-[#1A67FF]/28',
+    glowSecondary: 'bg-[#FCD116]/20 dark:bg-[#FCD116]/18',
+    pulseOne: 'bg-[#0038A8]/28 dark:bg-[#1A55DD]/32',
+    pulseTwo: 'bg-[#FCD116]/28 dark:bg-[#FCD116]/24',
     comboGradient:
-      'from-[#FCD116] via-[#0038A8] to-[#CE1126] dark:from-[#8B6A00] dark:via-[#0038A8] dark:to-[#8B1020]',
-    comboGlow: 'bg-[#FCD116]/30',
-    comboBadge: 'bg-[#FCD116]/25 text-[#1a1200] border-[#FCD116]/40',
-    comboCta: 'bg-[#0038A8] text-white hover:bg-[#002a7a]',
+      'from-[#0038A8] via-[#002D8C] to-[#CE1126] dark:from-[#001A60] dark:via-[#002480] dark:to-[#8B1020]',
+    comboGlow: 'bg-[#0038A8]/28',
+    comboBadge: 'bg-[#0038A8]/20 text-white border-[#4080FF]/30',
+    comboCta: 'bg-[#FCD116] text-[#001050] hover:bg-[#e8c000] font-bold',
   },
   halloween: {
     label: 'Halloween',

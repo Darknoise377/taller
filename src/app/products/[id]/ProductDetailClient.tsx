@@ -367,6 +367,18 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
     }
   }, [product.id, product.name, product.imageUrl, product.price, product.currency]);
 
+  // Registrar visita a este producto en analytics
+  useEffect(() => {
+    fetch('/api/analytics/pageview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        path: `/products/${product.id}`,
+        label: product.name,
+      }),
+    }).catch(() => {/* ignorar errores de analytics */});
+  }, [product.id, product.name]);
+
   useEffect(() => {
     if (relatedProducts.length <= 1) return;
     if (typeof window === "undefined") return;

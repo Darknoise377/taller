@@ -457,6 +457,10 @@ model MeliListing {
   meliItemId String   @unique       // e.g. "MCO1234567890"
   status     MeliListingStatus @default(ACTIVE)
   meliPrice  Float               // Last price sent to MeLi (after markup)
+  syncedProductPrice Float?      // Snapshot at last successful sync
+  syncedProductStock   Int?       // Snapshot at last successful sync
+  meliVisitsTotal      Int?       // Cached visits (last 30d) from MeLi API
+  meliVisitsCheckedAt  DateTime?
   lastSyncAt DateTime @default(now())
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -486,4 +490,30 @@ model MeliOrder {
   updatedAt    DateTime @updatedAt
 
   @@index([meliOrderId])
+}
+
+// ─────────────────────────────────────────────────────────────────
+// 📊 ANALYTICS
+// ─────────────────────────────────────────────────────────────────
+
+/// Registra cada búsqueda realizada en la tienda.
+model SearchLog {
+  id        Int      @id @default(autoincrement())
+  query     String   // Término buscado (normalizado a minúsculas)
+  results   Int      @default(0) // Cantidad de resultados encontrados
+  createdAt DateTime @default(now())
+
+  @@index([query])
+  @@index([createdAt])
+}
+
+/// Registra visitas a páginas de productos y secciones clave.
+model PageView {
+  id        Int      @id @default(autoincrement())
+  path      String   // e.g. /products/cadena-moto-420, /combos, /repuestos
+  label     String?  // Nombre legible (nombre del producto, sección)
+  createdAt DateTime @default(now())
+
+  @@index([path])
+  @@index([createdAt])
 }

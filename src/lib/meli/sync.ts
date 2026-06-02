@@ -209,6 +209,8 @@ export async function publishProduct(productId: string): Promise<{ meliItemId: s
       meliItemId: response.id,
       status: mapApiStatusToDb(response.status),
       meliPrice,
+      syncedProductPrice: product.price,
+      syncedProductStock: product.stock,
     },
   });
 
@@ -241,7 +243,13 @@ export async function updateStockAndPrice(productId: string): Promise<void> {
 
   await prisma.meliListing.update({
     where: { productId },
-    data: { meliPrice, status: statusUpdate, lastSyncAt: new Date() },
+    data: {
+      meliPrice,
+      status: statusUpdate,
+      lastSyncAt: new Date(),
+      syncedProductPrice: product.price,
+      syncedProductStock: product.stock,
+    },
   });
 }
 

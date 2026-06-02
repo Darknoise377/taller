@@ -43,7 +43,10 @@ interface ListingRow {
   lastSyncAt?: string;
   meliExport: boolean;
   stock: number;
-  syncState: 'synced' | 'pending' | 'issues';
+  syncState: 'synced' | 'pending' | 'issues' | 'out_of_sync';
+  resyncReasons: string[];
+  meliVisitsTotal?: number | null;
+  meliVisitsCheckedAt?: string | null;
   live?: {
     statusLabel: string;
     statusDetail: string | null;
@@ -63,12 +66,14 @@ interface ListingsSummary {
   synced: number;
   pending: number;
   issues: number;
+  outOfSync: number;
 }
 
 const FILTER_OPTIONS: { value: MeliSyncFilter; label: string }[] = [
   { value: 'all', label: 'Todos' },
   { value: 'synced', label: 'Sincronizados' },
   { value: 'pending', label: 'Pendientes' },
+  { value: 'out_of_sync', label: 'Cambios sin sync' },
   { value: 'issues', label: 'Con alertas' },
 ];
 
@@ -151,6 +156,8 @@ export default function AdminMeliPage() {
     }
     return listings.filter((row) => row.syncState === syncFilter);
   }, [listings, syncFilter]);
+
+  const outOfSyncCount = summary?.outOfSync ?? listings.filter((r) => r.syncState === 'out_of_sync').length;
 
   const handleConnect = () => { window.location.href = '/api/meli/auth'; };
 
@@ -328,10 +335,44 @@ export default function AdminMeliPage() {
         if (row.syncState === 'pending') {
           return <Tag color="orange">Pendiente</Tag>;
         }
+        if (row.syncState === 'out_of_sync') {
+          return (
+            <Tooltip title={row.resyncReasons.join(' · ')}>
+              <Tag color="volcano">Re-sincronizar</Tag>
+            </Tooltip>
+          );
+        }
         if (row.syncState === 'issues') {
           return <Tag color="red">Revisar</Tag>;
         }
         return <Tag color="green">Sincronizado</Tag>;
+      },
+    },
+    {
+      title: 'Visitas MeLi (30d)',
+      key: 'visits',
+      width: 120,
+      align: 'center',
+      render: (_: unknown, row) => {
+        if (!row.meliItemId) return <Text type="secondary">—</Text>;
+        if (row.meliVisitsTotal == null) {
+          return (
+            <Tooltip title="Pulsa «Actualizar estados» para cargar visitas desde MeLi">
+              <Text type="secondary" className="text-xs">Sin datos</Text>
+            </Tooltip>
+          );
+        }
+        return (
+          <Tooltip
+            title={
+              row.meliVisitsCheckedAt
+                ? `Consultado: ${new Date(row.meliVisitsCheckedAt).toLocaleString('es-CO')}`
+                : 'Últimos 30 días'
+            }
+          >
+            <Text strong>{row.meliVisitsTotal.toLocaleString('es-CO')}</Text>
+          </Tooltip>
+        );
       },
     },
     {
@@ -380,6 +421,11 @@ export default function AdminMeliPage() {
             {healthIcon(row.live.health)}
             <div>
               <Tag color={tagColor}>{row.live.statusLabel}</Tag>
+              {row.resyncReasons.length > 0 && (
+                <div className="text-xs text-volcano mt-1 max-w-[220px] leading-snug">
+                  {row.resyncReasons[0]}
+                </div>
+              )}
               {detail && (
                 <div className="text-xs text-slate-500 mt-1 max-w-[200px] leading-snug">
                   {detail}
@@ -580,8 +626,16 @@ export default function AdminMeliPage() {
             <Tag>{summary.total} productos</Tag>
             <Tag color="green">{summary.synced} sincronizados</Tag>
             <Tag color="orange">{summary.pending} pendientes</Tag>
+            <Tag color="volcano">{summary.outOfSync} con cambios locales</Tag>
             <Tag color="red">{summary.issues} con alertas</Tag>
           </div>
+        )}
+
+        {outOfSyncCount > 0 && (
+          <Paragraph type="warning" className="!mb-3 text-sm">
+            Hay {outOfSyncCount} producto(s) con cambios en la tienda que aún no se reflejan en MeLi.
+            Usa <strong>Actualizar</strong> en cada fila o <strong>Sync pendientes</strong> / <strong>Sincronizar todos</strong>.
+          </Paragraph>
         )}
 
         <Segmented

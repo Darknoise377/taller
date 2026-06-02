@@ -1,6 +1,8 @@
 import { prisma } from '@/lib/prisma';
-import { meliApi } from './client';
-import { parseMeliLiveStatus } from './listingStatus';
+import { meliApi, type MeliVisitsEntry } from './client';
+import { parseMeliLiveStatus, getSyncState, type MeliSyncFilter } from './listingStatus';
+import { calculateMeliPriceSync, getMeliConfig } from './pricing';
+import { detectResyncReasons, needsResync } from './outOfSync';
 
 export type AdminMeliListingRow = {
   productId: string;
@@ -13,8 +15,20 @@ export type AdminMeliListingRow = {
   meliExport: boolean;
   stock: number;
   live: ReturnType<typeof parseMeliLiveStatus>;
-  syncState: 'synced' | 'pending' | 'issues';
+  syncState: 'synced' | 'pending' | 'issues' | 'out_of_sync';
+  resyncReasons: string[];
+  meliVisitsTotal?: number | null;
+  meliVisitsCheckedAt?: string | null;
 };
+
+function visitsDateRange(days = 30): { from: string; to: string } {
+  const to = new Date();
+  const from = new Date(to.getTime() - days * 24 * 60 * 60 * 1000);
+  return {
+    from: from.toISOString().slice(0, 10),
+    to: to.toISOString().slice(0, 10),
+  };
+}
 
 async function fetchLiveItemsMap(meliItemIds: string[]) {
   const map = new Map<string, ReturnType<typeof parseMeliLiveStatus>>();
@@ -38,6 +52,62 @@ async function fetchLiveItemsMap(meliItemIds: string[]) {
   return map;
 }
 
+async function fetchVisitsMap(meliItemIds: string[]) {
+  const map = new Map<string, number>();
+  if (meliItemIds.length === 0) return map;
+
+  const { from, to } = visitsDateRange(30);
+
+  for (let i = 0; i < meliItemIds.length; i += 20) {
+    const chunk = meliItemIds.slice(i, i + 20);
+    try {
+      const entries = await meliApi.getItemsVisits(chunk, from, to);
+      const list = Array.isArray(entries) ? entries : [];
+      for (const row of list as MeliVisitsEntry[]) {
+        if (row?.item_id && typeof row.total_visits === 'number') {
+          map.set(row.item_id, row.total_visits);
+        }
+      }
+    } catch (err) {
+      console.warn('[meli/adminListings] visits batch failed:', err);
+    }
+    if (i + 20 < meliItemIds.length) {
+      await new Promise((r) => setTimeout(r, 400));
+    }
+  }
+
+  return map;
+}
+
+export type AdminMeliListingsSummary = {
+  total: number;
+  synced: number;
+  pending: number;
+  issues: number;
+  outOfSync: number;
+};
+
+export function summarizeListings(items: AdminMeliListingRow[]): AdminMeliListingsSummary {
+  return {
+    total: items.length,
+    synced: items.filter((i) => i.syncState === 'synced').length,
+    pending: items.filter((i) => i.syncState === 'pending').length,
+    issues: items.filter((i) => i.syncState === 'issues').length,
+    outOfSync: items.filter((i) => i.syncState === 'out_of_sync').length,
+  };
+}
+
+export function filterBySyncState(
+  items: AdminMeliListingRow[],
+  filter: MeliSyncFilter,
+): AdminMeliListingRow[] {
+  if (filter === 'all') return items;
+  if (filter === 'synced') {
+    return items.filter((row) => Boolean(row.meliItemId) && row.syncState === 'synced');
+  }
+  return items.filter((row) => row.syncState === filter);
+}
+
 /**
  * Loads catalog rows for admin MeLi page and optionally refreshes live status from MeLi API.
  */
@@ -50,13 +120,19 @@ export async function loadAdminMeliListings(options: {
       name: true,
       price: true,
       stock: true,
+      updatedAt: true,
       meliExport: true,
+      meliListingType: true,
       meliListing: {
         select: {
           meliItemId: true,
           status: true,
           meliPrice: true,
           lastSyncAt: true,
+          syncedProductPrice: true,
+          syncedProductStock: true,
+          meliVisitsTotal: true,
+          meliVisitsCheckedAt: true,
         },
       },
     },
@@ -68,39 +144,92 @@ export async function loadAdminMeliListings(options: {
     .filter((id): id is string => Boolean(id));
 
   let liveMap = new Map<string, ReturnType<typeof parseMeliLiveStatus>>();
+  let visitsMap = new Map<string, number>();
 
   if (options.refreshLive && meliItemIds.length > 0) {
-    liveMap = await fetchLiveItemsMap(meliItemIds);
+    [liveMap, visitsMap] = await Promise.all([
+      fetchLiveItemsMap(meliItemIds),
+      fetchVisitsMap(meliItemIds),
+    ]);
+
+    const checkedAt = new Date();
 
     await Promise.all(
       products.map(async (p) => {
         const itemId = p.meliListing?.meliItemId;
-        if (!itemId) return;
+        if (!itemId || !p.meliListing) return;
+
         const live = liveMap.get(itemId);
-        if (!live) return;
+        const visits = visitsMap.get(itemId);
+
         await prisma.meliListing.update({
           where: { productId: p.id },
-          data: { status: live.dbStatus },
+          data: {
+            ...(live ? { status: live.dbStatus } : {}),
+            ...(visits !== undefined
+              ? { meliVisitsTotal: visits, meliVisitsCheckedAt: checkedAt }
+              : {}),
+          },
         });
       }),
     );
   }
 
-  const { getSyncState } = await import('./listingStatus');
+  const meliConfig = await getMeliConfig();
+  const rows: AdminMeliListingRow[] = [];
 
-  return products.map((p) => {
+  for (const p of products) {
     const meliItemId = p.meliListing?.meliItemId;
     const live = meliItemId && liveMap.size > 0 ? liveMap.get(meliItemId) ?? null : null;
     const localStatus = p.meliListing?.status;
 
-    const syncState = getSyncState({
+    let expectedMeliPrice: number | undefined;
+    if (p.meliListing) {
+      try {
+        expectedMeliPrice = calculateMeliPriceSync(
+          p.price,
+          p.meliListingType || meliConfig.defaultListingType,
+          meliConfig.extraMarginPercent,
+          meliConfig.fixedCostCOP,
+        ).meliPrice;
+      } catch {
+        expectedMeliPrice = undefined;
+      }
+    }
+
+    const resyncReasons = detectResyncReasons({
+      productUpdatedAt: p.updatedAt,
+      lastSyncAt: p.meliListing?.lastSyncAt,
+      basePrice: p.price,
+      stock: p.stock,
+      meliItemId,
+      storedMeliPrice: p.meliListing?.meliPrice,
+      expectedMeliPrice,
+      syncedProductPrice: p.meliListing?.syncedProductPrice,
+      syncedProductStock: p.meliListing?.syncedProductStock,
+      livePrice: live?.livePrice,
+      liveStock: live?.availableQuantity,
+    });
+
+    let syncState = getSyncState({
       meliExport: p.meliExport,
       meliItemId,
       localStatus,
       live,
     });
 
-    return {
+    if (meliItemId && needsResync(resyncReasons) && syncState === 'synced') {
+      syncState = 'out_of_sync';
+    } else if (meliItemId && needsResync(resyncReasons) && syncState === 'issues') {
+      // keep issues but reasons will show both
+    } else if (meliItemId && needsResync(resyncReasons)) {
+      syncState = 'out_of_sync';
+    }
+
+    const visitsFromRefresh =
+      meliItemId && visitsMap.has(meliItemId) ? visitsMap.get(meliItemId)! : undefined;
+
+    rows.push({
       productId: p.id,
       productName: p.name,
       basePrice: p.price,
@@ -112,6 +241,15 @@ export async function loadAdminMeliListings(options: {
       stock: p.stock,
       live,
       syncState,
-    };
-  });
+      resyncReasons,
+      meliVisitsTotal:
+        visitsFromRefresh ?? p.meliListing?.meliVisitsTotal ?? null,
+      meliVisitsCheckedAt:
+        visitsFromRefresh !== undefined
+          ? new Date().toISOString()
+          : p.meliListing?.meliVisitsCheckedAt?.toISOString() ?? null,
+    });
+  }
+
+  return rows;
 }
