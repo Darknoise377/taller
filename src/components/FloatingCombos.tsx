@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import ComboCard from "@/components/ComboCard";
+import Link from 'next/link';
 import type { Combo } from "@/types/combo";
 import { ChevronLeftIcon, ChevronRightIcon, SparklesIcon } from "@heroicons/react/24/outline";
 
@@ -55,6 +56,49 @@ export default function FloatingCombos({ excludeProductId, initialFilter = "most
         return copy;
     }
   }, [combos, filter]);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    let raf = 0;
+    const update = () => {
+      const first = scroller.firstElementChild as HTMLElement | null;
+      if (!first) return;
+      const childWidth = first.offsetWidth + parseFloat(getComputedStyle(first).marginRight || '0');
+      const idx = Math.round(scroller.scrollLeft / childWidth);
+      setCurrentIndex(Math.max(0, Math.min(idx, sorted.length - 1)));
+    };
+
+    const onScroll = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    };
+
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    const resizeObserver = new ResizeObserver(() => update());
+    resizeObserver.observe(scroller);
+
+    // initial update
+    update();
+
+    return () => {
+      scroller.removeEventListener('scroll', onScroll);
+      resizeObserver.disconnect();
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [sorted.length]);
+
+  const scrollToIndex = (index: number) => {
+    const s = scrollerRef.current; if (!s) return;
+    const first = s.firstElementChild as HTMLElement | null;
+    if (!first) return;
+    const childWidth = first.offsetWidth + parseFloat(getComputedStyle(first).marginRight || '0');
+    const left = Math.max(0, Math.min(index, sorted.length - 1)) * childWidth;
+    s.scrollTo({ left, behavior: 'smooth' });
+  };
 
   const handlePrev = () => {
     const s = scrollerRef.current; if (!s) return; s.scrollBy({ left: -s.clientWidth * 0.7, behavior: 'smooth' });
@@ -112,6 +156,18 @@ export default function FloatingCombos({ excludeProductId, initialFilter = "most
                 ))}
               </div>
             </div>
+            {/* Dots / indicators */}
+            <div className="mt-2 flex items-center gap-2 justify-center">
+              {sorted.map((_, i) => (
+                <button
+                  key={`dot-${i}`}
+                  type="button"
+                  aria-label={`Ir al combo ${i + 1}`}
+                  onClick={() => scrollToIndex(i)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all ${i === currentIndex ? 'bg-[#0A2A66] scale-110' : 'bg-slate-300'}`}
+                />
+              ))}
+            </div>
             <div className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden sm:block">
               <button onClick={handleNext} aria-label="Siguiente" className="p-2 rounded-full bg-white text-slate-700 shadow">
                 <ChevronRightIcon className="w-4 h-4" />
@@ -120,7 +176,7 @@ export default function FloatingCombos({ excludeProductId, initialFilter = "most
           </div>
 
           <div className="mt-3 flex items-center gap-2">
-            <a href="/combos" className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition">Ver catálogo de combos</a>
+            <Link href="/combos" className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition">Ver catálogo de combos</Link>
             <span className="text-xs text-slate-500">{combos.length} disponibles</span>
           </div>
         </div>

@@ -131,6 +131,7 @@ export async function POST(req: Request) {
     revalidatePath('/combos');
     return NextResponse.json(combo, { status: 201 });
   } catch (err) {
+    console.error('[POST /api/admin/combos] error:', err);
     return NextResponse.json({ error: 'Error al crear combo' }, { status: 500 });
   }
 }
