@@ -13,6 +13,7 @@ import AnnouncementBar from '@/components/AnnouncementBar';
 import SeasonalGlobalTheme from '@/components/SeasonalGlobalTheme';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ClientOnlyWidgets from '@/components/ClientOnlyWidgets';
+import FloatingCombos from '@/components/FloatingCombos';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from "./theme-provider";
 import { getBaseUrl, getBaseUrlAsUrl } from "@/lib/site";
@@ -173,6 +174,8 @@ export default function RootLayout({
               <CartModal />
               {/* 🔹 Botones flotantes + Asistente IA (solo cliente) */}
               <ClientOnlyWidgets />
+              {/* 🔹 Panel flotante de combos (siempre visible) */}
+              <FloatingCombos />
               {/* 🔹 Toast notifications */}
               <Toaster position="top-center" richColors closeButton />
               {/* 🔹 Footer dinámico */}
