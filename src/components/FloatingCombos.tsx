@@ -15,6 +15,7 @@ import {
   GiftIcon,
 } from "@heroicons/react/24/outline";
 import { isCheckoutPath } from "@/utils/routeUtils";
+import { useCart } from "@/context/CartContext";
 
 type ComboFilter = "most_sold" | "max_savings" | "low_stock" | "featured";
 
@@ -37,13 +38,21 @@ export default function FloatingCombos({
   limit = 12,
 }: FloatingCombosProps) {
   const pathname = usePathname();
+  const { isCartModalOpen } = useCart();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [waMenuOpen, setWaMenuOpen] = useState(false);
   const [combos, setCombos] = useState<Combo[]>([]);
   const [filter, setFilter] = useState<ComboFilter>(initialFilter);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    const handler = (e: Event) => setWaMenuOpen((e as CustomEvent<{ open: boolean }>).detail.open);
+    window.addEventListener('wa-menu-change', handler);
+    return () => window.removeEventListener('wa-menu-change', handler);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -260,7 +269,7 @@ export default function FloatingCombos({
         aria-expanded={open}
         aria-haspopup="dialog"
         whileTap={{ scale: 0.96 }}
-        className={`fixed right-4 z-[75] inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] px-4 py-2.5 text-white shadow-[0_8px_32px_rgba(10,42,102,0.45)] ring-2 ring-white/20 transition hover:shadow-[0_12px_40px_rgba(10,42,102,0.55)] ${fabBottom} ${open ? "pointer-events-none opacity-0" : "opacity-100"}`}
+        className={`fixed right-4 z-[75] inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] px-4 py-2.5 text-white shadow-[0_8px_32px_rgba(10,42,102,0.45)] ring-2 ring-white/20 transition hover:shadow-[0_12px_40px_rgba(10,42,102,0.55)] ${fabBottom} ${open || isCartModalOpen || waMenuOpen ? "pointer-events-none opacity-0" : "opacity-100"}`}
       >
         <span className="relative flex h-6 w-6 items-center justify-center">
           <SparklesIcon className="h-5 w-5" />

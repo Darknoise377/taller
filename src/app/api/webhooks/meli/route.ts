@@ -26,7 +26,10 @@ const MELI_SECRET = process.env.MELI_SECRET_KEY ?? '';
  */
 function validateSignature(req: Request): boolean {
   // Skip validation in local dev when secret is not set
-  if (!MELI_SECRET) return true;
+  if (!MELI_SECRET) {
+    console.warn('[meli/webhook] MELI_SECRET_KEY not set — skipping signature check');
+    return true;
+  }
 
   const xSignature = req.headers.get('x-signature');
   const xRequestId = req.headers.get('x-request-id');
@@ -60,7 +63,10 @@ export async function POST(req: Request) {
   }
 
   if (!validateSignature(req)) {
-    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    // Log for debugging but always return 200 — MeLi will retry on non-2xx,
+    // and bots scanning the endpoint shouldn't get a useful error response.
+    console.warn('[meli/webhook] signature validation failed — ignored');
+    return NextResponse.json({ ok: true }, { status: 200 });
   }
 
   let body: { topic?: string; resource?: string; _id?: number; user_id?: number };

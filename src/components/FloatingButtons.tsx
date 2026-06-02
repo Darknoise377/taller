@@ -168,7 +168,11 @@ export default function FloatingButtons() {
 
         {/* Main trigger button */}
         <motion.button
-          onClick={() => setMenuOpen((o) => !o)}
+          onClick={() => {
+            const next = !menuOpen;
+            setMenuOpen(next);
+            window.dispatchEvent(new CustomEvent('wa-menu-change', { detail: { open: next } }));
+          }}
           aria-label="Abrir opciones de WhatsApp"
           aria-expanded={menuOpen}
           whileHover={{ scale: 1.08 }}
