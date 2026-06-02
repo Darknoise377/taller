@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Demasiadas solicitudes" }, { status: 429 });
   }
 
-  let body: { transactionId?: unknown; referenceCode?: unknown };
+  let body: { transactionId?: unknown; referenceCode?: unknown; env?: unknown };
   try {
     body = await req.json();
   } catch {
@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
     typeof body.transactionId === "string" ? body.transactionId.trim() : null;
   const referenceCode =
     typeof body.referenceCode === "string" ? body.referenceCode.trim() : null;
+  const env = typeof body.env === "string" ? body.env.trim().toLowerCase() : null;
 
   if (!transactionId || !TX_RE.test(transactionId)) {
     return NextResponse.json({ error: "transactionId inválido" }, { status: 400 });
@@ -55,11 +56,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ status: order.status, alreadyFinal: true });
   }
 
-  // ── Verificar con la API de Wompi server-side ──────────────────────────────
-  const isProduction = process.env.NEXT_PUBLIC_WOMPI_ENV === "production";
-  const wompiBase = isProduction
-    ? "https://production.wompi.co/v1"
-    : "https://sandbox.wompi.co/v1";
+  const primaryEnv = env === "production" || env === "prod"
+    ? "production"
+    : env === "sandbox"
+      ? "sandbox"
+      : process.env.NEXT_PUBLIC_WOMPI_ENV === "production"
+        ? "production"
+        : "sandbox";
+
+  const envCandidates = primaryEnv === "production" ? ["production", "sandbox"] : ["sandbox", "production"];
 
   const privateKey = process.env.WOMPI_PRIVATE_KEY ?? "";
   const fetchHeaders: HeadersInit = privateKey
@@ -68,16 +73,32 @@ export async function POST(req: NextRequest) {
 
   let txData: Record<string, unknown>;
   try {
-    const wompiRes = await fetch(`${wompiBase}/transactions/${transactionId}`, {
-      headers: fetchHeaders,
-      cache: "no-store",
-    });
-    if (!wompiRes.ok) {
+    let wompiRes: Response | null = null;
+    for (const candidate of envCandidates) {
+      const wompiBase = candidate === "production"
+        ? "https://production.wompi.co/v1"
+        : "https://sandbox.wompi.co/v1";
+
+      const attempt = await fetch(`${wompiBase}/transactions/${transactionId}`, {
+        headers: fetchHeaders,
+        cache: "no-store",
+      });
+
+      if (attempt.ok) {
+        wompiRes = attempt;
+        break;
+      }
+
+      wompiRes = attempt;
+    }
+
+    if (!wompiRes?.ok) {
       return NextResponse.json(
         { error: "Transacción no encontrada en Wompi" },
         { status: 502 }
       );
     }
+
     const payload = await wompiRes.json();
     txData = (payload?.data ?? {}) as Record<string, unknown>;
   } catch (err) {

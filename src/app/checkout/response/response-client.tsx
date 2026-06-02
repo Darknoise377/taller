@@ -39,6 +39,7 @@ export default function ResponseClient() {
   const referenceCode = useMemo(() => searchParams.get("referenceCode"), [searchParams]);
   const transactionId = useMemo(() => searchParams.get("id"), [searchParams]);
   const provider = useMemo(() => searchParams.get("provider"), [searchParams]);
+  const wompiEnv = useMemo(() => searchParams.get("env"), [searchParams]);
 
   useEffect(() => {
     const isWompi = provider === "wompi" || !!transactionId;
@@ -48,7 +49,7 @@ export default function ResponseClient() {
       fetch("/api/wompi/update-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transactionId, referenceCode }),
+        body: JSON.stringify({ transactionId, referenceCode, env: wompiEnv }),
         cache: "no-store",
       })
         .then((res) => (res.ok ? res.json() : null))
@@ -84,7 +85,7 @@ export default function ResponseClient() {
         setLoading(false);
       }
     }
-  }, [searchParams, referenceCode, transactionId, provider]);
+  }, [searchParams, referenceCode, transactionId, provider, wompiEnv]);
 
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
     `Hola! Acabo de realizar un pedido con referencia #${referenceCode ?? "—"} y quiero consultarlo.`
