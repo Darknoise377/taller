@@ -116,10 +116,12 @@ export default function FloatingCombos({
 
   const isProductDetail = !!pathname?.match(/^\/products\/[^/]+$/);
   const isComboDetail = !!pathname?.match(/^\/combos\/[^/]+$/);
-  const fabBottom =
-    isProductDetail || isComboDetail
-      ? "bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-6"
-      : "bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-6";
+  // md:bottom-24 (6rem = 96px) keeps the FAB above the WhatsApp button (h-14=56px at md:bottom-6 → top at 80px)
+  const fabBottom = isComboDetail
+    ? "bottom-[calc(9.25rem+env(safe-area-inset-bottom))] md:bottom-24"
+    : isProductDetail
+      ? "bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-24"
+      : "bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-24";
 
   const sheet = (
     <AnimatePresence>
