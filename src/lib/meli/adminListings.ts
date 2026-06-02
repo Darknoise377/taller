@@ -58,10 +58,11 @@ async function fetchVisitsMap(meliItemIds: string[]) {
 
   const { from, to } = visitsDateRange(30);
 
-  for (let i = 0; i < meliItemIds.length; i += 20) {
-    const chunk = meliItemIds.slice(i, i + 20);
+  // MeLi Colombia (MCO) visits endpoint only accepts 1 item per request
+  for (let i = 0; i < meliItemIds.length; i++) {
+    const itemId = meliItemIds[i];
     try {
-      const entries = await meliApi.getItemsVisits(chunk, from, to);
+      const entries = await meliApi.getItemsVisits([itemId], from, to);
       const list = Array.isArray(entries) ? entries : [];
       for (const row of list as MeliVisitsEntry[]) {
         if (row?.item_id && typeof row.total_visits === 'number') {
@@ -69,10 +70,11 @@ async function fetchVisitsMap(meliItemIds: string[]) {
         }
       }
     } catch (err) {
-      console.warn('[meli/adminListings] visits batch failed:', err);
+      console.warn(`[meli/adminListings] visits failed for ${itemId}:`, err);
     }
-    if (i + 20 < meliItemIds.length) {
-      await new Promise((r) => setTimeout(r, 400));
+    // Throttle: avoid rate-limiting (MeLi allows ~10 req/s on free tier)
+    if (i + 1 < meliItemIds.length) {
+      await new Promise((r) => setTimeout(r, 120));
     }
   }
 
