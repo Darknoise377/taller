@@ -25,6 +25,7 @@ import { getProductCategoryLabel } from '@/constants/productCategories';
 import { Facebook, Instagram } from 'lucide-react';
 import ProductReviews from "@/components/ProductReviews";
 import { BLUR_DATA_URL } from "@/lib/placeholder";
+import FloatingCombos from '@/components/FloatingCombos';
 
 // --- Prop Interfaces ---
 interface ProductDetailClientProps {
@@ -948,6 +949,9 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
           </span>
         </button>
       </div>
+
+      {/* Floating combos panel (reusable) */}
+      <FloatingCombos excludeProductId={product.id} />
 
     </div>
   );
