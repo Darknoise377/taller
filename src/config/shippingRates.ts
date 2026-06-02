@@ -17,9 +17,12 @@ export type SeasonalThemeKey =
   | "black_week"
   | "navidad";
 
+export type SeasonalVisualIntensity = "subtle" | "medium" | "full";
+
 export interface SeasonalCampaignConfig {
   enabled: boolean;
   key: SeasonalThemeKey;
+  intensity: SeasonalVisualIntensity;
   title: string;
   subtitle: string;
   ctaLabel: string;
@@ -44,6 +47,7 @@ export const CONTRAENTREGA_SURCHARGE = 8_000;
 export const DEFAULT_SEASONAL_CAMPAIGN: SeasonalCampaignConfig = {
   enabled: false,
   key: "none",
+  intensity: "full",
   title: "",
   subtitle: "",
   ctaLabel: "Ver ofertas",

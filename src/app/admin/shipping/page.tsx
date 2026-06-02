@@ -15,6 +15,7 @@ import {
 import {
   DEFAULT_SEASONAL_CAMPAIGN,
   DEFAULT_SHIPPING_CONFIG,
+  type SeasonalVisualIntensity,
   type SeasonalThemeKey,
   type ShippingConfig,
   type ShippingRegion,
@@ -35,6 +36,12 @@ const SEASON_OPTIONS: Array<{ value: SeasonalThemeKey; label: string }> = [
   { value: "amor_amistad", label: "Amor y amistad" },
   { value: "black_week", label: "Black Week" },
   { value: "navidad", label: "Diciembre / Navidad" },
+];
+
+const INTENSITY_OPTIONS: Array<{ value: SeasonalVisualIntensity; label: string }> = [
+  { value: "subtle", label: "Suave" },
+  { value: "medium", label: "Media" },
+  { value: "full", label: "Full (pro)" },
 ];
 
 export default function ShippingSettingsPage() {
@@ -374,6 +381,24 @@ export default function ShippingSettingsPage() {
               placeholder="/combos"
               className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0A2A66]"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-500 dark:text-slate-400 mb-1.5">
+              Intensidad visual
+            </label>
+            <select
+              title="Intensidad visual de temporada"
+              value={seasonalCampaign.intensity}
+              onChange={(e) => updateSeasonal("intensity", e.target.value as SeasonalVisualIntensity)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#0A2A66]"
+            >
+              {INTENSITY_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="md:col-span-2">
