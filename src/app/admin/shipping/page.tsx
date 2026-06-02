@@ -30,10 +30,11 @@ type ShippingMode = "always_free" | "threshold";
 const SEASON_OPTIONS: Array<{ value: SeasonalThemeKey; label: string }> = [
   { value: "none", label: "Sin temporada" },
   { value: "mundial_2026", label: "Mundial 2026" },
+  { value: "halloween", label: "Halloween" },
   { value: "independencia", label: "Independencia" },
   { value: "amor_amistad", label: "Amor y amistad" },
   { value: "black_week", label: "Black Week" },
-  { value: "navidad", label: "Navidad" },
+  { value: "navidad", label: "Diciembre / Navidad" },
 ];
 
 export default function ShippingSettingsPage() {

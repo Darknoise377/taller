@@ -10,6 +10,7 @@ import CartModal from '@/components/CartModal';
 import ConditionalNavbar from '@/components/ConditionalNavbar';
 import DynamicFooter from '@/components/DynamicFooter';
 import AnnouncementBar from '@/components/AnnouncementBar';
+import SeasonalGlobalTheme from '@/components/SeasonalGlobalTheme';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import ClientOnlyWidgets from '@/components/ClientOnlyWidgets';
 import { Toaster } from 'sonner';
@@ -154,6 +155,8 @@ export default function RootLayout({
               <AnnouncementBar />
               {/* 🔹 Navbar (oculto en /admin a través de ConditionalNavbar) */}
               <ConditionalNavbar />
+              {/* 🔹 Tema global por temporada (Mundial, Halloween, Navidad, etc.) */}
+              <SeasonalGlobalTheme />
               <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

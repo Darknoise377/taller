@@ -153,6 +153,15 @@ const seasonVisuals: Record<SeasonalThemeKey, {
     pulseOne: "bg-[#22A06B]/30 dark:bg-[#22A06B]/30",
     pulseTwo: "bg-[#1E88E5]/30 dark:bg-[#1E88E5]/30",
   },
+  halloween: {
+    heroBg: "bg-gradient-to-br from-[#fff4e8] via-[#ffe5cc] to-[#ffd9b5] dark:from-[#1E0C00] dark:via-[#2A1304] dark:to-[#30140B]",
+    badgeBg: "bg-[#ED6C02]/15 dark:bg-[#ED6C02]/25",
+    badgeText: "text-[#B95000] dark:text-[#FFC27A]",
+    glowPrimary: "bg-[#ED6C02]/20 dark:bg-[#ED6C02]/25",
+    glowSecondary: "bg-[#7B1FA2]/15 dark:bg-[#7B1FA2]/20",
+    pulseOne: "bg-[#ED6C02]/30 dark:bg-[#ED6C02]/30",
+    pulseTwo: "bg-[#7B1FA2]/30 dark:bg-[#7B1FA2]/30",
+  },
   independencia: {
     heroBg: "bg-gradient-to-br from-[#fff6e6] via-[#ffe8d0] to-[#ffd8b6] dark:from-[#2A1500] dark:via-[#3A1E04] dark:to-[#5A2F0A]",
     badgeBg: "bg-[#F57C00]/15 dark:bg-[#F57C00]/25",

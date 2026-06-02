@@ -11,6 +11,7 @@ export interface ShippingRegion {
 export type SeasonalThemeKey =
   | "none"
   | "mundial_2026"
+  | "halloween"
   | "independencia"
   | "amor_amistad"
   | "black_week"
