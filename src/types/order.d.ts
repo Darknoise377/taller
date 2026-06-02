@@ -5,6 +5,8 @@ export type PaymentMethod = 'CONTRAENTREGA' | 'PAYU' | 'WOMPI' | 'MERCADO_LIBRE'
 
 export interface OrderCreatePayload {
   total: number;
+  shippingCost?: number;
+  stockRestoredAt?: string | null;
   paymentMethod: PaymentMethod;
   customerName: string;
   customerEmail: string;
@@ -42,6 +44,8 @@ export interface Order {
   id: number;
   referenceCode: string;
   total: number;
+  shippingCost?: number;
+  stockRestoredAt?: string | null;
   status: OrderStatus;
   paymentMethod: PaymentMethod;
   customerName: string;

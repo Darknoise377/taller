@@ -18,6 +18,7 @@ import {
   getProductCategoryLabel,
 } from "@/constants/productCategories";
 import { ProductCard } from '../../components/ProductCard';
+import FloatingCombos from '@/components/FloatingCombos';
 
 type ProductsClientProps = {
   initialProducts: ProductType[];
@@ -624,6 +625,7 @@ export default function ProductsClient({
           </>
         )}
       </AnimatePresence>
+    <FloatingCombos />
     </div>
   );
 }

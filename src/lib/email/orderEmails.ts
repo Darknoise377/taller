@@ -48,6 +48,7 @@ export type BaseOrderForEmail = {
   customerName: string;
   customerEmail: string;
   total: number;
+  shippingCost?: number;
   currency: string;
   paymentMethod: PaymentMethod;
   status: OrderStatus;
@@ -126,7 +127,8 @@ function productRowsHtml(products: OrderProductLine[], currency: string): string
     .join("");
 }
 
-function stepsHtml(paymentMethod: PaymentMethod): string {
+function stepsHtml(paymentMethod: PaymentMethod, status: OrderStatus): string {
+  const isPaid = status === "APPROVED";
   const steps =
     paymentMethod === "CONTRAENTREGA"
       ? [
@@ -136,7 +138,7 @@ function stepsHtml(paymentMethod: PaymentMethod): string {
           { emoji: "💳", label: "Paga al recibir", done: false },
         ]
       : [
-          { emoji: "✅", label: "Pago confirmado", done: true },
+          { emoji: isPaid ? "✅" : "⏳", label: isPaid ? "Pago confirmado" : "Pago pendiente por confirmar", done: isPaid },
           { emoji: "📦", label: "Preparando tu pedido", done: false },
           { emoji: "🚚", label: "Envío en camino", done: false },
           { emoji: "🎉", label: "¡Entregado!", done: false },
@@ -157,6 +159,7 @@ function stepsHtml(paymentMethod: PaymentMethod): string {
 
 function buildConfirmationEmail(order: BaseOrderForEmail): string {
   const isContraentrega = order.paymentMethod === "CONTRAENTREGA";
+  const isPaid = order.status === "APPROVED";
   const whatsappUrl = waUrl(order.referenceCode, order.customerName, order.phone);
 
   const shippingBlock =
@@ -192,8 +195,8 @@ function buildConfirmationEmail(order: BaseOrderForEmail): string {
       <span style="color:white;font-weight:800;font-size:18px;">A&amp;R</span>
     </div>
     <p style="margin:0 0 4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#64748b;">TALLER DE MOTOS A&amp;R</p>
-    <h1 style="margin:0;font-size:24px;font-weight:700;color:#0f172a;">${isContraentrega ? "¡Pedido registrado!" : "¡Gracias por tu compra!"}</h1>
-    <p style="margin:8px 0 0;color:#64748b;font-size:14px;">${isContraentrega ? "Hemos registrado tu pedido con pago contraentrega." : "Tu pago fue confirmado. ¡Pronto tendrás tu pedido!"}</p>
+    <h1 style="margin:0;font-size:24px;font-weight:700;color:#0f172a;">${isContraentrega ? "¡Pedido registrado!" : isPaid ? "¡Gracias por tu compra!" : "¡Pedido recibido!"}</h1>
+    <p style="margin:8px 0 0;color:#64748b;font-size:14px;">${isContraentrega ? "Hemos registrado tu pedido con pago contraentrega." : isPaid ? "Tu pago fue confirmado. ¡Pronto tendrás tu pedido!" : "Recibimos tu orden. El pago está pendiente de confirmación en Wompi."}</p>
   </div>
   <div style="background:white;border-radius:16px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:20px;">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:8px;">
@@ -216,7 +219,14 @@ function buildConfirmationEmail(order: BaseOrderForEmail): string {
       </thead>
       <tbody>${productRowsHtml(order.products, order.currency)}</tbody>
     </table>
-    <div style="border-top:2px solid #e2e8f0;padding-top:14px;text-align:right;">
+    ${
+      order.shippingCost && order.shippingCost > 0
+        ? `<div style="padding-top:10px;text-align:right;font-size:14px;color:#64748b;">
+            Envío: <strong style="color:#0f172a;">${formatMoney(order.shippingCost, order.currency)}</strong>
+          </div>`
+        : ""
+    }
+    <div style="border-top:2px solid #e2e8f0;padding-top:14px;margin-top:10px;text-align:right;">
       <span style="font-size:14px;color:#64748b;">Total: </span>
       <span style="font-size:22px;font-weight:700;color:#0A2A66;">${formatMoney(order.total, order.currency)}</span>
     </div>
@@ -224,7 +234,7 @@ function buildConfirmationEmail(order: BaseOrderForEmail): string {
   </div>
   <div style="background:white;border-radius:16px;padding:24px 28px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:20px;">
     <p style="margin:0 0 18px;font-size:16px;font-weight:700;color:#0f172a;">¿Qué sigue con tu pedido?</p>
-    ${stepsHtml(order.paymentMethod)}
+    ${stepsHtml(order.paymentMethod, order.status)}
   </div>
   ${waBlock}
   <div style="text-align:center;color:#94a3b8;font-size:12px;">
@@ -359,9 +369,12 @@ async function dispatchEmailJob(
   if (type === "ORDER_CREATED") {
     const order = payload as BaseOrderForEmail;
     const isContraentrega = order.paymentMethod === "CONTRAENTREGA";
+    const isPaid = order.status === "APPROVED";
     const subject = isContraentrega
       ? `📥 Pedido recibido — Contraentrega #${order.referenceCode.slice(0, 8).toUpperCase()} | A&R`
-      : `✅ Pago confirmado — Pedido #${order.referenceCode.slice(0, 8).toUpperCase()} | A&R`;
+      : isPaid
+        ? `✅ Pago confirmado — Pedido #${order.referenceCode.slice(0, 8).toUpperCase()} | A&R`
+        : `📥 Pedido recibido — Pago pendiente #${order.referenceCode.slice(0, 8).toUpperCase()} | A&R`;
 
     const result = await resend.emails.send({
       from: FROM_EMAIL,

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { OrderStatus, PaymentMethod } from "@prisma/client";
 import { sendOrderCreatedEmail } from "@/lib/email/orderEmails";
 import { rateLimit } from "@/lib/rateLimit";
+import { releaseOrderStock, shouldReleaseStockForStatus } from "@/lib/orders/restoreStock";
 
 const REF_RE = /^[a-zA-Z0-9_\-]{1,120}$/;
 const TX_RE  = /^[a-zA-Z0-9_\-]{1,100}$/;
@@ -140,14 +141,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: "PENDING" });
   }
 
-  // Persistir en DB
-  await prisma.order.update({
-    where: { id: order.id },
-    data: {
-      status: newStatus,
-      transactionId,
-      rawResponse: txData as object,
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.order.update({
+      where: { id: order.id },
+      data: {
+        status: newStatus,
+        transactionId,
+        rawResponse: txData as object,
+      },
+    });
+
+    if (shouldReleaseStockForStatus(newStatus)) {
+      await releaseOrderStock(order.id, tx);
+    }
   });
 
   console.log(`✅ update-order: ${referenceCode} → ${newStatus}`);

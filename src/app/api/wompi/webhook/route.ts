@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { sendOrderStatusChangedEmail } from '@/lib/email/orderEmails';
 import { isValidWompiWebhookSignature, mapWompiStatusToOrderStatus, type WompiWebhookPayload } from '@/lib/payments/wompi';
 import { shouldApplyIncomingOrderStatus } from '@/lib/orders/status';
+import { releaseOrderStock, shouldReleaseStockForStatus } from '@/lib/orders/restoreStock';
 
 export async function POST(req: Request) {
   try {
@@ -30,6 +32,7 @@ export async function POST(req: Request) {
     const order = await prisma.order.findUnique({
       where: { referenceCode },
       select: {
+        id: true,
         referenceCode: true,
         customerName: true,
         customerEmail: true,
@@ -71,14 +74,20 @@ export async function POST(req: Request) {
 
     const canUpdateStatus = shouldApplyIncomingOrderStatus(order.status, newStatus);
 
-    await prisma.order.update({
-      where: { referenceCode },
-      data: {
-        ...(canUpdateStatus ? { status: newStatus } : {}),
-        transactionId,
-        paymentNetwork: 'WOMPI',
-        rawResponse: body,
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.order.update({
+        where: { referenceCode },
+        data: {
+          ...(canUpdateStatus ? { status: newStatus } : {}),
+          transactionId,
+          paymentNetwork: 'WOMPI',
+          rawResponse: body as Prisma.InputJsonValue,
+        },
+      });
+
+      if (canUpdateStatus && shouldReleaseStockForStatus(newStatus)) {
+        await releaseOrderStock(order.id, tx);
+      }
     });
 
     if (canUpdateStatus) {

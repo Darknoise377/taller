@@ -184,9 +184,40 @@ body {
   overflow: hidden;
 }
 
+@media (max-width: 767px) {
+  .seasonal-cup,
+  .seasonal-love-title,
+  .seasonal-blackweek-title,
+  .seasonal-ball {
+    display: none;
+  }
+
+  .seasonal-ribbon,
+  .seasonal-lantern,
+  .seasonal-tree,
+  .seasonal-gift {
+    transform: scale(0.72);
+    opacity: 0.65;
+  }
+}
+
 .seasonal-overlay-subtle { opacity: 0.72; }
 .seasonal-overlay-medium { opacity: 0.88; }
 .seasonal-overlay-full { opacity: 1; }
+
+.seasonal-overlay-entrance::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.14), transparent 55%);
+  animation: seasonal-entrance-flash 6.8s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes seasonal-entrance-flash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
 
 .seasonal-confetti-layer,
 .seasonal-bat-layer,
@@ -246,6 +277,8 @@ body {
   position: absolute;
   top: 74px;
   left: 30px;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0.12em;
   font-size: 11px;
   letter-spacing: 0.14em;
   color: #f8fafc;

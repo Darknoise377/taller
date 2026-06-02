@@ -93,7 +93,10 @@ model Order {
   id              Int           @id @default(autoincrement())
   referenceCode   String        @unique @default(uuid())
   total           Float
+  shippingCost    Float         @default(0)
   currency        String        @default("COP")
+  /// Set when inventory was returned after cancel/decline/expiry (idempotent guard).
+  stockRestoredAt DateTime?
   status          OrderStatus   @default(PENDING)
   transactionId   String?
   paymentMethod   PaymentMethod @default(CONTRAENTREGA)
@@ -144,6 +147,7 @@ model Order {
   @@index([createdAt])
   @@index([customerEmail])
   @@index([status])
+  @@index([status, paymentMethod, createdAt])
 }
 
 //

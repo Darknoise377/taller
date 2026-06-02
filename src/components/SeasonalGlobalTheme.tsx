@@ -76,7 +76,10 @@ export default function SeasonalGlobalTheme() {
   if (activeKey === "none") return null;
 
   return (
-    <div className={`seasonal-overlay seasonal-overlay-${intensity}`} aria-hidden="true">
+    <div
+      className={`seasonal-overlay seasonal-overlay-${intensity} ${showEntrance ? "seasonal-overlay-entrance" : ""}`}
+      aria-hidden="true"
+    >
       {activeKey === "mundial_2026" && (
         <>
           <div className="seasonal-top-banner" />

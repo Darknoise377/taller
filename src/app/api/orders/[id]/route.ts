@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { Prisma, OrderStatus } from "@prisma/client";
 import { sendOrderStatusChangedEmail } from "@/lib/email/orderEmails";
 import { canTransitionOrderStatus } from "@/lib/orders/status";
+import { releaseOrderStock, shouldReleaseStockForStatus } from "@/lib/orders/restoreStock";
 import { getRequestActorFromCookie, writeSecurityAuditLog } from "@/lib/security/auditDb";
 
 /**
@@ -175,10 +176,22 @@ export async function PATCH(
       }
     }
 
-    const updatedOrder = await prisma.order.update({
-      where: { id: numericId },
-      data: dataToUpdate,
-      include: { products: { include: { product: true } } },
+    const statusChangingToRelease =
+      typeof status === "string" &&
+      shouldReleaseStockForStatus(status as OrderStatus);
+
+    const updatedOrder = await prisma.$transaction(async (tx) => {
+      const updated = await tx.order.update({
+        where: { id: numericId },
+        data: dataToUpdate,
+        include: { products: { include: { product: true } } },
+      });
+
+      if (statusChangingToRelease && previousOrderForEmail) {
+        await releaseOrderStock(numericId, tx);
+      }
+
+      return updated;
     });
 
     await writeSecurityAuditLog({
@@ -250,26 +263,16 @@ export async function DELETE(
     const deletedOrder = await prisma.$transaction(async (tx) => {
       const orderToDelete = await tx.order.findUnique({
         where: { id: numericId },
-        include: {
-          products: {
-            select: { productId: true, quantity: true },
-          },
-        },
+        select: { id: true, referenceCode: true },
       });
 
       if (!orderToDelete) {
         throw new Error(`La orden ${id} no existe`);
       }
 
-      // Revert inventory consumed by the order before deleting it.
-      for (const item of orderToDelete.products) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { increment: item.quantity } },
-        });
-      }
+      await releaseOrderStock(numericId, tx);
 
-      // ✅ Eliminar productos asociados antes de la orden
+      await tx.orderCombo.deleteMany({ where: { orderId: numericId } });
       await tx.orderProduct.deleteMany({ where: { orderId: numericId } });
       await tx.order.delete({ where: { id: numericId } });
 

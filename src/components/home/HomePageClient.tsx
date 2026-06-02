@@ -35,6 +35,7 @@ import {
   type SeasonalCampaignConfig,
   type SeasonalThemeKey,
 } from '@/config/shippingRates';
+import { getSeasonMeta } from '@/config/seasonTheme';
 
 // TIPOS DE DATOS
 interface SlideData {
@@ -126,80 +127,6 @@ const categoryConfig: Partial<Record<
   },
 };
 
-const seasonVisuals: Record<SeasonalThemeKey, {
-  heroBg: string;
-  badgeBg: string;
-  badgeText: string;
-  glowPrimary: string;
-  glowSecondary: string;
-  pulseOne: string;
-  pulseTwo: string;
-}> = {
-  none: {
-    heroBg: "bg-gradient-to-br from-[#e9f2ff] via-[#f8fbff] to-[#e3edff] dark:from-[#07122E] dark:via-[#0A2A66] dark:to-[#0D1F4E]",
-    badgeBg: "bg-[#0A2A66]/10 dark:bg-white/10",
-    badgeText: "text-[#0A2A66] dark:text-[#5B9BD5]",
-    glowPrimary: "bg-[#2E5FA7]/15 dark:bg-[#2E5FA7]/10",
-    glowSecondary: "bg-[#0A2A66]/10 dark:bg-[#0A2A66]/20",
-    pulseOne: "bg-[#2E5FA7]/20 dark:bg-[#5B9BD5]/20",
-    pulseTwo: "bg-[#0A2A66]/15 dark:bg-[#8FA8CC]/20",
-  },
-  mundial_2026: {
-    heroBg: "bg-gradient-to-br from-[#fff8cf] via-[#ffe89b] to-[#cde2ff] dark:from-[#1d1300] dark:via-[#0b1f4f] dark:to-[#2a0810]",
-    badgeBg: "bg-[#FCD116]/25 dark:bg-[#FCD116]/35",
-    badgeText: "text-[#8B6A00] dark:text-[#FFE588]",
-    glowPrimary: "bg-[#0038A8]/20 dark:bg-[#1A67FF]/25",
-    glowSecondary: "bg-[#CE1126]/18 dark:bg-[#FF4B63]/24",
-    pulseOne: "bg-[#FCD116]/35 dark:bg-[#FCD116]/30",
-    pulseTwo: "bg-[#0038A8]/30 dark:bg-[#0038A8]/34",
-  },
-  halloween: {
-    heroBg: "bg-gradient-to-br from-[#1b0d00] via-[#2c1507] to-[#3f1c08] dark:from-[#120700] dark:via-[#1f0d00] dark:to-[#2f1100]",
-    badgeBg: "bg-[#FF7A00]/25 dark:bg-[#FF7A00]/35",
-    badgeText: "text-[#FFD39D] dark:text-[#FFE6C7]",
-    glowPrimary: "bg-[#FF7A00]/28 dark:bg-[#FF7A00]/28",
-    glowSecondary: "bg-[#7A3AC9]/22 dark:bg-[#7A3AC9]/28",
-    pulseOne: "bg-[#FF7A00]/32 dark:bg-[#FF7A00]/34",
-    pulseTwo: "bg-[#7A3AC9]/32 dark:bg-[#7A3AC9]/34",
-  },
-  independencia: {
-    heroBg: "bg-gradient-to-br from-[#fff6e6] via-[#ffe8d0] to-[#ffd8b6] dark:from-[#2A1500] dark:via-[#3A1E04] dark:to-[#5A2F0A]",
-    badgeBg: "bg-[#F57C00]/15 dark:bg-[#F57C00]/25",
-    badgeText: "text-[#C15E00] dark:text-[#FFC67B]",
-    glowPrimary: "bg-[#F57C00]/20 dark:bg-[#F57C00]/25",
-    glowSecondary: "bg-[#C62828]/15 dark:bg-[#C62828]/20",
-    pulseOne: "bg-[#F57C00]/30 dark:bg-[#F57C00]/30",
-    pulseTwo: "bg-[#C62828]/30 dark:bg-[#C62828]/30",
-  },
-  amor_amistad: {
-    heroBg: "bg-gradient-to-br from-[#fff0f4] via-[#ffe4ec] to-[#fde0ff] dark:from-[#2B0D1F] dark:via-[#3B1232] dark:to-[#4A1642]",
-    badgeBg: "bg-[#D81B60]/15 dark:bg-[#D81B60]/25",
-    badgeText: "text-[#B0144E] dark:text-[#FF97C2]",
-    glowPrimary: "bg-[#D81B60]/20 dark:bg-[#D81B60]/25",
-    glowSecondary: "bg-[#8E24AA]/15 dark:bg-[#8E24AA]/20",
-    pulseOne: "bg-[#D81B60]/30 dark:bg-[#D81B60]/30",
-    pulseTwo: "bg-[#8E24AA]/30 dark:bg-[#8E24AA]/30",
-  },
-  black_week: {
-    heroBg: "bg-gradient-to-br from-[#f3f4f6] via-[#e5e7eb] to-[#d1d5db] dark:from-[#050505] dark:via-[#0b0b0b] dark:to-[#171717]",
-    badgeBg: "bg-black/10 dark:bg-white/10",
-    badgeText: "text-black dark:text-white",
-    glowPrimary: "bg-black/15 dark:bg-white/10",
-    glowSecondary: "bg-slate-500/15 dark:bg-slate-300/10",
-    pulseOne: "bg-black/20 dark:bg-white/20",
-    pulseTwo: "bg-slate-500/30 dark:bg-slate-300/25",
-  },
-  navidad: {
-    heroBg: "bg-gradient-to-br from-[#e8f7ea] via-[#fff3f3] to-[#ecf4ff] dark:from-[#06210F] dark:via-[#112f14] dark:to-[#3A0C0C]",
-    badgeBg: "bg-[#1E8E3E]/18 dark:bg-[#1E8E3E]/30",
-    badgeText: "text-[#0F5A24] dark:text-[#A7F0B3]",
-    glowPrimary: "bg-[#1E8E3E]/24 dark:bg-[#1E8E3E]/30",
-    glowSecondary: "bg-[#C62828]/22 dark:bg-[#E53935]/26",
-    pulseOne: "bg-[#1E8E3E]/34 dark:bg-[#1E8E3E]/32",
-    pulseTwo: "bg-[#C62828]/30 dark:bg-[#C62828]/34",
-  },
-};
-
 export type HomePageClientProps = {
   initialCategories: CategoryItem[];
   initialSliderProducts: SlideData[];
@@ -238,16 +165,16 @@ export default function HomePageClient({
       });
   }, []);
 
-  const activeSeasonKey =
+  const activeSeasonKey: SeasonalThemeKey =
     seasonalCampaign.enabled && seasonalCampaign.key ? seasonalCampaign.key : 'none';
-  const activeVisual = seasonVisuals[activeSeasonKey];
+  const activeVisual = getSeasonMeta(activeSeasonKey);
   const campaignTitle =
     seasonalCampaign.title.trim() ||
     (activeSeasonKey === 'mundial_2026' ? 'Temporada mundialista en toda la tienda' : 'Temporada especial activa');
   const campaignSubtitle =
     seasonalCampaign.subtitle.trim() ||
     'Promociones destacadas, piezas listas para despachar y atención prioritaria.';
-  const campaignHref = seasonalCampaign.ctaHref.trim() || '/products';
+  const campaignHref = seasonalCampaign.ctaHref.trim() || '/combos';
   const campaignCtaLabel = seasonalCampaign.ctaLabel.trim() || 'Ver campaña';
 
   return (
@@ -293,27 +220,42 @@ export default function HomePageClient({
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.45 }}
-                  className={`mb-4 rounded-2xl border border-white/35 dark:border-white/10 ${activeVisual.badgeBg} backdrop-blur px-4 py-3`}
+                  className={`mb-4 overflow-hidden rounded-2xl border backdrop-blur-md ${activeVisual.badgeBg} shadow-lg`}
                 >
-                  <div className="flex items-start sm:items-center justify-between gap-4 flex-col sm:flex-row">
-                    <div>
-                      <p className={`text-xs font-bold tracking-[0.18em] uppercase ${activeVisual.badgeText}`}>
-                        Campana de temporada
-                      </p>
-                      <h2 className="mt-1 text-base sm:text-lg font-extrabold text-[#081F4D] dark:text-white">
-                        {campaignTitle}
-                      </h2>
-                      <p className="text-xs sm:text-sm text-[#0A2A66]/75 dark:text-white/70 mt-0.5">
-                        {campaignSubtitle}
-                      </p>
+                  <div className="relative px-4 py-4 sm:px-5 sm:py-4">
+                    <div
+                      className={`pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full blur-2xl ${activeVisual.glowPrimary}`}
+                    />
+                    <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex gap-3 min-w-0">
+                        <span
+                          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/70 text-2xl shadow-inner dark:bg-white/10"
+                          aria-hidden
+                        >
+                          {activeVisual.icon}
+                        </span>
+                        <div className="min-w-0">
+                          <p
+                            className={`text-[10px] font-bold tracking-[0.2em] uppercase ${activeVisual.badgeText}`}
+                          >
+                            {activeVisual.label} · temporada activa
+                          </p>
+                          <h2 className="mt-0.5 text-base font-extrabold leading-snug text-[#081F4D] dark:text-white sm:text-lg">
+                            {campaignTitle}
+                          </h2>
+                          <p className="mt-1 text-xs leading-relaxed text-[#0A2A66]/80 dark:text-white/70 sm:text-sm">
+                            {campaignSubtitle}
+                          </p>
+                        </div>
+                      </div>
+                      <Link
+                        href={campaignHref}
+                        className={`inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl px-5 py-2.5 text-xs font-bold shadow-md transition ${activeVisual.comboCta}`}
+                      >
+                        {campaignCtaLabel}
+                        <ArrowRightIcon className="h-3.5 w-3.5" />
+                      </Link>
                     </div>
-                    <Link
-                      href={campaignHref}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#0A2A66] dark:bg-white text-white dark:text-[#0A2A66] text-xs font-bold hover:bg-[#081F4D] dark:hover:bg-slate-100 transition-colors"
-                    >
-                      {campaignCtaLabel}
-                      <ArrowRightIcon className="w-3.5 h-3.5" />
-                    </Link>
                   </div>
                 </motion.div>
               )}
@@ -497,7 +439,12 @@ export default function HomePageClient({
         {/* ════════════════════════════════════════
             COMBOS Y OFERTAS ESPECIALES
             ════════════════════════════════════════ */}
-        <FeaturedCombosRow initialCombos={initialFeaturedCombos} />
+        <FeaturedCombosRow
+          initialCombos={initialFeaturedCombos}
+          seasonKey={activeSeasonKey}
+          campaignCtaHref={campaignHref}
+          campaignCtaLabel={campaignCtaLabel}
+        />
 
         {/* ════════════════════════════════════════
             BENEFICIOS
@@ -1015,52 +962,122 @@ function FeaturedProductsRow({ initialProducts }: { initialProducts: ProductType
   );
 }
 
-function FeaturedCombosRow({ initialCombos }: { initialCombos: Combo[] }) {
+function FeaturedCombosRow({
+  initialCombos,
+  seasonKey,
+  campaignCtaHref,
+  campaignCtaLabel,
+}: {
+  initialCombos: Combo[];
+  seasonKey: SeasonalThemeKey;
+  campaignCtaHref: string;
+  campaignCtaLabel: string;
+}) {
   const combos = initialCombos;
-  const loading = false;
+  const theme = getSeasonMeta(seasonKey);
+  const combosHref = seasonKey !== 'none' ? campaignCtaHref : '/combos';
+  const combosCta =
+    seasonKey !== 'none' && campaignCtaLabel !== 'Ver campaña'
+      ? campaignCtaLabel
+      : 'Ver todos los combos';
+
+  const totalSavings = combos.reduce(
+    (sum, c) => sum + Math.max(0, c.originalPrice - c.price),
+    0,
+  );
+  const maxPct = combos.reduce((best, c) => {
+    if (c.originalPrice <= 0) return best;
+    const pct = Math.round(((c.originalPrice - c.price) / c.originalPrice) * 100);
+    return Math.max(best, pct);
+  }, 0);
+
+  const formatCOP = (n: number) =>
+    new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      maximumFractionDigits: 0,
+    }).format(n);
 
   if (combos.length === 0) return null;
 
+  const [heroCombo, ...restCombos] = combos;
+
   return (
-    <section id="combos" className="mt-8">
-      {/* Flash-sale header */}
-      <div className="rounded-2xl bg-gradient-to-r from-orange-500 via-red-500 to-rose-600 dark:from-orange-600 dark:via-red-600 dark:to-rose-700 p-5 sm:p-6 mb-6 shadow-lg">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <FireIcon className="w-5 h-5 text-yellow-300 animate-pulse" />
-              <p className="text-xs font-bold tracking-[0.18em] text-orange-100 uppercase">Oferta Relámpago</p>
+    <section id="combos" className="relative mt-4 scroll-mt-24">
+      <div
+        className={`relative overflow-hidden rounded-3xl bg-gradient-to-br p-6 sm:p-8 shadow-[0_24px_60px_-20px_rgba(10,42,102,0.35)] ${theme.comboGradient}`}
+      >
+        <div
+          className={`pointer-events-none absolute -left-16 top-0 h-48 w-48 rounded-full blur-3xl ${theme.comboGlow}`}
+        />
+        <div
+          className={`pointer-events-none absolute -bottom-20 -right-10 h-56 w-56 rounded-full blur-3xl ${theme.glowSecondary}`}
+        />
+
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div
+              className={`mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-wider ${theme.comboBadge}`}
+            >
+              <FireIcon className="h-4 w-4 animate-pulse text-amber-300" />
+              {seasonKey !== 'none' ? `${theme.label} · combos` : 'Oferta especial'}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              Combos con Ahorro Real 🎁
+            <h2 className="text-2xl font-extrabold leading-tight text-white sm:text-4xl">
+              Paquetes que te ahorran de verdad
             </h2>
-            <p className="text-sm text-orange-100/80 mt-1 max-w-xl">
-              Paquetes armados para darte más por menos. Cada combo incluye un regalo sorpresa.
+            <p className="mt-2 max-w-lg text-sm leading-relaxed text-white/85 sm:text-base">
+              Más piezas por menos plata. Cada combo incluye regalo sorpresa y despacho rápido a todo
+              Colombia.
             </p>
+            {totalSavings > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-xl bg-black/20 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm">
+                  Hasta {maxPct}% OFF
+                </span>
+                <span className="rounded-xl bg-white/15 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
+                  Ahorro combinado {formatCOP(totalSavings)}
+                </span>
+              </div>
+            )}
           </div>
           <Link
-            href="/combos"
-            className="shrink-0 inline-flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold px-4 py-2 rounded-xl border border-white/30 transition-colors"
+            href={combosHref}
+            className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold shadow-lg transition ${theme.comboCta}`}
           >
-            Ver todos los combos
-            <ArrowRightIcon className="w-4 h-4" />
+            {combosCta}
+            <ArrowRightIcon className="h-4 w-4" />
           </Link>
         </div>
       </div>
 
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-96 rounded-3xl bg-slate-200 dark:bg-slate-800 animate-pulse" />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {combos.map((combo, idx) => (
-            <ComboCard key={combo.id} combo={combo} idx={idx} showDescription />
-          ))}
-        </div>
-      )}
+      {/* Mobile: carrusel con snap */}
+      <div className="mt-6 -mx-4 flex gap-4 overflow-x-auto px-4 pb-2 snap-x snap-mandatory no-scrollbar sm:hidden">
+        {combos.map((combo, idx) => (
+          <div key={combo.id} className="w-[min(88vw,20rem)] shrink-0 snap-center">
+            <ComboCard combo={combo} idx={idx} showDescription />
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: combo destacado + rejilla */}
+      <div className="mt-8 hidden gap-6 sm:grid lg:grid-cols-12">
+        {heroCombo && (
+          <div className="lg:col-span-5">
+            <ComboCard combo={heroCombo} idx={0} showDescription />
+          </div>
+        )}
+        {restCombos.length > 0 && (
+          <div className="grid gap-5 sm:grid-cols-2 lg:col-span-7">
+            {restCombos.map((combo, idx) => (
+              <ComboCard key={combo.id} combo={combo} idx={idx + 1} showDescription />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <p className="mt-4 text-center text-xs text-slate-500 dark:text-slate-400 sm:hidden">
+        Desliza para ver más combos →
+      </p>
     </section>
   );
 }

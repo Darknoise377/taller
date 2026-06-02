@@ -51,7 +51,7 @@ export const DEFAULT_SEASONAL_CAMPAIGN: SeasonalCampaignConfig = {
   title: "",
   subtitle: "",
   ctaLabel: "Ver ofertas",
-  ctaHref: "/products",
+  ctaHref: "/combos",
 };
 
 /** Tarifa base por región. Ajusta los valores según tu contrato. */

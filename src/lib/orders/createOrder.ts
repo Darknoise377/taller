@@ -1,7 +1,9 @@
 import { PaymentMethod, type Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
+import { estimateShippingWithConfig } from '@/config/shippingRates';
 import { sendOrderCreatedEmail } from '@/lib/email/orderEmails';
 import { buildWompiCheckoutUrl } from '@/lib/payments/wompi';
+import { getShippingConfig } from '@/lib/store/getShippingConfig';
 import { calculateDiscountedTotal, clampPercentage, normalizeAmount } from '@/utils/formatCurrency';
 
 export type CreateOrderErrorCode =
@@ -13,7 +15,8 @@ export type CreateOrderErrorCode =
   | 'STOCK'
   | 'INVALID_PROMO'
   | 'PROMO_EXPIRED'
-  | 'INVALID_PRICE';
+  | 'INVALID_PRICE'
+  | 'MISSING_DEPARTMENT';
 
 export class CreateOrderError extends Error {
   constructor(
@@ -74,10 +77,10 @@ export function consolidateProductLines(products: OrderLineInput[]): Map<string,
     const productId = String(item.productId ?? '').trim();
     const quantity = Number(item.quantity);
     if (!productId) {
-      throw new CreateOrderError('Producto inválido', 'INVALID_PRODUCT');
+      throw new CreateOrderError('Producto inv?lido', 'INVALID_PRODUCT');
     }
     if (!Number.isInteger(quantity) || quantity <= 0) {
-      throw new CreateOrderError('Cantidad inválida', 'INVALID_QUANTITY');
+      throw new CreateOrderError('Cantidad inv?lida', 'INVALID_QUANTITY');
     }
     map.set(productId, (map.get(productId) ?? 0) + quantity);
   }
@@ -90,10 +93,10 @@ export function consolidateComboLines(combos: ComboLineInput[]): Map<string, num
     const comboId = String(item.comboId ?? '').trim();
     const quantity = Number(item.quantity);
     if (!comboId) {
-      throw new CreateOrderError('Combo inválido', 'INVALID_COMBO');
+      throw new CreateOrderError('Combo inv?lido', 'INVALID_COMBO');
     }
     if (!Number.isInteger(quantity) || quantity <= 0) {
-      throw new CreateOrderError('Cantidad inválida', 'INVALID_QUANTITY');
+      throw new CreateOrderError('Cantidad inv?lida', 'INVALID_QUANTITY');
     }
     map.set(comboId, (map.get(comboId) ?? 0) + quantity);
   }
@@ -107,21 +110,23 @@ export function generateBrandedReferenceCode(): string {
 function httpMessageForCode(code: CreateOrderErrorCode): string {
   switch (code) {
     case 'STOCK':
-      return 'No hay stock suficiente para uno o más productos';
+      return 'No hay stock suficiente para uno o m?s productos';
     case 'INVALID_PROMO':
-      return 'Código de promoción inválido';
+      return 'C?digo de promoci?n inv?lido';
     case 'PROMO_EXPIRED':
-      return 'Este código de promoción ha expirado';
+      return 'Este c?digo de promoci?n ha expirado';
     case 'COMBO_EXPIRED':
-      return 'Uno o más combos han expirado';
+      return 'Uno o m?s combos han expirado';
     case 'INVALID_COMBO':
-      return 'Uno o más combos no existen o no están disponibles';
+      return 'Uno o m?s combos no existen o no est?n disponibles';
     case 'EMPTY_CART':
       return 'Debes enviar al menos un producto o combo';
     case 'INVALID_PRICE':
-      return 'Hay productos con precio inválido';
+      return 'Hay productos con precio inv?lido';
+    case 'MISSING_DEPARTMENT':
+      return 'Departamento requerido para calcular el env?o';
     default:
-      return 'Datos inválidos';
+      return 'Datos inv?lidos';
   }
 }
 
@@ -192,7 +197,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
       : [];
 
   if (dbCombos.length !== comboIds.length) {
-    throw new CreateOrderError('Uno o más combos no existen', 'INVALID_COMBO');
+    throw new CreateOrderError('Uno o m?s combos no existen', 'INVALID_COMBO');
   }
 
   const orderComboLines: Array<{ comboId: string; quantity: number; unitPrice: number }> = [];
@@ -201,7 +206,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
   for (const combo of dbCombos) {
     const qty = combosById.get(combo.id) ?? 0;
     if (combo.stock < qty) {
-      throw new CreateOrderError('No hay stock suficiente para uno o más combos', 'STOCK');
+      throw new CreateOrderError('No hay stock suficiente para uno o m?s combos', 'STOCK');
     }
     if (combo.expiresAt && new Date() > combo.expiresAt) {
       throw new CreateOrderError('Este combo ha expirado', 'COMBO_EXPIRED');
@@ -209,7 +214,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
 
     const comboPrice = normalizeAmount(combo.price);
     if (comboPrice < 0) {
-      throw new CreateOrderError('Combo con precio inválido', 'INVALID_PRICE');
+      throw new CreateOrderError('Combo con precio inv?lido', 'INVALID_PRICE');
     }
 
     comboSubtotal = normalizeAmount(comboSubtotal + comboPrice * qty);
@@ -235,7 +240,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
   });
 
   if (dbProducts.length !== productIds.length) {
-    throw new CreateOrderError('Uno o más productos no existen', 'INVALID_PRODUCT');
+    throw new CreateOrderError('Uno o m?s productos no existen', 'INVALID_PRODUCT');
   }
 
   let directSubtotal = 0;
@@ -249,7 +254,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
 
     const normalizedPrice = normalizeAmount(p.price);
     if (normalizedPrice < 0) {
-      throw new CreateOrderError('Precio inválido', 'INVALID_PRICE');
+      throw new CreateOrderError('Precio inv?lido', 'INVALID_PRICE');
     }
 
     if (directQty > 0) {
@@ -276,15 +281,15 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
     });
 
     if (!promotion) {
-      throw new CreateOrderError('Código inválido', 'INVALID_PROMO');
+      throw new CreateOrderError('C?digo inv?lido', 'INVALID_PROMO');
     }
     if (promotion.expiresAt && new Date() > promotion.expiresAt) {
-      throw new CreateOrderError('Código expirado', 'PROMO_EXPIRED');
+      throw new CreateOrderError('C?digo expirado', 'PROMO_EXPIRED');
     }
 
     const normalizedDiscount = clampPercentage(promotion.discount);
     if (normalizedDiscount <= 0 || normalizedDiscount > 100) {
-      throw new CreateOrderError('Promoción inválida', 'INVALID_PROMO');
+      throw new CreateOrderError('Promoci?n inv?lida', 'INVALID_PROMO');
     }
 
     if (promotion.appliesTo === 'ALL') {
@@ -315,6 +320,28 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
     }
 
     promoCodeToStore = promotion.code;
+  }
+
+  let shippingCost = 0;
+  const needsShipping =
+    input.paymentMethod === PaymentMethod.WOMPI ||
+    input.paymentMethod === PaymentMethod.CONTRAENTREGA;
+
+  if (needsShipping) {
+    const department = input.department?.trim();
+    if (!department) {
+      throw new CreateOrderError('Departamento requerido para calcular el env?o', 'MISSING_DEPARTMENT');
+    }
+
+    const shippingConfig = await getShippingConfig();
+    const shippingEstimate = estimateShippingWithConfig(
+      department,
+      input.paymentMethod as 'WOMPI' | 'CONTRAENTREGA',
+      subtotal,
+      shippingConfig,
+    );
+    shippingCost = normalizeAmount(shippingEstimate.total);
+    finalTotal = normalizeAmount(finalTotal + shippingCost);
   }
 
   let sellerIdToStore: string | undefined;
@@ -361,6 +388,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
       data: {
         ...(input.referenceCode ? { referenceCode: input.referenceCode } : {}),
         total: totalToStore,
+        shippingCost,
         currency,
         paymentMethod: input.paymentMethod,
         customerName: input.customerName.trim(),
@@ -414,6 +442,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
         customerName: order.customerName,
         customerEmail: order.customerEmail,
         total: order.total,
+        shippingCost: order.shippingCost,
         currency: order.currency,
         paymentMethod: order.paymentMethod,
         status: order.status,
