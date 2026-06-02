@@ -115,9 +115,11 @@ export default function FloatingCombos({
   if (isCheckoutPath(pathname) || pathname?.startsWith("/admin")) return null;
 
   const isProductDetail = !!pathname?.match(/^\/products\/[^/]+$/);
-  const fabBottom = isProductDetail
-    ? "bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-6"
-    : "bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-6";
+  const isComboDetail = !!pathname?.match(/^\/combos\/[^/]+$/);
+  const fabBottom =
+    isProductDetail || isComboDetail
+      ? "bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-6"
+      : "bottom-[calc(4.75rem+env(safe-area-inset-bottom))] md:bottom-6";
 
   const sheet = (
     <AnimatePresence>

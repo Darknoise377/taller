@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -10,7 +10,6 @@ import {
   ChevronLeftIcon,
   GiftIcon,
   FireIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { SparklesIcon } from "@heroicons/react/24/solid";
 import type { Combo } from "@/types/combo";
@@ -29,40 +28,11 @@ function formatCOP(value: number) {
 export default function ComboDetailClient({ combo }: { combo: Combo }) {
   const { addComboToCart, openCartModal } = useCart();
   const [added, setAdded] = useState(false);
-  const [showCombosPanel, setShowCombosPanel] = useState(false);
-  const [relatedCombos, setRelatedCombos] = useState<Combo[]>([]);
 
   const savings = combo.originalPrice - combo.price;
   const savingsPct = Math.round((savings / combo.originalPrice) * 100);
   const isLowStock = combo.stock > 0 && combo.stock <= 5;
   const isOutOfStock = combo.stock <= 0;
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadRelatedCombos() {
-      try {
-        const res = await fetch("/api/combos?limit=8", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = (await res.json()) as Combo[];
-        if (cancelled) return;
-        const filtered = data.filter((item) => item.id !== combo.id).slice(0, 4);
-        setRelatedCombos(filtered);
-      } catch (error) {
-        console.error("[ComboDetail] Error loading related combos:", error);
-      }
-    }
-
-    void loadRelatedCombos();
-    return () => {
-      cancelled = true;
-    };
-  }, [combo.id]);
-
-  const relatedCombosLabel = useMemo(() => {
-    if (relatedCombos.length === 0) return "Ver combos";
-    return `Ver combos (${relatedCombos.length})`;
-  }, [relatedCombos.length]);
 
   const handleAdd = () => {
     if (isOutOfStock || added) return;
@@ -76,81 +46,6 @@ export default function ComboDetailClient({ combo }: { combo: Combo }) {
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      <button
-        type="button"
-        onClick={() => setShowCombosPanel((prev) => !prev)}
-        className="fixed right-4 bottom-24 z-40 md:top-1/2 md:bottom-auto md:-translate-y-1/2 inline-flex items-center gap-2 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-4 py-2.5 shadow-2xl hover:scale-[1.02] transition"
-      >
-        <SparklesIcon className="w-4 h-4" />
-        <span className="text-sm font-semibold">{relatedCombosLabel}</span>
-      </button>
-
-      <aside
-        className={`fixed right-4 z-50 transition-all duration-300 ${
-          showCombosPanel
-            ? "top-20 opacity-100 pointer-events-auto"
-            : "top-24 opacity-0 pointer-events-none"
-        }`}
-      >
-        <div className="w-[min(92vw,22rem)] rounded-3xl border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-2xl p-4">
-          <div className="flex items-center justify-between gap-3 mb-3">
-            <p className="text-sm font-bold text-slate-900 dark:text-white">Combos destacados</p>
-            <button
-              type="button"
-              onClick={() => setShowCombosPanel(false)}
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
-              aria-label="Cerrar panel de combos"
-            >
-              <XMarkIcon className="w-4 h-4" />
-            </button>
-          </div>
-
-          {relatedCombos.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">Estamos cargando más combos para ti.</p>
-          ) : (
-            <ul className="space-y-2">
-              {relatedCombos.map((item) => (
-                <li key={item.id}>
-                  <Link
-                    href={`/combos/${item.slug}`}
-                    className="flex items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-700 p-2 hover:border-blue-500/40 hover:bg-blue-50 dark:hover:bg-slate-800 transition"
-                    onClick={() => setShowCombosPanel(false)}
-                  >
-                    <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 shrink-0">
-                      {item.imageUrl ? (
-                        <Image
-                          src={item.imageUrl}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                          sizes="48px"
-                        />
-                      ) : (
-                        <div className="flex items-center justify-center h-full">
-                          <GiftIcon className="w-6 h-6 text-slate-400" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white line-clamp-1">{item.name}</p>
-                      <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{formatCOP(item.price)}</p>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <Link
-            href="/combos"
-            onClick={() => setShowCombosPanel(false)}
-            className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
-          >
-            Ver catálogo de combos
-          </Link>
-        </div>
-      </aside>
-
       {/* Breadcrumb */}
       <div className="max-w-6xl mx-auto px-4 pt-6">
         <Link
