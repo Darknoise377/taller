@@ -145,6 +145,7 @@ const PaymentOption: React.FC<PaymentOptionProps> = ({
           <input
             type="radio"
             name="paymentMethod"
+            aria-label={title}
             checked={isSelected}
             onChange={() => setMethod(method)}
             className="focus:ring-[#0A2A66] h-4 w-4 text-[#0A2A66] border-gray-300 dark:border-slate-600"
@@ -722,10 +723,11 @@ const CheckoutPage: React.FC = () => {
 
                   {/* Select de departamento */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                    <label htmlFor="select-state" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                       Departamento
                     </label>
                     <select
+                      id="select-state"
                       name="state"
                       value={shippingInfo.state}
                       onChange={handleShippingChange}
@@ -743,10 +745,11 @@ const CheckoutPage: React.FC = () => {
 
                   {/* Select de ciudad */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                    <label htmlFor="select-city" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
                       Ciudad
                     </label>
                     <select
+                      id="select-city"
                       name="city"
                       value={shippingInfo.city}
                       onChange={handleShippingChange}
