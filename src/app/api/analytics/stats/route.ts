@@ -1,13 +1,25 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authOptions';
+import { cookies } from 'next/headers';
+import { verifyAdminToken } from '@/lib/auth';
+import { COOKIE_NAME } from '@/config/admin';
 import { prisma } from '@/lib/prisma';
 
 export const runtime = 'nodejs';
 
+async function requireAdmin() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+  if (!token) return false;
+  try {
+    await verifyAdminToken(token);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as { role?: string })?.role !== 'admin') {
+  if (!(await requireAdmin())) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 403 });
   }
 
