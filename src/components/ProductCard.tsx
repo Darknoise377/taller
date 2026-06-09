@@ -160,14 +160,14 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
           )}
         </div>
 
-        {/* Opciones de medida */}
+                {/* Opciones de medida */}
         {product.sizes && product.sizes.length > 0 && (
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1.5">
               Medida
             </p>
             <div className="flex flex-wrap gap-1.5">
-              {product.sizes.map((s) => (
+              {product.sizes.slice(0, 3).map((s) => (
                 <button
                   key={s}
                   type="button"
@@ -181,6 +181,14 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
                   {s}
                 </button>
               ))}
+              {product.sizes.length > 3 && (
+                <Link
+                  href={`/products/${product.slug ?? product.id}`}
+                  className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center"
+                >
+                  +{product.sizes.length - 3} más...
+                </Link>
+              )}
             </div>
           </div>
         )}
