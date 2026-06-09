@@ -167,18 +167,19 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
               Medida
             </p>
             <div className="flex flex-wrap gap-1.5">
-              {product.sizes.slice(0, 3).map((s) => (
+                            {product.sizes.slice(0, 3).map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setSelectedSize(s)}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all ${
+                  title={s} // Al poner el mouse encima se verá el texto completo
+                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all truncate max-w-[140px] sm:max-w-[180px] ${
                     selectedSize === s
                       ? "bg-[#0A2A66] text-white border-[#0A2A66] shadow-sm"
                       : "bg-transparent border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-[#0A2A66] dark:hover:border-[#2E5FA7]"
                   }`}
                 >
-                  {s}
+                  {s.length > 25 ? s.substring(0, 25) + "..." : s}
                 </button>
               ))}
               {product.sizes.length > 3 && (
