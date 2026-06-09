@@ -143,23 +143,48 @@ async function buildAttributes(
     }
   }
 
-  // AI fallback for any unresolved required attributes
+    // AI fallback for any unresolved required attributes
   if (unresolved.length > 0) {
     console.info(`[meli/sync] Asking AI to resolve ${unresolved.length} attribute(s): ${unresolved.map((a) => a.id).join(', ')}`);
     const aiResolved = await resolveAttributesWithAI(product, unresolved);
-    result.push(...aiResolved);
+    
+    // No agregar si ya fue resuelto manualmente, y filtrar valores vacíos/inválidos devueltos por IA
+    const existingIds = new Set(result.map((a) => a.id));
+    for (const attr of aiResolved) {
+      if (!attr.id || !attr.value_name?.trim()) continue;
+      if (existingIds.has(attr.id)) continue;
+      result.push(attr);
+      existingIds.add(attr.id);
+    }
   }
 
   return result;
+}
+
+// ─── Título saneado para cumplir reglas de MeLi ──────────────────────────────
+const MELI_FORBIDDEN_TITLE_WORDS = /\b(oferta|descuento|gratis|promo|rebaja|sale|%off|envio gratis)\b/gi;
+
+function sanitizeTitle(raw: string): string {
+  return raw
+    .replace(/https?:\/\/\S+/gi, '')           // quitar URLs
+    .replace(/\S+@\S+\.\S+/g, '')              // quitar emails
+    .replace(/\b\d[\d\s\-().]{6,}\d\b/g, '')   // quitar teléfonos
+    .replace(MELI_FORBIDDEN_TITLE_WORDS, '')    // palabras promocionales prohibidas
+    .replace(/\$[\d.,]+/g, '')                  // precios en el título
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 60)
+    .trimEnd();
 }
 
 // ─── Build a MeLi item payload from a local product ─────────────────────────
 async function buildPayload(
   product: Product,
   categoryId: string,
-): Promise<MeliItemPayload> {
+): Promise<MeliItemPayload & { _meliPrice: number }> {
   const listingType = product.meliListingType || 'gold_special';
   const { meliPrice } = await calculateMeliPrice(product.price, listingType);
+
   const pictures =
     product.images?.length
       ? product.images.map((url) => ({ source: url }))
@@ -167,10 +192,17 @@ async function buildPayload(
       ? [{ source: product.imageUrl }]
       : [];
 
+  // Guard: MeLi requiere al menos 1 imagen
+  if (pictures.length === 0) {
+    throw new Error(
+      `El producto ${product.id} ("${product.name}") no tiene imágenes. MeLi requiere al menos una.`,
+    );
+  }
+
   const attributes = await buildAttributes(product, categoryId);
 
   return {
-    title: product.name.slice(0, 60).trimEnd(),
+    title: sanitizeTitle(product.name),
     category_id: categoryId,
     price: meliPrice,
     currency_id: 'COP',
@@ -178,14 +210,22 @@ async function buildPayload(
     buying_mode: 'buy_it_now',
     condition: 'new',
     listing_type_id: listingType,
-    description: { plain_text: product.description },
+    // Evitar null en plain_text
+    description: { plain_text: product.description?.slice(0, 50000) ?? '' },
     pictures,
     ...(attributes.length > 0 && { attributes }),
+    // Garantía estándar para repuestos
+    sale_terms: [
+      { id: 'WARRANTY_TYPE', value_name: 'Garantía del vendedor' },
+      { id: 'WARRANTY_TIME', value_name: '90 días' },
+    ],
     shipping: {
       mode: 'me2',
       local_pick_up: true,
       free_shipping: false,
     },
+    // Campo interno — no lo recibe la API de MeLi, se stripea antes de enviar
+    _meliPrice: meliPrice,
   };
 }
 
@@ -197,9 +237,22 @@ async function resolveCategoryId(product: Product): Promise<string> {
   if (categoryMap[localCat]) return categoryMap[localCat];
 
   // Auto-predict via MeLi API (best-effort)
+  // MEJORA: Enriquecer el string de predicción para evitar malas categorizaciones (ej: Ventilador -> Electrodoméstico)
   try {
-    const predictions = await meliApi.predictCategory(product.name);
-    if (predictions.length > 0) return predictions[0].category_id;
+    const tagsContext = product.tags?.join(' ') || '';
+    const categoryContext = product.category ? String(product.category) : '';
+    const brandContext = (product as Product & { brand?: string | null }).brand || '';
+    
+    // Construimos un título falso súper descriptivo solo para el Predictor de Meli
+    const enrichedPredictionString = `Repuesto Moto ${categoryContext} ${brandContext} ${product.name} ${tagsContext}`.trim().replace(/\s+/g, ' ');
+    
+    console.info(`[meli/sync] Predicting category using enriched string: "${enrichedPredictionString.substring(0, 80)}..."`);
+    const predictions = await meliApi.predictCategory(enrichedPredictionString);
+    
+    if (predictions.length > 0) {
+       console.info(`[meli/sync] Predicted Category: ${predictions[0].category_id}`);
+       return predictions[0].category_id;
+    }
   } catch {
     // ignore — caller must configure category map
   }
@@ -213,11 +266,18 @@ async function resolveCategoryId(product: Product): Promise<string> {
 export async function publishProduct(productId: string): Promise<{ meliItemId: string }> {
   const product = await prisma.product.findUniqueOrThrow({ where: { id: productId } });
 
+  // Validar stock antes de intentar publicar
+  if (product.stock <= 0) {
+    throw new Error(`No se puede publicar el producto ${productId}: stock es 0.`);
+  }
+
   const categoryId = await resolveCategoryId(product);
   const payload = await buildPayload(product, categoryId);
-  const { meliPrice } = await calculateMeliPrice(product.price);
+  
+    // Reusar el precio calculado en buildPayload para evitar inconsistencias de listingType
+  const { _meliPrice: meliPrice, ...meliPayload } = payload;
 
-  const response = await meliApi.createItem(payload);
+  const response = await meliApi.createItem(meliPayload as MeliItemPayload);
 
   await prisma.meliListing.create({
     data: {
@@ -227,6 +287,7 @@ export async function publishProduct(productId: string): Promise<{ meliItemId: s
       meliPrice,
       syncedProductPrice: product.price,
       syncedProductStock: product.stock,
+      lastSyncAt: new Date(),
     },
   });
 
@@ -244,24 +305,31 @@ export async function updateStockAndPrice(productId: string): Promise<void> {
 
   const { meliPrice } = await calculateMeliPrice(product.price);
 
+  // Verificar estado ANTES de updateItem para incluir reactivación si hace falta
+  let currentMeliStatus: string | undefined;
+  let shouldReactivate = false;
+  try {
+    const meliItem = await meliApi.getItem(listing.meliItemId);
+    currentMeliStatus = meliItem.status;
+    // Si está pausado (por stock 0 previo) y ahora hay stock, reactivar
+    shouldReactivate = meliItem.status === 'paused' && product.stock > 0;
+  } catch {
+    // Si falla el GET, igual intentamos el update sin tocar status
+  }
+
   await meliApi.updateItem(listing.meliItemId, {
     price: meliPrice,
     available_quantity: product.stock,
+    ...(shouldReactivate && { status: 'active' }),
   });
-
-  let statusUpdate = listing.status;
-  try {
-    const meliItem = await meliApi.getItem(listing.meliItemId);
-    statusUpdate = mapApiStatusToDb(meliItem.status);
-  } catch {
-    // keep previous status if live check fails
-  }
 
   await prisma.meliListing.update({
     where: { productId },
     data: {
       meliPrice,
-      status: statusUpdate,
+      status: currentMeliStatus
+        ? mapApiStatusToDb(shouldReactivate ? 'active' : currentMeliStatus)
+        : listing.status,
       lastSyncAt: new Date(),
       syncedProductPrice: product.price,
       syncedProductStock: product.stock,
@@ -278,22 +346,27 @@ export async function syncProduct(productId: string): Promise<{ action: 'publish
     return { action: 'published' };
   }
 
-  // Check real status on MeLi before attempting update.
-  // If the seller deleted the item on MeLi it comes back as 'closed' and
-  // price/quantity updates are rejected — we must re-publish instead.
   try {
     const meliItem = await meliApi.getItem(listing.meliItemId);
     if (meliItem.status === 'closed') {
-      // Remove stale listing and create a new one
+      // Borrar SÓLO si el republish tiene éxito
       await prisma.meliListing.delete({ where: { productId } });
       await publishProduct(productId);
       return { action: 'republished' };
     }
   } catch {
-    // If getItem itself fails (e.g. 404 — item gone), also re-publish
-    await prisma.meliListing.delete({ where: { productId } });
-    await publishProduct(productId);
-    return { action: 'republished' };
+    // Si getItem falla (404), intentar republish — si falla, el listing viejo sigue intacto localmente
+    try {
+      await prisma.meliListing.delete({ where: { productId } });
+      await publishProduct(productId);
+      return { action: 'republished' };
+    } catch (publishErr) {
+      throw new Error(
+        `Republish fallido para ${productId}. Listing eliminado localmente pero no re-creado. Causa: ${
+          publishErr instanceof Error ? publishErr.message : String(publishErr)
+        }`
+      );
+    }
   }
 
   await updateStockAndPrice(productId);
@@ -418,10 +491,15 @@ export async function processMeliOrder(meliOrderId: string): Promise<void> {
       continue;
     }
 
-    // Decrement local stock (floor at 0)
+        // Decrement local stock (floor at 0 real)
+    const currentProduct = await prisma.product.findUniqueOrThrow({
+      where: { id: listing.productId },
+      select: { stock: true },
+    });
+
     await prisma.product.update({
       where: { id: listing.productId },
-      data: { stock: { decrement: orderItem.quantity } },
+      data: { stock: Math.max(0, currentProduct.stock - orderItem.quantity) },
     });
 
     // Push updated stock back to MeLi listing
