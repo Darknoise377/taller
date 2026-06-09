@@ -317,11 +317,27 @@ export async function updateStockAndPrice(productId: string): Promise<void> {
     // Si falla el GET, igual intentamos el update sin tocar status
   }
 
-  await meliApi.updateItem(listing.meliItemId, {
-    price: meliPrice,
-    available_quantity: product.stock,
-    ...(shouldReactivate && { status: 'active' }),
-  });
+    try {
+    await meliApi.updateItem(listing.meliItemId, {
+      price: meliPrice,
+      available_quantity: product.stock,
+      ...(shouldReactivate && { status: 'active' }),
+    });
+    } catch (err: unknown) {
+    // Si el ítem ya no se puede actualizar porque fue borrado/inactivado directamente en MeLi
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    if (
+      errorMessage.includes('status:inactive') ||
+      errorMessage.includes('not modifiable') ||
+      errorMessage.includes('field_not_updatable') ||
+      errorMessage.includes('item.price.not_modifiable')
+    ) {
+      console.warn(`[meli/sync] Listing ${listing.meliItemId} (Product ${productId}) no es actualizable. Se eliminará el registro local.`);
+      await prisma.meliListing.delete({ where: { productId } });
+      throw new Error(`La publicación MCO en Mercado Libre está inactiva o fue eliminada manualmente. Se desvinculó de la base de datos local para que la próxima sincronización la vuelva a publicar.`);
+    }
+    throw err;
+  }
 
   await prisma.meliListing.update({
     where: { productId },
@@ -348,7 +364,7 @@ export async function syncProduct(productId: string): Promise<{ action: 'publish
 
   try {
     const meliItem = await meliApi.getItem(listing.meliItemId);
-    if (meliItem.status === 'closed') {
+        if (meliItem.status === 'closed' || meliItem.status === 'inactive') {
       // Borrar SÓLO si el republish tiene éxito
       await prisma.meliListing.delete({ where: { productId } });
       await publishProduct(productId);
