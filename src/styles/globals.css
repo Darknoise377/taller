@@ -1,3 +1,4 @@
+
 @import "tailwindcss";
 
 /* Tailwind v4: permite que `dark:` funcione con la clase `.dark` en <html> */
@@ -128,13 +129,48 @@ body {
 }
 
 /* Global seasonal themes */
-:root[data-season-theme="mundial_2026"] body {
-  background-image:
-    radial-gradient(circle at 88% 6%, rgba(0, 56, 168, 0.18), transparent 44%),
-    radial-gradient(circle at 10% 8%, rgba(252, 209, 22, 0.14), transparent 42%),
-    radial-gradient(circle at 48% 100%, rgba(0, 72, 180, 0.12), transparent 48%);
-  background-attachment: fixed;
-}
+  :root[data-season-theme="mundial_2026"] {
+    --season-glow-primary: rgba(0, 56, 168, 0.4);
+    --season-glow-secondary: rgba(252, 209, 22, 0.3);
+    --season-pulse-one: rgba(206, 17, 38, 0.3);
+  }
+  :root[data-season-theme="mundial_2026"] body {
+    background-image:
+      radial-gradient(circle at 88% 6%, rgba(0, 56, 168, 0.18), transparent 44%),
+      radial-gradient(circle at 10% 8%, rgba(252, 209, 22, 0.14), transparent 42%),
+      radial-gradient(circle at 48% 100%, rgba(0, 72, 180, 0.12), transparent 48%);
+    background-attachment: fixed;
+  }
+
+  :root[data-season-theme="halloween"] {
+    --season-glow-primary: rgba(255, 122, 0, 0.4);
+    --season-glow-secondary: rgba(122, 58, 201, 0.3);
+    --season-pulse-one: rgba(92, 45, 14, 0.4);
+  }
+
+  :root[data-season-theme="navidad"] {
+    --season-glow-primary: rgba(30, 142, 62, 0.4);
+    --season-glow-secondary: rgba(198, 40, 40, 0.3);
+    --season-pulse-one: rgba(46, 125, 50, 0.4);
+  }
+
+  :root[data-season-theme="independencia"] {
+    --season-glow-primary: rgba(252, 209, 22, 0.4);
+    --season-glow-secondary: rgba(0, 56, 147, 0.3);
+    --season-pulse-one: rgba(206, 17, 38, 0.4);
+  }
+
+  :root[data-season-theme="amor_amistad"] {
+    --season-glow-primary: rgba(216, 27, 96, 0.4);
+    --season-glow-secondary: rgba(142, 36, 170, 0.3);
+    --season-pulse-one: rgba(240, 98, 146, 0.4);
+  }
+
+  :root[data-season-theme="black_week"] {
+    --season-glow-primary: rgba(0, 0, 0, 0.4);
+    --season-glow-secondary: rgba(255, 193, 7, 0.3);
+    --season-pulse-one: rgba(50, 50, 50, 0.4);
+  }
 
 :root[data-season-theme="halloween"] body {
   background-image:
@@ -177,12 +213,61 @@ body {
 }
 
 .seasonal-overlay {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 34;
-  overflow: hidden;
-}
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 34;
+    overflow: hidden;
+  }
+
+  /* Artistic Liquid Blobs Background */
+  .seasonal-art-blob {
+    position: absolute;
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+    animation: seasonal-blob-morph 15s ease-in-out infinite alternate, seasonal-blob-move 20s ease-in-out infinite alternate;
+  }
+
+  .seasonal-blob-1 {
+    top: -10%;
+    left: -10%;
+    width: 50vw;
+    height: 50vw;
+    background: var(--season-glow-primary, rgba(255,255,255,0.1));
+    animation-delay: 0s, 0s;
+  }
+
+  .seasonal-blob-2 {
+    bottom: -20%;
+    right: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: var(--season-glow-secondary, rgba(255,255,255,0.1));
+    animation-delay: -5s, -2s;
+  }
+
+  .seasonal-blob-3 {
+    top: 30%;
+    left: 40%;
+    width: 40vw;
+    height: 40vw;
+    background: var(--season-pulse-one, rgba(255,255,255,0.1));
+    animation-delay: -10s, -7s;
+  }
+
+  @keyframes seasonal-blob-morph {
+    0% { border-radius: 40% 60% 70% 30% / 40% 40% 60% 50%; }
+    34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
+    67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
+    100% { border-radius: 40% 60% 70% 30% / 40% 40% 60% 50%; }
+  }
+
+  @keyframes seasonal-blob-move {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    50% { transform: translate(5vw, 10vh) scale(1.1) rotate(90deg); }
+    100% { transform: translate(-5vw, -5vh) scale(0.9) rotate(180deg); }
+  }
 
 @media (max-width: 767px) {
   .seasonal-cup,
@@ -231,15 +316,38 @@ body {
 }
 
 .seasonal-top-banner,
-.seasonal-heritage-banner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 8px;
-  opacity: 0.98;
-  background: linear-gradient(90deg, #ffcd00 0%, #ffcd00 45%, #003893 45%, #003893 75%, #ce1126 75%, #ce1126 100%);
-}
+  .seasonal-heritage-banner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 8px;
+    opacity: 0.98;
+    background: linear-gradient(90deg, #ffcd00 0%, #ffcd00 45%, #003893 45%, #003893 75%, #ce1126 75%, #ce1126 100%);
+  }
+
+  /* Wavy Artistic Banner */
+  .seasonal-top-wave-banner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    opacity: 0.85;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='%23000'/%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z' fill='%23000'/%3E%3C/svg%3E");
+    background-image: linear-gradient(90deg, #ffcd00 0%, #003893 50%, #ce1126 100%);
+  }
+
+  .seasonal-halloween-wave {
+    background-image: linear-gradient(90deg, #FF7A00 0%, #5c2d0e 50%, #7A3AC9 100%);
+  }
+  
+  .seasonal-love-wave {
+    background-image: linear-gradient(90deg, #D81B60 0%, #f06292 50%, #8E24AA 100%);
+  }
 
 .seasonal-top-banner-glow {
   position: absolute;

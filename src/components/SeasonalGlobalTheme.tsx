@@ -76,13 +76,18 @@ export default function SeasonalGlobalTheme() {
   if (activeKey === "none") return null;
 
   return (
-    <div
+        <div
       className={`seasonal-overlay seasonal-overlay-${intensity} ${showEntrance ? "seasonal-overlay-entrance" : ""}`}
       aria-hidden="true"
     >
+      {/* Artistic Liquid Blobs Background */}
+      <div className="seasonal-art-blob seasonal-blob-1"></div>
+      <div className="seasonal-art-blob seasonal-blob-2"></div>
+      <div className="seasonal-art-blob seasonal-blob-3"></div>
+
       {activeKey === "mundial_2026" && (
         <>
-          <div className="seasonal-top-banner" />
+                    <div className="seasonal-top-wave-banner" />
           <div className="seasonal-top-banner-glow" />
           <div className="seasonal-ribbon seasonal-ribbon-left" />
           <div className="seasonal-ribbon seasonal-ribbon-right" />
@@ -103,6 +108,7 @@ export default function SeasonalGlobalTheme() {
 
       {activeKey === "halloween" && (
         <>
+                    <div className="seasonal-top-wave-banner seasonal-halloween-wave" />
           <div className="seasonal-web seasonal-web-left" />
           <div className="seasonal-web seasonal-web-right" />
           <div className="seasonal-moon" />
@@ -159,6 +165,7 @@ export default function SeasonalGlobalTheme() {
 
       {activeKey === "amor_amistad" && (
         <>
+                    <div className="seasonal-top-wave-banner seasonal-love-wave" />
           <div className="seasonal-love-glow" />
           <div className="seasonal-love-title">Amor y Amistad</div>
           <div className="seasonal-heart-layer">

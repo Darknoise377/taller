@@ -243,15 +243,24 @@ async function resolveCategoryId(product: Product): Promise<string> {
     const categoryContext = product.category ? String(product.category) : '';
     const brandContext = (product as Product & { brand?: string | null }).brand || '';
     
-    // Construimos un título falso súper descriptivo solo para el Predictor de Meli
-    const enrichedPredictionString = `Repuesto Moto ${categoryContext} ${brandContext} ${product.name} ${tagsContext}`.trim().replace(/\s+/g, ' ');
+        // Construimos un título falso súper descriptivo solo para el Predictor de Meli
+    const enrichedPredictionString = `Repuestos Motos y Cuatrimotos ${categoryContext} ${brandContext} ${product.name} ${tagsContext}`.trim().replace(/\s+/g, ' ');
     
     console.info(`[meli/sync] Predicting category using enriched string: "${enrichedPredictionString.substring(0, 80)}..."`);
     const predictions = await meliApi.predictCategory(enrichedPredictionString);
     
     if (predictions.length > 0) {
-       console.info(`[meli/sync] Predicted Category: ${predictions[0].category_id}`);
-       return predictions[0].category_id;
+      // Forzamos que la predicción seleccionada contenga algo de motos o repuestos de vehículos para evitar que caiga en Agro/Electrodomésticos
+      const validPrediction = predictions.find(p => 
+        p.domain_id?.includes('MOTOCYCLE') || 
+        p.domain_id?.includes('VEHICLE') ||
+        p.domain_name?.toLowerCase().includes('moto') ||
+        p.category_name?.toLowerCase().includes('moto')
+      );
+
+      const finalCategoryId = validPrediction ? validPrediction.category_id : predictions[0].category_id;
+      console.info(`[meli/sync] Predicted Category: ${finalCategoryId} (Domain: ${validPrediction?.domain_id || predictions[0].domain_id})`);
+      return finalCategoryId;
     }
   } catch {
     // ignore — caller must configure category map
