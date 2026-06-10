@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
-  Button, Card, Col, Divider, Form, InputNumber, message,
+    Button, Card, Col, Divider, Form, Input, InputNumber, message,
   Popconfirm, Row, Select, Segmented, Spin, Table, Tag, Tooltip, Typography,
 } from 'antd';
 import {
@@ -69,6 +69,13 @@ interface ListingsSummary {
   outOfSync: number;
 }
 
+interface MeliOrderRow {
+  meliOrderId: string;
+  status: string;
+  rawPayload?: { total_amount?: number } | null;
+  createdAt: string | Date;
+}
+
 const FILTER_OPTIONS: { value: MeliSyncFilter; label: string }[] = [
   { value: 'all', label: 'Todos' },
   { value: 'synced', label: 'Sincronizados' },
@@ -89,8 +96,11 @@ export default function AdminMeliPage() {
   const [config, setConfig] = useState<MeliConfig | null>(null);
   const [listings, setListings] = useState<ListingRow[]>([]);
   const [summary, setSummary] = useState<ListingsSummary | null>(null);
-  const [syncFilter, setSyncFilter] = useState<MeliSyncFilter>('all');
+    const [syncFilter, setSyncFilter] = useState<MeliSyncFilter>('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
+  const [orders, setOrders] = useState<MeliOrderRow[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   const [configLoading, setConfigLoading] = useState(false);
   const [syncingAll, setSyncingAll] = useState(false);
   const [syncingPending, setSyncingPending] = useState(false);
@@ -122,7 +132,7 @@ export default function AdminMeliPage() {
     } catch { /* ignore */ }
   }, [form]);
 
-  const loadListings = useCallback(async (refreshLive = false) => {
+    const loadListings = useCallback(async (refreshLive = false) => {
     try {
       const qs = refreshLive ? '?refresh=1' : '';
       const res = await fetch(`/api/meli/listings${qs}`);
@@ -139,23 +149,45 @@ export default function AdminMeliPage() {
     }
   }, []);
 
+  const loadOrders = useCallback(async () => {
+    setOrdersLoading(true);
+    try {
+      const res = await fetch('/api/admin/meli/orders');
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(data.orders || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    setLoading(true);
-    Promise.all([loadStatus(), loadConfig()])
+        setLoading(true);
+    Promise.all([loadStatus(), loadConfig(), loadOrders()])
       .then(() => loadListings(false))
       .finally(() => setLoading(false));
 
     const interval = setInterval(loadStatus, 60_000);
     return () => clearInterval(interval);
-  }, [loadStatus, loadConfig, loadListings]);
+  }, [loadStatus, loadConfig, loadListings, loadOrders]);
 
-  const filteredListings = useMemo(() => {
-    if (syncFilter === 'all') return listings;
+    const filteredListings = useMemo(() => {
+    let filtered = listings;
     if (syncFilter === 'synced') {
-      return listings.filter((row) => Boolean(row.meliItemId) && row.syncState === 'synced');
+      filtered = filtered.filter((row) => Boolean(row.meliItemId) && row.syncState === 'synced');
+    } else if (syncFilter !== 'all') {
+      filtered = filtered.filter((row) => row.syncState === syncFilter);
     }
-    return listings.filter((row) => row.syncState === syncFilter);
-  }, [listings, syncFilter]);
+    
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(row => row.productName.toLowerCase().includes(term) || row?.meliItemId?.toLowerCase().includes(term));
+    }
+    return filtered;
+  }, [listings, syncFilter, searchTerm]);
 
   const outOfSyncCount = summary?.outOfSync ?? listings.filter((r) => r.syncState === 'out_of_sync').length;
 
@@ -638,15 +670,23 @@ export default function AdminMeliPage() {
           </Paragraph>
         )}
 
-        <Segmented
-          className="!mb-4"
-          value={syncFilter}
-          onChange={(v) => setSyncFilter(v as MeliSyncFilter)}
-          options={FILTER_OPTIONS.map((o) => ({
-            value: o.value,
-            label: o.label,
-          }))}
-        />
+                <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-between">
+          <Segmented
+            value={syncFilter}
+            onChange={(v) => setSyncFilter(v as MeliSyncFilter)}
+            options={FILTER_OPTIONS.map((o) => ({
+              value: o.value,
+              label: o.label,
+            }))}
+          />
+          <Input.Search 
+            placeholder="Buscar producto por nombre o ID MeLi" 
+            allowClear 
+            onSearch={setSearchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ maxWidth: 350 }}
+          />
+        </div>
 
         <Table
           dataSource={filteredListings}
@@ -658,11 +698,52 @@ export default function AdminMeliPage() {
         />
       </Card>
 
+      <Card title="Últimas Órdenes en Mercado Libre" className="mt-8">
+        <Table
+          dataSource={orders}
+          rowKey="id"
+          loading={ordersLoading}
+          size="small"
+          pagination={{ pageSize: 10 }}
+          columns={[
+            {
+              title: 'Orden ID',
+              dataIndex: 'meliOrderId',
+              key: 'meliOrderId',
+            },
+            {
+              title: 'Estado',
+              dataIndex: 'status',
+              key: 'status',
+              render: (status: string) => {
+                let color = 'default';
+                if (status === 'paid') color = 'success';
+                if (status === 'cancelled') color = 'error';
+                if (status === 'payment_required') color = 'warning';
+                return <Tag color={color}>{status.toUpperCase()}</Tag>;
+              }
+            },
+            {
+              title: 'Monto',
+              dataIndex: 'rawPayload',
+              key: 'total_amount',
+              render: (payload: { total_amount?: number } | null) => formatCurrency(payload?.total_amount || 0)
+            },
+            {
+              title: 'Fecha',
+              dataIndex: 'createdAt',
+              key: 'createdAt',
+              render: (val) => new Date(val).toLocaleString(),
+            }
+          ]}
+        />
+      </Card>
+
       <Divider />
       <Paragraph type="secondary" className="text-xs">
         Variables: <code>MELI_APP_ID</code>, <code>MELI_SECRET_KEY</code>,{' '}
         <code>MELI_REDIRECT_URI</code>
       </Paragraph>
-    </div>
-  );
-}
+      </div>
+    );
+  }
