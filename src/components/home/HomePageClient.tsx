@@ -30,6 +30,7 @@ import { ProductCard } from '@/components/ProductCard';
 import ComboCard from '@/components/ComboCard';
 import { makeProductPlaceholder } from '@/lib/placeholder';
 import type { Combo } from '@/types/combo';
+import { VideoPlayer } from '@/components/VideoPlayer';
 import {
   DEFAULT_SEASONAL_CAMPAIGN,
   type SeasonalCampaignConfig,
@@ -447,8 +448,22 @@ export default function HomePageClient({
         />
 
         {/* ════════════════════════════════════════
-            BENEFICIOS
-            ════════════════════════════════════════ */}
+                    VIDEO BANNER PROMOCIONAL
+                    ════════════════════════════════════════ */}
+                <section aria-label="Video promocional" className="py-4">
+                  <div className="rounded-3xl overflow-hidden shadow-2xl border border-slate-200/80 dark:border-slate-800">
+                    {/* Puedes cambiar la URL del video en src por la tuya de Cloudinary */}
+                    <VideoPlayer 
+                      variant="banner" 
+                      src="https://res.cloudinary.com/demo/video/upload/f_auto,q_auto/v1644342930/elephants.mp4" 
+                      className="w-full h-[300px] md:h-[450px] object-cover"
+                    />
+                  </div>
+                </section>
+
+                {/* ════════════════════════════════════════
+                    BENEFICIOS
+                    ════════════════════════════════════════ */}
         <section>
           <div className="mb-8">
             <p className="text-xs font-bold tracking-[0.18em] text-[#2E5FA7] uppercase">Ventajas</p>

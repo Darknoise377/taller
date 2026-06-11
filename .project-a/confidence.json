@@ -1,0 +1,3268 @@
+{
+  "files": [
+    {
+      "path": "eslint.config.mjs",
+      "confidence": 0.6050000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.5,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "next-env.d.ts",
+      "confidence": 0.5650000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.5,
+        "freshness": 0.4,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "next.config.ts",
+      "confidence": 0.6050000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.5,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "postcss.config.mjs",
+      "confidence": 0.5650000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.5,
+        "freshness": 0.4,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "scripts/test-resend.mjs",
+      "confidence": 0.6050000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.5,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/about/layout.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/about/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/analytics/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/chat-analytics/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/codes/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/combos/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/layout.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/login/layout.tsx",
+      "confidence": 0.64,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/login/logout.ts",
+      "confidence": 0.64,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/login/page.tsx",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/logout/route.ts",
+      "confidence": 0.64,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/meli/page.tsx",
+      "confidence": 0.7,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 1,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/orders/components/OrdersFilters.tsx",
+      "confidence": 0.64,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/orders/components/OrdersStats.tsx",
+      "confidence": 0.64,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/orders/components/OrdersTable.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/orders/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/products/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/security-audit/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/shipping/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/admin/users/page.tsx",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/chat-analytics/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/combos/analyze-image/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/combos/generate-description/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/combos/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/combos/[id]/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/emails/flush/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/emails/flush-all/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/login/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/logout/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/me/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/meli/orders/route.ts",
+      "confidence": 0.7,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 1,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/products/generate-description/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/products/generate-image/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/products/lookup-sku/route.ts",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/products/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/security-audit/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/stats/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/admin/store-settings/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/analytics/pageview/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/analytics/search/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/analytics/stats/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/auth/forgot-password/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/auth/login/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/auth/logout/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/auth/me/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/auth/register/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/auth/reset-password/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/cart/availability/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/cart/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/categories/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/chat/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/client-logs/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/codes/promotion/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/codes/route.ts",
+      "confidence": 0.64,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/codes/seller/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/codes/validate/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/combos/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/combos/[slug]/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/cron/expire-pending-orders/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/csrf/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/cuenta/change-password/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/cuenta/pedidos/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/cuenta/pedidos/[id]/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/cuenta/profile/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/cuenta/verificar-compra/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/feed/meta/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/health/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/meli/auth/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/meli/callback/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/meli/config/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/meli/listings/route.ts",
+      "confidence": 0.7,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 1,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/meli/status/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/meli/sync/bulk/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/meli/sync/[productId]/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/orders/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/orders/status/[referenceCode]/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/orders/[id]/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/payu/confirmation/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/payu/redirect/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/products/latest/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/products/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/products/[id]/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/reviews/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/search/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/store-settings/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/upload/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/users/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/users/[id]/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/webhook/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/webhooks/meli/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/wompi/redirect/route.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/wompi/update-order/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/api/wompi/webhook/route.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/checkout/layout.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/checkout/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/checkout/response/page.tsx",
+      "confidence": 0.64,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/checkout/response/response-client.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/combos/combos-client.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/combos/layout.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/combos/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/combos/[slug]/combo-detail-client.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/combos/[slug]/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/contact/layout.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/contact/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/cuenta/favoritos/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/cuenta/forgot-password/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/cuenta/layout.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/cuenta/login/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/cuenta/page.tsx",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/cuenta/pedidos/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/cuenta/pedidos/[id]/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/cuenta/perfil/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/cuenta/registro/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/cuenta/reset-password/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/error.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/layout.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/not-found.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/privacy/layout.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/privacy/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/products/category/[category]/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/products/layout-client.tsx",
+      "confidence": 0.64,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/products/layout.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/products/loading.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/products/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/products/products-client.tsx",
+      "confidence": 0.7100000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.2,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/products/[id]/loading.tsx",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/products/[id]/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/products/[id]/ProductDetailClient.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/repuestos/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/robots.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/seguimiento/layout.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/seguimiento/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/sitemap.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/terms/layout.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/terms/page.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/app/theme-provider.tsx",
+      "confidence": 0.655,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/AnnouncementBar.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/CartItem.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/CartModal.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/ChatWidget.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/ClientOnlyWidgets.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/ComboCard.tsx",
+      "confidence": 0.7250000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.3,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/ConditionalNavbar.tsx",
+      "confidence": 0.675,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/CountdownTimer.tsx",
+      "confidence": 0.7250000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.3,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/DynamicFooter.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/ErrorBoundary.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/FloatingButtons.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/FloatingCombos.tsx",
+      "confidence": 0.7250000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.3,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/Footer.tsx",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/HeroSection.tsx",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/home/HomePageClient.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/HomeSearch.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/Navbar.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/ProductCard.tsx",
+      "confidence": 0.73,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 1,
+        "usage": 0.2,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/ProductReviews.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/RecentPurchases.tsx",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/SeasonalGlobalTheme.tsx",
+      "confidence": 0.715,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 1,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/components/ShippingPromo.tsx",
+      "confidence": 0.7100000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.2,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/config/admin.ts",
+      "confidence": 0.81,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 1,
+        "risk": 1
+      },
+      "level": "canonical"
+    },
+    {
+      "path": "src/config/seasonTheme.ts",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/config/shippingRates.ts",
+      "confidence": 0.8300000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 1,
+        "risk": 1
+      },
+      "level": "canonical"
+    },
+    {
+      "path": "src/constants/order.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/constants/productCategories.ts",
+      "confidence": 0.8300000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 1,
+        "risk": 1
+      },
+      "level": "canonical"
+    },
+    {
+      "path": "src/context/AuthContext.tsx",
+      "confidence": 0.6900000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0.2,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/context/CartContext.tsx",
+      "confidence": 0.755,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.5,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/context/CustomerAuthContext.tsx",
+      "confidence": 0.78,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0.8,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/create-admin.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/hooks/useCart.ts",
+      "confidence": 0.73,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0.6,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/hooks/useCsrf.ts",
+      "confidence": 0.7400000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.4,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/hooks/useOrderExporter.ts",
+      "confidence": 0.675,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/hooks/useProducts.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/hooks/useShippingConfig.ts",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/hooks/useWishlist.ts",
+      "confidence": 0.7100000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.2,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/ai-provider.ts",
+      "confidence": 0.8300000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 1,
+        "risk": 1
+      },
+      "level": "canonical"
+    },
+    {
+      "path": "src/lib/ai.ts",
+      "confidence": 0.675,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/auth/hash.ts",
+      "confidence": 0.775,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0.9,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/auth/index.ts",
+      "confidence": 0.79,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/auth/jwt.ts",
+      "confidence": 0.81,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 1,
+        "risk": 1
+      },
+      "level": "canonical"
+    },
+    {
+      "path": "src/lib/cloudinary.ts",
+      "confidence": 0.67,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0.2,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/csrf.ts",
+      "confidence": 0.7400000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.4,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/email/authEmails.ts",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/email/orderEmails.ts",
+      "confidence": 0.785,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.7,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/embeddings.ts",
+      "confidence": 0.7050000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0.3,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/logout.ts",
+      "confidence": 0.64,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/meli/adminListings.ts",
+      "confidence": 0.715,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 1,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/meli/auth.ts",
+      "confidence": 0.7400000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.4,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/meli/client.ts",
+      "confidence": 0.745,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 1,
+        "usage": 0.3,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/meli/listingStatus.ts",
+      "confidence": 0.7599999999999999,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 1,
+        "usage": 0.4,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/meli/outOfSync.ts",
+      "confidence": 0.73,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 1,
+        "usage": 0.2,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/meli/pricing.ts",
+      "confidence": 0.7250000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.3,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/meli/sync.ts",
+      "confidence": 0.745,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 1,
+        "usage": 0.3,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/messenger/client.ts",
+      "confidence": 0.7100000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.2,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/messenger/processComment.ts",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/messenger/processMessage.ts",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/orders/createOrder.ts",
+      "confidence": 0.7400000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.4,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/orders/expirePendingOrders.ts",
+      "confidence": 0.7100000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.2,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/orders/restoreStock.ts",
+      "confidence": 0.755,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.5,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/orders/status.ts",
+      "confidence": 0.7050000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0.3,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/payments/wompi.ts",
+      "confidence": 0.7400000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.4,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/placeholder.ts",
+      "confidence": 0.77,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.6,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/prisma.ts",
+      "confidence": 0.79,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/rateLimit.ts",
+      "confidence": 0.8300000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 1,
+        "risk": 1
+      },
+      "level": "canonical"
+    },
+    {
+      "path": "src/lib/security/audit-edge.ts",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/security/audit.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/security/auditDb.ts",
+      "confidence": 0.755,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.5,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/seo/brand.ts",
+      "confidence": 0.8300000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 1,
+        "risk": 1
+      },
+      "level": "canonical"
+    },
+    {
+      "path": "src/lib/seo/queries.ts",
+      "confidence": 0.77,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.6,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/seo/searchSuggestions.ts",
+      "confidence": 0.7400000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.4,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/seo/slug.ts",
+      "confidence": 0.7250000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.3,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/seo/urls.ts",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/site.ts",
+      "confidence": 0.81,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 1,
+        "risk": 1
+      },
+      "level": "canonical"
+    },
+    {
+      "path": "src/lib/store/getShippingConfig.ts",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "confidence": 0.655,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/vertex.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/lib/whatsapp/processMessage.ts",
+      "confidence": 0.7100000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.2,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/middleware.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/scripts/ingest-embeddings.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/services/codeService.ts",
+      "confidence": 0.6950000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/services/orderService.ts",
+      "confidence": 0.7250000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.3,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/services/productService.ts",
+      "confidence": 0.7200000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0.4,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/types/auth.ts",
+      "confidence": 0.795,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0.9,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/types/cart.d.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/types/code.ts",
+      "confidence": 0.7100000000000001,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0.2,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/types/combo.d.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/types/global.d.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/types/google-genai.d.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/types/order.d.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/types/product.d.ts",
+      "confidence": 0.68,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/utils/colorUtils.ts",
+      "confidence": 0.655,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0.1,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/utils/formatCurrency.ts",
+      "confidence": 0.81,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 1,
+        "risk": 1
+      },
+      "level": "canonical"
+    },
+    {
+      "path": "src/utils/routeUtils.ts",
+      "confidence": 0.745,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.4,
+        "usage": 0.7,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "src/worker/processJobs.ts",
+      "confidence": 0.66,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.8,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "production"
+    },
+    {
+      "path": "tests/colorUtils.test.ts",
+      "confidence": 0.53,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "tests/createOrder.test.ts",
+      "confidence": 0.53,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "tests/formatCurrency.test.ts",
+      "confidence": 0.53,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "tests/meliListingStatus.test.ts",
+      "confidence": 0.53,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "tests/meliOutOfSync.test.ts",
+      "confidence": 0.55,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 1,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "tests/orderService.test.ts",
+      "confidence": 0.53,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "tests/orderStock.test.ts",
+      "confidence": 0.53,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "tests/productService.test.ts",
+      "confidence": 0.51,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "tests/routeUtils.test.ts",
+      "confidence": 0.53,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "tests/searchSuggestions.test.ts",
+      "confidence": 0.53,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "tests/verify-security.ts",
+      "confidence": 0.51,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 0.6,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    },
+    {
+      "path": "tests/wompi.test.ts",
+      "confidence": 0.53,
+      "factors": {
+        "source": 0.9,
+        "validation": 0.6,
+        "production": 0.2,
+        "freshness": 0.8,
+        "usage": 0,
+        "risk": 1
+      },
+      "level": "verified"
+    }
+  ],
+  "generatedAt": "2026-06-11T13:20:17.006Z"
+}

@@ -1,0 +1,1597 @@
+{
+  "builtAt": "2026-06-11T13:20:15.407Z",
+  "rootPath": "c:\\Users\\fabian\\Desktop\\taller_a_r",
+  "totalFiles": 251,
+  "forward": {
+    "eslint.config.mjs": [],
+    "next-env.d.ts": [],
+    "next.config.ts": [],
+    "postcss.config.mjs": [],
+    "scripts/test-resend.mjs": [],
+    "src/app/about/layout.tsx": [
+      "src/lib/seo/brand.ts"
+    ],
+    "src/app/about/page.tsx": [],
+    "src/app/admin/analytics/page.tsx": [],
+    "src/app/admin/chat-analytics/page.tsx": [],
+    "src/app/admin/codes/page.tsx": [
+      "src/types/code.ts",
+      "src/services/codeService.ts",
+      "src/constants/productCategories.ts"
+    ],
+    "src/app/admin/combos/page.tsx": [
+      "src/utils/formatCurrency.ts",
+      "src/services/productService.ts"
+    ],
+    "src/app/admin/layout.tsx": [
+      "src/context/AuthContext.tsx",
+      "src/types/auth.ts"
+    ],
+    "src/app/admin/login/layout.tsx": [],
+    "src/app/admin/login/logout.ts": [],
+    "src/app/admin/login/page.tsx": [
+      "src/context/AuthContext.tsx",
+      "src/types/auth.ts"
+    ],
+    "src/app/admin/logout/route.ts": [
+      "src/config/admin.ts"
+    ],
+    "src/app/admin/meli/page.tsx": [
+      "src/utils/formatCurrency.ts",
+      "src/lib/meli/pricing.ts",
+      "src/lib/meli/listingStatus.ts"
+    ],
+    "src/app/admin/orders/components/OrdersFilters.tsx": [],
+    "src/app/admin/orders/components/OrdersStats.tsx": [],
+    "src/app/admin/orders/components/OrdersTable.tsx": [],
+    "src/app/admin/orders/page.tsx": [
+      "src/services/orderService.ts",
+      "src/hooks/useOrderExporter.ts",
+      "src/utils/formatCurrency.ts"
+    ],
+    "src/app/admin/page.tsx": [],
+    "src/app/admin/products/page.tsx": [
+      "src/app/api/admin/products/lookup-sku/route.ts",
+      "src/services/productService.ts",
+      "src/constants/productCategories.ts",
+      "src/utils/formatCurrency.ts",
+      "src/config/shippingRates.ts"
+    ],
+    "src/app/admin/security-audit/page.tsx": [],
+    "src/app/admin/shipping/page.tsx": [
+      "src/config/shippingRates.ts"
+    ],
+    "src/app/admin/users/page.tsx": [],
+    "src/app/api/admin/chat-analytics/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/admin/combos/analyze-image/route.ts": [
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts",
+      "src/lib/ai-provider.ts"
+    ],
+    "src/app/api/admin/combos/generate-description/route.ts": [
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts",
+      "src/lib/ai-provider.ts"
+    ],
+    "src/app/api/admin/combos/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/admin/combos/[id]/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/admin/emails/flush/route.ts": [
+      "src/lib/security/auditDb.ts",
+      "src/lib/email/orderEmails.ts"
+    ],
+    "src/app/api/admin/emails/flush-all/route.ts": [
+      "src/lib/security/auditDb.ts",
+      "src/lib/prisma.ts",
+      "src/lib/email/orderEmails.ts"
+    ],
+    "src/app/api/admin/login/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/hash.ts",
+      "src/lib/auth/jwt.ts",
+      "src/config/admin.ts",
+      "src/lib/rateLimit.ts"
+    ],
+    "src/app/api/admin/logout/route.ts": [
+      "src/config/admin.ts"
+    ],
+    "src/app/api/admin/me/route.ts": [
+      "src/config/admin.ts",
+      "src/lib/auth/index.ts",
+      "src/types/auth.ts"
+    ],
+    "src/app/api/admin/meli/orders/route.ts": [
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts",
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/admin/products/generate-description/route.ts": [
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts",
+      "src/lib/ai-provider.ts",
+      "src/constants/productCategories.ts"
+    ],
+    "src/app/api/admin/products/generate-image/route.ts": [
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts",
+      "src/lib/ai-provider.ts",
+      "src/lib/cloudinary.ts"
+    ],
+    "src/app/api/admin/products/lookup-sku/route.ts": [
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts",
+      "src/lib/ai-provider.ts",
+      "src/constants/productCategories.ts"
+    ],
+    "src/app/api/admin/products/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/admin/security-audit/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/admin/stats/route.ts": [
+      "src/lib/prisma.ts",
+      "src/config/admin.ts",
+      "src/lib/auth/index.ts"
+    ],
+    "src/app/api/admin/store-settings/route.ts": [
+      "src/lib/prisma.ts",
+      "src/config/admin.ts",
+      "src/lib/auth/index.ts",
+      "src/config/shippingRates.ts"
+    ],
+    "src/app/api/analytics/pageview/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/analytics/search/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/analytics/stats/route.ts": [
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts",
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/auth/forgot-password/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/rateLimit.ts",
+      "src/lib/email/authEmails.ts",
+      "src/lib/site.ts"
+    ],
+    "src/app/api/auth/login/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/hash.ts",
+      "src/lib/auth/jwt.ts",
+      "src/config/admin.ts",
+      "src/lib/rateLimit.ts"
+    ],
+    "src/app/api/auth/logout/route.ts": [
+      "src/config/admin.ts"
+    ],
+    "src/app/api/auth/me/route.ts": [
+      "src/config/admin.ts",
+      "src/lib/auth/jwt.ts"
+    ],
+    "src/app/api/auth/register/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/hash.ts",
+      "src/lib/auth/jwt.ts",
+      "src/config/admin.ts",
+      "src/lib/rateLimit.ts"
+    ],
+    "src/app/api/auth/reset-password/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/hash.ts",
+      "src/lib/rateLimit.ts"
+    ],
+    "src/app/api/cart/availability/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/rateLimit.ts"
+    ],
+    "src/app/api/cart/route.ts": [],
+    "src/app/api/categories/route.ts": [
+      "src/lib/prisma.ts",
+      "src/constants/productCategories.ts"
+    ],
+    "src/app/api/chat/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/ai-provider.ts",
+      "src/lib/rateLimit.ts",
+      "src/constants/productCategories.ts",
+      "src/lib/orders/createOrder.ts"
+    ],
+    "src/app/api/client-logs/route.ts": [],
+    "src/app/api/codes/promotion/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/codes/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/codes/seller/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/codes/validate/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/rateLimit.ts"
+    ],
+    "src/app/api/combos/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/combos/[slug]/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/cron/expire-pending-orders/route.ts": [
+      "src/lib/orders/expirePendingOrders.ts"
+    ],
+    "src/app/api/csrf/route.ts": [
+      "src/lib/csrf.ts"
+    ],
+    "src/app/api/cuenta/change-password/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/jwt.ts",
+      "src/lib/auth/hash.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/cuenta/pedidos/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/jwt.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/cuenta/pedidos/[id]/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/jwt.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/cuenta/profile/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/jwt.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/cuenta/verificar-compra/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/jwt.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/feed/meta/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/site.ts"
+    ],
+    "src/app/api/health/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/meli/auth/route.ts": [
+      "src/lib/meli/auth.ts",
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/meli/callback/route.ts": [
+      "src/lib/meli/auth.ts"
+    ],
+    "src/app/api/meli/config/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/meli/listings/route.ts": [
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts",
+      "src/lib/meli/adminListings.ts"
+    ],
+    "src/app/api/meli/status/route.ts": [
+      "src/lib/meli/auth.ts",
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/meli/sync/bulk/route.ts": [
+      "src/lib/meli/sync.ts",
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/meli/sync/[productId]/route.ts": [
+      "src/lib/meli/sync.ts",
+      "src/lib/auth/index.ts",
+      "src/config/admin.ts"
+    ],
+    "src/app/api/orders/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/rateLimit.ts",
+      "src/lib/orders/createOrder.ts"
+    ],
+    "src/app/api/orders/status/[referenceCode]/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/orders/[id]/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/email/orderEmails.ts",
+      "src/lib/orders/status.ts",
+      "src/lib/orders/restoreStock.ts",
+      "src/lib/security/auditDb.ts"
+    ],
+    "src/app/api/payu/confirmation/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/email/orderEmails.ts",
+      "src/lib/orders/status.ts"
+    ],
+    "src/app/api/payu/redirect/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/products/latest/route.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/app/api/products/route.ts": [
+      "src/lib/prisma.ts",
+      "src/constants/productCategories.ts",
+      "src/lib/embeddings.ts",
+      "src/lib/seo/slug.ts"
+    ],
+    "src/app/api/products/[id]/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/embeddings.ts",
+      "src/lib/seo/slug.ts"
+    ],
+    "src/app/api/reviews/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/rateLimit.ts",
+      "src/config/admin.ts",
+      "src/lib/auth/jwt.ts"
+    ],
+    "src/app/api/search/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/ai-provider.ts",
+      "src/lib/rateLimit.ts",
+      "src/constants/productCategories.ts"
+    ],
+    "src/app/api/store-settings/route.ts": [
+      "src/lib/prisma.ts",
+      "src/config/shippingRates.ts"
+    ],
+    "src/app/api/upload/route.ts": [
+      "src/lib/cloudinary.ts",
+      "src/lib/rateLimit.ts"
+    ],
+    "src/app/api/users/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/hash.ts",
+      "src/lib/security/auditDb.ts"
+    ],
+    "src/app/api/users/[id]/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/hash.ts",
+      "src/lib/security/auditDb.ts"
+    ],
+    "src/app/api/webhook/route.ts": [
+      "src/lib/whatsapp/processMessage.ts",
+      "src/lib/messenger/processMessage.ts",
+      "src/lib/messenger/processComment.ts"
+    ],
+    "src/app/api/webhooks/meli/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/meli/sync.ts"
+    ],
+    "src/app/api/wompi/redirect/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/payments/wompi.ts"
+    ],
+    "src/app/api/wompi/update-order/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/email/orderEmails.ts",
+      "src/lib/rateLimit.ts",
+      "src/lib/orders/restoreStock.ts"
+    ],
+    "src/app/api/wompi/webhook/route.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/email/orderEmails.ts",
+      "src/lib/payments/wompi.ts",
+      "src/lib/orders/status.ts",
+      "src/lib/orders/restoreStock.ts"
+    ],
+    "src/app/checkout/layout.tsx": [
+      "src/lib/seo/brand.ts"
+    ],
+    "src/app/checkout/page.tsx": [
+      "src/hooks/useCart.ts",
+      "src/context/CustomerAuthContext.tsx",
+      "src/services/orderService.ts",
+      "src/types/code.ts",
+      "src/utils/formatCurrency.ts",
+      "src/components/ShippingPromo.tsx",
+      "src/config/shippingRates.ts"
+    ],
+    "src/app/checkout/response/page.tsx": [
+      "src/app/checkout/response/response-client.tsx"
+    ],
+    "src/app/checkout/response/response-client.tsx": [],
+    "src/app/combos/combos-client.tsx": [
+      "src/components/ComboCard.tsx"
+    ],
+    "src/app/combos/layout.tsx": [
+      "src/lib/seo/brand.ts"
+    ],
+    "src/app/combos/page.tsx": [
+      "src/lib/seo/queries.ts",
+      "src/lib/site.ts",
+      "src/app/combos/combos-client.tsx"
+    ],
+    "src/app/combos/[slug]/combo-detail-client.tsx": [
+      "src/hooks/useCart.ts",
+      "src/components/CountdownTimer.tsx",
+      "src/lib/placeholder.ts"
+    ],
+    "src/app/combos/[slug]/page.tsx": [
+      "src/app/combos/[slug]/combo-detail-client.tsx",
+      "src/lib/seo/queries.ts",
+      "src/lib/site.ts",
+      "src/lib/seo/brand.ts",
+      "src/lib/seo/urls.ts"
+    ],
+    "src/app/contact/layout.tsx": [
+      "src/lib/seo/brand.ts"
+    ],
+    "src/app/contact/page.tsx": [],
+    "src/app/cuenta/favoritos/page.tsx": [
+      "src/hooks/useWishlist.ts",
+      "src/services/productService.ts",
+      "src/utils/formatCurrency.ts",
+      "src/lib/placeholder.ts"
+    ],
+    "src/app/cuenta/forgot-password/page.tsx": [
+      "src/hooks/useCsrf.ts"
+    ],
+    "src/app/cuenta/layout.tsx": [],
+    "src/app/cuenta/login/page.tsx": [
+      "src/context/CustomerAuthContext.tsx",
+      "src/hooks/useCsrf.ts"
+    ],
+    "src/app/cuenta/page.tsx": [],
+    "src/app/cuenta/pedidos/page.tsx": [
+      "src/context/CustomerAuthContext.tsx",
+      "src/utils/formatCurrency.ts"
+    ],
+    "src/app/cuenta/pedidos/[id]/page.tsx": [
+      "src/utils/formatCurrency.ts"
+    ],
+    "src/app/cuenta/perfil/page.tsx": [
+      "src/context/CustomerAuthContext.tsx"
+    ],
+    "src/app/cuenta/registro/page.tsx": [
+      "src/context/CustomerAuthContext.tsx",
+      "src/hooks/useCsrf.ts"
+    ],
+    "src/app/cuenta/reset-password/page.tsx": [
+      "src/hooks/useCsrf.ts"
+    ],
+    "src/app/error.tsx": [],
+    "src/app/layout.tsx": [
+      "src/context/CartContext.tsx",
+      "src/context/CustomerAuthContext.tsx",
+      "src/components/CartModal.tsx",
+      "src/components/ConditionalNavbar.tsx",
+      "src/components/DynamicFooter.tsx",
+      "src/components/AnnouncementBar.tsx",
+      "src/components/SeasonalGlobalTheme.tsx",
+      "src/components/ErrorBoundary.tsx",
+      "src/components/ClientOnlyWidgets.tsx",
+      "src/components/FloatingCombos.tsx",
+      "src/app/theme-provider.tsx",
+      "src/lib/site.ts",
+      "src/lib/seo/brand.ts"
+    ],
+    "src/app/not-found.tsx": [],
+    "src/app/page.tsx": [
+      "src/components/home/HomePageClient.tsx",
+      "src/lib/seo/queries.ts",
+      "src/lib/seo/brand.ts",
+      "src/lib/site.ts"
+    ],
+    "src/app/privacy/layout.tsx": [
+      "src/lib/seo/brand.ts"
+    ],
+    "src/app/privacy/page.tsx": [],
+    "src/app/products/category/[category]/page.tsx": [
+      "src/app/products/products-client.tsx",
+      "src/lib/seo/queries.ts",
+      "src/constants/productCategories.ts",
+      "src/lib/site.ts",
+      "src/lib/seo/brand.ts"
+    ],
+    "src/app/products/layout-client.tsx": [],
+    "src/app/products/layout.tsx": [],
+    "src/app/products/loading.tsx": [],
+    "src/app/products/page.tsx": [
+      "src/app/products/products-client.tsx",
+      "src/lib/seo/queries.ts",
+      "src/lib/site.ts",
+      "src/constants/productCategories.ts",
+      "src/lib/seo/brand.ts"
+    ],
+    "src/app/products/products-client.tsx": [
+      "src/constants/productCategories.ts",
+      "src/components/ProductCard.tsx",
+      "src/components/FloatingCombos.tsx"
+    ],
+    "src/app/products/[id]/loading.tsx": [],
+    "src/app/products/[id]/page.tsx": [
+      "src/lib/prisma.ts",
+      "src/app/products/[id]/ProductDetailClient.tsx",
+      "src/lib/site.ts",
+      "src/lib/seo/brand.ts",
+      "src/constants/productCategories.ts",
+      "src/lib/seo/slug.ts"
+    ],
+    "src/app/products/[id]/ProductDetailClient.tsx": [
+      "src/context/CartContext.tsx",
+      "src/lib/utils.ts",
+      "src/constants/productCategories.ts",
+      "src/components/ProductReviews.tsx",
+      "src/lib/placeholder.ts",
+      "src/components/FloatingCombos.tsx"
+    ],
+    "src/app/repuestos/page.tsx": [],
+    "src/app/robots.ts": [
+      "src/lib/site.ts"
+    ],
+    "src/app/seguimiento/layout.tsx": [
+      "src/lib/seo/brand.ts"
+    ],
+    "src/app/seguimiento/page.tsx": [],
+    "src/app/sitemap.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/site.ts",
+      "src/lib/seo/queries.ts",
+      "src/constants/productCategories.ts"
+    ],
+    "src/app/terms/layout.tsx": [
+      "src/lib/seo/brand.ts"
+    ],
+    "src/app/terms/page.tsx": [],
+    "src/app/theme-provider.tsx": [],
+    "src/components/AnnouncementBar.tsx": [
+      "src/utils/routeUtils.ts"
+    ],
+    "src/components/CartItem.tsx": [
+      "src/hooks/useCart.ts"
+    ],
+    "src/components/CartModal.tsx": [
+      "src/hooks/useCart.ts",
+      "src/components/CartItem.tsx",
+      "src/components/ShippingPromo.tsx",
+      "src/utils/routeUtils.ts",
+      "src/config/shippingRates.ts"
+    ],
+    "src/components/ChatWidget.tsx": [
+      "src/lib/csrf.ts"
+    ],
+    "src/components/ClientOnlyWidgets.tsx": [],
+    "src/components/ComboCard.tsx": [
+      "src/hooks/useCart.ts",
+      "src/components/CountdownTimer.tsx",
+      "src/lib/placeholder.ts"
+    ],
+    "src/components/ConditionalNavbar.tsx": [
+      "src/components/Navbar.tsx"
+    ],
+    "src/components/CountdownTimer.tsx": [],
+    "src/components/DynamicFooter.tsx": [
+      "src/utils/routeUtils.ts"
+    ],
+    "src/components/ErrorBoundary.tsx": [],
+    "src/components/FloatingButtons.tsx": [
+      "src/utils/routeUtils.ts"
+    ],
+    "src/components/FloatingCombos.tsx": [
+      "src/components/ComboCard.tsx",
+      "src/utils/routeUtils.ts",
+      "src/context/CartContext.tsx"
+    ],
+    "src/components/Footer.tsx": [],
+    "src/components/HeroSection.tsx": [],
+    "src/components/home/HomePageClient.tsx": [
+      "src/constants/productCategories.ts",
+      "src/components/HomeSearch.tsx",
+      "src/lib/seo/searchSuggestions.ts",
+      "src/components/CountdownTimer.tsx",
+      "src/components/RecentPurchases.tsx",
+      "src/components/ProductCard.tsx",
+      "src/components/ComboCard.tsx",
+      "src/lib/placeholder.ts",
+      "src/config/shippingRates.ts",
+      "src/config/seasonTheme.ts"
+    ],
+    "src/components/HomeSearch.tsx": [
+      "src/lib/seo/searchSuggestions.ts"
+    ],
+    "src/components/Navbar.tsx": [
+      "src/context/CartContext.tsx",
+      "src/context/CustomerAuthContext.tsx",
+      "src/utils/routeUtils.ts"
+    ],
+    "src/components/ProductCard.tsx": [
+      "src/hooks/useCart.ts",
+      "src/hooks/useWishlist.ts",
+      "src/lib/placeholder.ts",
+      "src/hooks/useShippingConfig.ts"
+    ],
+    "src/components/ProductReviews.tsx": [
+      "src/context/CustomerAuthContext.tsx"
+    ],
+    "src/components/RecentPurchases.tsx": [],
+    "src/components/SeasonalGlobalTheme.tsx": [
+      "src/config/shippingRates.ts"
+    ],
+    "src/components/ShippingPromo.tsx": [],
+    "src/config/admin.ts": [],
+    "src/config/seasonTheme.ts": [
+      "src/config/shippingRates.ts"
+    ],
+    "src/config/shippingRates.ts": [],
+    "src/constants/order.ts": [],
+    "src/constants/productCategories.ts": [],
+    "src/context/AuthContext.tsx": [
+      "src/types/auth.ts"
+    ],
+    "src/context/CartContext.tsx": [],
+    "src/context/CustomerAuthContext.tsx": [
+      "src/types/auth.ts"
+    ],
+    "src/create-admin.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/hash.ts"
+    ],
+    "src/hooks/useCart.ts": [
+      "src/context/CartContext.tsx"
+    ],
+    "src/hooks/useCsrf.ts": [
+      "src/lib/csrf.ts"
+    ],
+    "src/hooks/useOrderExporter.ts": [],
+    "src/hooks/useProducts.ts": [],
+    "src/hooks/useShippingConfig.ts": [
+      "src/config/shippingRates.ts"
+    ],
+    "src/hooks/useWishlist.ts": [],
+    "src/lib/ai-provider.ts": [],
+    "src/lib/ai.ts": [],
+    "src/lib/auth/hash.ts": [],
+    "src/lib/auth/index.ts": [
+      "src/lib/auth/hash.ts",
+      "src/lib/auth/jwt.ts"
+    ],
+    "src/lib/auth/jwt.ts": [
+      "src/types/auth.ts"
+    ],
+    "src/lib/cloudinary.ts": [],
+    "src/lib/csrf.ts": [],
+    "src/lib/email/authEmails.ts": [],
+    "src/lib/email/orderEmails.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/lib/embeddings.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/lib/logout.ts": [
+      "src/config/admin.ts"
+    ],
+    "src/lib/meli/adminListings.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/meli/client.ts",
+      "src/lib/meli/listingStatus.ts",
+      "src/lib/meli/pricing.ts",
+      "src/lib/meli/outOfSync.ts"
+    ],
+    "src/lib/meli/auth.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/lib/meli/client.ts": [
+      "src/lib/meli/auth.ts"
+    ],
+    "src/lib/meli/listingStatus.ts": [
+      "src/lib/meli/client.ts"
+    ],
+    "src/lib/meli/outOfSync.ts": [],
+    "src/lib/meli/pricing.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/lib/meli/sync.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/meli/client.ts",
+      "src/lib/meli/listingStatus.ts",
+      "src/lib/meli/pricing.ts"
+    ],
+    "src/lib/messenger/client.ts": [],
+    "src/lib/messenger/processComment.ts": [
+      "src/lib/ai-provider.ts",
+      "src/lib/messenger/client.ts",
+      "src/constants/productCategories.ts"
+    ],
+    "src/lib/messenger/processMessage.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/ai-provider.ts",
+      "src/constants/productCategories.ts",
+      "src/lib/whatsapp/processMessage.ts",
+      "src/lib/messenger/client.ts"
+    ],
+    "src/lib/orders/createOrder.ts": [
+      "src/lib/prisma.ts",
+      "src/config/shippingRates.ts",
+      "src/lib/email/orderEmails.ts",
+      "src/lib/payments/wompi.ts",
+      "src/lib/store/getShippingConfig.ts",
+      "src/utils/formatCurrency.ts"
+    ],
+    "src/lib/orders/expirePendingOrders.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/orders/restoreStock.ts"
+    ],
+    "src/lib/orders/restoreStock.ts": [
+      "src/lib/prisma.ts"
+    ],
+    "src/lib/orders/status.ts": [],
+    "src/lib/payments/wompi.ts": [],
+    "src/lib/placeholder.ts": [],
+    "src/lib/prisma.ts": [],
+    "src/lib/rateLimit.ts": [],
+    "src/lib/security/audit-edge.ts": [],
+    "src/lib/security/audit.ts": [
+      "src/lib/prisma.ts",
+      "src/types/auth.ts"
+    ],
+    "src/lib/security/auditDb.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/auth/jwt.ts",
+      "src/config/admin.ts",
+      "src/types/auth.ts"
+    ],
+    "src/lib/seo/brand.ts": [],
+    "src/lib/seo/queries.ts": [
+      "src/lib/prisma.ts",
+      "src/constants/productCategories.ts",
+      "src/lib/seo/searchSuggestions.ts"
+    ],
+    "src/lib/seo/searchSuggestions.ts": [],
+    "src/lib/seo/slug.ts": [],
+    "src/lib/seo/urls.ts": [
+      "src/lib/site.ts"
+    ],
+    "src/lib/site.ts": [],
+    "src/lib/store/getShippingConfig.ts": [
+      "src/lib/prisma.ts",
+      "src/config/shippingRates.ts"
+    ],
+    "src/lib/utils.ts": [],
+    "src/lib/vertex.ts": [],
+    "src/lib/whatsapp/processMessage.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/ai-provider.ts",
+      "src/constants/productCategories.ts",
+      "src/lib/orders/createOrder.ts"
+    ],
+    "src/middleware.ts": [
+      "src/lib/auth/jwt.ts",
+      "src/config/admin.ts",
+      "src/types/auth.ts",
+      "src/lib/security/audit-edge.ts",
+      "src/lib/csrf.ts"
+    ],
+    "src/scripts/ingest-embeddings.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/embeddings.ts"
+    ],
+    "src/services/codeService.ts": [],
+    "src/services/orderService.ts": [],
+    "src/services/productService.ts": [],
+    "src/types/auth.ts": [],
+    "src/types/cart.d.ts": [],
+    "src/types/code.ts": [],
+    "src/types/combo.d.ts": [],
+    "src/types/global.d.ts": [],
+    "src/types/google-genai.d.ts": [],
+    "src/types/order.d.ts": [],
+    "src/types/product.d.ts": [],
+    "src/utils/colorUtils.ts": [],
+    "src/utils/formatCurrency.ts": [],
+    "src/utils/routeUtils.ts": [],
+    "src/worker/processJobs.ts": [
+      "src/lib/prisma.ts",
+      "src/lib/ai.ts"
+    ],
+    "tests/colorUtils.test.ts": [
+      "src/utils/colorUtils.ts"
+    ],
+    "tests/createOrder.test.ts": [
+      "src/lib/orders/createOrder.ts"
+    ],
+    "tests/formatCurrency.test.ts": [
+      "src/utils/formatCurrency.ts"
+    ],
+    "tests/meliListingStatus.test.ts": [
+      "src/lib/meli/listingStatus.ts"
+    ],
+    "tests/meliOutOfSync.test.ts": [
+      "src/lib/meli/outOfSync.ts"
+    ],
+    "tests/orderService.test.ts": [
+      "src/services/orderService.ts"
+    ],
+    "tests/orderStock.test.ts": [
+      "src/lib/orders/restoreStock.ts",
+      "src/lib/orders/expirePendingOrders.ts"
+    ],
+    "tests/productService.test.ts": [
+      "src/services/productService.ts"
+    ],
+    "tests/routeUtils.test.ts": [
+      "src/utils/routeUtils.ts"
+    ],
+    "tests/searchSuggestions.test.ts": [
+      "src/lib/seo/searchSuggestions.ts"
+    ],
+    "tests/verify-security.ts": [],
+    "tests/wompi.test.ts": [
+      "src/lib/payments/wompi.ts"
+    ]
+  },
+  "reverse": {
+    "eslint.config.mjs": [],
+    "next-env.d.ts": [],
+    "next.config.ts": [],
+    "postcss.config.mjs": [],
+    "scripts/test-resend.mjs": [],
+    "src/app/about/layout.tsx": [],
+    "src/app/about/page.tsx": [],
+    "src/app/admin/analytics/page.tsx": [],
+    "src/app/admin/chat-analytics/page.tsx": [],
+    "src/app/admin/codes/page.tsx": [],
+    "src/app/admin/combos/page.tsx": [],
+    "src/app/admin/layout.tsx": [],
+    "src/app/admin/login/layout.tsx": [],
+    "src/app/admin/login/logout.ts": [],
+    "src/app/admin/login/page.tsx": [],
+    "src/app/admin/logout/route.ts": [],
+    "src/app/admin/meli/page.tsx": [],
+    "src/app/admin/orders/components/OrdersFilters.tsx": [],
+    "src/app/admin/orders/components/OrdersStats.tsx": [],
+    "src/app/admin/orders/components/OrdersTable.tsx": [],
+    "src/app/admin/orders/page.tsx": [],
+    "src/app/admin/page.tsx": [],
+    "src/app/admin/products/page.tsx": [],
+    "src/app/admin/security-audit/page.tsx": [],
+    "src/app/admin/shipping/page.tsx": [],
+    "src/app/admin/users/page.tsx": [],
+    "src/app/api/admin/chat-analytics/route.ts": [],
+    "src/app/api/admin/combos/analyze-image/route.ts": [],
+    "src/app/api/admin/combos/generate-description/route.ts": [],
+    "src/app/api/admin/combos/route.ts": [],
+    "src/app/api/admin/combos/[id]/route.ts": [],
+    "src/app/api/admin/emails/flush/route.ts": [],
+    "src/app/api/admin/emails/flush-all/route.ts": [],
+    "src/app/api/admin/login/route.ts": [],
+    "src/app/api/admin/logout/route.ts": [],
+    "src/app/api/admin/me/route.ts": [],
+    "src/app/api/admin/meli/orders/route.ts": [],
+    "src/app/api/admin/products/generate-description/route.ts": [],
+    "src/app/api/admin/products/generate-image/route.ts": [],
+    "src/app/api/admin/products/lookup-sku/route.ts": [
+      "src/app/admin/products/page.tsx"
+    ],
+    "src/app/api/admin/products/route.ts": [],
+    "src/app/api/admin/security-audit/route.ts": [],
+    "src/app/api/admin/stats/route.ts": [],
+    "src/app/api/admin/store-settings/route.ts": [],
+    "src/app/api/analytics/pageview/route.ts": [],
+    "src/app/api/analytics/search/route.ts": [],
+    "src/app/api/analytics/stats/route.ts": [],
+    "src/app/api/auth/forgot-password/route.ts": [],
+    "src/app/api/auth/login/route.ts": [],
+    "src/app/api/auth/logout/route.ts": [],
+    "src/app/api/auth/me/route.ts": [],
+    "src/app/api/auth/register/route.ts": [],
+    "src/app/api/auth/reset-password/route.ts": [],
+    "src/app/api/cart/availability/route.ts": [],
+    "src/app/api/cart/route.ts": [],
+    "src/app/api/categories/route.ts": [],
+    "src/app/api/chat/route.ts": [],
+    "src/app/api/client-logs/route.ts": [],
+    "src/app/api/codes/promotion/route.ts": [],
+    "src/app/api/codes/route.ts": [],
+    "src/app/api/codes/seller/route.ts": [],
+    "src/app/api/codes/validate/route.ts": [],
+    "src/app/api/combos/route.ts": [],
+    "src/app/api/combos/[slug]/route.ts": [],
+    "src/app/api/cron/expire-pending-orders/route.ts": [],
+    "src/app/api/csrf/route.ts": [],
+    "src/app/api/cuenta/change-password/route.ts": [],
+    "src/app/api/cuenta/pedidos/route.ts": [],
+    "src/app/api/cuenta/pedidos/[id]/route.ts": [],
+    "src/app/api/cuenta/profile/route.ts": [],
+    "src/app/api/cuenta/verificar-compra/route.ts": [],
+    "src/app/api/feed/meta/route.ts": [],
+    "src/app/api/health/route.ts": [],
+    "src/app/api/meli/auth/route.ts": [],
+    "src/app/api/meli/callback/route.ts": [],
+    "src/app/api/meli/config/route.ts": [],
+    "src/app/api/meli/listings/route.ts": [],
+    "src/app/api/meli/status/route.ts": [],
+    "src/app/api/meli/sync/bulk/route.ts": [],
+    "src/app/api/meli/sync/[productId]/route.ts": [],
+    "src/app/api/orders/route.ts": [],
+    "src/app/api/orders/status/[referenceCode]/route.ts": [],
+    "src/app/api/orders/[id]/route.ts": [],
+    "src/app/api/payu/confirmation/route.ts": [],
+    "src/app/api/payu/redirect/route.ts": [],
+    "src/app/api/products/latest/route.ts": [],
+    "src/app/api/products/route.ts": [],
+    "src/app/api/products/[id]/route.ts": [],
+    "src/app/api/reviews/route.ts": [],
+    "src/app/api/search/route.ts": [],
+    "src/app/api/store-settings/route.ts": [],
+    "src/app/api/upload/route.ts": [],
+    "src/app/api/users/route.ts": [],
+    "src/app/api/users/[id]/route.ts": [],
+    "src/app/api/webhook/route.ts": [],
+    "src/app/api/webhooks/meli/route.ts": [],
+    "src/app/api/wompi/redirect/route.ts": [],
+    "src/app/api/wompi/update-order/route.ts": [],
+    "src/app/api/wompi/webhook/route.ts": [],
+    "src/app/checkout/layout.tsx": [],
+    "src/app/checkout/page.tsx": [],
+    "src/app/checkout/response/page.tsx": [],
+    "src/app/checkout/response/response-client.tsx": [
+      "src/app/checkout/response/page.tsx"
+    ],
+    "src/app/combos/combos-client.tsx": [
+      "src/app/combos/page.tsx"
+    ],
+    "src/app/combos/layout.tsx": [],
+    "src/app/combos/page.tsx": [],
+    "src/app/combos/[slug]/combo-detail-client.tsx": [
+      "src/app/combos/[slug]/page.tsx"
+    ],
+    "src/app/combos/[slug]/page.tsx": [],
+    "src/app/contact/layout.tsx": [],
+    "src/app/contact/page.tsx": [],
+    "src/app/cuenta/favoritos/page.tsx": [],
+    "src/app/cuenta/forgot-password/page.tsx": [],
+    "src/app/cuenta/layout.tsx": [],
+    "src/app/cuenta/login/page.tsx": [],
+    "src/app/cuenta/page.tsx": [],
+    "src/app/cuenta/pedidos/page.tsx": [],
+    "src/app/cuenta/pedidos/[id]/page.tsx": [],
+    "src/app/cuenta/perfil/page.tsx": [],
+    "src/app/cuenta/registro/page.tsx": [],
+    "src/app/cuenta/reset-password/page.tsx": [],
+    "src/app/error.tsx": [],
+    "src/app/layout.tsx": [],
+    "src/app/not-found.tsx": [],
+    "src/app/page.tsx": [],
+    "src/app/privacy/layout.tsx": [],
+    "src/app/privacy/page.tsx": [],
+    "src/app/products/category/[category]/page.tsx": [],
+    "src/app/products/layout-client.tsx": [],
+    "src/app/products/layout.tsx": [],
+    "src/app/products/loading.tsx": [],
+    "src/app/products/page.tsx": [],
+    "src/app/products/products-client.tsx": [
+      "src/app/products/category/[category]/page.tsx",
+      "src/app/products/page.tsx"
+    ],
+    "src/app/products/[id]/loading.tsx": [],
+    "src/app/products/[id]/page.tsx": [],
+    "src/app/products/[id]/ProductDetailClient.tsx": [
+      "src/app/products/[id]/page.tsx"
+    ],
+    "src/app/repuestos/page.tsx": [],
+    "src/app/robots.ts": [],
+    "src/app/seguimiento/layout.tsx": [],
+    "src/app/seguimiento/page.tsx": [],
+    "src/app/sitemap.ts": [],
+    "src/app/terms/layout.tsx": [],
+    "src/app/terms/page.tsx": [],
+    "src/app/theme-provider.tsx": [
+      "src/app/layout.tsx"
+    ],
+    "src/components/AnnouncementBar.tsx": [
+      "src/app/layout.tsx"
+    ],
+    "src/components/CartItem.tsx": [
+      "src/components/CartModal.tsx"
+    ],
+    "src/components/CartModal.tsx": [
+      "src/app/layout.tsx"
+    ],
+    "src/components/ChatWidget.tsx": [],
+    "src/components/ClientOnlyWidgets.tsx": [
+      "src/app/layout.tsx"
+    ],
+    "src/components/ComboCard.tsx": [
+      "src/app/combos/combos-client.tsx",
+      "src/components/FloatingCombos.tsx",
+      "src/components/home/HomePageClient.tsx"
+    ],
+    "src/components/ConditionalNavbar.tsx": [
+      "src/app/layout.tsx"
+    ],
+    "src/components/CountdownTimer.tsx": [
+      "src/app/combos/[slug]/combo-detail-client.tsx",
+      "src/components/ComboCard.tsx",
+      "src/components/home/HomePageClient.tsx"
+    ],
+    "src/components/DynamicFooter.tsx": [
+      "src/app/layout.tsx"
+    ],
+    "src/components/ErrorBoundary.tsx": [
+      "src/app/layout.tsx"
+    ],
+    "src/components/FloatingButtons.tsx": [],
+    "src/components/FloatingCombos.tsx": [
+      "src/app/layout.tsx",
+      "src/app/products/products-client.tsx",
+      "src/app/products/[id]/ProductDetailClient.tsx"
+    ],
+    "src/components/Footer.tsx": [],
+    "src/components/HeroSection.tsx": [],
+    "src/components/home/HomePageClient.tsx": [
+      "src/app/page.tsx"
+    ],
+    "src/components/HomeSearch.tsx": [
+      "src/components/home/HomePageClient.tsx"
+    ],
+    "src/components/Navbar.tsx": [
+      "src/components/ConditionalNavbar.tsx"
+    ],
+    "src/components/ProductCard.tsx": [
+      "src/app/products/products-client.tsx",
+      "src/components/home/HomePageClient.tsx"
+    ],
+    "src/components/ProductReviews.tsx": [
+      "src/app/products/[id]/ProductDetailClient.tsx"
+    ],
+    "src/components/RecentPurchases.tsx": [
+      "src/components/home/HomePageClient.tsx"
+    ],
+    "src/components/SeasonalGlobalTheme.tsx": [
+      "src/app/layout.tsx"
+    ],
+    "src/components/ShippingPromo.tsx": [
+      "src/app/checkout/page.tsx",
+      "src/components/CartModal.tsx"
+    ],
+    "src/config/admin.ts": [
+      "src/app/admin/logout/route.ts",
+      "src/app/api/admin/combos/analyze-image/route.ts",
+      "src/app/api/admin/combos/generate-description/route.ts",
+      "src/app/api/admin/combos/route.ts",
+      "src/app/api/admin/combos/[id]/route.ts",
+      "src/app/api/admin/login/route.ts",
+      "src/app/api/admin/logout/route.ts",
+      "src/app/api/admin/me/route.ts",
+      "src/app/api/admin/meli/orders/route.ts",
+      "src/app/api/admin/products/generate-description/route.ts",
+      "src/app/api/admin/products/generate-image/route.ts",
+      "src/app/api/admin/products/lookup-sku/route.ts",
+      "src/app/api/admin/products/route.ts",
+      "src/app/api/admin/stats/route.ts",
+      "src/app/api/admin/store-settings/route.ts",
+      "src/app/api/analytics/stats/route.ts",
+      "src/app/api/auth/login/route.ts",
+      "src/app/api/auth/logout/route.ts",
+      "src/app/api/auth/me/route.ts",
+      "src/app/api/auth/register/route.ts",
+      "src/app/api/cuenta/change-password/route.ts",
+      "src/app/api/cuenta/pedidos/route.ts",
+      "src/app/api/cuenta/pedidos/[id]/route.ts",
+      "src/app/api/cuenta/profile/route.ts",
+      "src/app/api/cuenta/verificar-compra/route.ts",
+      "src/app/api/meli/auth/route.ts",
+      "src/app/api/meli/config/route.ts",
+      "src/app/api/meli/listings/route.ts",
+      "src/app/api/meli/status/route.ts",
+      "src/app/api/meli/sync/bulk/route.ts",
+      "src/app/api/meli/sync/[productId]/route.ts",
+      "src/app/api/reviews/route.ts",
+      "src/lib/logout.ts",
+      "src/lib/security/auditDb.ts",
+      "src/middleware.ts"
+    ],
+    "src/config/seasonTheme.ts": [
+      "src/components/home/HomePageClient.tsx"
+    ],
+    "src/config/shippingRates.ts": [
+      "src/app/admin/products/page.tsx",
+      "src/app/admin/shipping/page.tsx",
+      "src/app/api/admin/store-settings/route.ts",
+      "src/app/api/store-settings/route.ts",
+      "src/app/checkout/page.tsx",
+      "src/components/CartModal.tsx",
+      "src/components/home/HomePageClient.tsx",
+      "src/components/SeasonalGlobalTheme.tsx",
+      "src/config/seasonTheme.ts",
+      "src/hooks/useShippingConfig.ts",
+      "src/lib/orders/createOrder.ts",
+      "src/lib/store/getShippingConfig.ts"
+    ],
+    "src/constants/order.ts": [],
+    "src/constants/productCategories.ts": [
+      "src/app/admin/codes/page.tsx",
+      "src/app/admin/products/page.tsx",
+      "src/app/api/admin/products/generate-description/route.ts",
+      "src/app/api/admin/products/lookup-sku/route.ts",
+      "src/app/api/categories/route.ts",
+      "src/app/api/chat/route.ts",
+      "src/app/api/products/route.ts",
+      "src/app/api/search/route.ts",
+      "src/app/products/category/[category]/page.tsx",
+      "src/app/products/page.tsx",
+      "src/app/products/products-client.tsx",
+      "src/app/products/[id]/page.tsx",
+      "src/app/products/[id]/ProductDetailClient.tsx",
+      "src/app/sitemap.ts",
+      "src/components/home/HomePageClient.tsx",
+      "src/lib/messenger/processComment.ts",
+      "src/lib/messenger/processMessage.ts",
+      "src/lib/seo/queries.ts",
+      "src/lib/whatsapp/processMessage.ts"
+    ],
+    "src/context/AuthContext.tsx": [
+      "src/app/admin/layout.tsx",
+      "src/app/admin/login/page.tsx"
+    ],
+    "src/context/CartContext.tsx": [
+      "src/app/layout.tsx",
+      "src/app/products/[id]/ProductDetailClient.tsx",
+      "src/components/FloatingCombos.tsx",
+      "src/components/Navbar.tsx",
+      "src/hooks/useCart.ts"
+    ],
+    "src/context/CustomerAuthContext.tsx": [
+      "src/app/checkout/page.tsx",
+      "src/app/cuenta/login/page.tsx",
+      "src/app/cuenta/pedidos/page.tsx",
+      "src/app/cuenta/perfil/page.tsx",
+      "src/app/cuenta/registro/page.tsx",
+      "src/app/layout.tsx",
+      "src/components/Navbar.tsx",
+      "src/components/ProductReviews.tsx"
+    ],
+    "src/create-admin.ts": [],
+    "src/hooks/useCart.ts": [
+      "src/app/checkout/page.tsx",
+      "src/app/combos/[slug]/combo-detail-client.tsx",
+      "src/components/CartItem.tsx",
+      "src/components/CartModal.tsx",
+      "src/components/ComboCard.tsx",
+      "src/components/ProductCard.tsx"
+    ],
+    "src/hooks/useCsrf.ts": [
+      "src/app/cuenta/forgot-password/page.tsx",
+      "src/app/cuenta/login/page.tsx",
+      "src/app/cuenta/registro/page.tsx",
+      "src/app/cuenta/reset-password/page.tsx"
+    ],
+    "src/hooks/useOrderExporter.ts": [
+      "src/app/admin/orders/page.tsx"
+    ],
+    "src/hooks/useProducts.ts": [],
+    "src/hooks/useShippingConfig.ts": [
+      "src/components/ProductCard.tsx"
+    ],
+    "src/hooks/useWishlist.ts": [
+      "src/app/cuenta/favoritos/page.tsx",
+      "src/components/ProductCard.tsx"
+    ],
+    "src/lib/ai-provider.ts": [
+      "src/app/api/admin/combos/analyze-image/route.ts",
+      "src/app/api/admin/combos/generate-description/route.ts",
+      "src/app/api/admin/products/generate-description/route.ts",
+      "src/app/api/admin/products/generate-image/route.ts",
+      "src/app/api/admin/products/lookup-sku/route.ts",
+      "src/app/api/chat/route.ts",
+      "src/app/api/search/route.ts",
+      "src/lib/messenger/processComment.ts",
+      "src/lib/messenger/processMessage.ts",
+      "src/lib/whatsapp/processMessage.ts"
+    ],
+    "src/lib/ai.ts": [
+      "src/worker/processJobs.ts"
+    ],
+    "src/lib/auth/hash.ts": [
+      "src/app/api/admin/login/route.ts",
+      "src/app/api/auth/login/route.ts",
+      "src/app/api/auth/register/route.ts",
+      "src/app/api/auth/reset-password/route.ts",
+      "src/app/api/cuenta/change-password/route.ts",
+      "src/app/api/users/route.ts",
+      "src/app/api/users/[id]/route.ts",
+      "src/create-admin.ts",
+      "src/lib/auth/index.ts"
+    ],
+    "src/lib/auth/index.ts": [
+      "src/app/api/admin/combos/analyze-image/route.ts",
+      "src/app/api/admin/combos/generate-description/route.ts",
+      "src/app/api/admin/combos/route.ts",
+      "src/app/api/admin/combos/[id]/route.ts",
+      "src/app/api/admin/me/route.ts",
+      "src/app/api/admin/meli/orders/route.ts",
+      "src/app/api/admin/products/generate-description/route.ts",
+      "src/app/api/admin/products/generate-image/route.ts",
+      "src/app/api/admin/products/lookup-sku/route.ts",
+      "src/app/api/admin/products/route.ts",
+      "src/app/api/admin/stats/route.ts",
+      "src/app/api/admin/store-settings/route.ts",
+      "src/app/api/analytics/stats/route.ts",
+      "src/app/api/meli/auth/route.ts",
+      "src/app/api/meli/config/route.ts",
+      "src/app/api/meli/listings/route.ts",
+      "src/app/api/meli/status/route.ts",
+      "src/app/api/meli/sync/bulk/route.ts",
+      "src/app/api/meli/sync/[productId]/route.ts"
+    ],
+    "src/lib/auth/jwt.ts": [
+      "src/app/api/admin/login/route.ts",
+      "src/app/api/auth/login/route.ts",
+      "src/app/api/auth/me/route.ts",
+      "src/app/api/auth/register/route.ts",
+      "src/app/api/cuenta/change-password/route.ts",
+      "src/app/api/cuenta/pedidos/route.ts",
+      "src/app/api/cuenta/pedidos/[id]/route.ts",
+      "src/app/api/cuenta/profile/route.ts",
+      "src/app/api/cuenta/verificar-compra/route.ts",
+      "src/app/api/reviews/route.ts",
+      "src/lib/auth/index.ts",
+      "src/lib/security/auditDb.ts",
+      "src/middleware.ts"
+    ],
+    "src/lib/cloudinary.ts": [
+      "src/app/api/admin/products/generate-image/route.ts",
+      "src/app/api/upload/route.ts"
+    ],
+    "src/lib/csrf.ts": [
+      "src/app/api/csrf/route.ts",
+      "src/components/ChatWidget.tsx",
+      "src/hooks/useCsrf.ts",
+      "src/middleware.ts"
+    ],
+    "src/lib/email/authEmails.ts": [
+      "src/app/api/auth/forgot-password/route.ts"
+    ],
+    "src/lib/email/orderEmails.ts": [
+      "src/app/api/admin/emails/flush/route.ts",
+      "src/app/api/admin/emails/flush-all/route.ts",
+      "src/app/api/orders/[id]/route.ts",
+      "src/app/api/payu/confirmation/route.ts",
+      "src/app/api/wompi/update-order/route.ts",
+      "src/app/api/wompi/webhook/route.ts",
+      "src/lib/orders/createOrder.ts"
+    ],
+    "src/lib/embeddings.ts": [
+      "src/app/api/products/route.ts",
+      "src/app/api/products/[id]/route.ts",
+      "src/scripts/ingest-embeddings.ts"
+    ],
+    "src/lib/logout.ts": [],
+    "src/lib/meli/adminListings.ts": [
+      "src/app/api/meli/listings/route.ts"
+    ],
+    "src/lib/meli/auth.ts": [
+      "src/app/api/meli/auth/route.ts",
+      "src/app/api/meli/callback/route.ts",
+      "src/app/api/meli/status/route.ts",
+      "src/lib/meli/client.ts"
+    ],
+    "src/lib/meli/client.ts": [
+      "src/lib/meli/adminListings.ts",
+      "src/lib/meli/listingStatus.ts",
+      "src/lib/meli/sync.ts"
+    ],
+    "src/lib/meli/listingStatus.ts": [
+      "src/app/admin/meli/page.tsx",
+      "src/lib/meli/adminListings.ts",
+      "src/lib/meli/sync.ts",
+      "tests/meliListingStatus.test.ts"
+    ],
+    "src/lib/meli/outOfSync.ts": [
+      "src/lib/meli/adminListings.ts",
+      "tests/meliOutOfSync.test.ts"
+    ],
+    "src/lib/meli/pricing.ts": [
+      "src/app/admin/meli/page.tsx",
+      "src/lib/meli/adminListings.ts",
+      "src/lib/meli/sync.ts"
+    ],
+    "src/lib/meli/sync.ts": [
+      "src/app/api/meli/sync/bulk/route.ts",
+      "src/app/api/meli/sync/[productId]/route.ts",
+      "src/app/api/webhooks/meli/route.ts"
+    ],
+    "src/lib/messenger/client.ts": [
+      "src/lib/messenger/processComment.ts",
+      "src/lib/messenger/processMessage.ts"
+    ],
+    "src/lib/messenger/processComment.ts": [
+      "src/app/api/webhook/route.ts"
+    ],
+    "src/lib/messenger/processMessage.ts": [
+      "src/app/api/webhook/route.ts"
+    ],
+    "src/lib/orders/createOrder.ts": [
+      "src/app/api/chat/route.ts",
+      "src/app/api/orders/route.ts",
+      "src/lib/whatsapp/processMessage.ts",
+      "tests/createOrder.test.ts"
+    ],
+    "src/lib/orders/expirePendingOrders.ts": [
+      "src/app/api/cron/expire-pending-orders/route.ts",
+      "tests/orderStock.test.ts"
+    ],
+    "src/lib/orders/restoreStock.ts": [
+      "src/app/api/orders/[id]/route.ts",
+      "src/app/api/wompi/update-order/route.ts",
+      "src/app/api/wompi/webhook/route.ts",
+      "src/lib/orders/expirePendingOrders.ts",
+      "tests/orderStock.test.ts"
+    ],
+    "src/lib/orders/status.ts": [
+      "src/app/api/orders/[id]/route.ts",
+      "src/app/api/payu/confirmation/route.ts",
+      "src/app/api/wompi/webhook/route.ts"
+    ],
+    "src/lib/payments/wompi.ts": [
+      "src/app/api/wompi/redirect/route.ts",
+      "src/app/api/wompi/webhook/route.ts",
+      "src/lib/orders/createOrder.ts",
+      "tests/wompi.test.ts"
+    ],
+    "src/lib/placeholder.ts": [
+      "src/app/combos/[slug]/combo-detail-client.tsx",
+      "src/app/cuenta/favoritos/page.tsx",
+      "src/app/products/[id]/ProductDetailClient.tsx",
+      "src/components/ComboCard.tsx",
+      "src/components/home/HomePageClient.tsx",
+      "src/components/ProductCard.tsx"
+    ],
+    "src/lib/prisma.ts": [
+      "src/app/api/admin/chat-analytics/route.ts",
+      "src/app/api/admin/combos/route.ts",
+      "src/app/api/admin/combos/[id]/route.ts",
+      "src/app/api/admin/emails/flush-all/route.ts",
+      "src/app/api/admin/login/route.ts",
+      "src/app/api/admin/meli/orders/route.ts",
+      "src/app/api/admin/products/route.ts",
+      "src/app/api/admin/security-audit/route.ts",
+      "src/app/api/admin/stats/route.ts",
+      "src/app/api/admin/store-settings/route.ts",
+      "src/app/api/analytics/pageview/route.ts",
+      "src/app/api/analytics/search/route.ts",
+      "src/app/api/analytics/stats/route.ts",
+      "src/app/api/auth/forgot-password/route.ts",
+      "src/app/api/auth/login/route.ts",
+      "src/app/api/auth/register/route.ts",
+      "src/app/api/auth/reset-password/route.ts",
+      "src/app/api/cart/availability/route.ts",
+      "src/app/api/categories/route.ts",
+      "src/app/api/chat/route.ts",
+      "src/app/api/codes/promotion/route.ts",
+      "src/app/api/codes/route.ts",
+      "src/app/api/codes/seller/route.ts",
+      "src/app/api/codes/validate/route.ts",
+      "src/app/api/combos/route.ts",
+      "src/app/api/combos/[slug]/route.ts",
+      "src/app/api/cuenta/change-password/route.ts",
+      "src/app/api/cuenta/pedidos/route.ts",
+      "src/app/api/cuenta/pedidos/[id]/route.ts",
+      "src/app/api/cuenta/profile/route.ts",
+      "src/app/api/cuenta/verificar-compra/route.ts",
+      "src/app/api/feed/meta/route.ts",
+      "src/app/api/health/route.ts",
+      "src/app/api/meli/config/route.ts",
+      "src/app/api/orders/route.ts",
+      "src/app/api/orders/status/[referenceCode]/route.ts",
+      "src/app/api/orders/[id]/route.ts",
+      "src/app/api/payu/confirmation/route.ts",
+      "src/app/api/payu/redirect/route.ts",
+      "src/app/api/products/latest/route.ts",
+      "src/app/api/products/route.ts",
+      "src/app/api/products/[id]/route.ts",
+      "src/app/api/reviews/route.ts",
+      "src/app/api/search/route.ts",
+      "src/app/api/store-settings/route.ts",
+      "src/app/api/users/route.ts",
+      "src/app/api/users/[id]/route.ts",
+      "src/app/api/webhooks/meli/route.ts",
+      "src/app/api/wompi/redirect/route.ts",
+      "src/app/api/wompi/update-order/route.ts",
+      "src/app/api/wompi/webhook/route.ts",
+      "src/app/products/[id]/page.tsx",
+      "src/app/sitemap.ts",
+      "src/create-admin.ts",
+      "src/lib/email/orderEmails.ts",
+      "src/lib/embeddings.ts",
+      "src/lib/meli/adminListings.ts",
+      "src/lib/meli/auth.ts",
+      "src/lib/meli/pricing.ts",
+      "src/lib/meli/sync.ts",
+      "src/lib/messenger/processMessage.ts",
+      "src/lib/orders/createOrder.ts",
+      "src/lib/orders/expirePendingOrders.ts",
+      "src/lib/orders/restoreStock.ts",
+      "src/lib/security/audit.ts",
+      "src/lib/security/auditDb.ts",
+      "src/lib/seo/queries.ts",
+      "src/lib/store/getShippingConfig.ts",
+      "src/lib/whatsapp/processMessage.ts",
+      "src/scripts/ingest-embeddings.ts",
+      "src/worker/processJobs.ts"
+    ],
+    "src/lib/rateLimit.ts": [
+      "src/app/api/admin/login/route.ts",
+      "src/app/api/auth/forgot-password/route.ts",
+      "src/app/api/auth/login/route.ts",
+      "src/app/api/auth/register/route.ts",
+      "src/app/api/auth/reset-password/route.ts",
+      "src/app/api/cart/availability/route.ts",
+      "src/app/api/chat/route.ts",
+      "src/app/api/codes/validate/route.ts",
+      "src/app/api/orders/route.ts",
+      "src/app/api/reviews/route.ts",
+      "src/app/api/search/route.ts",
+      "src/app/api/upload/route.ts",
+      "src/app/api/wompi/update-order/route.ts"
+    ],
+    "src/lib/security/audit-edge.ts": [
+      "src/middleware.ts"
+    ],
+    "src/lib/security/audit.ts": [],
+    "src/lib/security/auditDb.ts": [
+      "src/app/api/admin/emails/flush/route.ts",
+      "src/app/api/admin/emails/flush-all/route.ts",
+      "src/app/api/orders/[id]/route.ts",
+      "src/app/api/users/route.ts",
+      "src/app/api/users/[id]/route.ts"
+    ],
+    "src/lib/seo/brand.ts": [
+      "src/app/about/layout.tsx",
+      "src/app/checkout/layout.tsx",
+      "src/app/combos/layout.tsx",
+      "src/app/combos/[slug]/page.tsx",
+      "src/app/contact/layout.tsx",
+      "src/app/layout.tsx",
+      "src/app/page.tsx",
+      "src/app/privacy/layout.tsx",
+      "src/app/products/category/[category]/page.tsx",
+      "src/app/products/page.tsx",
+      "src/app/products/[id]/page.tsx",
+      "src/app/seguimiento/layout.tsx",
+      "src/app/terms/layout.tsx"
+    ],
+    "src/lib/seo/queries.ts": [
+      "src/app/combos/page.tsx",
+      "src/app/combos/[slug]/page.tsx",
+      "src/app/page.tsx",
+      "src/app/products/category/[category]/page.tsx",
+      "src/app/products/page.tsx",
+      "src/app/sitemap.ts"
+    ],
+    "src/lib/seo/searchSuggestions.ts": [
+      "src/components/home/HomePageClient.tsx",
+      "src/components/HomeSearch.tsx",
+      "src/lib/seo/queries.ts",
+      "tests/searchSuggestions.test.ts"
+    ],
+    "src/lib/seo/slug.ts": [
+      "src/app/api/products/route.ts",
+      "src/app/api/products/[id]/route.ts",
+      "src/app/products/[id]/page.tsx"
+    ],
+    "src/lib/seo/urls.ts": [
+      "src/app/combos/[slug]/page.tsx"
+    ],
+    "src/lib/site.ts": [
+      "src/app/api/auth/forgot-password/route.ts",
+      "src/app/api/feed/meta/route.ts",
+      "src/app/combos/page.tsx",
+      "src/app/combos/[slug]/page.tsx",
+      "src/app/layout.tsx",
+      "src/app/page.tsx",
+      "src/app/products/category/[category]/page.tsx",
+      "src/app/products/page.tsx",
+      "src/app/products/[id]/page.tsx",
+      "src/app/robots.ts",
+      "src/app/sitemap.ts",
+      "src/lib/seo/urls.ts"
+    ],
+    "src/lib/store/getShippingConfig.ts": [
+      "src/lib/orders/createOrder.ts"
+    ],
+    "src/lib/utils.ts": [
+      "src/app/products/[id]/ProductDetailClient.tsx"
+    ],
+    "src/lib/vertex.ts": [],
+    "src/lib/whatsapp/processMessage.ts": [
+      "src/app/api/webhook/route.ts",
+      "src/lib/messenger/processMessage.ts"
+    ],
+    "src/middleware.ts": [],
+    "src/scripts/ingest-embeddings.ts": [],
+    "src/services/codeService.ts": [
+      "src/app/admin/codes/page.tsx"
+    ],
+    "src/services/orderService.ts": [
+      "src/app/admin/orders/page.tsx",
+      "src/app/checkout/page.tsx",
+      "tests/orderService.test.ts"
+    ],
+    "src/services/productService.ts": [
+      "src/app/admin/combos/page.tsx",
+      "src/app/admin/products/page.tsx",
+      "src/app/cuenta/favoritos/page.tsx",
+      "tests/productService.test.ts"
+    ],
+    "src/types/auth.ts": [
+      "src/app/admin/layout.tsx",
+      "src/app/admin/login/page.tsx",
+      "src/app/api/admin/me/route.ts",
+      "src/context/AuthContext.tsx",
+      "src/context/CustomerAuthContext.tsx",
+      "src/lib/auth/jwt.ts",
+      "src/lib/security/audit.ts",
+      "src/lib/security/auditDb.ts",
+      "src/middleware.ts"
+    ],
+    "src/types/cart.d.ts": [],
+    "src/types/code.ts": [
+      "src/app/admin/codes/page.tsx",
+      "src/app/checkout/page.tsx"
+    ],
+    "src/types/combo.d.ts": [],
+    "src/types/global.d.ts": [],
+    "src/types/google-genai.d.ts": [],
+    "src/types/order.d.ts": [],
+    "src/types/product.d.ts": [],
+    "src/utils/colorUtils.ts": [
+      "tests/colorUtils.test.ts"
+    ],
+    "src/utils/formatCurrency.ts": [
+      "src/app/admin/combos/page.tsx",
+      "src/app/admin/meli/page.tsx",
+      "src/app/admin/orders/page.tsx",
+      "src/app/admin/products/page.tsx",
+      "src/app/checkout/page.tsx",
+      "src/app/cuenta/favoritos/page.tsx",
+      "src/app/cuenta/pedidos/page.tsx",
+      "src/app/cuenta/pedidos/[id]/page.tsx",
+      "src/lib/orders/createOrder.ts",
+      "tests/formatCurrency.test.ts"
+    ],
+    "src/utils/routeUtils.ts": [
+      "src/components/AnnouncementBar.tsx",
+      "src/components/CartModal.tsx",
+      "src/components/DynamicFooter.tsx",
+      "src/components/FloatingButtons.tsx",
+      "src/components/FloatingCombos.tsx",
+      "src/components/Navbar.tsx",
+      "tests/routeUtils.test.ts"
+    ],
+    "src/worker/processJobs.ts": [],
+    "tests/colorUtils.test.ts": [],
+    "tests/createOrder.test.ts": [],
+    "tests/formatCurrency.test.ts": [],
+    "tests/meliListingStatus.test.ts": [],
+    "tests/meliOutOfSync.test.ts": [],
+    "tests/orderService.test.ts": [],
+    "tests/orderStock.test.ts": [],
+    "tests/productService.test.ts": [],
+    "tests/routeUtils.test.ts": [],
+    "tests/searchSuggestions.test.ts": [],
+    "tests/verify-security.ts": [],
+    "tests/wompi.test.ts": []
+  }
+}

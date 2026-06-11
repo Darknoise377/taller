@@ -1,0 +1,47 @@
+{
+  "queries": [
+    {
+      "query": "Haz un análisis general de este proyecto. ¿De qué trata, cuáles son sus módulos principales, qué tecnologías usa y cómo está estructurada su arquitectura?",
+      "timestamp": "2026-06-09T19:03:24.280Z",
+      "selectedFile": "src/config/seasonTheme.ts",
+      "success": true,
+      "fallbackUsed": false
+    },
+    {
+      "query": "dónde está el componente de la tarjeta de producto de productos destacados que muestra la medida o descripción",
+      "timestamp": "2026-06-09T19:15:29.258Z",
+      "selectedFile": "src/lib/seo/queries.ts",
+      "success": true,
+      "fallbackUsed": false
+    },
+    {
+      "query": "¿De qué trata este proyecto de forma general, cuáles son sus principales características y qué hace?",
+      "timestamp": "2026-06-09T22:14:21.122Z",
+      "selectedFile": "src/config/seasonTheme.ts",
+      "success": true,
+      "fallbackUsed": false
+    },
+    {
+      "query": "¿Cómo está implementada la sincronización de inventarios, órdenes y precios con la API de Mercado Libre (MeLi) en este proyecto? endpoint route handler controller",
+      "timestamp": "2026-06-09T23:01:19.478Z",
+      "selectedFile": "src/app/api/admin/products/lookup-sku/route.ts",
+      "success": true,
+      "fallbackUsed": false
+    },
+    {
+      "query": "¿Dónde están definidos los temas visuales de temporada y cómo se aplican los estilos estacionales?",
+      "timestamp": "2026-06-09T23:19:22.548Z",
+      "selectedFile": "src/app/api/admin/products/lookup-sku/route.ts",
+      "success": true,
+      "fallbackUsed": false
+    },
+    {
+      "query": "¿Dónde está configurado Cloudinary en este proyecto? ¿Hay algún archivo de utilidades o hooks para Cloudinary, y en qué carpeta de src/components debo crear un componente llamado VideoPlayer? component ui view screen widget react vue svelte",
+      "timestamp": "2026-06-11T13:20:23.317Z",
+      "selectedFile": "src/components/ProductReviews.tsx",
+      "success": true,
+      "fallbackUsed": false
+    }
+  ],
+  "updatedAt": "2026-06-11T13:20:23.321Z"
+}

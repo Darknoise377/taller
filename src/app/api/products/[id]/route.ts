@@ -78,8 +78,11 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
       price,
       currency: body.currency ?? existingProduct.currency,
       images: Array.isArray(body.images) ? body.images : existingProduct.images,
-      imageUrl: body.imageUrl !== undefined ? body.imageUrl : existingProduct.imageUrl,
-      sku: body.sku ?? existingProduct.sku,
+            imageUrl: body.imageUrl !== undefined ? body.imageUrl : existingProduct.imageUrl,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      videoUrl: body.videoUrl !== undefined ? body.videoUrl : existingProduct.videoUrl,
+            sku: body.sku ?? existingProduct.sku,
       diagramNumber: body.diagramNumber ?? existingProduct.diagramNumber,
       category: body.category ?? existingProduct.category,
       sizes: Array.isArray(body.sizes) ? body.sizes : existingProduct.sizes,

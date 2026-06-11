@@ -1,0 +1,15 @@
+{
+  "project": "onelike",
+  "version": "0.1.0",
+  "repositoryUrl": "https://github.com/Darknoise377/taller.git",
+  "totalFiles": 251,
+  "totalDirectories": 187,
+  "totalLines": 33946,
+  "rootsCount": 8,
+  "dependencyRelations": 417,
+  "bootstrappedAt": "2026-06-11T13:20:16.142Z",
+  "bootstrapDuration": 594,
+  "bootstrapVersion": "1.0.0",
+  "gitCommit": "82ba9dee",
+  "gitBranch": "main"
+}

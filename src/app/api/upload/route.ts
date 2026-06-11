@@ -12,8 +12,11 @@ const ALLOWED_TYPES = new Set([
   "image/png",
   "image/webp",
   "image/gif",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime" // Formato de Apple .mov
 ]);
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // Aumentado a 50 MB para permitir videos cortos
 
 // Magic bytes for allowed image formats
 const MAGIC_BYTES: [string, number[]][] = [
@@ -74,13 +77,13 @@ export async function POST(req: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Validate magic bytes (prevent spoofed MIME types)
-    if (!validateMagicBytes(buffer, file.type)) {
-      return NextResponse.json(
-        { error: "El contenido del archivo no coincide con el tipo declarado." },
-        { status: 400 }
-      );
-    }
+    // Validate magic bytes solo para imágenes, ignoramos videos para simplificar por ahora
+        if (file.type.startsWith('image/') && !validateMagicBytes(buffer, file.type)) {
+          return NextResponse.json(
+            { error: "El contenido del archivo de imagen no coincide con el tipo declarado." },
+            { status: 400 }
+          );
+        }
 
     // Intentamos subir a Cloudinary. Si tienes un upload preset configurado y
     // lo defines en `CLOUDINARY_UPLOAD_PRESET`, lo usaremos; si no, subimos
@@ -109,8 +112,13 @@ export async function POST(req: Request) {
         uploadStream.end(buffer);
       });
 
-    let uploadResult: CloudinaryUploadResult;
-    const tryOptions = presetFromEnv ? { upload_preset: presetFromEnv } : { folder: process.env.CLOUDINARY_UPLOAD_FOLDER ?? "onelike" };
+    // Informamos a Cloudinary que puede ser video o imagen
+        let uploadResult: CloudinaryUploadResult;
+        const baseOptions = { 
+          resource_type: "auto", // CLAVE PARA VIDEOS
+          folder: process.env.CLOUDINARY_UPLOAD_FOLDER ?? "onelike" 
+        };
+        const tryOptions = presetFromEnv ? { upload_preset: presetFromEnv, ...baseOptions } : baseOptions;
 
     try {
       uploadResult = await doUpload(tryOptions);

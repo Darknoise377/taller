@@ -77,9 +77,13 @@ export async function GET(req: Request) {
           description: true,
           price: true,
           currency: true,
+
+
+
           imageUrl: true,
-          images: true,
-          sku: true,
+                    images: true,
+                    videoUrl: true,
+                    sku: true,
           tags: true,
           diagramNumber: true,
           category: true,
@@ -123,9 +127,13 @@ export async function POST(req: Request) {
       description,
       price,
       currency,
+
+
+
       images,
-      imageUrl,   // 👈 nuevo campo
-      category,
+            imageUrl,
+            videoUrl,
+            category,
       sizes,
       colors,
       stock,
@@ -161,9 +169,15 @@ export async function POST(req: Request) {
       description,
       price,
       currency,
+
+
+
       images: Array.isArray(images) ? images : [], // puede venir vacío si usas solo imageUrl
-      imageUrl: imageUrl ?? null, // guardamos la URL de Cloudinary
-      category,
+            imageUrl: imageUrl ?? null, // guardamos la URL de Cloudinary
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore
+                  videoUrl: videoUrl ?? null,
+                  category,
       sizes: Array.isArray(sizes) ? sizes : [],
       colors: Array.isArray(colors) ? colors : [],
       stock: typeof stock === 'number' ? stock : 0,

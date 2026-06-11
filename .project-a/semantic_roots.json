@@ -1,0 +1,260 @@
+{
+  "version": "1.0",
+  "project": "taller_a_r",
+  "roots": [
+    {
+      "id": "backend_api_services",
+      "label": "Backend API Services",
+      "description": "Automáticamente generado basado en archivos api",
+      "keywords": [
+        "api",
+        "endpoint",
+        "route",
+        "handler",
+        "rest",
+        "http",
+        "server",
+        "express",
+        "fastify"
+      ],
+      "paths": [
+        "src/app/api/admin/chat-analytics/route.ts",
+        "src/app/api/admin/combos/analyze-image/route.ts",
+        "src/app/api/admin/combos/generate-description/route.ts",
+        "src/app/api/admin/combos/route.ts",
+        "src/app/api/admin/combos/[id]/route.ts",
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/admin/logout/route.ts",
+        "src/app/api/admin/me/route.ts",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/admin/products/route.ts",
+        "src/app/api/admin/security-audit/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/analytics/pageview/route.ts",
+        "src/app/api/analytics/search/route.ts",
+        "src/app/api/analytics/stats/route.ts",
+        "src/app/api/auth/forgot-password/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/logout/route.ts",
+        "src/app/api/auth/me/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/auth/reset-password/route.ts",
+        "src/app/api/cart/availability/route.ts",
+        "src/app/api/cart/route.ts",
+        "src/app/api/categories/route.ts",
+        "src/app/api/chat/route.ts",
+        "src/app/api/client-logs/route.ts",
+        "src/app/api/codes/promotion/route.ts",
+        "src/app/api/codes/route.ts",
+        "src/app/api/codes/seller/route.ts",
+        "src/app/api/codes/validate/route.ts",
+        "src/app/api/combos/route.ts",
+        "src/app/api/combos/[slug]/route.ts",
+        "src/app/api/cron/expire-pending-orders/route.ts",
+        "src/app/api/csrf/route.ts",
+        "src/app/api/cuenta/change-password/route.ts",
+        "src/app/api/cuenta/pedidos/route.ts",
+        "src/app/api/cuenta/pedidos/[id]/route.ts",
+        "src/app/api/cuenta/profile/route.ts",
+        "src/app/api/cuenta/verificar-compra/route.ts",
+        "src/app/api/feed/meta/route.ts",
+        "src/app/api/health/route.ts",
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/callback/route.ts",
+        "src/app/api/meli/config/route.ts",
+        "src/app/api/meli/listings/route.ts"
+      ]
+    },
+    {
+      "id": "business_logic",
+      "label": "Business Logic",
+      "description": "Automáticamente generado basado en archivos services",
+      "keywords": [
+        "service",
+        "business",
+        "logic",
+        "usecase",
+        "interactor"
+      ],
+      "paths": [
+        "src/services/codeService.ts",
+        "src/services/orderService.ts",
+        "src/services/productService.ts"
+      ]
+    },
+    {
+      "id": "ui_components",
+      "label": "UI Components",
+      "description": "Automáticamente generado basado en archivos components",
+      "keywords": [
+        "component",
+        "ui",
+        "react",
+        "vue",
+        "svelte"
+      ],
+      "paths": [
+        "src/app/admin/orders/components/OrdersFilters.tsx",
+        "src/app/admin/orders/components/OrdersStats.tsx",
+        "src/app/admin/orders/components/OrdersTable.tsx",
+        "src/components/AnnouncementBar.tsx",
+        "src/components/CartItem.tsx",
+        "src/components/CartModal.tsx",
+        "src/components/ChatWidget.tsx",
+        "src/components/ClientOnlyWidgets.tsx",
+        "src/components/ComboCard.tsx",
+        "src/components/ConditionalNavbar.tsx",
+        "src/components/CountdownTimer.tsx",
+        "src/components/DynamicFooter.tsx",
+        "src/components/ErrorBoundary.tsx",
+        "src/components/FloatingButtons.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/Footer.tsx",
+        "src/components/HeroSection.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/components/HomeSearch.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/ProductCard.tsx",
+        "src/components/ProductReviews.tsx",
+        "src/components/RecentPurchases.tsx",
+        "src/components/SeasonalGlobalTheme.tsx",
+        "src/components/ShippingPromo.tsx"
+      ]
+    },
+    {
+      "id": "core_infrastructure",
+      "label": "Core Infrastructure",
+      "description": "Automáticamente generado basado en archivos lib",
+      "keywords": [
+        "lib",
+        "utility",
+        "helper",
+        "core",
+        "infra"
+      ],
+      "paths": [
+        "src/lib/ai-provider.ts",
+        "src/lib/ai.ts",
+        "src/lib/auth/hash.ts",
+        "src/lib/auth/index.ts",
+        "src/lib/auth/jwt.ts",
+        "src/lib/cloudinary.ts",
+        "src/lib/csrf.ts",
+        "src/lib/email/authEmails.ts",
+        "src/lib/email/orderEmails.ts",
+        "src/lib/embeddings.ts",
+        "src/lib/logout.ts",
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/auth.ts",
+        "src/lib/meli/client.ts",
+        "src/lib/meli/listingStatus.ts",
+        "src/lib/meli/outOfSync.ts",
+        "src/lib/meli/pricing.ts",
+        "src/lib/meli/sync.ts",
+        "src/lib/messenger/client.ts",
+        "src/lib/messenger/processComment.ts",
+        "src/lib/messenger/processMessage.ts",
+        "src/lib/orders/createOrder.ts",
+        "src/lib/orders/expirePendingOrders.ts",
+        "src/lib/orders/restoreStock.ts",
+        "src/lib/orders/status.ts",
+        "src/lib/payments/wompi.ts",
+        "src/lib/placeholder.ts",
+        "src/lib/prisma.ts",
+        "src/lib/rateLimit.ts",
+        "src/lib/security/audit-edge.ts",
+        "src/lib/security/audit.ts",
+        "src/lib/security/auditDb.ts",
+        "src/lib/seo/brand.ts",
+        "src/lib/seo/queries.ts",
+        "src/lib/seo/searchSuggestions.ts",
+        "src/lib/seo/slug.ts",
+        "src/lib/seo/urls.ts",
+        "src/lib/site.ts",
+        "src/lib/store/getShippingConfig.ts",
+        "src/lib/utils.ts",
+        "src/lib/vertex.ts",
+        "src/lib/whatsapp/processMessage.ts"
+      ]
+    },
+    {
+      "id": "state_management",
+      "label": "State Management",
+      "description": "Automáticamente generado basado en archivos context",
+      "keywords": [
+        "context",
+        "store",
+        "state",
+        "redux",
+        "zustand",
+        "provider"
+      ],
+      "paths": [
+        "src/context/AuthContext.tsx",
+        "src/context/CartContext.tsx",
+        "src/context/CustomerAuthContext.tsx"
+      ]
+    },
+    {
+      "id": "data_persistence",
+      "label": "Data Persistence",
+      "description": "Automáticamente generado basado en archivos prisma",
+      "keywords": [
+        "prisma",
+        "database",
+        "schema",
+        "model",
+        "orm",
+        "migration"
+      ],
+      "paths": [
+        "src/lib/prisma.ts"
+      ]
+    },
+    {
+      "id": "middleware_layer",
+      "label": "Middleware Layer",
+      "description": "Automáticamente generado basado en archivos middleware",
+      "keywords": [
+        "middleware",
+        "hook",
+        "interceptor",
+        "guard",
+        "pipeline",
+        "request"
+      ],
+      "paths": [
+        "src/middleware.ts"
+      ]
+    },
+    {
+      "id": "types_definitions",
+      "label": "Types & Definitions",
+      "description": "Automáticamente generado basado en archivos types",
+      "keywords": [
+        "types",
+        "interface",
+        "schema",
+        "dto",
+        "type",
+        "typedef"
+      ],
+      "paths": [
+        "src/types/auth.ts",
+        "src/types/cart.d.ts",
+        "src/types/code.ts",
+        "src/types/combo.d.ts",
+        "src/types/global.d.ts",
+        "src/types/google-genai.d.ts",
+        "src/types/order.d.ts",
+        "src/types/product.d.ts"
+      ]
+    }
+  ],
+  "generatedAt": "2026-06-09T23:19:16.478Z"
+}

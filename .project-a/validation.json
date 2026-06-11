@@ -1,0 +1,1749 @@
+{
+  "results": [
+    {
+      "file": "next-env.d.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "next.config.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/about/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/about/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/analytics/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/chat-analytics/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/codes/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/combos/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/login/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/login/logout.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/login/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/logout/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/meli/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/orders/components/OrdersFilters.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/orders/components/OrdersStats.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/orders/components/OrdersTable.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/orders/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/products/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/security-audit/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/shipping/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/admin/users/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/chat-analytics/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/combos/analyze-image/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/combos/generate-description/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/combos/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/combos/[id]/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/emails/flush/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/emails/flush-all/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/login/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/logout/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/me/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/meli/orders/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/products/generate-description/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/products/generate-image/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/products/lookup-sku/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/products/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/security-audit/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/stats/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/admin/store-settings/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/analytics/pageview/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/analytics/search/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/analytics/stats/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/auth/forgot-password/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/auth/login/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/auth/logout/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/auth/me/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/auth/register/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/auth/reset-password/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/cart/availability/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/cart/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/categories/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/chat/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/client-logs/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/codes/promotion/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/codes/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/codes/seller/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/codes/validate/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/combos/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/combos/[slug]/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/cron/expire-pending-orders/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/csrf/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/cuenta/change-password/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/cuenta/pedidos/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/cuenta/pedidos/[id]/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/cuenta/profile/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/cuenta/verificar-compra/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/feed/meta/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/health/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/meli/auth/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/meli/callback/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/meli/config/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/meli/listings/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/meli/status/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/meli/sync/bulk/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/meli/sync/[productId]/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/orders/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/orders/status/[referenceCode]/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/orders/[id]/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/payu/confirmation/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/payu/redirect/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/products/latest/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/products/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/products/[id]/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/reviews/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/search/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/store-settings/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/upload/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/users/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/users/[id]/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/webhook/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/webhooks/meli/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/wompi/redirect/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/wompi/update-order/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/api/wompi/webhook/route.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/checkout/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/checkout/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/checkout/response/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/checkout/response/response-client.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/combos/combos-client.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/combos/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/combos/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/combos/[slug]/combo-detail-client.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/combos/[slug]/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/contact/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/contact/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/cuenta/favoritos/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/cuenta/forgot-password/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/cuenta/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/cuenta/login/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/cuenta/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/cuenta/pedidos/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/cuenta/pedidos/[id]/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/cuenta/perfil/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/cuenta/registro/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/cuenta/reset-password/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/error.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/not-found.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/privacy/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/privacy/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/products/category/[category]/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/products/layout-client.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/products/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/products/loading.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/products/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/products/products-client.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/products/[id]/loading.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/products/[id]/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/products/[id]/ProductDetailClient.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/repuestos/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/robots.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/seguimiento/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/seguimiento/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/sitemap.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/terms/layout.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/terms/page.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/app/theme-provider.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/AnnouncementBar.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/CartItem.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/CartModal.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/ChatWidget.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/ClientOnlyWidgets.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/ComboCard.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/ConditionalNavbar.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/CountdownTimer.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/DynamicFooter.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/ErrorBoundary.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/FloatingButtons.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/FloatingCombos.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/Footer.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/HeroSection.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/home/HomePageClient.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/HomeSearch.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/Navbar.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/ProductCard.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/ProductReviews.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/RecentPurchases.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/SeasonalGlobalTheme.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/components/ShippingPromo.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/config/admin.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/config/seasonTheme.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/config/shippingRates.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/constants/order.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/constants/productCategories.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/context/AuthContext.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/context/CartContext.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/context/CustomerAuthContext.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/create-admin.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/hooks/useCart.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/hooks/useCsrf.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/hooks/useOrderExporter.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/hooks/useProducts.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/hooks/useShippingConfig.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/hooks/useWishlist.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/ai-provider.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/ai.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/auth/hash.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/auth/index.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/auth/jwt.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/cloudinary.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/csrf.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/email/authEmails.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/email/orderEmails.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/embeddings.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/logout.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/meli/adminListings.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/meli/auth.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/meli/client.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/meli/listingStatus.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/meli/outOfSync.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/meli/pricing.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/meli/sync.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/messenger/client.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/messenger/processComment.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/messenger/processMessage.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/orders/createOrder.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/orders/expirePendingOrders.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/orders/restoreStock.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/orders/status.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/payments/wompi.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/placeholder.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/prisma.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/rateLimit.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/security/audit-edge.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/security/audit.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/security/auditDb.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/seo/brand.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/seo/queries.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/seo/searchSuggestions.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/seo/slug.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/seo/urls.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/site.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/store/getShippingConfig.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/utils.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/vertex.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/lib/whatsapp/processMessage.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/middleware.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/scripts/ingest-embeddings.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/services/codeService.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/services/orderService.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/services/productService.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/types/auth.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/types/cart.d.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/types/code.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/types/combo.d.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/types/global.d.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/types/google-genai.d.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/types/order.d.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/types/product.d.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/utils/colorUtils.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/utils/formatCurrency.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/utils/routeUtils.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "src/worker/processJobs.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/colorUtils.test.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/createOrder.test.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/formatCurrency.test.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/meliListingStatus.test.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/meliOutOfSync.test.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/orderService.test.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/orderStock.test.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/productService.test.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/routeUtils.test.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/searchSuggestions.test.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/verify-security.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
+      "file": "tests/wompi.test.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    }
+  ],
+  "summary": {
+    "total": 248,
+    "linterPass": 0,
+    "testPass": 0,
+    "buildPass": 0,
+    "errors": 0,
+    "note": "Validations skipped in bootstrapper - run validateFile() for individual checks"
+  },
+  "validatedAt": "2026-06-11T13:20:16.422Z"
+}

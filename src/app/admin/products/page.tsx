@@ -41,6 +41,7 @@ import {
   CheckCircleOutlined,
   InfoCircleOutlined,
   ThunderboltOutlined,
+  VideoCameraOutlined,
 } from '@ant-design/icons';
 import type { SkuLookupResult } from '@/app/api/admin/products/lookup-sku/route';
 import type { UploadFile } from 'antd/es/upload/interface';
@@ -65,7 +66,8 @@ export default function AdminProductsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const [form] = Form.useForm();
+    const [videoFileList, setVideoFileList] = useState<UploadFile[]>([]);
+    const [form] = Form.useForm();
 
   // --- Calculadora de precio ---
   const [shippingConfig, setShippingConfig] = useState<ShippingConfig>(DEFAULT_SHIPPING_CONFIG);
@@ -239,12 +241,28 @@ export default function AdminProductsPage() {
       }
 
       // 3. Combinar todas las URLs de imágenes
-      const allImageUrls = [...existingImages, ...uploadedImageUrls];
-      if (allImageUrls.length === 0) {
-          message.error('El producto debe tener al menos una imagen.');
-          setIsSaving(false);
-          return;
-      }
+            const allImageUrls = [...existingImages, ...uploadedImageUrls];
+            if (allImageUrls.length === 0) {
+                message.error('El producto debe tener al menos una imagen.');
+                setIsSaving(false);
+                return;
+            }
+      
+            // 3.5 Subir el video de Cloudinary si existe
+            let finalVideoUrl = videoFileList.length > 0 && videoFileList[0].url ? videoFileList[0].url : null;
+            const videoToUpload = videoFileList.find(f => f.originFileObj);
+            if (videoToUpload && videoToUpload.originFileObj) {
+               message.loading({ content: 'Subiendo video (esto puede tardar unos segundos)...', key: 'video-upload' });
+               try {
+                  const videoRes = await uploadImage(videoToUpload.originFileObj as File);
+                  finalVideoUrl = videoRes.url;
+                  message.success({ content: 'Video subido con éxito', key: 'video-upload', duration: 2 });
+               } catch(e) {
+                  message.error({ content: 'Error subiendo video: el archivo podría ser muy pesado.', key: 'video-upload', duration: 4 });
+                  setIsSaving(false);
+                  return;
+               }
+            }
 
       // 4. Construir el payload final para la API
       const payload: Partial<Product> = {
@@ -253,8 +271,9 @@ export default function AdminProductsPage() {
         stock: Number(values.stock ?? 0),
         category: values.category?.toLowerCase(),
         images: allImageUrls,
-        imageUrl: allImageUrls[0], // La primera imagen como principal
-        sizes: Array.isArray(values.sizes) ? values.sizes : [],
+                imageUrl: allImageUrls[0], // La primera imagen como principal
+                videoUrl: finalVideoUrl || null, // Guardamos la URL del video de Cloudinary
+                sizes: Array.isArray(values.sizes) ? values.sizes : [],
         colors: Array.isArray(values.colors) ? values.colors : [],
         tags: Array.isArray(values.tags) ? values.tags : [],
       };
@@ -368,21 +387,33 @@ export default function AdminProductsPage() {
   }, []);
 
   // --- Funciones del Modal y Formulario ---
-  const openModal = useCallback((product?: Product) => {
-    setEditingProduct(product || null);
-    if (product) {
-      form.setFieldsValue({ ...product });
-      const initialFileList = (product.images ?? []).map((url, index) => ({
-        uid: `${-index - 1}`,
-        name: `imagen-${index + 1}.jpg`,
-        status: 'done' as const,
-        url,
-      }));
-      setFileList(initialFileList);
-    } else {
-      form.resetFields();
-      setFileList([]);
-    }
+  const openModal = useCallback((product?: Product & { videoUrl?: string | null }) => {
+      setEditingProduct(product || null);
+      if (product) {
+        form.setFieldsValue({ ...product });
+        const initialFileList = (product.images ?? []).map((url, index) => ({
+          uid: `${-index - 1}`,
+          name: `imagen-${index + 1}.jpg`,
+          status: 'done' as const,
+          url,
+        }));
+        setFileList(initialFileList);
+      
+        if (product.videoUrl) {
+           setVideoFileList([{
+             uid: '-video-1',
+             name: 'video-producto.mp4',
+             status: 'done' as const,
+             url: product.videoUrl,
+           }]);
+        } else {
+           setVideoFileList([]);
+        }
+      } else {
+        form.resetFields();
+        setFileList([]);
+        setVideoFileList([]);
+      }
     setAiImgOpen(false);
     setAiImgPrompt('');
     setAiImgResult(null);
@@ -1145,10 +1176,13 @@ return (
              SECCIÓN 5 · IMÁGENES
         ══════════════════════════════════════════════════════════ */}
         <Divider orientation="left" style={{ fontSize: 12, color: '#8c8c8c', borderColor: '#d9d9d9', margin: '0 0 14px' }}>
-          <Space size={6}><FileImageOutlined />Imágenes del producto</Space>
-        </Divider>
+                  <Space size={6}><FileImageOutlined />Multimedia del producto</Space>
+                </Divider>
+        
+                <Row gutter={16}>
+                   <Col xs={24} md={12}>
 
-        <Form.Item
+                <Form.Item
           label={
             <Space size={6}>
               <span>Imágenes</span>
@@ -1168,15 +1202,64 @@ return (
             onChange={({ fileList: newFileList }) => setFileList(newFileList)}
           >
             {fileList.length < 5 && (
-              <div>
-                <PlusOutlined />
-                <div className="mt-2">Subir</div>
-              </div>
-            )}
-          </Upload>
-        </Form.Item>
+                          <div>
+                            <PlusOutlined />
+                            <div className="mt-2">Subir Img</div>
+                          </div>
+                        )}
+                      </Upload>
+                    </Form.Item>
+        
+                    </Col>
+                    <Col xs={24} md={12}>
+                       <Form.Item 
+                         label={
+                           <Space size={6}>
+                             <span>Video del producto</span>
+                             <Typography.Text type="secondary" style={{ fontSize: 11 }}>(opcional, máx. 50MB)</Typography.Text>
+                           </Space>
+                         }
+                       >
+                         <Upload
+                                         accept="video/mp4,video/webm,video/quicktime"
+                                         listType="picture-card"
+                                         fileList={videoFileList}
+                                         maxCount={1}
+                                         itemRender={(originNode, file) => {
+                                           if (file.url || file.thumbUrl || (file.originFileObj && file.originFileObj.type.startsWith('video/'))) {
+                                             const src = file.url || file.thumbUrl || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : '');
+                                             return (
+                                               <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', borderRadius: 8 }}>
+                                                 <video src={src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} controls controlsList="nodownload noplaybackrate" muted />
+                                                 <Button 
+                                                    type="primary" danger shape="circle" icon={<DeleteOutlined />} 
+                                                    size="small"
+                                                    style={{ position: 'absolute', top: 4, right: 4, zIndex: 10 }}
+                                                    onClick={() => setVideoFileList([])}
+                                                 />
+                                               </div>
+                                             );
+                                           }
+                                           return originNode;
+                                         }}
+                                         onRemove={(file) => {
+                                           setVideoFileList([]);
+                                         }}
+                                         beforeUpload={() => false}
+                                         onChange={({ fileList: newFileList }) => setVideoFileList(newFileList)}
+                                      >
+                            {videoFileList.length === 0 && (
+                              <div>
+                                <VideoCameraOutlined style={{ fontSize: 24, color: '#8c8c8c' }} />
+                                <div className="mt-2 text-xs">Subir MP4</div>
+                              </div>
+                            )}
+                         </Upload>
+                       </Form.Item>
+                    </Col>
+                    </Row>
 
-        {/* --- Generador de variantes con IA --- */}
+                    {/* --- Generador de variantes con IA --- */}
         <div style={{ marginTop: 4, marginBottom: 8 }}>
           <Button
             type="link"

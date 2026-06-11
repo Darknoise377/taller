@@ -15,7 +15,8 @@ export interface Product {
   price: number;
   currency: 'USD' | 'EUR' | 'COP';
   imageUrl?: string;
-  images?: string[];
+    images?: string[];
+    videoUrl?: string | null;
   category:
     | 'cilindros'
     | 'llantas'

@@ -1,0 +1,6 @@
+{"question":"Haz un análisis general de este proyecto. ¿De qué trata, cuáles son sus módulos principales, qué tecnologías usa y cómo está estructurada su arquitectura?","root":"ui_components","filesReturned":3,"timestamp":"2026-06-09T19:03:24.458Z"}
+{"question":"dónde está el componente de la tarjeta de producto de productos destacados que muestra la medida o descripción","root":"ui_components","filesReturned":2,"timestamp":"2026-06-09T19:15:29.373Z"}
+{"question":"¿De qué trata este proyecto de forma general, cuáles son sus principales características y qué hace?","root":"data_persistence","filesReturned":5,"timestamp":"2026-06-09T22:14:21.243Z"}
+{"question":"¿Cómo está implementada la sincronización de inventarios, órdenes y precios con la API de Mercado Libre (MeLi) en este proyecto?","root":"backend_api_services","filesReturned":8,"timestamp":"2026-06-09T23:01:19.608Z"}
+{"question":"¿Dónde están definidos los temas visuales de temporada y cómo se aplican los estilos estacionales?","root":"backend_api_services","filesReturned":8,"timestamp":"2026-06-09T23:19:22.670Z"}
+{"question":"¿Dónde está configurado Cloudinary en este proyecto? ¿Hay algún archivo de utilidades o hooks para Cloudinary, y en qué carpeta de src/components debo crear un componente llamado VideoPlayer?","root":"ui_components","filesReturned":8,"timestamp":"2026-06-11T13:20:23.525Z"}

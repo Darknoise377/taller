@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { getProductCategoryLabel } from '@/constants/productCategories';
 import { Facebook, Instagram } from 'lucide-react';
 import ProductReviews from "@/components/ProductReviews";
+import { VideoPlayer } from "@/components/VideoPlayer";
 import { BLUR_DATA_URL } from "@/lib/placeholder";
 import FloatingCombos from '@/components/FloatingCombos';
 
@@ -560,7 +561,30 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
             </div>
 
             {/* Urgencia */}
-            {product.stock > 0 && product.stock <= 3 && (
+                        {product.stock > 0 && product.stock <= 3 && (
+                          <div className="flex items-start gap-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/25 rounded-xl px-3.5 py-2.5">
+                            <span className="text-base shrink-0">🔥</span>
+                            <p className="text-sm font-semibold text-red-700 dark:text-red-400 leading-snug">
+                              ¡Alta demanda! Solo <strong>{product.stock}</strong> {product.stock === 1 ? "unidad" : "unidades"} disponibles.
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Reproductor de Video de Cloudinary */}
+                        {/* Nota: Asegúrate de que el tipo Product en '@/types/product' incluya 'videoUrl?: string | null' */}
+                        {((product as any).videoUrl) && (
+                          <div className="pt-2 pb-1">
+                             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Video del producto</h2>
+                             <VideoPlayer 
+                                src={(product as any).videoUrl} 
+                                poster={product.imageUrl || undefined}
+                                className="w-full aspect-video shadow-md"
+                             />
+                          </div>
+                        )}
+
+                        {/* Mensaje de validación */}
+                        {validationMessage && (
               <div className="flex items-start gap-2.5 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/25 rounded-xl px-3.5 py-2.5">
                 <span className="text-base shrink-0">🔥</span>
                 <p className="text-sm font-semibold text-red-700 dark:text-red-400 leading-snug">

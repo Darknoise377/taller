@@ -22,6 +22,7 @@ model Product {
   currency    String
   imageUrl    String?
   images      String[]
+  videoUrl    String?        // URL del video (ej. de Cloudinary)
   sku         String?        @unique
   brand       String?
   tags        String[]       @default([])

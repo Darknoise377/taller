@@ -1,0 +1,3454 @@
+{
+  "impacts": [
+    {
+      "file": "eslint.config.mjs",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "next-env.d.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "next.config.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "postcss.config.mjs",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "scripts/test-resend.mjs",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/about/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/about/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/analytics/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/chat-analytics/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/codes/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/combos/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/login/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/login/logout.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/login/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/logout/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/meli/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/orders/components/OrdersFilters.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/orders/components/OrdersStats.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/orders/components/OrdersTable.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/orders/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/products/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/security-audit/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/shipping/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/admin/users/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/chat-analytics/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/combos/analyze-image/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/combos/generate-description/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/combos/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/combos/[id]/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/emails/flush/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/emails/flush-all/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/login/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/logout/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/me/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/meli/orders/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/products/generate-description/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/products/generate-image/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/products/lookup-sku/route.ts",
+      "directImpact": [
+        "src/app/admin/products/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/app/api/admin/products/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/security-audit/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/stats/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/admin/store-settings/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/analytics/pageview/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/analytics/search/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/analytics/stats/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/auth/forgot-password/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/auth/login/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/auth/logout/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/auth/me/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/auth/register/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/auth/reset-password/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/cart/availability/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/cart/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/categories/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/chat/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/client-logs/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/codes/promotion/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/codes/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/codes/seller/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/codes/validate/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/combos/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/combos/[slug]/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/cron/expire-pending-orders/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/csrf/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/cuenta/change-password/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/cuenta/pedidos/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/cuenta/pedidos/[id]/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/cuenta/profile/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/cuenta/verificar-compra/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/feed/meta/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/health/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/meli/auth/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/meli/callback/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/meli/config/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/meli/listings/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/meli/status/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/meli/sync/bulk/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/meli/sync/[productId]/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/orders/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/orders/status/[referenceCode]/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/orders/[id]/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/payu/confirmation/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/payu/redirect/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/products/latest/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/products/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/products/[id]/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/reviews/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/search/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/store-settings/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/upload/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/users/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/users/[id]/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/webhook/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/webhooks/meli/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/wompi/redirect/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/wompi/update-order/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/api/wompi/webhook/route.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/checkout/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/checkout/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/checkout/response/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/checkout/response/response-client.tsx",
+      "directImpact": [
+        "src/app/checkout/response/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/app/combos/combos-client.tsx",
+      "directImpact": [
+        "src/app/combos/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/app/combos/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/combos/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/combos/[slug]/combo-detail-client.tsx",
+      "directImpact": [
+        "src/app/combos/[slug]/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/app/combos/[slug]/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/contact/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/contact/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/cuenta/favoritos/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/cuenta/forgot-password/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/cuenta/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/cuenta/login/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/cuenta/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/cuenta/pedidos/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/cuenta/pedidos/[id]/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/cuenta/perfil/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/cuenta/registro/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/cuenta/reset-password/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/error.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/not-found.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/privacy/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/privacy/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/products/category/[category]/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/products/layout-client.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/products/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/products/loading.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/products/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/products/products-client.tsx",
+      "directImpact": [
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/app/products/[id]/loading.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/products/[id]/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/products/[id]/ProductDetailClient.tsx",
+      "directImpact": [
+        "src/app/products/[id]/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/app/repuestos/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/robots.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/seguimiento/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/seguimiento/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/sitemap.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/terms/layout.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/terms/page.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/app/theme-provider.tsx",
+      "directImpact": [
+        "src/app/layout.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/components/AnnouncementBar.tsx",
+      "directImpact": [
+        "src/app/layout.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/components/CartItem.tsx",
+      "directImpact": [
+        "src/components/CartModal.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/layout.tsx"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/components/CartModal.tsx",
+      "directImpact": [
+        "src/app/layout.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/components/ChatWidget.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/components/ClientOnlyWidgets.tsx",
+      "directImpact": [
+        "src/app/layout.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/components/ComboCard.tsx",
+      "directImpact": [
+        "src/app/combos/combos-client.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/combos/page.tsx",
+        "src/app/layout.tsx",
+        "src/app/products/products-client.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/app/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 8
+    },
+    {
+      "file": "src/components/ConditionalNavbar.tsx",
+      "directImpact": [
+        "src/app/layout.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/components/CountdownTimer.tsx",
+      "directImpact": [
+        "src/app/combos/[slug]/combo-detail-client.tsx",
+        "src/components/ComboCard.tsx",
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/combos/combos-client.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/app/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 8
+    },
+    {
+      "file": "src/components/DynamicFooter.tsx",
+      "directImpact": [
+        "src/app/layout.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/components/ErrorBoundary.tsx",
+      "directImpact": [
+        "src/app/layout.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/components/FloatingButtons.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/components/FloatingCombos.tsx",
+      "directImpact": [
+        "src/app/layout.tsx",
+        "src/app/products/products-client.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/products/[id]/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 6
+    },
+    {
+      "file": "src/components/Footer.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/components/HeroSection.tsx",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/components/home/HomePageClient.tsx",
+      "directImpact": [
+        "src/app/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/components/HomeSearch.tsx",
+      "directImpact": [
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/page.tsx"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/components/Navbar.tsx",
+      "directImpact": [
+        "src/components/ConditionalNavbar.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/layout.tsx"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/components/ProductCard.tsx",
+      "directImpact": [
+        "src/app/products/products-client.tsx",
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 5
+    },
+    {
+      "file": "src/components/ProductReviews.tsx",
+      "directImpact": [
+        "src/app/products/[id]/ProductDetailClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/products/[id]/page.tsx"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/components/RecentPurchases.tsx",
+      "directImpact": [
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/page.tsx"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/components/SeasonalGlobalTheme.tsx",
+      "directImpact": [
+        "src/app/layout.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/components/ShippingPromo.tsx",
+      "directImpact": [
+        "src/app/checkout/page.tsx",
+        "src/components/CartModal.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/layout.tsx"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 3
+    },
+    {
+      "file": "src/config/admin.ts",
+      "directImpact": [
+        "src/app/admin/logout/route.ts",
+        "src/app/api/admin/combos/analyze-image/route.ts",
+        "src/app/api/admin/combos/generate-description/route.ts",
+        "src/app/api/admin/combos/route.ts",
+        "src/app/api/admin/combos/[id]/route.ts",
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/admin/logout/route.ts",
+        "src/app/api/admin/me/route.ts",
+        "src/app/api/admin/meli/orders/route.ts",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/admin/products/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/analytics/stats/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/logout/route.ts",
+        "src/app/api/auth/me/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/cuenta/change-password/route.ts",
+        "src/app/api/cuenta/pedidos/route.ts",
+        "src/app/api/cuenta/pedidos/[id]/route.ts",
+        "src/app/api/cuenta/profile/route.ts",
+        "src/app/api/cuenta/verificar-compra/route.ts",
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/config/route.ts",
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/reviews/route.ts",
+        "src/lib/logout.ts",
+        "src/lib/security/auditDb.ts",
+        "src/middleware.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/admin/products/page.tsx",
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 41
+    },
+    {
+      "file": "src/config/seasonTheme.ts",
+      "directImpact": [
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/page.tsx"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/config/shippingRates.ts",
+      "directImpact": [
+        "src/app/admin/products/page.tsx",
+        "src/app/admin/shipping/page.tsx",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/store-settings/route.ts",
+        "src/app/checkout/page.tsx",
+        "src/components/CartModal.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/components/SeasonalGlobalTheme.tsx",
+        "src/config/seasonTheme.ts",
+        "src/hooks/useShippingConfig.ts",
+        "src/lib/orders/createOrder.ts",
+        "src/lib/store/getShippingConfig.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/layout.tsx",
+        "src/app/page.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/components/ProductCard.tsx",
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts",
+        "src/lib/orders/createOrder.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 21
+    },
+    {
+      "file": "src/constants/order.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/constants/productCategories.ts",
+      "directImpact": [
+        "src/app/admin/codes/page.tsx",
+        "src/app/admin/products/page.tsx",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/categories/route.ts",
+        "src/app/api/chat/route.ts",
+        "src/app/api/products/route.ts",
+        "src/app/api/search/route.ts",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/products/products-client.tsx",
+        "src/app/products/[id]/page.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/app/sitemap.ts",
+        "src/components/home/HomePageClient.tsx",
+        "src/lib/messenger/processComment.ts",
+        "src/lib/messenger/processMessage.ts",
+        "src/lib/seo/queries.ts",
+        "src/lib/whatsapp/processMessage.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/admin/products/page.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/products/[id]/page.tsx",
+        "src/app/page.tsx",
+        "src/app/api/webhook/route.ts",
+        "src/app/combos/page.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/sitemap.ts",
+        "src/lib/messenger/processMessage.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 29
+    },
+    {
+      "file": "src/context/AuthContext.tsx",
+      "directImpact": [
+        "src/app/admin/layout.tsx",
+        "src/app/admin/login/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/context/CartContext.tsx",
+      "directImpact": [
+        "src/app/layout.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/Navbar.tsx",
+        "src/hooks/useCart.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/products/[id]/page.tsx",
+        "src/app/layout.tsx",
+        "src/app/products/products-client.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/ConditionalNavbar.tsx",
+        "src/app/checkout/page.tsx",
+        "src/app/combos/[slug]/combo-detail-client.tsx",
+        "src/components/CartItem.tsx",
+        "src/components/CartModal.tsx",
+        "src/components/ComboCard.tsx",
+        "src/components/ProductCard.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 16
+    },
+    {
+      "file": "src/context/CustomerAuthContext.tsx",
+      "directImpact": [
+        "src/app/checkout/page.tsx",
+        "src/app/cuenta/login/page.tsx",
+        "src/app/cuenta/pedidos/page.tsx",
+        "src/app/cuenta/perfil/page.tsx",
+        "src/app/cuenta/registro/page.tsx",
+        "src/app/layout.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/ProductReviews.tsx"
+      ],
+      "transitiveImpact": [
+        "src/components/ConditionalNavbar.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 10
+    },
+    {
+      "file": "src/create-admin.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/hooks/useCart.ts",
+      "directImpact": [
+        "src/app/checkout/page.tsx",
+        "src/app/combos/[slug]/combo-detail-client.tsx",
+        "src/components/CartItem.tsx",
+        "src/components/CartModal.tsx",
+        "src/components/ComboCard.tsx",
+        "src/components/ProductCard.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/combos/[slug]/page.tsx",
+        "src/components/CartModal.tsx",
+        "src/app/layout.tsx",
+        "src/app/combos/combos-client.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/app/products/products-client.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/hooks/useCsrf.ts",
+      "directImpact": [
+        "src/app/cuenta/forgot-password/page.tsx",
+        "src/app/cuenta/login/page.tsx",
+        "src/app/cuenta/registro/page.tsx",
+        "src/app/cuenta/reset-password/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 4
+    },
+    {
+      "file": "src/hooks/useOrderExporter.ts",
+      "directImpact": [
+        "src/app/admin/orders/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/hooks/useProducts.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/hooks/useShippingConfig.ts",
+      "directImpact": [
+        "src/components/ProductCard.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/products/products-client.tsx",
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 3
+    },
+    {
+      "file": "src/hooks/useWishlist.ts",
+      "directImpact": [
+        "src/app/cuenta/favoritos/page.tsx",
+        "src/components/ProductCard.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/products/products-client.tsx",
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 4
+    },
+    {
+      "file": "src/lib/ai-provider.ts",
+      "directImpact": [
+        "src/app/api/admin/combos/analyze-image/route.ts",
+        "src/app/api/admin/combos/generate-description/route.ts",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/chat/route.ts",
+        "src/app/api/search/route.ts",
+        "src/lib/messenger/processComment.ts",
+        "src/lib/messenger/processMessage.ts",
+        "src/lib/whatsapp/processMessage.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/admin/products/page.tsx",
+        "src/app/api/webhook/route.ts",
+        "src/lib/messenger/processMessage.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/lib/ai.ts",
+      "directImpact": [
+        "src/worker/processJobs.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/lib/auth/hash.ts",
+      "directImpact": [
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/auth/reset-password/route.ts",
+        "src/app/api/cuenta/change-password/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts",
+        "src/create-admin.ts",
+        "src/lib/auth/index.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/admin/combos/analyze-image/route.ts",
+        "src/app/api/admin/combos/generate-description/route.ts",
+        "src/app/api/admin/combos/route.ts",
+        "src/app/api/admin/combos/[id]/route.ts",
+        "src/app/api/admin/me/route.ts",
+        "src/app/api/admin/meli/orders/route.ts",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/admin/products/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/analytics/stats/route.ts",
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/config/route.ts",
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 28
+    },
+    {
+      "file": "src/lib/auth/index.ts",
+      "directImpact": [
+        "src/app/api/admin/combos/analyze-image/route.ts",
+        "src/app/api/admin/combos/generate-description/route.ts",
+        "src/app/api/admin/combos/route.ts",
+        "src/app/api/admin/combos/[id]/route.ts",
+        "src/app/api/admin/me/route.ts",
+        "src/app/api/admin/meli/orders/route.ts",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/admin/products/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/analytics/stats/route.ts",
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/config/route.ts",
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/admin/products/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 20
+    },
+    {
+      "file": "src/lib/auth/jwt.ts",
+      "directImpact": [
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/me/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/cuenta/change-password/route.ts",
+        "src/app/api/cuenta/pedidos/route.ts",
+        "src/app/api/cuenta/pedidos/[id]/route.ts",
+        "src/app/api/cuenta/profile/route.ts",
+        "src/app/api/cuenta/verificar-compra/route.ts",
+        "src/app/api/reviews/route.ts",
+        "src/lib/auth/index.ts",
+        "src/lib/security/auditDb.ts",
+        "src/middleware.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/admin/combos/analyze-image/route.ts",
+        "src/app/api/admin/combos/generate-description/route.ts",
+        "src/app/api/admin/combos/route.ts",
+        "src/app/api/admin/combos/[id]/route.ts",
+        "src/app/api/admin/me/route.ts",
+        "src/app/api/admin/meli/orders/route.ts",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/admin/products/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/analytics/stats/route.ts",
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/config/route.ts",
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 37
+    },
+    {
+      "file": "src/lib/cloudinary.ts",
+      "directImpact": [
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/upload/route.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/lib/csrf.ts",
+      "directImpact": [
+        "src/app/api/csrf/route.ts",
+        "src/components/ChatWidget.tsx",
+        "src/hooks/useCsrf.ts",
+        "src/middleware.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/cuenta/forgot-password/page.tsx",
+        "src/app/cuenta/login/page.tsx",
+        "src/app/cuenta/registro/page.tsx",
+        "src/app/cuenta/reset-password/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 8
+    },
+    {
+      "file": "src/lib/email/authEmails.ts",
+      "directImpact": [
+        "src/app/api/auth/forgot-password/route.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/lib/email/orderEmails.ts",
+      "directImpact": [
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/payu/confirmation/route.ts",
+        "src/app/api/wompi/update-order/route.ts",
+        "src/app/api/wompi/webhook/route.ts",
+        "src/lib/orders/createOrder.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 11
+    },
+    {
+      "file": "src/lib/embeddings.ts",
+      "directImpact": [
+        "src/app/api/products/route.ts",
+        "src/app/api/products/[id]/route.ts",
+        "src/scripts/ingest-embeddings.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 3
+    },
+    {
+      "file": "src/lib/logout.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/lib/meli/adminListings.ts",
+      "directImpact": [
+        "src/app/api/meli/listings/route.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/lib/meli/auth.ts",
+      "directImpact": [
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/callback/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/lib/meli/client.ts"
+      ],
+      "transitiveImpact": [
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/listingStatus.ts",
+        "src/lib/meli/sync.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 7
+    },
+    {
+      "file": "src/lib/meli/client.ts",
+      "directImpact": [
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/listingStatus.ts",
+        "src/lib/meli/sync.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/meli/listings/route.ts",
+        "src/app/admin/meli/page.tsx",
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/sync.ts",
+        "tests/meliListingStatus.test.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/webhooks/meli/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 11
+    },
+    {
+      "file": "src/lib/meli/listingStatus.ts",
+      "directImpact": [
+        "src/app/admin/meli/page.tsx",
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/sync.ts",
+        "tests/meliListingStatus.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/webhooks/meli/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 8
+    },
+    {
+      "file": "src/lib/meli/outOfSync.ts",
+      "directImpact": [
+        "src/lib/meli/adminListings.ts",
+        "tests/meliOutOfSync.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/meli/listings/route.ts"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 3
+    },
+    {
+      "file": "src/lib/meli/pricing.ts",
+      "directImpact": [
+        "src/app/admin/meli/page.tsx",
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/sync.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/webhooks/meli/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 7
+    },
+    {
+      "file": "src/lib/meli/sync.ts",
+      "directImpact": [
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/webhooks/meli/route.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 3
+    },
+    {
+      "file": "src/lib/messenger/client.ts",
+      "directImpact": [
+        "src/lib/messenger/processComment.ts",
+        "src/lib/messenger/processMessage.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/webhook/route.ts"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 3
+    },
+    {
+      "file": "src/lib/messenger/processComment.ts",
+      "directImpact": [
+        "src/app/api/webhook/route.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/lib/messenger/processMessage.ts",
+      "directImpact": [
+        "src/app/api/webhook/route.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/lib/orders/createOrder.ts",
+      "directImpact": [
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/webhook/route.ts",
+        "src/lib/messenger/processMessage.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 6
+    },
+    {
+      "file": "src/lib/orders/expirePendingOrders.ts",
+      "directImpact": [
+        "src/app/api/cron/expire-pending-orders/route.ts",
+        "tests/orderStock.test.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/lib/orders/restoreStock.ts",
+      "directImpact": [
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/wompi/update-order/route.ts",
+        "src/app/api/wompi/webhook/route.ts",
+        "src/lib/orders/expirePendingOrders.ts",
+        "tests/orderStock.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/cron/expire-pending-orders/route.ts",
+        "tests/orderStock.test.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 7
+    },
+    {
+      "file": "src/lib/orders/status.ts",
+      "directImpact": [
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/payu/confirmation/route.ts",
+        "src/app/api/wompi/webhook/route.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 3
+    },
+    {
+      "file": "src/lib/payments/wompi.ts",
+      "directImpact": [
+        "src/app/api/wompi/redirect/route.ts",
+        "src/app/api/wompi/webhook/route.ts",
+        "src/lib/orders/createOrder.ts",
+        "tests/wompi.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 8
+    },
+    {
+      "file": "src/lib/placeholder.ts",
+      "directImpact": [
+        "src/app/combos/[slug]/combo-detail-client.tsx",
+        "src/app/cuenta/favoritos/page.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/ComboCard.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/components/ProductCard.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/products/[id]/page.tsx",
+        "src/app/combos/combos-client.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/app/page.tsx",
+        "src/app/products/products-client.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/lib/prisma.ts",
+      "directImpact": [
+        "src/app/api/admin/chat-analytics/route.ts",
+        "src/app/api/admin/combos/route.ts",
+        "src/app/api/admin/combos/[id]/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/admin/meli/orders/route.ts",
+        "src/app/api/admin/products/route.ts",
+        "src/app/api/admin/security-audit/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/analytics/pageview/route.ts",
+        "src/app/api/analytics/search/route.ts",
+        "src/app/api/analytics/stats/route.ts",
+        "src/app/api/auth/forgot-password/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/auth/reset-password/route.ts",
+        "src/app/api/cart/availability/route.ts",
+        "src/app/api/categories/route.ts",
+        "src/app/api/chat/route.ts",
+        "src/app/api/codes/promotion/route.ts",
+        "src/app/api/codes/route.ts",
+        "src/app/api/codes/seller/route.ts",
+        "src/app/api/codes/validate/route.ts",
+        "src/app/api/combos/route.ts",
+        "src/app/api/combos/[slug]/route.ts",
+        "src/app/api/cuenta/change-password/route.ts",
+        "src/app/api/cuenta/pedidos/route.ts",
+        "src/app/api/cuenta/pedidos/[id]/route.ts",
+        "src/app/api/cuenta/profile/route.ts",
+        "src/app/api/cuenta/verificar-compra/route.ts",
+        "src/app/api/feed/meta/route.ts",
+        "src/app/api/health/route.ts",
+        "src/app/api/meli/config/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/app/api/orders/status/[referenceCode]/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/payu/confirmation/route.ts",
+        "src/app/api/payu/redirect/route.ts",
+        "src/app/api/products/latest/route.ts",
+        "src/app/api/products/route.ts",
+        "src/app/api/products/[id]/route.ts",
+        "src/app/api/reviews/route.ts",
+        "src/app/api/search/route.ts",
+        "src/app/api/store-settings/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts",
+        "src/app/api/webhooks/meli/route.ts",
+        "src/app/api/wompi/redirect/route.ts",
+        "src/app/api/wompi/update-order/route.ts",
+        "src/app/api/wompi/webhook/route.ts",
+        "src/app/products/[id]/page.tsx",
+        "src/app/sitemap.ts",
+        "src/create-admin.ts",
+        "src/lib/email/orderEmails.ts",
+        "src/lib/embeddings.ts",
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/auth.ts",
+        "src/lib/meli/pricing.ts",
+        "src/lib/meli/sync.ts",
+        "src/lib/messenger/processMessage.ts",
+        "src/lib/orders/createOrder.ts",
+        "src/lib/orders/expirePendingOrders.ts",
+        "src/lib/orders/restoreStock.ts",
+        "src/lib/security/audit.ts",
+        "src/lib/security/auditDb.ts",
+        "src/lib/seo/queries.ts",
+        "src/lib/store/getShippingConfig.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "src/scripts/ingest-embeddings.ts",
+        "src/worker/processJobs.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/payu/confirmation/route.ts",
+        "src/app/api/wompi/update-order/route.ts",
+        "src/app/api/wompi/webhook/route.ts",
+        "src/lib/orders/createOrder.ts",
+        "src/app/api/products/route.ts",
+        "src/app/api/products/[id]/route.ts",
+        "src/scripts/ingest-embeddings.ts",
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/callback/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/lib/meli/client.ts",
+        "src/app/admin/meli/page.tsx",
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/sync.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/webhooks/meli/route.ts",
+        "src/app/api/webhook/route.ts",
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts",
+        "src/app/api/cron/expire-pending-orders/route.ts",
+        "tests/orderStock.test.ts",
+        "src/lib/orders/expirePendingOrders.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts",
+        "src/app/combos/page.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/page.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/sitemap.ts",
+        "src/lib/messenger/processMessage.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 109
+    },
+    {
+      "file": "src/lib/rateLimit.ts",
+      "directImpact": [
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/auth/forgot-password/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/auth/reset-password/route.ts",
+        "src/app/api/cart/availability/route.ts",
+        "src/app/api/chat/route.ts",
+        "src/app/api/codes/validate/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/app/api/reviews/route.ts",
+        "src/app/api/search/route.ts",
+        "src/app/api/upload/route.ts",
+        "src/app/api/wompi/update-order/route.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/lib/security/audit-edge.ts",
+      "directImpact": [
+        "src/middleware.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/lib/security/audit.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/lib/security/auditDb.ts",
+      "directImpact": [
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "high",
+      "estimatedChanges": 5
+    },
+    {
+      "file": "src/lib/seo/brand.ts",
+      "directImpact": [
+        "src/app/about/layout.tsx",
+        "src/app/checkout/layout.tsx",
+        "src/app/combos/layout.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/contact/layout.tsx",
+        "src/app/layout.tsx",
+        "src/app/page.tsx",
+        "src/app/privacy/layout.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/products/[id]/page.tsx",
+        "src/app/seguimiento/layout.tsx",
+        "src/app/terms/layout.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/lib/seo/queries.ts",
+      "directImpact": [
+        "src/app/combos/page.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/page.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/sitemap.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "high",
+      "estimatedChanges": 6
+    },
+    {
+      "file": "src/lib/seo/searchSuggestions.ts",
+      "directImpact": [
+        "src/components/home/HomePageClient.tsx",
+        "src/components/HomeSearch.tsx",
+        "src/lib/seo/queries.ts",
+        "tests/searchSuggestions.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/page.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/app/combos/page.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/sitemap.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 11
+    },
+    {
+      "file": "src/lib/seo/slug.ts",
+      "directImpact": [
+        "src/app/api/products/route.ts",
+        "src/app/api/products/[id]/route.ts",
+        "src/app/products/[id]/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 3
+    },
+    {
+      "file": "src/lib/seo/urls.ts",
+      "directImpact": [
+        "src/app/combos/[slug]/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/lib/site.ts",
+      "directImpact": [
+        "src/app/api/auth/forgot-password/route.ts",
+        "src/app/api/feed/meta/route.ts",
+        "src/app/combos/page.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/layout.tsx",
+        "src/app/page.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/products/[id]/page.tsx",
+        "src/app/robots.ts",
+        "src/app/sitemap.ts",
+        "src/lib/seo/urls.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/combos/[slug]/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/lib/store/getShippingConfig.ts",
+      "directImpact": [
+        "src/lib/orders/createOrder.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 5
+    },
+    {
+      "file": "src/lib/utils.ts",
+      "directImpact": [
+        "src/app/products/[id]/ProductDetailClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/products/[id]/page.tsx"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/lib/vertex.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/lib/whatsapp/processMessage.ts",
+      "directImpact": [
+        "src/app/api/webhook/route.ts",
+        "src/lib/messenger/processMessage.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/webhook/route.ts"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 3
+    },
+    {
+      "file": "src/middleware.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/scripts/ingest-embeddings.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/services/codeService.ts",
+      "directImpact": [
+        "src/app/admin/codes/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/services/orderService.ts",
+      "directImpact": [
+        "src/app/admin/orders/page.tsx",
+        "src/app/checkout/page.tsx",
+        "tests/orderService.test.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 3
+    },
+    {
+      "file": "src/services/productService.ts",
+      "directImpact": [
+        "src/app/admin/combos/page.tsx",
+        "src/app/admin/products/page.tsx",
+        "src/app/cuenta/favoritos/page.tsx",
+        "tests/productService.test.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 4
+    },
+    {
+      "file": "src/types/auth.ts",
+      "directImpact": [
+        "src/app/admin/layout.tsx",
+        "src/app/admin/login/page.tsx",
+        "src/app/api/admin/me/route.ts",
+        "src/context/AuthContext.tsx",
+        "src/context/CustomerAuthContext.tsx",
+        "src/lib/auth/jwt.ts",
+        "src/lib/security/audit.ts",
+        "src/lib/security/auditDb.ts",
+        "src/middleware.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/admin/layout.tsx",
+        "src/app/admin/login/page.tsx",
+        "src/app/checkout/page.tsx",
+        "src/app/cuenta/login/page.tsx",
+        "src/app/cuenta/pedidos/page.tsx",
+        "src/app/cuenta/perfil/page.tsx",
+        "src/app/cuenta/registro/page.tsx",
+        "src/app/layout.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/ProductReviews.tsx",
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/me/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/cuenta/change-password/route.ts",
+        "src/app/api/cuenta/pedidos/route.ts",
+        "src/app/api/cuenta/pedidos/[id]/route.ts",
+        "src/app/api/cuenta/profile/route.ts",
+        "src/app/api/cuenta/verificar-compra/route.ts",
+        "src/app/api/reviews/route.ts",
+        "src/lib/auth/index.ts",
+        "src/lib/security/auditDb.ts",
+        "src/middleware.ts",
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 37
+    },
+    {
+      "file": "src/types/cart.d.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/types/code.ts",
+      "directImpact": [
+        "src/app/admin/codes/page.tsx",
+        "src/app/checkout/page.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 2
+    },
+    {
+      "file": "src/types/combo.d.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/types/global.d.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/types/google-genai.d.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/types/order.d.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/types/product.d.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "src/utils/colorUtils.ts",
+      "directImpact": [
+        "tests/colorUtils.test.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "medium",
+      "estimatedChanges": 1
+    },
+    {
+      "file": "src/utils/formatCurrency.ts",
+      "directImpact": [
+        "src/app/admin/combos/page.tsx",
+        "src/app/admin/meli/page.tsx",
+        "src/app/admin/orders/page.tsx",
+        "src/app/admin/products/page.tsx",
+        "src/app/checkout/page.tsx",
+        "src/app/cuenta/favoritos/page.tsx",
+        "src/app/cuenta/pedidos/page.tsx",
+        "src/app/cuenta/pedidos/[id]/page.tsx",
+        "src/lib/orders/createOrder.ts",
+        "tests/formatCurrency.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 14
+    },
+    {
+      "file": "src/utils/routeUtils.ts",
+      "directImpact": [
+        "src/components/AnnouncementBar.tsx",
+        "src/components/CartModal.tsx",
+        "src/components/DynamicFooter.tsx",
+        "src/components/FloatingButtons.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/Navbar.tsx",
+        "tests/routeUtils.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/layout.tsx",
+        "src/app/products/products-client.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/ConditionalNavbar.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 11
+    },
+    {
+      "file": "src/worker/processJobs.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/colorUtils.test.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/createOrder.test.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/formatCurrency.test.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/meliListingStatus.test.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/meliOutOfSync.test.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/orderService.test.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/orderStock.test.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/productService.test.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/routeUtils.test.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/searchSuggestions.test.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/verify-security.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
+      "file": "tests/wompi.test.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    }
+  ],
+  "highRisk": [
+    {
+      "file": "src/components/ComboCard.tsx",
+      "directImpact": [
+        "src/app/combos/combos-client.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/combos/page.tsx",
+        "src/app/layout.tsx",
+        "src/app/products/products-client.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/app/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 8
+    },
+    {
+      "file": "src/components/CountdownTimer.tsx",
+      "directImpact": [
+        "src/app/combos/[slug]/combo-detail-client.tsx",
+        "src/components/ComboCard.tsx",
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/combos/combos-client.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/app/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 8
+    },
+    {
+      "file": "src/components/FloatingCombos.tsx",
+      "directImpact": [
+        "src/app/layout.tsx",
+        "src/app/products/products-client.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/products/[id]/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 6
+    },
+    {
+      "file": "src/components/ProductCard.tsx",
+      "directImpact": [
+        "src/app/products/products-client.tsx",
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 5
+    },
+    {
+      "file": "src/config/admin.ts",
+      "directImpact": [
+        "src/app/admin/logout/route.ts",
+        "src/app/api/admin/combos/analyze-image/route.ts",
+        "src/app/api/admin/combos/generate-description/route.ts",
+        "src/app/api/admin/combos/route.ts",
+        "src/app/api/admin/combos/[id]/route.ts",
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/admin/logout/route.ts",
+        "src/app/api/admin/me/route.ts",
+        "src/app/api/admin/meli/orders/route.ts",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/admin/products/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/analytics/stats/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/logout/route.ts",
+        "src/app/api/auth/me/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/cuenta/change-password/route.ts",
+        "src/app/api/cuenta/pedidos/route.ts",
+        "src/app/api/cuenta/pedidos/[id]/route.ts",
+        "src/app/api/cuenta/profile/route.ts",
+        "src/app/api/cuenta/verificar-compra/route.ts",
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/config/route.ts",
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/reviews/route.ts",
+        "src/lib/logout.ts",
+        "src/lib/security/auditDb.ts",
+        "src/middleware.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/admin/products/page.tsx",
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 41
+    },
+    {
+      "file": "src/config/shippingRates.ts",
+      "directImpact": [
+        "src/app/admin/products/page.tsx",
+        "src/app/admin/shipping/page.tsx",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/store-settings/route.ts",
+        "src/app/checkout/page.tsx",
+        "src/components/CartModal.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/components/SeasonalGlobalTheme.tsx",
+        "src/config/seasonTheme.ts",
+        "src/hooks/useShippingConfig.ts",
+        "src/lib/orders/createOrder.ts",
+        "src/lib/store/getShippingConfig.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/layout.tsx",
+        "src/app/page.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/components/ProductCard.tsx",
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts",
+        "src/lib/orders/createOrder.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 21
+    },
+    {
+      "file": "src/constants/productCategories.ts",
+      "directImpact": [
+        "src/app/admin/codes/page.tsx",
+        "src/app/admin/products/page.tsx",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/categories/route.ts",
+        "src/app/api/chat/route.ts",
+        "src/app/api/products/route.ts",
+        "src/app/api/search/route.ts",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/products/products-client.tsx",
+        "src/app/products/[id]/page.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/app/sitemap.ts",
+        "src/components/home/HomePageClient.tsx",
+        "src/lib/messenger/processComment.ts",
+        "src/lib/messenger/processMessage.ts",
+        "src/lib/seo/queries.ts",
+        "src/lib/whatsapp/processMessage.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/admin/products/page.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/products/[id]/page.tsx",
+        "src/app/page.tsx",
+        "src/app/api/webhook/route.ts",
+        "src/app/combos/page.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/sitemap.ts",
+        "src/lib/messenger/processMessage.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 29
+    },
+    {
+      "file": "src/context/CartContext.tsx",
+      "directImpact": [
+        "src/app/layout.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/Navbar.tsx",
+        "src/hooks/useCart.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/products/[id]/page.tsx",
+        "src/app/layout.tsx",
+        "src/app/products/products-client.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/ConditionalNavbar.tsx",
+        "src/app/checkout/page.tsx",
+        "src/app/combos/[slug]/combo-detail-client.tsx",
+        "src/components/CartItem.tsx",
+        "src/components/CartModal.tsx",
+        "src/components/ComboCard.tsx",
+        "src/components/ProductCard.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 16
+    },
+    {
+      "file": "src/context/CustomerAuthContext.tsx",
+      "directImpact": [
+        "src/app/checkout/page.tsx",
+        "src/app/cuenta/login/page.tsx",
+        "src/app/cuenta/pedidos/page.tsx",
+        "src/app/cuenta/perfil/page.tsx",
+        "src/app/cuenta/registro/page.tsx",
+        "src/app/layout.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/ProductReviews.tsx"
+      ],
+      "transitiveImpact": [
+        "src/components/ConditionalNavbar.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 10
+    },
+    {
+      "file": "src/hooks/useCart.ts",
+      "directImpact": [
+        "src/app/checkout/page.tsx",
+        "src/app/combos/[slug]/combo-detail-client.tsx",
+        "src/components/CartItem.tsx",
+        "src/components/CartModal.tsx",
+        "src/components/ComboCard.tsx",
+        "src/components/ProductCard.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/combos/[slug]/page.tsx",
+        "src/components/CartModal.tsx",
+        "src/app/layout.tsx",
+        "src/app/combos/combos-client.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/app/products/products-client.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/lib/ai-provider.ts",
+      "directImpact": [
+        "src/app/api/admin/combos/analyze-image/route.ts",
+        "src/app/api/admin/combos/generate-description/route.ts",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/chat/route.ts",
+        "src/app/api/search/route.ts",
+        "src/lib/messenger/processComment.ts",
+        "src/lib/messenger/processMessage.ts",
+        "src/lib/whatsapp/processMessage.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/admin/products/page.tsx",
+        "src/app/api/webhook/route.ts",
+        "src/lib/messenger/processMessage.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/lib/auth/hash.ts",
+      "directImpact": [
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/auth/reset-password/route.ts",
+        "src/app/api/cuenta/change-password/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts",
+        "src/create-admin.ts",
+        "src/lib/auth/index.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/admin/combos/analyze-image/route.ts",
+        "src/app/api/admin/combos/generate-description/route.ts",
+        "src/app/api/admin/combos/route.ts",
+        "src/app/api/admin/combos/[id]/route.ts",
+        "src/app/api/admin/me/route.ts",
+        "src/app/api/admin/meli/orders/route.ts",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/admin/products/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/analytics/stats/route.ts",
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/config/route.ts",
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 28
+    },
+    {
+      "file": "src/lib/auth/index.ts",
+      "directImpact": [
+        "src/app/api/admin/combos/analyze-image/route.ts",
+        "src/app/api/admin/combos/generate-description/route.ts",
+        "src/app/api/admin/combos/route.ts",
+        "src/app/api/admin/combos/[id]/route.ts",
+        "src/app/api/admin/me/route.ts",
+        "src/app/api/admin/meli/orders/route.ts",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/admin/products/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/analytics/stats/route.ts",
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/config/route.ts",
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/admin/products/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 20
+    },
+    {
+      "file": "src/lib/auth/jwt.ts",
+      "directImpact": [
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/me/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/cuenta/change-password/route.ts",
+        "src/app/api/cuenta/pedidos/route.ts",
+        "src/app/api/cuenta/pedidos/[id]/route.ts",
+        "src/app/api/cuenta/profile/route.ts",
+        "src/app/api/cuenta/verificar-compra/route.ts",
+        "src/app/api/reviews/route.ts",
+        "src/lib/auth/index.ts",
+        "src/lib/security/auditDb.ts",
+        "src/middleware.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/admin/combos/analyze-image/route.ts",
+        "src/app/api/admin/combos/generate-description/route.ts",
+        "src/app/api/admin/combos/route.ts",
+        "src/app/api/admin/combos/[id]/route.ts",
+        "src/app/api/admin/me/route.ts",
+        "src/app/api/admin/meli/orders/route.ts",
+        "src/app/api/admin/products/generate-description/route.ts",
+        "src/app/api/admin/products/generate-image/route.ts",
+        "src/app/api/admin/products/lookup-sku/route.ts",
+        "src/app/api/admin/products/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/analytics/stats/route.ts",
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/config/route.ts",
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 37
+    },
+    {
+      "file": "src/lib/csrf.ts",
+      "directImpact": [
+        "src/app/api/csrf/route.ts",
+        "src/components/ChatWidget.tsx",
+        "src/hooks/useCsrf.ts",
+        "src/middleware.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/cuenta/forgot-password/page.tsx",
+        "src/app/cuenta/login/page.tsx",
+        "src/app/cuenta/registro/page.tsx",
+        "src/app/cuenta/reset-password/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 8
+    },
+    {
+      "file": "src/lib/email/orderEmails.ts",
+      "directImpact": [
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/payu/confirmation/route.ts",
+        "src/app/api/wompi/update-order/route.ts",
+        "src/app/api/wompi/webhook/route.ts",
+        "src/lib/orders/createOrder.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 11
+    },
+    {
+      "file": "src/lib/meli/auth.ts",
+      "directImpact": [
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/callback/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/lib/meli/client.ts"
+      ],
+      "transitiveImpact": [
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/listingStatus.ts",
+        "src/lib/meli/sync.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 7
+    },
+    {
+      "file": "src/lib/meli/client.ts",
+      "directImpact": [
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/listingStatus.ts",
+        "src/lib/meli/sync.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/meli/listings/route.ts",
+        "src/app/admin/meli/page.tsx",
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/sync.ts",
+        "tests/meliListingStatus.test.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/webhooks/meli/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 11
+    },
+    {
+      "file": "src/lib/meli/listingStatus.ts",
+      "directImpact": [
+        "src/app/admin/meli/page.tsx",
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/sync.ts",
+        "tests/meliListingStatus.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/webhooks/meli/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 8
+    },
+    {
+      "file": "src/lib/meli/pricing.ts",
+      "directImpact": [
+        "src/app/admin/meli/page.tsx",
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/sync.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/webhooks/meli/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 7
+    },
+    {
+      "file": "src/lib/orders/createOrder.ts",
+      "directImpact": [
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/webhook/route.ts",
+        "src/lib/messenger/processMessage.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 6
+    },
+    {
+      "file": "src/lib/orders/restoreStock.ts",
+      "directImpact": [
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/wompi/update-order/route.ts",
+        "src/app/api/wompi/webhook/route.ts",
+        "src/lib/orders/expirePendingOrders.ts",
+        "tests/orderStock.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/cron/expire-pending-orders/route.ts",
+        "tests/orderStock.test.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 7
+    },
+    {
+      "file": "src/lib/payments/wompi.ts",
+      "directImpact": [
+        "src/app/api/wompi/redirect/route.ts",
+        "src/app/api/wompi/webhook/route.ts",
+        "src/lib/orders/createOrder.ts",
+        "tests/wompi.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 8
+    },
+    {
+      "file": "src/lib/placeholder.ts",
+      "directImpact": [
+        "src/app/combos/[slug]/combo-detail-client.tsx",
+        "src/app/cuenta/favoritos/page.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/ComboCard.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/components/ProductCard.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/products/[id]/page.tsx",
+        "src/app/combos/combos-client.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/app/page.tsx",
+        "src/app/products/products-client.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/lib/prisma.ts",
+      "directImpact": [
+        "src/app/api/admin/chat-analytics/route.ts",
+        "src/app/api/admin/combos/route.ts",
+        "src/app/api/admin/combos/[id]/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/admin/meli/orders/route.ts",
+        "src/app/api/admin/products/route.ts",
+        "src/app/api/admin/security-audit/route.ts",
+        "src/app/api/admin/stats/route.ts",
+        "src/app/api/admin/store-settings/route.ts",
+        "src/app/api/analytics/pageview/route.ts",
+        "src/app/api/analytics/search/route.ts",
+        "src/app/api/analytics/stats/route.ts",
+        "src/app/api/auth/forgot-password/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/auth/reset-password/route.ts",
+        "src/app/api/cart/availability/route.ts",
+        "src/app/api/categories/route.ts",
+        "src/app/api/chat/route.ts",
+        "src/app/api/codes/promotion/route.ts",
+        "src/app/api/codes/route.ts",
+        "src/app/api/codes/seller/route.ts",
+        "src/app/api/codes/validate/route.ts",
+        "src/app/api/combos/route.ts",
+        "src/app/api/combos/[slug]/route.ts",
+        "src/app/api/cuenta/change-password/route.ts",
+        "src/app/api/cuenta/pedidos/route.ts",
+        "src/app/api/cuenta/pedidos/[id]/route.ts",
+        "src/app/api/cuenta/profile/route.ts",
+        "src/app/api/cuenta/verificar-compra/route.ts",
+        "src/app/api/feed/meta/route.ts",
+        "src/app/api/health/route.ts",
+        "src/app/api/meli/config/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/app/api/orders/status/[referenceCode]/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/payu/confirmation/route.ts",
+        "src/app/api/payu/redirect/route.ts",
+        "src/app/api/products/latest/route.ts",
+        "src/app/api/products/route.ts",
+        "src/app/api/products/[id]/route.ts",
+        "src/app/api/reviews/route.ts",
+        "src/app/api/search/route.ts",
+        "src/app/api/store-settings/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts",
+        "src/app/api/webhooks/meli/route.ts",
+        "src/app/api/wompi/redirect/route.ts",
+        "src/app/api/wompi/update-order/route.ts",
+        "src/app/api/wompi/webhook/route.ts",
+        "src/app/products/[id]/page.tsx",
+        "src/app/sitemap.ts",
+        "src/create-admin.ts",
+        "src/lib/email/orderEmails.ts",
+        "src/lib/embeddings.ts",
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/auth.ts",
+        "src/lib/meli/pricing.ts",
+        "src/lib/meli/sync.ts",
+        "src/lib/messenger/processMessage.ts",
+        "src/lib/orders/createOrder.ts",
+        "src/lib/orders/expirePendingOrders.ts",
+        "src/lib/orders/restoreStock.ts",
+        "src/lib/security/audit.ts",
+        "src/lib/security/auditDb.ts",
+        "src/lib/seo/queries.ts",
+        "src/lib/store/getShippingConfig.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "src/scripts/ingest-embeddings.ts",
+        "src/worker/processJobs.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/payu/confirmation/route.ts",
+        "src/app/api/wompi/update-order/route.ts",
+        "src/app/api/wompi/webhook/route.ts",
+        "src/lib/orders/createOrder.ts",
+        "src/app/api/products/route.ts",
+        "src/app/api/products/[id]/route.ts",
+        "src/scripts/ingest-embeddings.ts",
+        "src/app/api/meli/listings/route.ts",
+        "src/app/api/meli/auth/route.ts",
+        "src/app/api/meli/callback/route.ts",
+        "src/app/api/meli/status/route.ts",
+        "src/lib/meli/client.ts",
+        "src/app/admin/meli/page.tsx",
+        "src/lib/meli/adminListings.ts",
+        "src/lib/meli/sync.ts",
+        "src/app/api/meli/sync/bulk/route.ts",
+        "src/app/api/meli/sync/[productId]/route.ts",
+        "src/app/api/webhooks/meli/route.ts",
+        "src/app/api/webhook/route.ts",
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts",
+        "src/app/api/cron/expire-pending-orders/route.ts",
+        "tests/orderStock.test.ts",
+        "src/lib/orders/expirePendingOrders.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts",
+        "src/app/combos/page.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/page.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/sitemap.ts",
+        "src/lib/messenger/processMessage.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 109
+    },
+    {
+      "file": "src/lib/rateLimit.ts",
+      "directImpact": [
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/auth/forgot-password/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/auth/reset-password/route.ts",
+        "src/app/api/cart/availability/route.ts",
+        "src/app/api/chat/route.ts",
+        "src/app/api/codes/validate/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/app/api/reviews/route.ts",
+        "src/app/api/search/route.ts",
+        "src/app/api/upload/route.ts",
+        "src/app/api/wompi/update-order/route.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/lib/security/auditDb.ts",
+      "directImpact": [
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "high",
+      "estimatedChanges": 5
+    },
+    {
+      "file": "src/lib/seo/brand.ts",
+      "directImpact": [
+        "src/app/about/layout.tsx",
+        "src/app/checkout/layout.tsx",
+        "src/app/combos/layout.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/contact/layout.tsx",
+        "src/app/layout.tsx",
+        "src/app/page.tsx",
+        "src/app/privacy/layout.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/products/[id]/page.tsx",
+        "src/app/seguimiento/layout.tsx",
+        "src/app/terms/layout.tsx"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/lib/seo/queries.ts",
+      "directImpact": [
+        "src/app/combos/page.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/page.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/sitemap.ts"
+      ],
+      "transitiveImpact": [],
+      "riskLevel": "high",
+      "estimatedChanges": 6
+    },
+    {
+      "file": "src/lib/seo/searchSuggestions.ts",
+      "directImpact": [
+        "src/components/home/HomePageClient.tsx",
+        "src/components/HomeSearch.tsx",
+        "src/lib/seo/queries.ts",
+        "tests/searchSuggestions.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/page.tsx",
+        "src/components/home/HomePageClient.tsx",
+        "src/app/combos/page.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/sitemap.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 11
+    },
+    {
+      "file": "src/lib/site.ts",
+      "directImpact": [
+        "src/app/api/auth/forgot-password/route.ts",
+        "src/app/api/feed/meta/route.ts",
+        "src/app/combos/page.tsx",
+        "src/app/combos/[slug]/page.tsx",
+        "src/app/layout.tsx",
+        "src/app/page.tsx",
+        "src/app/products/category/[category]/page.tsx",
+        "src/app/products/page.tsx",
+        "src/app/products/[id]/page.tsx",
+        "src/app/robots.ts",
+        "src/app/sitemap.ts",
+        "src/lib/seo/urls.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/combos/[slug]/page.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 13
+    },
+    {
+      "file": "src/lib/store/getShippingConfig.ts",
+      "directImpact": [
+        "src/lib/orders/createOrder.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 5
+    },
+    {
+      "file": "src/types/auth.ts",
+      "directImpact": [
+        "src/app/admin/layout.tsx",
+        "src/app/admin/login/page.tsx",
+        "src/app/api/admin/me/route.ts",
+        "src/context/AuthContext.tsx",
+        "src/context/CustomerAuthContext.tsx",
+        "src/lib/auth/jwt.ts",
+        "src/lib/security/audit.ts",
+        "src/lib/security/auditDb.ts",
+        "src/middleware.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/admin/layout.tsx",
+        "src/app/admin/login/page.tsx",
+        "src/app/checkout/page.tsx",
+        "src/app/cuenta/login/page.tsx",
+        "src/app/cuenta/pedidos/page.tsx",
+        "src/app/cuenta/perfil/page.tsx",
+        "src/app/cuenta/registro/page.tsx",
+        "src/app/layout.tsx",
+        "src/components/Navbar.tsx",
+        "src/components/ProductReviews.tsx",
+        "src/app/api/admin/login/route.ts",
+        "src/app/api/auth/login/route.ts",
+        "src/app/api/auth/me/route.ts",
+        "src/app/api/auth/register/route.ts",
+        "src/app/api/cuenta/change-password/route.ts",
+        "src/app/api/cuenta/pedidos/route.ts",
+        "src/app/api/cuenta/pedidos/[id]/route.ts",
+        "src/app/api/cuenta/profile/route.ts",
+        "src/app/api/cuenta/verificar-compra/route.ts",
+        "src/app/api/reviews/route.ts",
+        "src/lib/auth/index.ts",
+        "src/lib/security/auditDb.ts",
+        "src/middleware.ts",
+        "src/app/api/admin/emails/flush/route.ts",
+        "src/app/api/admin/emails/flush-all/route.ts",
+        "src/app/api/orders/[id]/route.ts",
+        "src/app/api/users/route.ts",
+        "src/app/api/users/[id]/route.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 37
+    },
+    {
+      "file": "src/utils/formatCurrency.ts",
+      "directImpact": [
+        "src/app/admin/combos/page.tsx",
+        "src/app/admin/meli/page.tsx",
+        "src/app/admin/orders/page.tsx",
+        "src/app/admin/products/page.tsx",
+        "src/app/checkout/page.tsx",
+        "src/app/cuenta/favoritos/page.tsx",
+        "src/app/cuenta/pedidos/page.tsx",
+        "src/app/cuenta/pedidos/[id]/page.tsx",
+        "src/lib/orders/createOrder.ts",
+        "tests/formatCurrency.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/api/chat/route.ts",
+        "src/app/api/orders/route.ts",
+        "src/lib/whatsapp/processMessage.ts",
+        "tests/createOrder.test.ts"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 14
+    },
+    {
+      "file": "src/utils/routeUtils.ts",
+      "directImpact": [
+        "src/components/AnnouncementBar.tsx",
+        "src/components/CartModal.tsx",
+        "src/components/DynamicFooter.tsx",
+        "src/components/FloatingButtons.tsx",
+        "src/components/FloatingCombos.tsx",
+        "src/components/Navbar.tsx",
+        "tests/routeUtils.test.ts"
+      ],
+      "transitiveImpact": [
+        "src/app/layout.tsx",
+        "src/app/products/products-client.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/ConditionalNavbar.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 11
+    }
+  ],
+  "summary": {
+    "totalFiles": 251,
+    "highRisk": 35,
+    "totalImpacted": 668
+  },
+  "analyzedAt": "2026-06-11T13:20:18.164Z"
+}

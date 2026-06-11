@@ -1,0 +1,2279 @@
+{
+  "files": [
+    {
+      "path": "eslint.config.mjs",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "next-env.d.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "next.config.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "postcss.config.mjs",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "scripts/test-resend.mjs",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": true,
+      "antiPatterns": [
+        "process.exit"
+      ]
+    },
+    {
+      "path": "src/app/about/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/about/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/analytics/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/chat-analytics/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/codes/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/combos/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/login/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/login/logout.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/login/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/logout/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/meli/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/orders/components/OrdersFilters.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/orders/components/OrdersStats.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/orders/components/OrdersTable.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/orders/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/products/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/security-audit/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/shipping/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/admin/users/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/chat-analytics/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/combos/analyze-image/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/combos/generate-description/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/combos/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/combos/[id]/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/emails/flush/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/emails/flush-all/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/login/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/logout/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/me/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/meli/orders/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/products/generate-description/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/products/generate-image/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/products/lookup-sku/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 1,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/products/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/security-audit/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/stats/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/admin/store-settings/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/analytics/pageview/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/analytics/search/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/analytics/stats/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/auth/forgot-password/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/auth/login/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/auth/logout/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/auth/me/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/auth/register/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/auth/reset-password/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/cart/availability/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/cart/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/categories/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/chat/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/client-logs/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/codes/promotion/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/codes/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/codes/seller/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/codes/validate/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/combos/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/combos/[slug]/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/cron/expire-pending-orders/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/csrf/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/cuenta/change-password/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/cuenta/pedidos/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/cuenta/pedidos/[id]/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/cuenta/profile/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/cuenta/verificar-compra/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/feed/meta/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/health/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/meli/auth/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/meli/callback/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/meli/config/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/meli/listings/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/meli/status/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/meli/sync/bulk/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/meli/sync/[productId]/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/orders/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/orders/status/[referenceCode]/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/orders/[id]/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/payu/confirmation/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/payu/redirect/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/products/latest/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/products/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/products/[id]/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/reviews/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/search/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/store-settings/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/upload/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/users/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/users/[id]/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/webhook/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/webhooks/meli/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/wompi/redirect/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/wompi/update-order/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/api/wompi/webhook/route.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/checkout/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/checkout/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/checkout/response/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/checkout/response/response-client.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/combos/combos-client.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/combos/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/combos/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/combos/[slug]/combo-detail-client.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/combos/[slug]/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/contact/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/contact/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/cuenta/favoritos/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/cuenta/forgot-password/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/cuenta/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/cuenta/login/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/cuenta/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/cuenta/pedidos/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/cuenta/pedidos/[id]/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/cuenta/perfil/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/cuenta/registro/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/cuenta/reset-password/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/error.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/not-found.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/privacy/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/privacy/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/products/category/[category]/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/products/layout-client.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/products/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/products/loading.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/products/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/products/products-client.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/products/[id]/loading.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/products/[id]/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/products/[id]/ProductDetailClient.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/repuestos/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/robots.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/seguimiento/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/seguimiento/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/sitemap.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/terms/layout.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/terms/page.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/app/theme-provider.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/AnnouncementBar.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/CartItem.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/CartModal.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/ChatWidget.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/ClientOnlyWidgets.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/ComboCard.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/ConditionalNavbar.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/CountdownTimer.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/DynamicFooter.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/ErrorBoundary.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/FloatingButtons.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/FloatingCombos.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/Footer.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/HeroSection.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/home/HomePageClient.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/HomeSearch.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/Navbar.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/ProductCard.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/ProductReviews.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/RecentPurchases.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/SeasonalGlobalTheme.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/components/ShippingPromo.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/config/admin.ts",
+      "level": "canonical",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/config/seasonTheme.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 1,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/config/shippingRates.ts",
+      "level": "canonical",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/constants/order.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/constants/productCategories.ts",
+      "level": "canonical",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/context/AuthContext.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/context/CartContext.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/context/CustomerAuthContext.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/create-admin.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/hooks/useCart.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/hooks/useCsrf.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/hooks/useOrderExporter.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/hooks/useProducts.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/hooks/useShippingConfig.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/hooks/useWishlist.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/ai-provider.ts",
+      "level": "canonical",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/ai.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/auth/hash.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/auth/index.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/auth/jwt.ts",
+      "level": "canonical",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/cloudinary.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/csrf.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/email/authEmails.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/email/orderEmails.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/embeddings.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/logout.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/meli/adminListings.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/meli/auth.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/meli/client.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/meli/listingStatus.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/meli/outOfSync.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/meli/pricing.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/meli/sync.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/messenger/client.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/messenger/processComment.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/messenger/processMessage.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/orders/createOrder.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/orders/expirePendingOrders.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/orders/restoreStock.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/orders/status.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/payments/wompi.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/placeholder.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/prisma.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/rateLimit.ts",
+      "level": "canonical",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/security/audit-edge.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/security/audit.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/security/auditDb.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/seo/brand.ts",
+      "level": "canonical",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/seo/queries.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/seo/searchSuggestions.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/seo/slug.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/seo/urls.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/site.ts",
+      "level": "canonical",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/store/getShippingConfig.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/utils.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/vertex.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/lib/whatsapp/processMessage.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/middleware.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/scripts/ingest-embeddings.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": true,
+      "antiPatterns": [
+        "process.exit"
+      ]
+    },
+    {
+      "path": "src/services/codeService.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/services/orderService.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/services/productService.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/types/auth.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/types/cart.d.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/types/code.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/types/combo.d.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/types/global.d.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/types/google-genai.d.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/types/order.d.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/types/product.d.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/utils/colorUtils.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/utils/formatCurrency.ts",
+      "level": "canonical",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/utils/routeUtils.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "src/worker/processJobs.ts",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": true,
+      "antiPatterns": [
+        "process.exit"
+      ]
+    },
+    {
+      "path": "tests/colorUtils.test.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "tests/createOrder.test.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "tests/formatCurrency.test.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "tests/meliListingStatus.test.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "tests/meliOutOfSync.test.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "tests/orderService.test.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "tests/orderStock.test.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "tests/productService.test.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "tests/routeUtils.test.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "tests/searchSuggestions.test.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "tests/verify-security.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": true,
+      "antiPatterns": [
+        "process.exit"
+      ]
+    },
+    {
+      "path": "tests/wompi.test.ts",
+      "level": "verified",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    }
+  ],
+  "summary": {
+    "experimental": 0,
+    "verified": 14,
+    "production": 228,
+    "canonical": 9,
+    "quarantined": 4
+  },
+  "generatedAt": "2026-06-11T13:20:17.748Z"
+}
