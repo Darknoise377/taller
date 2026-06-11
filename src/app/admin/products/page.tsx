@@ -257,8 +257,8 @@ export default function AdminProductsPage() {
                   const videoRes = await uploadImage(videoToUpload.originFileObj as File);
                   finalVideoUrl = videoRes.url;
                   message.success({ content: 'Video subido con éxito', key: 'video-upload', duration: 2 });
-               } catch(e) {
-                  message.error({ content: 'Error subiendo video: el archivo podría ser muy pesado.', key: 'video-upload', duration: 4 });
+               } catch {
+                                 message.error({ content: 'Error subiendo video: el archivo podría ser muy pesado.', key: 'video-upload', duration: 4 });
                   setIsSaving(false);
                   return;
                }
@@ -1242,9 +1242,9 @@ return (
                                            }
                                            return originNode;
                                          }}
-                                         onRemove={(file) => {
-                                           setVideoFileList([]);
-                                         }}
+                                         onRemove={() => {
+                                                           setVideoFileList([]);
+                                                         }}
                                          beforeUpload={() => false}
                                          onChange={({ fileList: newFileList }) => setVideoFileList(newFileList)}
                                       >

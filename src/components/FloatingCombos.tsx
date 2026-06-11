@@ -124,8 +124,7 @@ export default function FloatingCombos({
   if (isCheckoutPath(pathname) || pathname?.startsWith("/admin")) return null;
 
   const isProductDetail = !!pathname?.match(/^\/products\/[^/]+$/);
-  const isComboDetail = !!pathname?.match(/^\/combos\/[^/]+$/);
-  // Mobile: FloatingButtons (WA) sits at bottom-20 (5rem) on normal pages, its 56px button top = ~8.5rem.
+    // Mobile: FloatingButtons (WA) sits at bottom-20 (5rem) on normal pages, its 56px button top = ~8.5rem.
   // On product detail it sits at 8.5rem, top = ~12rem. Add 0.75rem gap above each.
   const fabBottom = isProductDetail
     ? "bottom-[calc(12.75rem+env(safe-area-inset-bottom))] md:bottom-24"

@@ -16,7 +16,7 @@ async function requireAdmin() {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   if (!(await requireAdmin())) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
