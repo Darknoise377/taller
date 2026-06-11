@@ -66,8 +66,9 @@ export default function AdminProductsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-    const [videoFileList, setVideoFileList] = useState<UploadFile[]>([]);
-    const [form] = Form.useForm();
+      const [videoUrlForm, setVideoUrlForm] = useState<string>('');
+      const [isVideoUploading, setIsVideoUploading] = useState(false);
+      const [form] = Form.useForm();
 
   // --- Calculadora de precio ---
   const [shippingConfig, setShippingConfig] = useState<ShippingConfig>(DEFAULT_SHIPPING_CONFIG);
@@ -248,21 +249,8 @@ export default function AdminProductsPage() {
                 return;
             }
       
-            // 3.5 Subir el video de Cloudinary si existe
-            let finalVideoUrl = videoFileList.length > 0 && videoFileList[0].url ? videoFileList[0].url : null;
-            const videoToUpload = videoFileList.find(f => f.originFileObj);
-            if (videoToUpload && videoToUpload.originFileObj) {
-               message.loading({ content: 'Subiendo video (esto puede tardar unos segundos)...', key: 'video-upload' });
-               try {
-                  const videoRes = await uploadImage(videoToUpload.originFileObj as File);
-                  finalVideoUrl = videoRes.url;
-                  message.success({ content: 'Video subido con éxito', key: 'video-upload', duration: 2 });
-               } catch {
-                                 message.error({ content: 'Error subiendo video: el archivo podría ser muy pesado.', key: 'video-upload', duration: 4 });
-                  setIsSaving(false);
-                  return;
-               }
-            }
+            // 3.5 Usar la URL del video que ya se subió
+                        const finalVideoUrl = videoUrlForm.trim() || null;
 
       // 4. Construir el payload final para la API
       const payload: Partial<Product> = {
@@ -400,20 +388,15 @@ export default function AdminProductsPage() {
         setFileList(initialFileList);
       
         if (product.videoUrl) {
-           setVideoFileList([{
-             uid: '-video-1',
-             name: 'video-producto.mp4',
-             status: 'done' as const,
-             url: product.videoUrl,
-           }]);
-        } else {
-           setVideoFileList([]);
-        }
-      } else {
-        form.resetFields();
-        setFileList([]);
-        setVideoFileList([]);
-      }
+                 setVideoUrlForm(product.videoUrl);
+              } else {
+                 setVideoUrlForm('');
+              }
+            } else {
+              form.resetFields();
+              setFileList([]);
+              setVideoUrlForm('');
+            }
     setAiImgOpen(false);
     setAiImgPrompt('');
     setAiImgResult(null);
@@ -506,15 +489,22 @@ export default function AdminProductsPage() {
       dataIndex: 'imageUrl',
       key: 'imageUrl',
       render: (imageUrl: string, record) => (
-        <Image
-          width={60}
-          height={60}
-          src={imageUrl || record.images?.[0]}
-          alt={record.name}
-          style={{ objectFit: 'cover', borderRadius: '4px' }}
-          fallback="/placeholder.png" // Una imagen por defecto si no hay
-        />
-      ),
+              <div 
+                style={{ cursor: 'pointer' }} 
+                onClick={() => openModal(record)}
+                title="Haga clic para editar"
+              >
+                <Image
+                  width={60}
+                  height={60}
+                  src={imageUrl || record.images?.[0]}
+                  alt={record.name}
+                  style={{ objectFit: 'cover', borderRadius: '4px' }}
+                  fallback="/placeholder.png" 
+                  preview={false} // Desactivamos el preview nativo para que el clic abra el modal
+                />
+              </div>
+            ),
     },
     {
       title: 'Nombre',
@@ -522,16 +512,21 @@ export default function AdminProductsPage() {
       key: 'name',
       sorter: (a, b) => a.name.localeCompare(b.name),
       render: (name: string, record) => (
-        <div>
-          <div style={{ fontWeight: 500 }}>{name}</div>
-          {record.brand && (
-            <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 1 }}>{record.brand}</div>
-          )}
-          {record.sku && !record.brand && (
-            <div style={{ fontSize: 12, color: '#bfbfbf', marginTop: 1, fontFamily: 'monospace' }}>{record.sku}</div>
-          )}
-        </div>
-      ),
+              <div 
+                style={{ cursor: 'pointer', padding: '4px 0' }} 
+                onClick={() => openModal(record)}
+                title="Haga clic para editar"
+                className="hover:opacity-75 transition-opacity"
+              >
+                <div style={{ fontWeight: 600, color: '#0A2A66' }}>{name}</div>
+                {record.brand && (
+                  <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 1 }}>{record.brand}</div>
+                )}
+                {record.sku && !record.brand && (
+                  <div style={{ fontSize: 12, color: '#bfbfbf', marginTop: 1, fontFamily: 'monospace' }}>{record.sku}</div>
+                )}
+              </div>
+            ),
     },
     {
       title: 'Precio',
@@ -1212,51 +1207,58 @@ return (
         
                     </Col>
                     <Col xs={24} md={12}>
-                       <Form.Item 
-                         label={
-                           <Space size={6}>
-                             <span>Video del producto</span>
-                             <Typography.Text type="secondary" style={{ fontSize: 11 }}>(opcional, máx. 50MB)</Typography.Text>
-                           </Space>
-                         }
-                       >
-                         <Upload
-                                         accept="video/mp4,video/webm,video/quicktime"
-                                         listType="picture-card"
-                                         fileList={videoFileList}
-                                         maxCount={1}
-                                         itemRender={(originNode, file) => {
-                                           if (file.url || file.thumbUrl || (file.originFileObj && file.originFileObj.type.startsWith('video/'))) {
-                                             const src = file.url || file.thumbUrl || (file.originFileObj ? URL.createObjectURL(file.originFileObj) : '');
-                                             return (
-                                               <div style={{ position: 'relative', width: '100%', height: '100%', overflow: 'hidden', borderRadius: 8 }}>
-                                                 <video src={src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} controls controlsList="nodownload noplaybackrate" muted />
-                                                 <Button 
-                                                    type="primary" danger shape="circle" icon={<DeleteOutlined />} 
-                                                    size="small"
-                                                    style={{ position: 'absolute', top: 4, right: 4, zIndex: 10 }}
-                                                    onClick={() => setVideoFileList([])}
-                                                 />
-                                               </div>
-                                             );
-                                           }
-                                           return originNode;
-                                         }}
-                                         onRemove={() => {
-                                                           setVideoFileList([]);
-                                                         }}
-                                         beforeUpload={() => false}
-                                         onChange={({ fileList: newFileList }) => setVideoFileList(newFileList)}
-                                      >
-                            {videoFileList.length === 0 && (
-                              <div>
-                                <VideoCameraOutlined style={{ fontSize: 24, color: '#8c8c8c' }} />
-                                <div className="mt-2 text-xs">Subir MP4</div>
-                              </div>
-                            )}
-                         </Upload>
-                       </Form.Item>
-                    </Col>
+                               <Form.Item 
+                                 label={
+                                   <Space size={6}>
+                                     <span>Video del producto (Sube MP4)</span>
+                                     <Typography.Text type="secondary" style={{ fontSize: 11 }}>(máx. 50MB)</Typography.Text>
+                                   </Space>
+                                 }
+                               >
+                                 <div className="space-y-3">
+                                   <Upload
+                                      accept="video/mp4,video/webm,video/quicktime"
+                                      showUploadList={false}
+                                      beforeUpload={async (file) => {
+                                        setIsVideoUploading(true);
+                                        message.loading({ content: 'Subiendo video a Cloudinary...', key: 'video-upload' });
+                                        try {
+                                          const videoRes = await uploadImage(file);
+                                          setVideoUrlForm(videoRes.url);
+                                          message.success({ content: '¡Video subido y procesado con éxito!', key: 'video-upload', duration: 3 });
+                                        } catch {
+                                                                                  message.error({ content: 'Error subiendo video. ¿Pesa más de 50MB?', key: 'video-upload', duration: 4 });
+                                        } finally {
+                                          setIsVideoUploading(false);
+                                        }
+                                        return false;
+                                      }}
+                                   >
+                                     <Button icon={<VideoCameraOutlined />} loading={isVideoUploading} disabled={isVideoUploading}>
+                                       {isVideoUploading ? 'Subiendo...' : 'Seleccionar y subir video'}
+                                     </Button>
+                                   </Upload>
+               
+                                   {videoUrlForm && (
+                                     <div className="mt-4 border border-slate-200 rounded-lg p-2 bg-slate-50 relative">
+                                        <video className="w-full max-h-48 object-cover rounded bg-black" controls controlsList="nodownload" playsInline>
+                                          <source src={videoUrlForm} type="video/mp4" />
+                                          Tu navegador no soporta video.
+                                        </video>
+                                        <Button 
+                                           type="primary" danger size="small" 
+                                           className="absolute top-3 right-3"
+                                           icon={<DeleteOutlined />}
+                                           onClick={() => setVideoUrlForm('')}
+                                        >
+                                          Quitar
+                                        </Button>
+                                        <div className="text-xs text-slate-400 mt-2 truncate">URL: {videoUrlForm}</div>
+                                     </div>
+                                   )}
+                                 </div>
+                               </Form.Item>
+                            </Col>
                     </Row>
 
                     {/* --- Generador de variantes con IA --- */}

@@ -87,15 +87,19 @@ export function VideoPlayer({
     >
       <video
         ref={videoRef}
-        src={src}
         poster={poster}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-cover bg-black"
         playsInline
+        webkit-playsinline="true"
         autoPlay={isBanner}
         muted={isMuted}
         loop={isBanner}
-        onClick={togglePlay} // Pausar/Reproducir tocando el video
-      />
+        onClick={togglePlay}
+      >
+        {/* Aquí está el secreto pro: Forzar el type video/mp4 en el source child */}
+        <source src={src} type="video/mp4" />
+        Tu navegador no soporta la reproducción de video.
+      </video>
 
       {/* Play/Pause Button Central para la variante Default */}
       {!isBanner && !isPlaying && (
