@@ -572,12 +572,12 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
 
                         {/* Reproductor de Video de Cloudinary */}
                         {/* Nota: Asegúrate de que el tipo Product en '@/types/product' incluya 'videoUrl?: string | null' */}
-                        {((product as any).videoUrl) && (
-                          <div className="pt-2 pb-1">
-                             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Video del producto</h2>
-                             <VideoPlayer 
-                                src={(product as any).videoUrl} 
-                                poster={product.imageUrl || undefined}
+                        {(product.videoUrl) && (
+                                      <div className="pt-2 pb-1">
+                                         <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Video del producto</h2>
+                                         <VideoPlayer 
+                                            src={product.videoUrl} 
+                                            poster={product.imageUrl || undefined}
                                 className="w-full aspect-video shadow-md"
                              />
                           </div>
