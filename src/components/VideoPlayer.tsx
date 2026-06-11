@@ -90,13 +90,11 @@ export function VideoPlayer({
         poster={poster}
         className="w-full h-full object-cover bg-black"
         playsInline
-        webkit-playsinline="true"
-        autoPlay={isBanner}
         muted={isMuted}
         loop={isBanner}
         onClick={togglePlay}
+        preload="metadata"
       >
-        {/* Aquí está el secreto pro: Forzar el type video/mp4 en el source child */}
         <source src={src} type="video/mp4" />
         Tu navegador no soporta la reproducción de video.
       </video>
@@ -129,6 +127,8 @@ export function VideoPlayer({
             <div className="flex items-center space-x-4">
               <button 
                 onClick={togglePlay}
+                aria-label={isPlaying ? "Pausar video" : "Reproducir video"}
+                title={isPlaying ? "Pausar" : "Reproducir"}
                 className="text-white hover:text-gray-300 transition"
               >
                 {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" />}
@@ -136,6 +136,8 @@ export function VideoPlayer({
               
               <button 
                 onClick={toggleMute}
+                aria-label={isMuted ? "Activar sonido" : "Silenciar video"}
+                title={isMuted ? "Activar sonido" : "Silenciar"}
                 className="text-white hover:text-gray-300 transition"
               >
                 {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
@@ -144,6 +146,8 @@ export function VideoPlayer({
 
             <button 
               onClick={toggleFullScreen}
+              aria-label="Pantalla completa"
+              title="Pantalla completa"
               className="text-white hover:text-gray-300 transition"
             >
               <Maximize size={20} />

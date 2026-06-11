@@ -23,6 +23,7 @@ export async function GET(_: Request, context: { params: Promise<{ id: string }>
         currency: true,
         imageUrl: true,
         images: true,
+        videoUrl: true,
         sku: true,
         tags: true,
         diagramNumber: true,
