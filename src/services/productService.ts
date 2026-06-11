@@ -63,8 +63,13 @@ export async function uploadImage(file: File): Promise<{ url: string; public_id:
   const data = await res.json();
 
   // ⚡ Normalizamos siempre a { url, public_id }
+  // Para videos, agregamos .mp4 si no está presente (requerido por Cloudinary para HTML5 video)
+  let url = data.url || data.secure_url;
+  if (file.type.startsWith('video/') && !url.includes('.mp4')) {
+    url = url.concat('.mp4');
+  }
   return {
-    url: data.url || data.secure_url, // 👈 soporte doble
+    url,
     public_id: data.public_id ?? '',
   };
 }

@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
+import { normalizeVideoUrl } from "@/lib/utils";
 
 interface VideoPlayerProps {
   /** 
@@ -22,6 +23,7 @@ export function VideoPlayer({
   poster,
   className = "" 
 }: VideoPlayerProps) {
+  const normalizedSrc = normalizeVideoUrl(src);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(variant === "banner");
   const [isMuted, setIsMuted] = useState(variant === "banner");
@@ -94,8 +96,9 @@ export function VideoPlayer({
         loop={isBanner}
         onClick={togglePlay}
         preload="metadata"
+        onError={(e) => console.error('Video error:', e.currentTarget.error)}
       >
-        <source src={src} type="video/mp4" />
+        <source src={normalizedSrc} type="video/mp4" />
         Tu navegador no soporta la reproducción de video.
       </video>
 

@@ -11,3 +11,16 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
+
+/**
+ * Normaliza URL de video de Cloudinary para reproducir en HTML5 video.
+ * Añade .mp4 si no está presente en URLs de video.
+ */
+export function normalizeVideoUrl(url: string): string {
+  if (!url) return url;
+  if (url.includes('.mp4')) return url;
+  if (url.includes('cloudinary.com') && url.includes('/video/upload')) {
+    return url.concat('.mp4');
+  }
+  return url;
+}

@@ -51,6 +51,7 @@ import { PRODUCT_CATEGORY_OPTIONS, getProductCategoryLabel } from '@/constants/p
 import { formatCurrency } from '@/utils/formatCurrency';
 import { DEFAULT_SHIPPING_CONFIG } from '@/config/shippingRates';
 import type { ShippingConfig } from '@/config/shippingRates';
+import { normalizeVideoUrl } from '@/lib/utils';
 
 // --- Constantes y Opciones ---
 const CATEGORY_OPTIONS = PRODUCT_CATEGORY_OPTIONS;
@@ -1239,23 +1240,23 @@ return (
                                      </Button>
                                    </Upload>
                
-                                   {videoUrlForm && (
-                                     <div className="mt-4 border border-slate-200 rounded-lg p-2 bg-slate-50 relative">
-                                        <video className="w-full max-h-48 object-cover rounded bg-black" controls controlsList="nodownload" playsInline>
-                                          <source src={videoUrlForm} type="video/mp4" />
-                                          Tu navegador no soporta video.
-                                        </video>
-                                        <Button 
-                                           type="primary" danger size="small" 
-                                           className="absolute top-3 right-3"
-                                           icon={<DeleteOutlined />}
-                                           onClick={() => setVideoUrlForm('')}
-                                        >
-                                          Quitar
-                                        </Button>
-                                        <div className="text-xs text-slate-400 mt-2 truncate">URL: {videoUrlForm}</div>
-                                     </div>
-                                   )}
+{videoUrlForm && (
+                                      <div className="mt-4 border border-slate-200 rounded-lg p-2 bg-slate-50 relative">
+                                         <video className="w-full max-h-48 object-cover rounded bg-black" controls controlsList="nodownload" playsInline>
+                                           <source src={normalizeVideoUrl(videoUrlForm)} type="video/mp4" />
+                                           Tu navegador no soporta video.
+                                         </video>
+                                         <Button 
+                                            type="primary" danger size="small" 
+                                            className="absolute top-3 right-3"
+                                            icon={<DeleteOutlined />}
+                                            onClick={() => setVideoUrlForm('')}
+                                         >
+                                           Quitar
+                                         </Button>
+                                         <div className="text-xs text-slate-400 mt-2 truncate">URL: {videoUrlForm}</div>
+                                      </div>
+                                    )}
                                  </div>
                                </Form.Item>
                             </Col>
