@@ -37,8 +37,17 @@
       "antiPatterns": []
     },
     {
-      "path": "scripts/test-resend.mjs",
+      "path": "scripts/check-videos.ts",
       "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
+      "path": "scripts/test-resend.mjs",
+      "level": "verified",
       "incidentCount": 0,
       "hotfixCount": 0,
       "rollbackCount": 0,
@@ -1488,6 +1497,15 @@
       "antiPatterns": []
     },
     {
+      "path": "src/components/VideoPlayer.tsx",
+      "level": "production",
+      "incidentCount": 0,
+      "hotfixCount": 0,
+      "rollbackCount": 0,
+      "quarantineActive": false,
+      "antiPatterns": []
+    },
+    {
       "path": "src/config/admin.ts",
       "level": "canonical",
       "incidentCount": 0,
@@ -2270,10 +2288,10 @@
   ],
   "summary": {
     "experimental": 0,
-    "verified": 14,
-    "production": 228,
+    "verified": 15,
+    "production": 229,
     "canonical": 9,
     "quarantined": 4
   },
-  "generatedAt": "2026-06-11T13:20:17.748Z"
+  "generatedAt": "2026-06-12T21:34:11.462Z"
 }

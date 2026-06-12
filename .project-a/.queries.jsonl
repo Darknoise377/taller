@@ -4,3 +4,4 @@
 {"question":"¿Cómo está implementada la sincronización de inventarios, órdenes y precios con la API de Mercado Libre (MeLi) en este proyecto?","root":"backend_api_services","filesReturned":8,"timestamp":"2026-06-09T23:01:19.608Z"}
 {"question":"¿Dónde están definidos los temas visuales de temporada y cómo se aplican los estilos estacionales?","root":"backend_api_services","filesReturned":8,"timestamp":"2026-06-09T23:19:22.670Z"}
 {"question":"¿Dónde está configurado Cloudinary en este proyecto? ¿Hay algún archivo de utilidades o hooks para Cloudinary, y en qué carpeta de src/components debo crear un componente llamado VideoPlayer?","root":"ui_components","filesReturned":8,"timestamp":"2026-06-11T13:20:23.525Z"}
+{"question":"Estructura exacta de HomePageClient.tsx y los componentes que renderiza en el Home. ¿Cuáles son los puntos de conversión y qué clases de Tailwind predominan?","root":"ui_components","filesReturned":8,"timestamp":"2026-06-12T21:34:24.165Z"}

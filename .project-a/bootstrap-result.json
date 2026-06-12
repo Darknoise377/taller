@@ -5,20 +5,20 @@
     "project": "onelike",
     "version": "0.1.0",
     "repositoryUrl": "https://github.com/Darknoise377/taller.git",
-    "totalFiles": 251,
+    "totalFiles": 253,
     "totalDirectories": 187,
-    "totalLines": 33946,
+    "totalLines": 34387,
     "rootsCount": 8,
-    "dependencyRelations": 417,
-    "bootstrappedAt": "2026-06-11T13:20:16.142Z",
-    "bootstrapDuration": 594,
+    "dependencyRelations": 421,
+    "bootstrappedAt": "2026-06-12T21:34:07.374Z",
+    "bootstrapDuration": 1240,
     "bootstrapVersion": "1.0.0",
-    "gitCommit": "82ba9dee",
+    "gitCommit": "23b249c1",
     "gitBranch": "main"
   },
   "health": {
     "projectRoot": "c:\\Users\\fabian\\Desktop\\taller_a_r",
-    "checkedAt": "2026-06-11T13:20:16.218Z",
+    "checkedAt": "2026-06-12T21:34:07.465Z",
     "healthy": true,
     "issueCount": 0,
     "issues": [],
@@ -28,19 +28,19 @@
   },
   "metrics": {
     "projectRoot": "c:\\Users\\fabian\\Desktop\\taller_a_r",
-    "calculatedAt": "2026-06-11T13:20:16.418Z",
+    "calculatedAt": "2026-06-12T21:34:08.786Z",
     "fileStats": {
-      "total": 252,
+      "total": 254,
       "byExtension": {
         ".mjs": 3,
-        ".ts": 162,
+        ".ts": 163,
         ".prisma": 1,
-        ".tsx": 86
+        ".tsx": 87
       },
       "byDirectory": {
         "": 4,
         "prisma": 1,
-        "scripts": 1,
+        "scripts": 2,
         "src\\app\\about": 2,
         "src\\app\\admin\\analytics": 1,
         "src\\app\\admin\\chat-analytics": 1,
@@ -151,7 +151,7 @@
         "src\\app\\repuestos": 1,
         "src\\app\\seguimiento": 2,
         "src\\app\\terms": 2,
-        "src\\components": 21,
+        "src\\components": 22,
         "src\\components\\home": 1,
         "src\\config": 3,
         "src\\constants": 2,
@@ -176,10 +176,10 @@
         "src\\worker": 1,
         "tests": 12
       },
-      "sizeBytes": 1309841,
-      "avgSizeKb": 5.075958736359127,
-      "largeFiles": 1,
-      "tinyFiles": 53
+      "sizeBytes": 1330691,
+      "avgSizeKb": 5.11615326648622,
+      "largeFiles": 3,
+      "tinyFiles": 55
     },
     "rootStats": {
       "total": 0,
@@ -187,10 +187,10 @@
       "avgFilesPerRoot": 0
     },
     "depStats": {
-      "totalRelations": 417,
-      "avgDepsPerFile": 1.6613545816733069,
+      "totalRelations": 421,
+      "avgDepsPerFile": 1.6640316205533596,
       "circularDeps": 8,
-      "orphanFiles": 43,
+      "orphanFiles": 44,
       "hub_files": [
         "src/config/admin.ts",
         "src/config/shippingRates.ts",
@@ -217,8 +217,8 @@
       "avgFileSize": 0,
       "largeFiles": 0,
       "tinyFiles": 0,
-      "avgImportsPerFile": 3.8588709677419355,
-      "avgExportsPerFile": 1.8588709677419355
+      "avgImportsPerFile": 3.856,
+      "avgExportsPerFile": 1.852
     }
   },
   "artifacts": {
@@ -235,7 +235,7 @@
     "healthPath": "c:\\Users\\fabian\\Desktop\\taller_a_r\\.project-a\\health.json"
   },
   "summary": {
-    "duration": 3067,
+    "duration": 7095,
     "stepsRun": [
       "Dependency Graph",
       "Vector Memory",

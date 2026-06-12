@@ -41,18 +41,53 @@ export default function FloatingCombos({
   const { isCartModalOpen } = useCart();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [waMenuOpen, setWaMenuOpen] = useState(false);
-  const [combos, setCombos] = useState<Combo[]>([]);
+    const [waMenuOpen, setWaMenuOpen] = useState(false);
+    const [aiChatOpen, setAiChatOpen] = useState(false);
+    const [combos, setCombos] = useState<Combo[]>([]);
   const [filter, setFilter] = useState<ComboFilter>(initialFilter);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    const handler = (e: Event) => setWaMenuOpen((e as CustomEvent<{ open: boolean }>).detail.open);
-    window.addEventListener('wa-menu-change', handler);
-    return () => window.removeEventListener('wa-menu-change', handler);
-  }, []);
+      const handler = (e: Event) => setWaMenuOpen((e as CustomEvent<{ open: boolean }>).detail.open);
+      const aiHandler = (e: Event) => setAiChatOpen((e as CustomEvent<{ open: boolean }>).detail.open);
+    
+      window.addEventListener('wa-menu-change', handler);
+      window.addEventListener('ai-chat-change', aiHandler);
+      return () => {
+        window.removeEventListener('wa-menu-change', handler);
+        window.removeEventListener('ai-chat-change', aiHandler);
+      };
+    }, []);
+
+    // Efecto adicional para intentar auto-detectar librerías de chat de IA comunes si no usan el evento
+    useEffect(() => {
+      // Observador para chats que inyectan iframes o divs globales (ej: Intercom, Zendesk, o tu IA)
+      const checkChatOpened = () => {
+        const chatElements = document.querySelectorAll('[id*="chat"], [class*="chat-window"], [class*="ai-assistant"], iframe[title*="chat"]');
+        let isChatVisible = false;
+      
+        chatElements.forEach(el => {
+          const style = window.getComputedStyle(el);
+          if (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0') {
+            // Solo consideramos ventanas abiertas, no el botoncito cerrado
+            if (el.clientHeight > 150 || el.clientWidth > 150) {
+               isChatVisible = true;
+            }
+          }
+        });
+      
+        if (isChatVisible !== aiChatOpen) {
+          setAiChatOpen(isChatVisible);
+        }
+      };
+
+      const observer = new MutationObserver(() => checkChatOpened());
+      observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    
+      return () => observer.disconnect();
+    }, [aiChatOpen]);
 
   useEffect(() => {
     let cancelled = false;
@@ -268,8 +303,8 @@ export default function FloatingCombos({
         aria-expanded={open}
         aria-haspopup="dialog"
         whileTap={{ scale: 0.96 }}
-        className={`fixed right-4 z-[75] inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] px-4 py-2.5 text-white shadow-[0_8px_32px_rgba(10,42,102,0.45)] ring-2 ring-white/20 transition hover:shadow-[0_12px_40px_rgba(10,42,102,0.55)] ${fabBottom} ${open || isCartModalOpen || waMenuOpen ? "pointer-events-none opacity-0" : "opacity-100"}`}
-      >
+        className={`fixed right-4 z-[75] inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] px-4 py-2.5 text-white shadow-[0_8px_32px_rgba(10,42,102,0.45)] ring-2 ring-white/20 transition hover:shadow-[0_12px_40px_rgba(10,42,102,0.55)] ${fabBottom} ${open || isCartModalOpen || waMenuOpen || aiChatOpen ? "pointer-events-none opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}
+              >
         <span className="relative flex h-6 w-6 items-center justify-center">
           <SparklesIcon className="h-5 w-5" />
           {combos.length > 0 && (

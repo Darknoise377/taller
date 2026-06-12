@@ -29,6 +29,13 @@
       "estimatedChanges": 0
     },
     {
+      "file": "scripts/check-videos.ts",
+      "directImpact": [],
+      "transitiveImpact": [],
+      "riskLevel": "low",
+      "estimatedChanges": 0
+    },
+    {
       "file": "scripts/test-resend.mjs",
       "directImpact": [],
       "transitiveImpact": [],
@@ -1247,6 +1254,19 @@
       "estimatedChanges": 3
     },
     {
+      "file": "src/components/VideoPlayer.tsx",
+      "directImpact": [
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/products/[id]/page.tsx",
+        "src/app/page.tsx"
+      ],
+      "riskLevel": "medium",
+      "estimatedChanges": 4
+    },
+    {
       "file": "src/config/admin.ts",
       "directImpact": [
         "src/app/admin/logout/route.ts",
@@ -2239,13 +2259,17 @@
     {
       "file": "src/lib/utils.ts",
       "directImpact": [
-        "src/app/products/[id]/ProductDetailClient.tsx"
+        "src/app/admin/products/page.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/VideoPlayer.tsx"
       ],
       "transitiveImpact": [
-        "src/app/products/[id]/page.tsx"
+        "src/app/products/[id]/page.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/home/HomePageClient.tsx"
       ],
-      "riskLevel": "medium",
-      "estimatedChanges": 2
+      "riskLevel": "high",
+      "estimatedChanges": 6
     },
     {
       "file": "src/lib/vertex.ts",
@@ -3356,6 +3380,21 @@
       "estimatedChanges": 5
     },
     {
+      "file": "src/lib/utils.ts",
+      "directImpact": [
+        "src/app/admin/products/page.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/VideoPlayer.tsx"
+      ],
+      "transitiveImpact": [
+        "src/app/products/[id]/page.tsx",
+        "src/app/products/[id]/ProductDetailClient.tsx",
+        "src/components/home/HomePageClient.tsx"
+      ],
+      "riskLevel": "high",
+      "estimatedChanges": 6
+    },
+    {
       "file": "src/types/auth.ts",
       "directImpact": [
         "src/app/admin/layout.tsx",
@@ -3446,9 +3485,9 @@
     }
   ],
   "summary": {
-    "totalFiles": 251,
-    "highRisk": 35,
-    "totalImpacted": 668
+    "totalFiles": 253,
+    "highRisk": 36,
+    "totalImpacted": 676
   },
-  "analyzedAt": "2026-06-11T13:20:18.164Z"
+  "analyzedAt": "2026-06-12T21:34:12.619Z"
 }

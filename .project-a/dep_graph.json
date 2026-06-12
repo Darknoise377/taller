@@ -1,12 +1,13 @@
 {
-  "builtAt": "2026-06-11T13:20:15.407Z",
+  "builtAt": "2026-06-12T21:34:05.947Z",
   "rootPath": "c:\\Users\\fabian\\Desktop\\taller_a_r",
-  "totalFiles": 251,
+  "totalFiles": 253,
   "forward": {
     "eslint.config.mjs": [],
     "next-env.d.ts": [],
     "next.config.ts": [],
     "postcss.config.mjs": [],
+    "scripts/check-videos.ts": [],
     "scripts/test-resend.mjs": [],
     "src/app/about/layout.tsx": [
       "src/lib/seo/brand.ts"
@@ -55,7 +56,8 @@
       "src/services/productService.ts",
       "src/constants/productCategories.ts",
       "src/utils/formatCurrency.ts",
-      "src/config/shippingRates.ts"
+      "src/config/shippingRates.ts",
+      "src/lib/utils.ts"
     ],
     "src/app/admin/security-audit/page.tsx": [],
     "src/app/admin/shipping/page.tsx": [
@@ -533,6 +535,7 @@
       "src/lib/utils.ts",
       "src/constants/productCategories.ts",
       "src/components/ProductReviews.tsx",
+      "src/components/VideoPlayer.tsx",
       "src/lib/placeholder.ts",
       "src/components/FloatingCombos.tsx"
     ],
@@ -604,6 +607,7 @@
       "src/components/ProductCard.tsx",
       "src/components/ComboCard.tsx",
       "src/lib/placeholder.ts",
+      "src/components/VideoPlayer.tsx",
       "src/config/shippingRates.ts",
       "src/config/seasonTheme.ts"
     ],
@@ -629,6 +633,9 @@
       "src/config/shippingRates.ts"
     ],
     "src/components/ShippingPromo.tsx": [],
+    "src/components/VideoPlayer.tsx": [
+      "src/lib/utils.ts"
+    ],
     "src/config/admin.ts": [],
     "src/config/seasonTheme.ts": [
       "src/config/shippingRates.ts"
@@ -845,6 +852,7 @@
     "next-env.d.ts": [],
     "next.config.ts": [],
     "postcss.config.mjs": [],
+    "scripts/check-videos.ts": [],
     "scripts/test-resend.mjs": [],
     "src/app/about/layout.tsx": [],
     "src/app/about/page.tsx": [],
@@ -1064,6 +1072,10 @@
     "src/components/ShippingPromo.tsx": [
       "src/app/checkout/page.tsx",
       "src/components/CartModal.tsx"
+    ],
+    "src/components/VideoPlayer.tsx": [
+      "src/app/products/[id]/ProductDetailClient.tsx",
+      "src/components/home/HomePageClient.tsx"
     ],
     "src/config/admin.ts": [
       "src/app/admin/logout/route.ts",
@@ -1512,7 +1524,9 @@
       "src/lib/orders/createOrder.ts"
     ],
     "src/lib/utils.ts": [
-      "src/app/products/[id]/ProductDetailClient.tsx"
+      "src/app/admin/products/page.tsx",
+      "src/app/products/[id]/ProductDetailClient.tsx",
+      "src/components/VideoPlayer.tsx"
     ],
     "src/lib/vertex.ts": [],
     "src/lib/whatsapp/processMessage.ts": [

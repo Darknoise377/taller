@@ -15,6 +15,13 @@
       "errors": []
     },
     {
+      "file": "scripts/check-videos.ts",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
       "file": "src/app/about/layout.tsx",
       "linter": "skip",
       "tests": "skip",
@@ -1135,6 +1142,13 @@
       "errors": []
     },
     {
+      "file": "src/components/VideoPlayer.tsx",
+      "linter": "skip",
+      "tests": "skip",
+      "build": "skip",
+      "errors": []
+    },
+    {
       "file": "src/config/admin.ts",
       "linter": "skip",
       "tests": "skip",
@@ -1738,12 +1752,12 @@
     }
   ],
   "summary": {
-    "total": 248,
+    "total": 250,
     "linterPass": 0,
     "testPass": 0,
     "buildPass": 0,
     "errors": 0,
     "note": "Validations skipped in bootstrapper - run validateFile() for individual checks"
   },
-  "validatedAt": "2026-06-11T13:20:16.422Z"
+  "validatedAt": "2026-06-12T21:34:08.805Z"
 }

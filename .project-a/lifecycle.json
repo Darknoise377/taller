@@ -16,10 +16,10 @@
     },
     {
       "path": "next.config.ts",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 7
     },
     {
       "path": "postcss.config.mjs",
@@ -29,11 +29,18 @@
       "daysSinceModified": 180
     },
     {
-      "path": "scripts/test-resend.mjs",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "path": "scripts/check-videos.ts",
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 7
+    },
+    {
+      "path": "scripts/test-resend.mjs",
+      "freshness": 0.8776564929487385,
+      "stress": 0.44999999999999996,
+      "obsolescenceRisk": "fresh",
+      "daysSinceModified": 90
     },
     {
       "path": "src/app/about/layout.tsx",
@@ -135,31 +142,31 @@
     },
     {
       "path": "src/app/admin/orders/components/OrdersTable.tsx",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.8776564929487385,
+      "stress": 0.44999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 90
     },
     {
       "path": "src/app/admin/orders/page.tsx",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.8776564929487385,
+      "stress": 0.44999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 90
     },
     {
       "path": "src/app/admin/page.tsx",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.8776564929487385,
+      "stress": 0.44999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 90
     },
     {
       "path": "src/app/admin/products/page.tsx",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 7
     },
     {
       "path": "src/app/admin/security-audit/page.tsx",
@@ -219,17 +226,17 @@
     },
     {
       "path": "src/app/api/admin/emails/flush/route.ts",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.8776564929487385,
+      "stress": 0.44999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 90
     },
     {
       "path": "src/app/api/admin/emails/flush-all/route.ts",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.8776564929487385,
+      "stress": 0.44999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 90
     },
     {
       "path": "src/app/api/admin/login/route.ts",
@@ -282,10 +289,10 @@
     },
     {
       "path": "src/app/api/admin/products/route.ts",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 7
     },
     {
       "path": "src/app/api/admin/security-audit/route.ts",
@@ -296,17 +303,17 @@
     },
     {
       "path": "src/app/api/admin/stats/route.ts",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.8776564929487385,
+      "stress": 0.44999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 90
     },
     {
       "path": "src/app/api/admin/store-settings/route.ts",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.8776564929487385,
+      "stress": 0.44999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 90
     },
     {
       "path": "src/app/api/analytics/pageview/route.ts",
@@ -534,10 +541,10 @@
     },
     {
       "path": "src/app/api/meli/listings/route.ts",
-      "freshness": 0.9907332038700339,
-      "stress": 0.32999999999999996,
+      "freshness": 0.9591574846601116,
+      "stress": 0.39,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 7
+      "daysSinceModified": 30
     },
     {
       "path": "src/app/api/meli/status/route.ts",
@@ -604,17 +611,17 @@
     },
     {
       "path": "src/app/api/products/route.ts",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 7
     },
     {
       "path": "src/app/api/products/[id]/route.ts",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 7
     },
     {
       "path": "src/app/api/reviews/route.ts",
@@ -639,10 +646,10 @@
     },
     {
       "path": "src/app/api/upload/route.ts",
-      "freshness": 0.8776564929487385,
-      "stress": 0.44999999999999996,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 90
+      "daysSinceModified": 7
     },
     {
       "path": "src/app/api/users/route.ts",
@@ -933,17 +940,17 @@
     },
     {
       "path": "src/app/products/[id]/page.tsx",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 7
     },
     {
       "path": "src/app/products/[id]/ProductDetailClient.tsx",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 7
     },
     {
       "path": "src/app/repuestos/page.tsx",
@@ -1080,10 +1087,10 @@
     },
     {
       "path": "src/components/FloatingCombos.tsx",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 7
     },
     {
       "path": "src/components/Footer.tsx",
@@ -1101,10 +1108,10 @@
     },
     {
       "path": "src/components/home/HomePageClient.tsx",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 7
     },
     {
       "path": "src/components/HomeSearch.tsx",
@@ -1154,6 +1161,13 @@
       "stress": 0.39,
       "obsolescenceRisk": "fresh",
       "daysSinceModified": 30
+    },
+    {
+      "path": "src/components/VideoPlayer.tsx",
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
+      "obsolescenceRisk": "fresh",
+      "daysSinceModified": 7
     },
     {
       "path": "src/config/admin.ts",
@@ -1339,10 +1353,10 @@
     },
     {
       "path": "src/lib/meli/adminListings.ts",
-      "freshness": 0.9907332038700339,
-      "stress": 0.32999999999999996,
+      "freshness": 0.9591574846601116,
+      "stress": 0.39,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 7
+      "daysSinceModified": 30
     },
     {
       "path": "src/lib/meli/auth.ts",
@@ -1353,24 +1367,24 @@
     },
     {
       "path": "src/lib/meli/client.ts",
-      "freshness": 0.9907332038700339,
-      "stress": 0.32999999999999996,
+      "freshness": 0.9591574846601116,
+      "stress": 0.39,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 7
+      "daysSinceModified": 30
     },
     {
       "path": "src/lib/meli/listingStatus.ts",
-      "freshness": 0.9907332038700339,
-      "stress": 0.32999999999999996,
+      "freshness": 0.9591574846601116,
+      "stress": 0.39,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 7
+      "daysSinceModified": 30
     },
     {
       "path": "src/lib/meli/outOfSync.ts",
-      "freshness": 0.9907332038700339,
-      "stress": 0.32999999999999996,
+      "freshness": 0.9591574846601116,
+      "stress": 0.39,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 7
+      "daysSinceModified": 30
     },
     {
       "path": "src/lib/meli/pricing.ts",
@@ -1535,10 +1549,10 @@
     },
     {
       "path": "src/lib/utils.ts",
-      "freshness": 0.7620066471801565,
-      "stress": 0.51,
-      "obsolescenceRisk": "stable",
-      "daysSinceModified": 180
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
+      "obsolescenceRisk": "fresh",
+      "daysSinceModified": 7
     },
     {
       "path": "src/lib/vertex.ts",
@@ -1584,10 +1598,10 @@
     },
     {
       "path": "src/services/productService.ts",
-      "freshness": 0.8776564929487385,
-      "stress": 0.44999999999999996,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 90
+      "daysSinceModified": 7
     },
     {
       "path": "src/types/auth.ts",
@@ -1640,10 +1654,10 @@
     },
     {
       "path": "src/types/product.d.ts",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.9907332038700339,
+      "stress": 0.32999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 7
     },
     {
       "path": "src/utils/colorUtils.ts",
@@ -1689,10 +1703,10 @@
     },
     {
       "path": "tests/formatCurrency.test.ts",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.8776564929487385,
+      "stress": 0.44999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 90
     },
     {
       "path": "tests/meliListingStatus.test.ts",
@@ -1703,10 +1717,10 @@
     },
     {
       "path": "tests/meliOutOfSync.test.ts",
-      "freshness": 0.9907332038700339,
-      "stress": 0.32999999999999996,
+      "freshness": 0.9591574846601116,
+      "stress": 0.39,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 7
+      "daysSinceModified": 30
     },
     {
       "path": "tests/orderService.test.ts",
@@ -1752,18 +1766,18 @@
     },
     {
       "path": "tests/wompi.test.ts",
-      "freshness": 0.9591574846601116,
-      "stress": 0.39,
+      "freshness": 0.8776564929487385,
+      "stress": 0.44999999999999996,
       "obsolescenceRisk": "fresh",
-      "daysSinceModified": 30
+      "daysSinceModified": 90
     }
   ],
   "summary": {
-    "fresh": 231,
-    "stable": 20,
+    "fresh": 234,
+    "stable": 19,
     "aging": 0,
     "deprecated": 0,
-    "avgFreshness": 0.9298956143134501
+    "avgFreshness": 0.9294523262398202
   },
-  "generatedAt": "2026-06-11T13:20:17.885Z"
+  "generatedAt": "2026-06-12T21:34:11.760Z"
 }
