@@ -1,4 +1,4 @@
-﻿// src/app/products/[id]/ProductDetailClient.tsx
+// src/app/products/[id]/ProductDetailClient.tsx
 
 "use client";
 
@@ -149,6 +149,25 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
     if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setLightboxOpen(true); }
   };
 
+  const touchStartX = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX;
+
+    if (diff > 50) {
+      next(); // Deslizar a la izquierda -> Siguiente imagen
+    } else if (diff < -50) {
+      prev(); // Deslizar a la derecha -> Imagen anterior
+    }
+    touchStartX.current = null;
+  };
+
   return (
     <>
       {lightboxOpen && (
@@ -209,6 +228,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, productName }) => {
                 y: ((e.clientY - r.top) / r.height) * 100,
               });
             }}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
             aria-label={`Imagen de ${productName}. Toca para ver a pantalla completa.`}
           >
             <Image
@@ -327,22 +348,35 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
     [product.images, product.imageUrl]
   );
   
+  const handleCopySku = () => {
+    const textToCopy = product.sku || product.id;
+    navigator.clipboard.writeText(textToCopy);
+    toast.success("¡Referencia copiada al portapapeles!");
+  };
+
   const handleAddToCart = () => {
     if (product.stock <= 0) {
-      setValidationMessage("Este producto está agotado.");
+      const msg = "Este producto está agotado.";
+      setValidationMessage(msg);
+      toast.error(msg);
       return;
     }
     if (product.sizes.length > 0 && !selectedSize) {
-      setValidationMessage("Selecciona una medida/referencia antes de anadir al carrito.");
+      const msg = "Selecciona una medida/referencia antes de añadir al carrito.";
+      setValidationMessage(msg);
+      toast.error(msg);
       return;
     }
     if (product.colors.length > 0 && !selectedColor) {
-      setValidationMessage("Selecciona una compatibilidad antes de anadir al carrito.");
+      const msg = "Selecciona una compatibilidad antes de añadir al carrito.";
+      setValidationMessage(msg);
+      toast.error(msg);
       return;
     }
 
     setValidationMessage("");
     addToCart(product, quantity, selectedSize, selectedColor);
+    toast.success("¡Producto añadido al carrito!");
   };
 
   const lowStockThreshold = 5;
@@ -394,8 +428,11 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
       if (cards.length <= 1) return;
       setActiveRelatedIndex((prev) => {
         const next = (prev + 1) % cards.length;
-        const target = cards[next] as HTMLElement;
-        target.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+        const cardWidth = (cards[0] as HTMLElement).offsetWidth + 12;
+        scroller.scrollTo({
+          left: next * cardWidth,
+          behavior: "smooth",
+        });
         return next;
       });
     }, 4500);
@@ -432,8 +469,12 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
     const scroller = relatedScrollerRef.current;
     if (!scroller) return;
     const cards = scroller.querySelectorAll("article");
-    if (!cards[index]) return;
-    (cards[index] as HTMLElement).scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+    if (cards.length === 0 || !cards[index]) return;
+    const cardWidth = (cards[0] as HTMLElement).offsetWidth + 12;
+    scroller.scrollTo({
+      left: index * cardWidth,
+      behavior: "smooth",
+    });
     setActiveRelatedIndex(index);
   };
 
@@ -471,8 +512,8 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
       </nav>
 
       <div className="max-w-7xl mx-auto pb-[calc(9rem+env(safe-area-inset-bottom))] md:pb-16">
-        {/* Mobile: imagen full-width sin padding lateral */}
-        <div className="md:hidden">
+        {/* Mobile: galería con espaciado recomendado y bordes pulidos */}
+        <div className="md:hidden px-4 pt-3 sm:px-6">
           <ImageGallery images={images} productName={product.name} />
         </div>
 
@@ -533,7 +574,8 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
             {/* Precio prominente */}
             <div className="flex items-baseline gap-3 py-1">
               <span className="text-4xl font-black text-[#0A2A66] dark:text-white tracking-tight">
-                {product.currency} {Number(product.price).toLocaleString("es-CO")}
+                ${Number(product.price).toLocaleString("es-CO")}{" "}
+                <span className="text-lg font-bold text-slate-400 dark:text-slate-500 uppercase">{product.currency}</span>
               </span>
             </div>
 
@@ -571,7 +613,10 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                         )}
 
                         {/* Reproductor de Video de Cloudinary */}
-                        {product.videoUrl && (
+                        {product.videoUrl && 
+                         product.videoUrl !== "null" && 
+                         product.videoUrl !== "undefined" && 
+                         product.videoUrl.trim() !== "" && (
                           <div className="pt-2 pb-1">
                              <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Video del producto</h2>
                              <VideoPlayer 
@@ -642,8 +687,8 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                       className={cn(
                         "px-3 h-10 rounded-xl text-sm font-semibold border-2 transition-all",
                         selectedColor === c
-                          ? "bg-[#2E5FA7] text-white border-[#2E5FA7] shadow-md"
-                          : "border-slate-200 dark:border-slate-700 hover:border-[#2E5FA7]"
+                          ? "bg-[#0A2A66] dark:bg-[#2E5FA7] text-white border-[#0A2A66] dark:border-[#2E5FA7] shadow-md"
+                          : "border-slate-200 dark:border-slate-700 hover:border-[#0A2A66] dark:hover:border-[#2E5FA7]"
                       )}
                     >
                       {c}
@@ -722,31 +767,51 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
             </div>
 
             {/* Ficha técnica */}
-            <div className="border-t border-slate-100 dark:border-slate-800 pt-4">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3">Información técnica</h2>
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+            <div className="border-t border-slate-100 dark:border-slate-800 pt-5">
+              <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-3.5">Ficha Técnica</h2>
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm bg-slate-50/50 dark:bg-slate-900/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-800/80">
                 <div>
-                  <dt className="text-xs text-slate-400 dark:text-slate-500">SKU</dt>
-                  <dd className="font-semibold text-slate-700 dark:text-slate-300 mt-0.5 break-all">{product.sku ?? String(product.id)}</dd>
+                  <dt className="text-xs text-slate-400 dark:text-slate-500 font-medium">Referencia / SKU</dt>
+                  <dd className="font-semibold text-slate-800 dark:text-slate-200 mt-1 flex items-center gap-1.5 select-all">
+                    <span className="break-all">
+                      {product.sku ?? `REF-${product.id.slice(0, 8).toUpperCase()}`}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopySku}
+                      title="Copiar referencia"
+                      className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5" />
+                      </svg>
+                    </button>
+                  </dd>
                 </div>
                 <div>
-                  <dt className="text-xs text-slate-400 dark:text-slate-500">Categoría</dt>
-                  <dd className="font-semibold text-slate-700 dark:text-slate-300 mt-0.5">{getProductCategoryLabel(product.category)}</dd>
+                  <dt className="text-xs text-slate-400 dark:text-slate-500 font-medium">Categoría</dt>
+                  <dd className="font-semibold text-slate-800 dark:text-slate-200 mt-1 capitalize">{getProductCategoryLabel(product.category)}</dd>
                 </div>
-                {product.tags && product.tags.length > 0 && (
-                  <div className="col-span-2">
-                    <dt className="text-xs text-slate-400 dark:text-slate-500 mb-1">Etiquetas</dt>
-                    <dd className="flex flex-wrap gap-1.5">
-                      {product.tags.map((tag) => (
-                        <span key={tag} className="inline-block px-2.5 py-0.5 rounded-full text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">{tag}</span>
-                      ))}
-                    </dd>
+                {product.brand && (
+                  <div>
+                    <dt className="text-xs text-slate-400 dark:text-slate-500 font-medium">Marca</dt>
+                    <dd className="font-semibold text-slate-800 dark:text-slate-200 mt-1">{product.brand}</dd>
                   </div>
                 )}
                 {product.diagramNumber && (
+                  <div>
+                    <dt className="text-xs text-slate-400 dark:text-slate-500 font-medium">N° en diagrama</dt>
+                    <dd className="font-semibold text-slate-800 dark:text-slate-200 mt-1">{product.diagramNumber}</dd>
+                  </div>
+                )}
+                {product.tags && product.tags.length > 0 && (
                   <div className="col-span-2">
-                    <dt className="text-xs text-slate-400 dark:text-slate-500">N° en diagrama</dt>
-                    <dd className="font-semibold text-slate-700 dark:text-slate-300 mt-0.5">{product.diagramNumber}</dd>
+                    <dt className="text-xs text-slate-400 dark:text-slate-500 font-medium mb-1.5">Etiquetas</dt>
+                    <dd className="flex flex-wrap gap-1.5">
+                      {product.tags.map((tag) => (
+                        <span key={tag} className="inline-block px-2.5 py-0.5 rounded-full text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium">{tag}</span>
+                      ))}
+                    </dd>
                   </div>
                 )}
               </dl>
@@ -969,7 +1034,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
           <ShoppingCartIcon className="w-5 h-5 shrink-0" />
           <span className="whitespace-nowrap">
             {product.stock > 0
-              ? `Añadir · ${product.currency} ${Number(product.price).toLocaleString("es-CO")}`
+              ? `Añadir · $${Number(product.price).toLocaleString("es-CO")}`
               : "Agotado"}
           </span>
         </button>

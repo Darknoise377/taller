@@ -1242,8 +1242,14 @@ return (
                
 {videoUrlForm && (
                                       <div className="mt-4 border border-slate-200 rounded-lg p-2 bg-slate-50 relative">
-                                         <video className="w-full max-h-48 object-cover rounded bg-black" controls controlsList="nodownload" playsInline>
-                                           <source src={normalizeVideoUrl(videoUrlForm)} type="video/mp4" />
+                                         <video 
+                                           key={videoUrlForm}
+                                           src={normalizeVideoUrl(videoUrlForm)}
+                                           className="w-full max-h-48 object-cover rounded bg-black" 
+                                           controls 
+                                           controlsList="nodownload" 
+                                           playsInline
+                                         >
                                            Tu navegador no soporta video.
                                          </video>
                                          <Button 

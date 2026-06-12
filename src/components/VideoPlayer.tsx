@@ -88,7 +88,9 @@ export function VideoPlayer({
       onClick={togglePlay}
     >
       <video
+        key={normalizedSrc}
         ref={videoRef}
+        src={normalizedSrc}
         poster={poster}
         className="w-full h-full object-cover bg-black"
         playsInline
@@ -98,7 +100,6 @@ export function VideoPlayer({
         preload="metadata"
         onError={(e) => console.error('Video error:', e.currentTarget.error)}
       >
-        <source src={normalizedSrc} type="video/mp4" />
         Tu navegador no soporta la reproducción de video.
       </video>
 
