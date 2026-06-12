@@ -52,6 +52,7 @@ const nextConfig: NextConfig = {
           "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
           "style-src 'self' 'unsafe-inline'",
           "img-src 'self' data: blob: https://res.cloudinary.com https://placehold.co https://picsum.photos",
+          "media-src 'self' https://res.cloudinary.com",
           "font-src 'self' data:",
           "connect-src 'self' https://res.cloudinary.com https://api.cloudinary.com",
           "frame-src 'self' https://checkout.payulatam.com https://sandbox.checkout.payulatam.com",
