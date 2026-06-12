@@ -484,151 +484,167 @@ export default function AdminProductsPage() {
   }, [aiImgResult, fileList.length]);
 
   // --- Definición de Columnas para la Tabla ---
-  const columns: ColumnsType<Product> = useMemo(() => [
-    {
-      title: 'Imagen',
-      dataIndex: 'imageUrl',
-      key: 'imageUrl',
-      render: (imageUrl: string, record) => (
-              <div 
-                style={{ cursor: 'pointer' }} 
-                onClick={() => openModal(record)}
-                title="Haga clic para editar"
-              >
-                <Image
-                  width={60}
-                  height={60}
-                  src={imageUrl || record.images?.[0]}
-                  alt={record.name}
-                  style={{ objectFit: 'cover', borderRadius: '4px' }}
-                  fallback="/placeholder.png" 
-                  preview={false} // Desactivamos el preview nativo para que el clic abra el modal
-                />
-              </div>
-            ),
-    },
-    {
-      title: 'Nombre',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: (a, b) => a.name.localeCompare(b.name),
-      render: (name: string, record) => (
-              <div 
-                style={{ cursor: 'pointer', padding: '4px 0' }} 
-                onClick={() => openModal(record)}
-                title="Haga clic para editar"
-                className="hover:opacity-75 transition-opacity"
-              >
-                <div style={{ fontWeight: 600, color: '#0A2A66' }}>{name}</div>
-                {record.brand && (
-                  <div style={{ fontSize: 12, color: '#8c8c8c', marginTop: 1 }}>{record.brand}</div>
-                )}
-                {record.sku && !record.brand && (
-                  <div style={{ fontSize: 12, color: '#bfbfbf', marginTop: 1, fontFamily: 'monospace' }}>{record.sku}</div>
-                )}
-              </div>
-            ),
-    },
-    {
-      title: 'Precio',
-      dataIndex: 'price',
-      key: 'price',
-      sorter: (a, b) => a.price - b.price,
-      render: (price: number, record) => formatCurrency(price, record.currency ?? 'COP'),
-    },
-    {
-      title: 'Categoría',
-      dataIndex: 'category',
-      key: 'category',
-      render: (category: string) => <Tag color="blue">{getProductCategoryLabel(category)}</Tag>,
-    },
-    {
-      title: 'SKU',
-      dataIndex: 'sku',
-      key: 'sku',
-      render: (sku: string) => sku ? <span className="font-mono">{sku}</span> : null,
-    },
-    {
-      title: 'Etiquetas',
-      dataIndex: 'tags',
-      key: 'tags',
-      render: (tags: string[]) => (
-        <>
-          {tags?.map((t) => <Tag key={t}>{t}</Tag>)}
-        </>
-      ),
-    },
-    {
-      title: 'Stock',
-      dataIndex: 'stock',
-      key: 'stock',
-      sorter: (a, b) => (a.stock ?? 0) - (b.stock ?? 0),
-      render: (stock: number) => {
-        const s = stock ?? 0;
-        const color = s === 0 ? '#cf1322' : s <= 5 ? '#d46b08' : '#389e0d';
-        const bg    = s === 0 ? '#fff1f0' : s <= 5 ? '#fff7e6' : '#f6ffed';
-        const border = s === 0 ? '#ffa39e' : s <= 5 ? '#ffd591' : '#b7eb8f';
-        return (
-          <span style={{ background: bg, color, border: `1px solid ${border}`, borderRadius: 12, padding: '2px 10px', fontWeight: 600, fontSize: 13 }}>
-            {s}
-          </span>
-        );
-      },
-    },
-     {
-      title: 'Medidas/Compatibilidad',
-      dataIndex: 'sizes',
-      key: 'sizes',
-      render: (sizes: string[]) => (
-        <>
-          {sizes?.map((size) => <Tag key={size}>{size.toUpperCase()}</Tag>)}
-        </>
-      ),
-    },
-    {
-      title: 'MeLi',
-      key: 'meliExport',
-      align: 'center',
-      render: (_, record) => (
-        <Tooltip title={record.meliExport ? 'Exportar a MeLi: ON' : 'Exportar a MeLi: OFF'}>
-          <Tag
-            color={record.meliExport ? 'green' : 'default'}
-            style={{ cursor: 'pointer' }}
-            onClick={async () => {
-              try {
-                await productService.updateProduct(record.id, { meliExport: !record.meliExport });
-                await fetchProducts();
-              } catch { message.error('Error al actualizar'); }
-            }}
-          >
-            {record.meliExport ? 'ON' : 'OFF'}
-          </Tag>
-        </Tooltip>
-      ),
-    },
-    {
-      title: 'Acciones',
-      key: 'actions',
-      align: 'center',
-      render: (_, record) => (
-        <Space size="middle">
-          <Button
-            type="text"
-            icon={<EditOutlined />}
+  // Renderizador inteligente de etiquetas (oculta excesos)
+    const renderTags = (items: string[] | undefined, color: string = 'default') => {
+      if (!items || items.length === 0) return null;
+      const MAX_VISIBLE = 2;
+      const visible = items.slice(0, MAX_VISIBLE);
+      const hidden = items.slice(MAX_VISIBLE);
+
+      return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+          {visible.map((t) => <Tag key={t} color={color} style={{ margin: 0, fontSize: '11px' }}>{t.toUpperCase()}</Tag>)}
+          {hidden.length > 0 && (
+            <Tooltip title={<div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', maxWidth: '200px' }}>{hidden.map(t => <Tag key={t} color={color} style={{ margin: 0 }}>{t}</Tag>)}</div>}>
+              <Tag style={{ margin: 0, fontSize: '11px', cursor: 'help' }}>+{hidden.length} más</Tag>
+            </Tooltip>
+          )}
+        </div>
+      );
+    };
+
+    const columns: ColumnsType<Product> = useMemo(() => [
+      {
+        title: 'Producto',
+        key: 'product',
+        sorter: (a, b) => a.name.localeCompare(b.name),
+        render: (_, record) => (
+          <div 
+            style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer', maxWidth: '400px' }} 
             onClick={() => openModal(record)}
-          />
-          <Popconfirm
-            title="¿Estás seguro de eliminar este producto?"
-            onConfirm={() => handleDeleteProduct(record.id)}
-            okText="Sí, eliminar"
-            cancelText="No"
+            title="Haga clic para editar"
+            className="hover:bg-slate-50 transition-colors p-1 -m-1 rounded-lg"
           >
-            <Button type="text" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ], [handleDeleteProduct, openModal, fetchProducts]);
+            <div style={{ flexShrink: 0, position: 'relative' }}>
+              <Image
+                width={56}
+                height={56}
+                src={record.imageUrl || record.images?.[0]}
+                alt={record.name}
+                style={{ objectFit: 'cover', borderRadius: '8px', border: '1px solid #f0f0f0' }}
+                fallback="/placeholder.png" 
+                preview={false}
+              />
+              {record.videoUrl && (
+                <div style={{ position: 'absolute', top: -4, right: -4, background: '#1890ff', color: 'white', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                  ▶
+                </div>
+              )}
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontWeight: 600, color: '#0A2A66', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {record.name}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                <Tag color="blue" style={{ margin: 0, fontSize: '10px', lineHeight: '18px', padding: '0 6px' }}>
+                  {getProductCategoryLabel(record.category)}
+                </Tag>
+                {(record.sku || record.brand) && (
+                  <span style={{ fontSize: '11px', color: '#8c8c8c', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {record.brand ? <strong style={{color: '#595959'}}>{record.brand}</strong> : ''}
+                    {record.brand && record.sku ? ' · ' : ''}
+                    {record.sku ? <span style={{fontFamily: 'monospace'}}>{record.sku}</span> : ''}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        ),
+      },
+      {
+        title: 'Precio',
+        dataIndex: 'price',
+        key: 'price',
+        sorter: (a, b) => a.price - b.price,
+        render: (price: number, record) => (
+          <span style={{ fontWeight: 600, color: '#262626' }}>
+            {formatCurrency(price, record.currency ?? 'COP')}
+          </span>
+        ),
+      },
+      {
+        title: 'Stock',
+        dataIndex: 'stock',
+        key: 'stock',
+        sorter: (a, b) => (a.stock ?? 0) - (b.stock ?? 0),
+        render: (stock: number) => {
+          const s = stock ?? 0;
+          const color = s === 0 ? '#cf1322' : s <= 5 ? '#d46b08' : '#389e0d';
+          const bg    = s === 0 ? '#fff1f0' : s <= 5 ? '#fff7e6' : '#f6ffed';
+          const border = s === 0 ? '#ffa39e' : s <= 5 ? '#ffd591' : '#b7eb8f';
+          return (
+            <span style={{ background: bg, color, border: `1px solid ${border}`, borderRadius: 12, padding: '2px 10px', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>
+              {s === 0 ? 'Agotado' : s}
+            </span>
+          );
+        },
+      },
+      {
+        title: 'Compatibilidad & Etiquetas',
+        key: 'tags_sizes',
+        responsive: ['lg'], // Oculto en tablets/celulares
+        width: '25%',
+        render: (_, record) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {renderTags(record.sizes, 'processing')}
+            {renderTags(record.tags, 'default')}
+          </div>
+        ),
+      },
+      {
+        title: 'MeLi',
+        key: 'meliExport',
+        align: 'center',
+        responsive: ['md'],
+        render: (_, record) => (
+          <Tooltip title={record.meliExport ? 'Exportar a MeLi: ON' : 'Exportar a MeLi: OFF'}>
+            <Tag
+              color={record.meliExport ? 'green' : 'default'}
+              style={{ cursor: 'pointer', margin: 0, padding: '2px 8px' }}
+              onClick={async (e) => {
+                e.stopPropagation(); // Evita abrir el modal de edición
+                try {
+                  await productService.updateProduct(record.id, { meliExport: !record.meliExport });
+                  await fetchProducts();
+                  message.success(`MercadoLibre ${!record.meliExport ? 'activado' : 'desactivado'} para ${record.name}`);
+                } catch { message.error('Error al actualizar'); }
+              }}
+            >
+              {record.meliExport ? 'ON' : 'OFF'}
+            </Tag>
+          </Tooltip>
+        ),
+      },
+      {
+        title: 'Acciones',
+        key: 'actions',
+        align: 'center',
+        render: (_, record) => (
+          <Space size="small">
+            <Button
+              type="text"
+              icon={<EditOutlined style={{ color: '#0A2A66' }} />}
+              onClick={() => openModal(record)}
+            />
+            <Popconfirm
+              title="¿Eliminar producto?"
+              description="Esta acción no se puede deshacer."
+              onConfirm={(e) => { e?.stopPropagation(); handleDeleteProduct(record.id); }}
+              onCancel={(e) => e?.stopPropagation()}
+              okText="Sí, eliminar"
+              cancelText="Cancelar"
+            >
+              <Button 
+                 type="text" 
+                 danger 
+                 icon={<DeleteOutlined />} 
+                 onClick={(e) => e.stopPropagation()} 
+              />
+            </Popconfirm>
+          </Space>
+        ),
+      },
+    ], [handleDeleteProduct, openModal, fetchProducts]);
 
   // --- Renderizado del Componente ---
 return (
