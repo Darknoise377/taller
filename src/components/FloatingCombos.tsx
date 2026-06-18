@@ -61,33 +61,44 @@ export default function FloatingCombos({
       };
     }, []);
 
-    // Efecto adicional para intentar auto-detectar librerías de chat de IA comunes si no usan el evento
+// Debounced chat observer for performance
     useEffect(() => {
-      // Observador para chats que inyectan iframes o divs globales (ej: Intercom, Zendesk, o tu IA)
+      let rafId = 0;
+      let lastCheck = 0;
+
       const checkChatOpened = () => {
+        const now = Date.now();
+        if (now - lastCheck < 250) return;
+        lastCheck = now;
+
         const chatElements = document.querySelectorAll('[id*="chat"], [class*="chat-window"], [class*="ai-assistant"], iframe[title*="chat"]');
         let isChatVisible = false;
-      
+
         chatElements.forEach(el => {
           const style = window.getComputedStyle(el);
           if (style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0') {
-            // Solo consideramos ventanas abiertas, no el botoncito cerrado
             if (el.clientHeight > 150 || el.clientWidth > 150) {
-               isChatVisible = true;
+              isChatVisible = true;
             }
           }
         });
-      
-        if (isChatVisible !== aiChatOpen) {
-          setAiChatOpen(isChatVisible);
-        }
+
+        setAiChatOpen(prev => prev === isChatVisible ? prev : isChatVisible);
       };
 
-      const observer = new MutationObserver(() => checkChatOpened());
-      observer.observe(document.body, { childList: true, subtree: true, attributes: true });
-    
-      return () => observer.disconnect();
-    }, [aiChatOpen]);
+      const debouncedCheck = () => {
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(checkChatOpened);
+      };
+
+      const observer = new MutationObserver(debouncedCheck);
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      return () => {
+        observer.disconnect();
+        cancelAnimationFrame(rafId);
+      };
+    }, []);
 
   useEffect(() => {
     let cancelled = false;

@@ -6,6 +6,16 @@ const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === 'tr
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // Compression y optimización
+  compress: true,
+  productionBrowserSourceMaps: false,
+
+  // Optimización de Turbopack
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@heroicons/react', '@ant-design/icons', 'antd', 'framer-motion', 'dayjs'],
+    reactCompiler: false,
+  },
+
   // Packages used only on the server — Turbopack/webpack must not bundle them
   serverExternalPackages: ['resend', 'svix', 'postal-mime'],
 
@@ -23,12 +33,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'res.cloudinary.com', // Cloudinary
+        hostname: 'res.cloudinary.com',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'picsum.photos', // opcional: imágenes de prueba
+        hostname: 'picsum.photos',
         pathname: '/**',
       },
     ],
@@ -74,11 +84,31 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/(.*)',
-        headers: securityHeaders,
+        headers: [
+          ...securityHeaders,
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+        ],
+      },
+      {
+        source: '/images/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/:path*.webp',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/:path*.avif',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
       },
     ];
   },
 };
 
 export default withBundleAnalyzer(nextConfig);
-

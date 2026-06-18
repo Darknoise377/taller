@@ -829,3 +829,19 @@ body {
   .seasonal-love-title,
   .seasonal-blackweek-title { font-size: 12px; }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .seasonal-art-blob,
+  .seasonal-confetti,
+  .seasonal-snow,
+  .seasonal-streamer,
+  .seasonal-heart,
+  .seasonal-bat,
+  .seasonal-ghost,
+  .seasonal-gift,
+  .seasonal-lantern,
+  .seasonal-ball,
+  .seasonal-cup {
+    animation: none !important;
+  }
+}
