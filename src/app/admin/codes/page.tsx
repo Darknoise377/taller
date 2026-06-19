@@ -6,6 +6,7 @@ import * as codeService from '@/services/codeService';
 import { toast } from 'sonner';
 import { Pencil, Trash2, X } from 'lucide-react';
 import { PRODUCT_CATEGORY_OPTIONS } from '@/constants/productCategories';
+import { Select } from 'antd';
 
 const initialSellerState = { name: '', code: '' };
 const initialPromoState = {
@@ -17,9 +18,15 @@ const initialPromoState = {
   targetProductIds: [] as string[],
 };
 
+function getErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return 'Ocurrió un error inesperado';
+}
+
 export default function AdminCodesPage() {
   const [sellers, setSellers] = useState<Seller[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [products, setProducts] = useState<Array<{ id: string; name: string }>>([]);
   const [newSeller, setNewSeller] = useState(initialSellerState);
   const [newPromo, setNewPromo] = useState(initialPromoState);
   const [editingSeller, setEditingSeller] = useState<Seller | null>(null);
@@ -27,11 +34,6 @@ export default function AdminCodesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<{ type: 'seller' | 'promo'; id: string; name: string } | null>(null);
-
-  const getErrorMessage = (err: unknown): string => {
-    if (err instanceof Error) return err.message;
-    return 'Ocurrió un error inesperado';
-  };
 
   const loadData = useCallback(async () => {
     try {
@@ -47,9 +49,22 @@ export default function AdminCodesPage() {
     }
   }, []);
 
+  const loadProducts = useCallback(async () => {
+    try {
+      const r = await fetch('/api/products?all=true&limit=500');
+      if (!r.ok) return;
+      const data = await r.json();
+      const list = Array.isArray(data) ? data : data.items ?? [];
+      setProducts(list.map((p: { id: string; name: string }) => ({ id: p.id, name: p.name })));
+    } catch {
+      // non-critical
+    }
+  }, []);
+
   useEffect(() => {
     void loadData();
-  }, [loadData]);
+    loadProducts();
+  }, [loadData, loadProducts]);
 
   // --- Sellers ---
   const handleSellerChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -200,7 +215,7 @@ export default function AdminCodesPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 max-w-5xl">
-      <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-slate-100">Administrar Códigos</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-slate-100">Códigos y Promociones</h1>
 
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-xl mb-4" role="alert">
@@ -220,7 +235,7 @@ export default function AdminCodesPage() {
                 {editingSeller ? 'Editar Vendedor' : 'Crear Vendedor'}
               </h3>
               {editingSeller && (
-                <button type="button" onClick={cancelEdit} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300">
+                <button type="button" onClick={cancelEdit} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300" aria-label="Cancelar edición">
                   <X size={18} />
                 </button>
               )}
@@ -272,7 +287,7 @@ export default function AdminCodesPage() {
                 {editingPromo ? 'Editar Promoción' : 'Crear Promoción'}
               </h3>
               {editingPromo && (
-                <button type="button" onClick={cancelEdit} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300">
+                <button type="button" onClick={cancelEdit} className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-300" aria-label="Cancelar edición">
                   <X size={18} />
                 </button>
               )}
@@ -340,27 +355,23 @@ export default function AdminCodesPage() {
               </div>
             )}
 
-            {newPromo.appliesTo === 'PRODUCT' && (
+{newPromo.appliesTo === 'PRODUCT' && (
               <div>
-                <label className={labelClass}>IDs de productos (uno por línea)</label>
-                <textarea
-                  rows={3}
-                  placeholder="Pega aquí los IDs de los productos, uno por línea"
-                  value={newPromo.targetProductIds.join('\n')}
-                  onChange={(e) =>
-                    setNewPromo((p) => ({
-                      ...p,
-                      targetProductIds: e.target.value
-                        .split('\n')
-                        .map((s) => s.trim())
-                        .filter(Boolean),
-                    }))
-                  }
-                  className={inputClass}
+                <label className={labelClass}>Productos (selecciona uno o más)</label>
+                <Select
+                  mode="multiple"
+                  showSearch
+                  placeholder="Buscar productos..."
+                  optionFilterProp="label"
+                  value={newPromo.targetProductIds}
+                  onChange={(values: string[]) => setNewPromo((p) => ({ ...p, targetProductIds: values }))}
+                  options={products.map((p) => ({ value: p.id, label: p.name }))}
+                  style={{ width: '100%', marginTop: 4 }}
+                  maxTagCount="responsive"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Puedes copiar los IDs desde la página de Productos del admin.
-                </p>
+                {newPromo.targetProductIds.length === 0 && (
+                  <p className="text-xs text-amber-600 mt-1">Selecciona al menos un producto</p>
+                )}
               </div>
             )}
 

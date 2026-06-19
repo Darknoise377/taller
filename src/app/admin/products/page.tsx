@@ -209,11 +209,26 @@ export default function AdminProductsPage() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+useEffect(() => {
+     fetchProducts();
+   }, [fetchProducts]);
 
-  // --- Manejadores de Eventos (Handlers) ---
+   // Reset form when modal closes
+   useEffect(() => {
+     if (!modalOpen) {
+       setEditingProduct(null);
+       setFileList([]);
+       setVideoUrlForm('');
+       setAiImgOpen(false);
+       setAiImgPrompt('');
+       setAiImgResult(null);
+       setSkuLookupRef('');
+       setLookupResult(null);
+       form.resetFields();
+     }
+   }, [modalOpen, form]);
+
+   // --- Manejadores de Eventos (Handlers) ---
 
   const handleSaveProduct = async () => {
     try {
@@ -748,23 +763,24 @@ return (
       </Spin>
     </Card>
 
-    <Modal
-      open={modalOpen}
-      title={
-        <Space>
-          {editingProduct ? <EditOutlined style={{ color: '#0A2A66' }} /> : <PlusOutlined style={{ color: '#0A2A66' }} />}
-          <span>{editingProduct ? 'Editar Producto' : 'Crear Nuevo Producto'}</span>
-        </Space>
-      }
-      onCancel={() => setModalOpen(false)}
-      onOk={handleSaveProduct}
-      confirmLoading={isSaving}
-      okText={isSaving ? 'Guardando...' : 'Guardar producto'}
-      cancelText="Cancelar"
-      width="min(820px, 95vw)"
-      forceRender
-      styles={{ body: { maxHeight: '78vh', overflowY: 'auto', paddingRight: 4 } }}
-    >
+<Modal
+       open={modalOpen}
+       title={
+         <Space>
+           {editingProduct ? <EditOutlined style={{ color: '#0A2A66' }} /> : <PlusOutlined style={{ color: '#0A2A66' }} />}
+           <span>{editingProduct ? 'Editar Producto' : 'Crear Nuevo Producto'}</span>
+         </Space>
+       }
+       onCancel={() => setModalOpen(false)}
+       onOk={handleSaveProduct}
+       confirmLoading={isSaving}
+       okText={isSaving ? 'Guardando...' : 'Guardar producto'}
+       cancelText="Cancelar"
+       width="min(820px, 95vw)"
+       forceRender
+       destroyOnClose
+       styles={{ body: { maxHeight: '78vh', overflowY: 'auto', paddingRight: 4 } }}
+     >
       <Form
         layout="vertical"
         form={form}

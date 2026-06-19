@@ -1,10 +1,9 @@
-// src/app/products/[id]/ProductDetailClient.tsx
-
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Tag } from 'antd';
 import {
   ShoppingCartIcon,
   CheckCircleIcon,
@@ -27,6 +26,8 @@ import ProductReviews from "@/components/ProductReviews";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { BLUR_DATA_URL } from "@/lib/placeholder";
 import FloatingCombos from '@/components/FloatingCombos';
+import { FlashSale } from '@/types/flash-sale';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 // --- Prop Interfaces ---
 interface ProductDetailClientProps {
@@ -342,12 +343,40 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
   const resumeTimeoutRef = useRef<number | null>(null);
   const isUserInteractingRef = useRef(false);
   const [recentlyViewed, setRecentlyViewed] = useState<{ id: string; name: string; imageUrl: string; price: number; currency: string }[]>([]);
+  const [flashSale, setFlashSale] = useState<FlashSale | null>(null);
 
   const images = useMemo(() => 
     product.images && product.images.length > 0 ? product.images : [product.imageUrl || "/placeholder.png"],
     [product.images, product.imageUrl]
   );
-  
+
+  // Cargar oferta flash activa para este producto
+  useEffect(() => {
+    fetch('/api/flash-sales')
+      .then(r => r.ok ? r.json() : [])
+      .then((sales: FlashSale[]) => {
+        const now = new Date();
+        const activeSale = sales.find(s => {
+          const start = new Date(s.startTime);
+          const end = s.endTime ? new Date(s.endTime) : null;
+          const inRange = start <= now && (!end || end >= now);
+          if (!inRange) return false;
+          if (s.appliesTo === 'ALL') return true;
+          if (s.appliesTo === 'CATEGORY' && s.targetCategories.includes(product.category)) return true;
+          if (s.appliesTo === 'PRODUCT' && s.targetProductIds.includes(product.id)) return true;
+          return false;
+        });
+        setFlashSale(activeSale || null);
+      })
+      .catch(() => {});
+  }, [product.id, product.category]);
+
+  // Calcular precio tachado: Precio Tachado = Precio Actual / (1 - Descuento)
+  const originalPrice = useMemo(() => {
+    if (!flashSale) return null;
+    return Math.ceil(product.price / (1 - flashSale.discount / 100));
+  }, [flashSale, product.price]);
+
   const handleCopySku = () => {
     const textToCopy = product.sku || product.id;
     navigator.clipboard.writeText(textToCopy);
@@ -573,10 +602,23 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
 
             {/* Precio prominente */}
             <div className="flex items-baseline gap-3 py-1">
-              <span className="text-4xl font-black text-[#0A2A66] dark:text-white tracking-tight">
-                ${Number(product.price).toLocaleString("es-CO")}{" "}
-                <span className="text-lg font-bold text-slate-400 dark:text-slate-500 uppercase">{product.currency}</span>
-              </span>
+              {flashSale && originalPrice ? (
+                <>
+                  <Tag color="red" className="text-sm font-bold px-2 py-0.5">
+                    -{flashSale.discount}%
+                  </Tag>
+                  <span className="text-lg text-slate-400 dark:text-slate-500 line-through">
+                    {formatCurrency(originalPrice, product.currency)}
+                  </span>
+                  <span className="text-4xl font-black text-[#0A2A66] dark:text-white tracking-tight">
+                    {formatCurrency(product.price, product.currency)}
+                  </span>
+                </>
+              ) : (
+                <span className="text-4xl font-black text-[#0A2A66] dark:text-white tracking-tight">
+                  {formatCurrency(product.price, product.currency)}
+                </span>
+              )}
             </div>
 
             {/* Badge de stock */}

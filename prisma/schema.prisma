@@ -518,3 +518,27 @@ model PageView {
   @@index([path])
   @@index([createdAt])
 }
+
+// ============================================================
+// ⚡ FLASH SALES - Ofertas por Tiempo Limitado (Descuentos Automáticos)
+// ============================================================
+
+model FlashSale {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  discount    Float
+  startTime   DateTime
+  endTime     DateTime?
+  isActive    Boolean  @default(true)
+
+  // Targeting: "ALL" | "CATEGORY" | "PRODUCT"
+  appliesTo   String   @default("ALL")
+  targetCategories String[] @default([])
+  targetProductIds String[] @default([])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive, startTime, endTime])
+}
