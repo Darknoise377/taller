@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 const APP_ID = process.env.META_APP_ID;
-const REDIRECT_URI = `${process.env.NEXT_PUBLIC_APP_URL}/api/meta/oauth/callback`;
+const REDIRECT_URI = `${process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL}/api/meta/oauth/callback`;
 const SCOPES = [
   'pages_manage_posts',
   'pages_read_engagement',

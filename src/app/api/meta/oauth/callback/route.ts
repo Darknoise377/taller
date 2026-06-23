@@ -6,6 +6,8 @@ import {
   fetchInstagramAccountId,
 } from '@/lib/meta/graphApi';
 
+const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL;
+
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const code = url.searchParams.get('code');
@@ -15,7 +17,7 @@ export async function GET(req: Request) {
   if (error) {
     const errorDesc = url.searchParams.get('error_description') || 'OAuth error';
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/admin/settings?meta_error=${encodeURIComponent(errorDesc)}`
+      `${APP_URL}/admin/settings?meta_error=${encodeURIComponent(errorDesc)}`
     );
   }
 
@@ -48,7 +50,7 @@ export async function GET(req: Request) {
   const params = new URLSearchParams({
     client_id: APP_ID,
     client_secret: APP_SECRET,
-    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/meta/oauth/callback`,
+    redirect_uri: `${APP_URL}/api/meta/oauth/callback`,
     code,
   });
 
@@ -60,7 +62,7 @@ export async function GET(req: Request) {
     const errorText = await tokenRes.text();
     console.error('OAuth token error:', errorText);
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/admin/settings?meta_error=token_exchange_failed`
+      `${APP_URL}/admin/settings?meta_error=token_exchange_failed`
     );
   }
 
@@ -70,14 +72,14 @@ export async function GET(req: Request) {
   const longLived = await exchangeForLongLivedToken(shortLivedToken);
   if (!longLived) {
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/admin/settings?meta_error=long_lived_exchange_failed`
+      `${APP_URL}/admin/settings?meta_error=long_lived_exchange_failed`
     );
   }
 
   const pages = await fetchPageTokens(longLived.accessToken);
   if (!pages || pages.length === 0) {
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/admin/settings?meta_error=no_pages_found`
+      `${APP_URL}/admin/settings?meta_error=no_pages_found`
     );
   }
 
@@ -108,6 +110,6 @@ export async function GET(req: Request) {
   });
 
   return NextResponse.redirect(
-    `${process.env.NEXT_PUBLIC_APP_URL}/admin/settings?meta_success=connected`
+    `${APP_URL}/admin/meta?meta_success=connected`
   );
 }
