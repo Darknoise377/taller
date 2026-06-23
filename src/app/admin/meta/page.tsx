@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  Button, Card, Divider, Form, Input, message, Popconfirm, Spin, Table, Tag, Typography, Select,
+  Button, Card, Divider, Form, Input, message, Popconfirm, Spin, Table, Tag, Typography, Select, Modal,
 } from 'antd';
 import {
   ApiOutlined, CheckCircleOutlined, CloseCircleOutlined, DisconnectOutlined, ReloadOutlined,
@@ -41,7 +41,9 @@ export default function AdminMetaPage() {
   const [posts, setPosts] = useState<SocialPostRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [manualModal, setManualModal] = useState(false);
   const [form] = Form.useForm<{ productId: string; caption: string; platform: string }>();
+  const [manualForm] = Form.useForm<{ pageAccessToken: string; pageId: string; instagramAccountId?: string }>();
 
   const loadStatus = useCallback(async () => {
     try {
@@ -78,6 +80,30 @@ export default function AdminMetaPage() {
 
   const handleConnect = () => {
     window.location.href = '/api/meta/oauth/login?storeId=default';
+  };
+
+  const handleManualConnect = async (values: { pageAccessToken: string; pageId: string; instagramAccountId?: string }) => {
+    try {
+      const res = await fetch('/api/meta/oauth/manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          storeId: 'default',
+          ...values,
+          expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        }),
+      });
+      if (res.ok) {
+        message.success('Conexión guardada');
+        setManualModal(false);
+        loadStatus();
+      } else {
+        const err = await res.json();
+        message.error(err.error || 'Error al guardar');
+      }
+    } catch {
+      message.error('Error al guardar conexión');
+    }
   };
 
   const handleDisconnect = async () => {
@@ -214,7 +240,8 @@ export default function AdminMetaPage() {
               {status.pageId && <Text>Página: {status.pageId}</Text>}
               {status.hasInstagram && <Text> · Instagram: Sí</Text>}
             </div>
-            <div className="ml-auto">
+            <div className="ml-auto flex gap-2">
+              <Button onClick={() => setManualModal(true)}>Editar tokens</Button>
               <Popconfirm
                 title="¿Desconectar cuenta de Meta?"
                 description="Se eliminarán los tokens guardados."
@@ -233,12 +260,52 @@ export default function AdminMetaPage() {
               <Text type="danger">No conectado</Text>
             </div>
             <Text type="secondary">Conecta para publicar productos en Facebook e Instagram.</Text>
-            <Button type="primary" className="ml-auto" icon={<ApiOutlined />} onClick={handleConnect}>
-              Conectar con Meta
-            </Button>
+            <div className="ml-auto flex gap-2">
+              <Button onClick={() => setManualModal(true)}>Conexión manual</Button>
+              <Button type="primary" icon={<ApiOutlined />} onClick={handleConnect}>
+                Conectar con Meta
+              </Button>
+            </div>
           </div>
         )}
       </Card>
+
+      <Modal
+        title="Conexión manual con Meta"
+        open={manualModal}
+        onCancel={() => setManualModal(false)}
+        footer={null}
+      >
+        <Form
+          form={manualForm}
+          layout="vertical"
+          onFinish={handleManualConnect}
+        >
+          <Form.Item
+            name="pageAccessToken"
+            label="Page Access Token"
+            rules={[{ required: true }]}
+          >
+            <Input.TextArea rows={2} placeholder="Token de página infinito" />
+          </Form.Item>
+          <Form.Item
+            name="pageId"
+            label="Page ID"
+            rules={[{ required: true }]}
+          >
+            <Input placeholder="ID de la página" />
+          </Form.Item>
+          <Form.Item
+            name="instagramAccountId"
+            label="Instagram Account ID (opcional)"
+          >
+            <Input placeholder="ID de cuenta de Instagram Business" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">Guardar</Button>
+          </Form.Item>
+        </Form>
+      </Modal>
 
       <Card title="Publicar producto" className="mt-6">
         <Form
