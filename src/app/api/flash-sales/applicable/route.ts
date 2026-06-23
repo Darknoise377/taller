@@ -9,32 +9,21 @@ export async function GET(req: NextRequest) {
   const now = new Date();
 
   // Construir filtro base para ofertas activas
-  const baseWhere: {
-    isActive: boolean;
-    startTime: { lte: Date };
-    OR: Array<{ endTime: null } | { endTime: { gte: Date } }>;
-  } = {
+  const baseWhere = {
     isActive: true,
     startTime: { lte: now },
     OR: [{ endTime: null }, { endTime: { gte: now } }],
   };
 
   if (productId && category) {
-    // Buscar ofertas que apliquen a este producto o categoría
+    // Obtener todas las ofertas activas y filtrar en JS para soportar FIXED_PRICE
     const sales = await prisma.flashSale.findMany({
       where: {
         ...baseWhere,
         OR: [
           { appliesTo: 'ALL' },
           { appliesTo: 'CATEGORY', targetCategories: { has: category } },
-          // PRODUCT: incluye FIXED_PRICE (busca en products relación) y PRODUCT común
-          {
-            appliesTo: 'PRODUCT',
-            OR: [
-              { targetProductIds: { has: productId } },
-              { products: { some: { productId } } },
-            ],
-          },
+          { appliesTo: 'PRODUCT' },
         ],
       },
       select: {

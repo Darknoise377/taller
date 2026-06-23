@@ -359,18 +359,25 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
    }, [product.id, product.category]);
 
 // Calcular precios según tipo de oferta
-  const { displayPrice, originalPrice } = useMemo(() => {
-    if (!flashSale) return { displayPrice: product.price, originalPrice: null };
+   const { displayPrice, originalPrice } = useMemo(() => {
+     if (!flashSale) return { displayPrice: product.price, originalPrice: null };
 
-    const result = calculateDisplayPrices({
-      basePrice: product.price,
-      discountPercentage: flashSale.discount,
-      mode: flashSale.mode,
-      targetPrice: flashSale.targetPrice,
-    });
+     // Para FIXED_PRICE, buscar el targetPrice específico del producto
+     let targetPrice = flashSale.targetPrice;
+     if (!targetPrice && flashSale.products?.length) {
+       const fpMatch = flashSale.products.find(p => p.productId === product.id);
+       if (fpMatch) targetPrice = fpMatch.targetPrice;
+     }
 
-    return { displayPrice: result.displayPrice, originalPrice: result.originalPrice };
-  }, [flashSale, product.price]);
+     const result = calculateDisplayPrices({
+       basePrice: product.price,
+       discountPercentage: flashSale.discount,
+       mode: flashSale.mode,
+       targetPrice: targetPrice,
+     });
+
+     return { displayPrice: result.displayPrice, originalPrice: result.originalPrice };
+   }, [flashSale, product.price, product.id]);
 
   const handleCopySku = () => {
     const textToCopy = product.sku || product.id;
