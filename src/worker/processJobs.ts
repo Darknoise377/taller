@@ -1,9 +1,14 @@
 /* Worker: poll jobs from DB and process them.
-   Run locally with: `npx ts-node src/worker/processJobs.ts` or compile to JS.
+    Run locally with: `npm run ai:worker`
 */
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import sendToAI from '@/lib/ai';
+import {
+  publishToFacebook,
+  createInstagramMediaContainer,
+  publishInstagramContainer,
+} from '@/lib/meta/graphApi';
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_API_TOKEN;
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
@@ -73,12 +78,89 @@ async function processOne() {
       await sendWhatsAppText(sender, aiReply);
     }
 
+    if (job.type === 'social_publish') {
+      const p = (payload && typeof payload === 'object') ? payload as Record<string, unknown> : {};
+      const socialPostId = typeof p.socialPostId === 'string' ? p.socialPostId : '';
+      const pageAccessToken = typeof p.pageAccessToken === 'string' ? p.pageAccessToken : '';
+      const pageId = typeof p.pageId === 'string' ? p.pageId : '';
+      const instagramAccountId = p.instagramAccountId ? String(p.instagramAccountId) : undefined;
+      const mediaUrl = typeof p.mediaUrl === 'string' ? p.mediaUrl : '';
+      const caption = typeof p.caption === 'string' ? p.caption : '';
+      const platform = typeof p.platform === 'string' ? p.platform : 'BOTH';
+
+      if (!socialPostId || !pageAccessToken || !pageId || !mediaUrl) {
+        throw new Error('Payload incompleto para publicación social');
+      }
+
+      const results: { facebookId?: string; instagramId?: string } = {};
+
+      if (platform === 'FACEBOOK' || platform === 'BOTH') {
+        const fbPostId = await publishToFacebook(pageAccessToken, pageId, mediaUrl, caption);
+        if (fbPostId) {
+          results.facebookId = fbPostId;
+        } else {
+          throw new Error('Error publicando en Facebook');
+        }
+      }
+
+      if ((platform === 'INSTAGRAM' || platform === 'BOTH') && instagramAccountId) {
+        const containerId = await createInstagramMediaContainer(pageAccessToken, instagramAccountId, mediaUrl, caption);
+        if (!containerId) {
+          throw new Error('Error creando contenedor de Instagram');
+        }
+        const igPostId = await publishInstagramContainer(pageAccessToken, instagramAccountId, containerId);
+        if (igPostId) {
+          results.instagramId = igPostId;
+        } else {
+          throw new Error('Error publicando en Instagram');
+        }
+      }
+
+      const metaPostId = results.facebookId || results.instagramId || undefined;
+      await prisma.socialPost.update({
+        where: { id: socialPostId },
+        data: {
+          status: 'PUBLISHED',
+          metaPostId,
+        },
+      });
+    }
+
     await prisma.job.update({ where: { id: job.id }, data: { status: 'COMPLETED', processedAt: new Date() } });
     return true;
   } catch (err) {
     console.error('Job processing failed:', err);
+    const errStr = err instanceof Error ? err.message : String(err);
+
+    const payload = job.payload as unknown;
+    const socialPostId = typeof (payload as Record<string, unknown>)?.socialPostId === 'string'
+      ? ((payload as Record<string, unknown>).socialPostId as string)
+      : undefined;
+
+    if (socialPostId) {
+      await prisma.socialPost.update({
+        where: { id: socialPostId },
+        data: {
+          status: 'FAILED',
+          errorMessage: errStr,
+        },
+      });
+    }
+
+    if (errStr.includes('OAuthException') || errStr.includes('(#190)')) {
+      const storeId = typeof (payload as Record<string, unknown>)?.storeId === 'string'
+        ? ((payload as Record<string, unknown>).storeId as string)
+        : undefined;
+      if (storeId) {
+        await prisma.metaToken.updateMany({
+          where: { storeId },
+          data: { isValid: false },
+        });
+      }
+    }
+
     await prisma.job.update({ where: { id: job.id }, data: { status: 'FAILED' } });
-    return true; // job consumed
+    return true;
   }
 }
 

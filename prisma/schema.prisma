@@ -377,6 +377,37 @@ enum JobStatus {
 }
 
 //
+// 📱 META SOCIAL PUBLISHING
+//
+model MetaToken {
+  id                  String   @id @default(cuid())
+  storeId             String   @unique
+  userAccessToken     String   @db.Text
+  pageAccessToken     String   @db.Text
+  pageId              String
+  instagramAccountId  String?
+  isValid             Boolean  @default(true)
+  expiresAt           DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model SocialPost {
+  id            String   @id @default(cuid())
+  storeId       String
+  platform      String   // "FACEBOOK", "INSTAGRAM", "BOTH"
+  status        String   // "PENDING", "PROCESSING", "PUBLISHED", "FAILED"
+  metaPostId    String?  // ID de retorno proporcionado por Meta
+  mediaUrl      String   @db.Text
+  caption       String   @db.Text
+  errorMessage  String?  @db.Text
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([storeId, status])
+}
+
+//
 // 🎯 Modos de Descuento
 //
 enum DiscountMode {
