@@ -49,7 +49,11 @@ export async function GET(request: Request) {
       take: limit,
     });
 
-    return NextResponse.json(combos);
+    return NextResponse.json(combos, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=300',
+      },
+    });
   } catch (err) {
     console.error('[GET /api/combos]', err);
     return NextResponse.json({ error: 'Error al cargar combos' }, { status: 500 });

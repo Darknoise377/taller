@@ -104,7 +104,7 @@ export default function FloatingCombos({
     let cancelled = false;
     async function load() {
       try {
-        const res = await fetch(`/api/combos?limit=${limit}`, { cache: "no-store" });
+        const res = await fetch(`/api/combos?limit=${limit}`);
         if (!res.ok) return;
         const data = (await res.json()) as Combo[];
         if (cancelled) return;
