@@ -350,26 +350,13 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
     [product.images, product.imageUrl]
   );
 
-  // Cargar oferta flash activa para este producto
-  useEffect(() => {
-    fetch('/api/flash-sales')
-      .then(r => r.ok ? r.json() : [])
-      .then((sales: FlashSale[]) => {
-        const now = new Date();
-        const activeSale = sales.find(s => {
-          const start = new Date(s.startTime);
-          const end = s.endTime ? new Date(s.endTime) : null;
-          const inRange = start <= now && (!end || end >= now);
-          if (!inRange) return false;
-          if (s.appliesTo === 'ALL') return true;
-          if (s.appliesTo === 'CATEGORY' && s.targetCategories.includes(product.category)) return true;
-          if (s.appliesTo === 'PRODUCT' && s.targetProductIds.includes(product.id)) return true;
-          return false;
-        });
-        setFlashSale(activeSale || null);
-      })
-      .catch(() => {});
-  }, [product.id, product.category]);
+// Cargar oferta flash activa para este producto (optimizado: solo la oferta aplicable)
+   useEffect(() => {
+     fetch(`/api/flash-sales/applicable?productId=${product.id}&category=${product.category}`)
+       .then(r => r.ok ? r.json() : null)
+       .then((sale: FlashSale | null) => setFlashSale(sale))
+       .catch(() => {});
+   }, [product.id, product.category]);
 
 // Calcular precios según tipo de oferta
   const { displayPrice, originalPrice } = useMemo(() => {
