@@ -26,6 +26,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
   const [validationError, setValidationError] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
   const [added, setAdded] = useState(false);
+  const [flashSale, setFlashSale] = useState<FlashSale | null>(null);
   const { toggle: toggleWishlist, isLiked } = useWishlist();
   const liked = isLiked(product.id);
   const { freeShippingThreshold, minShippingRate, isFreeShippingAll } = useShippingConfig();
@@ -39,6 +40,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
    }, [product.id, product.category]);
 
 // Calcular precios según tipo de oferta (con soporte FIXED_PRICE multi-producto)
+   // eslint-disable-next-line react-hooks/exhaustive-deps
    const { displayPrice, originalPrice, hasDiscount, discountPercentage } = useMemo(() => {
      if (!flashSale) return { displayPrice: product.price, originalPrice: null, hasDiscount: false, discountPercentage: 0 };
 
@@ -74,7 +76,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
        hasDiscount: true,
        discountPercentage: safeDiscount,
      };
-   }, [flashSale, product.price, product.id]);
+   }, [flashSale]);
 
   const hasFreeShipping = isFreeShippingAll || displayPrice >= freeShippingThreshold;
 

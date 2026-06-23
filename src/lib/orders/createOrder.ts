@@ -167,17 +167,6 @@ export function toAssistantOrderResult(
   };
 }
 
-interface ProductWithFlashSale {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-  category: string;
-  currency: string;
-  finalPrice: number;
-  flashSaleId: string | null;
-}
-
 async function applyFlashSalesToProducts(
   dbProducts: { id: string; price: number; category: string }[]
 ): Promise<Map<string, { price: number; flashSaleId: string | null }>> {
