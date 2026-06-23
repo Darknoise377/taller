@@ -43,6 +43,14 @@ type OrderProductLine = {
   };
 };
 
+type OrderComboLine = {
+  quantity: number;
+  combo: {
+    name: string;
+    price: number;
+  };
+};
+
 export type BaseOrderForEmail = {
   referenceCode: string;
   customerName: string;
@@ -53,6 +61,7 @@ export type BaseOrderForEmail = {
   paymentMethod: PaymentMethod;
   status: OrderStatus;
   products: OrderProductLine[];
+  combos?: OrderComboLine[];
   address?: string;
   city?: string;
   department?: string;
@@ -114,8 +123,12 @@ function waUrl(referenceCode: string, customerName: string, phone?: string): str
   return `https://wa.me/${number}?text=${msg}`;
 }
 
-function productRowsHtml(products: OrderProductLine[], currency: string): string {
-  return products
+function productRowsHtml(
+  products: OrderProductLine[],
+  combos: OrderComboLine[],
+  currency: string
+): string {
+  const productRows = products
     .map(
       (p) =>
         `<tr>
@@ -125,6 +138,19 @@ function productRowsHtml(products: OrderProductLine[], currency: string): string
         </tr>`
     )
     .join("");
+
+  const comboRows = (combos ?? [])
+    .map(
+      (c) =>
+        `<tr>
+          <td style="padding:12px 8px;border-bottom:1px solid #f1f5f9;font-size:14px;color:#0f172a;">${esc(c.combo.name)} (combo)</td>
+          <td style="padding:12px 8px;border-bottom:1px solid #f1f5f9;text-align:center;font-size:14px;color:#475569;">${c.quantity}</td>
+          <td style="padding:12px 8px;border-bottom:1px solid #f1f5f9;text-align:right;font-size:14px;color:#0f172a;">${formatMoney(c.combo.price * c.quantity, currency)}</td>
+        </tr>`
+    )
+    .join("");
+
+  return productRows + comboRows;
 }
 
 function stepsHtml(paymentMethod: PaymentMethod, status: OrderStatus): string {
@@ -217,7 +243,7 @@ function buildConfirmationEmail(order: BaseOrderForEmail): string {
           <th style="padding:8px 6px;text-align:right;font-size:11px;color:#94a3b8;text-transform:uppercase;">Subtotal</th>
         </tr>
       </thead>
-      <tbody>${productRowsHtml(order.products, order.currency)}</tbody>
+      <tbody>${productRowsHtml(order.products, order.combos ?? [], order.currency)}</tbody>
     </table>
     ${
       order.shippingCost && order.shippingCost > 0

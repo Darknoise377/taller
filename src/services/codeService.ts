@@ -12,6 +12,8 @@ interface PromotionData {
   appliesTo?: 'ALL' | 'CATEGORY' | 'PRODUCT';
   targetCategories?: string[];
   targetProductIds?: string[];
+  mode?: 'REAL' | 'ANCHOR' | 'FIXED_PRICE';
+  targetPrice?: number | null;
 }
 
 /**

@@ -1,3 +1,5 @@
+export type DiscountMode = 'REAL' | 'ANCHOR' | 'FIXED_PRICE';
+
 export interface FlashSale {
   id: string;
   name: string;
@@ -9,4 +11,6 @@ export interface FlashSale {
   appliesTo: string;
   targetCategories: string[];
   targetProductIds: string[];
+  mode: DiscountMode;
+  targetPrice: number | null;
 }

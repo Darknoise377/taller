@@ -1,100 +1,98 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma as db } from '@/lib/prisma'; // Importamos el cliente Prisma desde tu ruta existente
-import { rateLimit } from '@/lib/rateLimit';
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 
-/**
- * API Route para validar un código de vendedor o promoción.
- * Busca en la tabla Seller y luego en la tabla Promotion.
- *
- * @param req NextRequest - Contiene el código en los search params (ej: /api/codes/validate?code=MI-CODIGO)
- */
-export async function GET(req: NextRequest) {
-  const limit = await rateLimit(req, {
-    keyPrefix: 'codes-validate',
-    windowMs: 60 * 1000,
-    max: 30,
-  });
+interface ValidatedItem {
+  id: string;
+  category: string;
+}
 
-  if (!limit.ok) {
-    return NextResponse.json(
-      { type: 'invalid', message: 'Demasiados intentos. Intenta más tarde.' },
-      {
-        status: 429,
-        headers: {
-          'Retry-After': String(limit.retryAfterSeconds ?? 60),
-          'X-RateLimit-Limit': String(limit.limit),
-          'X-RateLimit-Remaining': String(limit.remaining),
-          'X-RateLimit-Reset': String(Math.ceil(limit.resetAt / 1000)),
-        },
-      }
-    );
-  }
-
-  const { searchParams } = new URL(req.url);
-  // Convertimos a mayúsculas para ser consistentes
-  const code = searchParams.get('code')?.trim().toUpperCase();
-
-  if (!code) {
-    return NextResponse.json(
-      { type: 'invalid', message: 'El código es requerido.' },
-      { status: 400 }
-    );
-  }
-
+export async function GET(req: Request) {
   try {
-    // 1. Buscar primero como código de VENDEDOR
-    const seller = await db.seller.findUnique({
-      where: { code },
-      select: { id: true, name: true, code: true }, // Solo seleccionamos lo necesario
+    const { searchParams } = new URL(req.url);
+    const code = searchParams.get("code");
+    const itemsParam = searchParams.get("items"); // JSON array of {id, category}
+
+    if (!code) {
+      return NextResponse.json(
+        { error: "Código requerido" },
+        { status: 400 }
+      );
+    }
+
+    // Parse cart items for flash sale conflict check
+    const items: ValidatedItem[] = itemsParam ? JSON.parse(decodeURIComponent(itemsParam)) : [];
+
+    // Check if it's a seller code
+    const seller = await prisma.seller.findUnique({
+      where: { code: code.toUpperCase() },
     });
 
     if (seller) {
-      // Encontrado como vendedor
-      return NextResponse.json({ type: 'seller', data: seller });
+      return NextResponse.json({
+        type: "seller",
+        data: seller,
+      });
     }
 
-    // 2. Si no es vendedor, buscar como CÓDIGO PROMOCIONAL
-    const promotion = await db.promotion.findUnique({
-      where: {
-        code,
-        isActive: true,
-      },
+    // Check if it's a promotion code
+    const promo = await prisma.promotion.findFirst({
+      where: { code: code.toUpperCase(), isActive: true },
       select: {
-        id: true,
         code: true,
-        description: true,
         discount: true,
-        isActive: true,
-        expiresAt: true,
-        appliesTo: true,
+        description: true,
+        mode: true,
+        targetPrice: true,
         targetCategories: true,
         targetProductIds: true,
+        appliesTo: true,
+        expiresAt: true,
       },
     });
 
-    if (promotion) {
-      // Encontrado como promoción
-      // Opcional: Validar 'expiresAt' si existe
-      if (promotion.expiresAt && new Date() > promotion.expiresAt) {
-        return NextResponse.json(
-          { type: 'invalid', message: 'Este código de promoción ha expirado.' },
-          { status: 404 }
-        );
+    if (promo) {
+      // Check for FlashSale conflicts
+      const now = new Date();
+      const activeFlashSales = await prisma.flashSale.findMany({
+        where: {
+          isActive: true,
+          startTime: { lte: now },
+          OR: [{ endTime: null }, { endTime: { gte: now } }],
+        },
+        select: { appliesTo: true, targetCategories: true, targetProductIds: true },
+      });
+
+      // Check if any cart item has an active flash sale
+      for (const item of items) {
+        const hasConflict = activeFlashSales.some((sale) => {
+          if (sale.appliesTo === 'ALL') return true;
+          if (sale.appliesTo === 'CATEGORY' && sale.targetCategories?.includes(item.category)) return true;
+          if (sale.appliesTo === 'PRODUCT' && sale.targetProductIds?.includes(item.id)) return true;
+          return false;
+        });
+        if (hasConflict) {
+          return NextResponse.json(
+            { error: "No se puede aplicar cupón: producto(s) con oferta Flash Sale activa" },
+            { status: 409 }
+          );
+        }
       }
-      return NextResponse.json({ type: 'promotion', data: promotion });
+
+      return NextResponse.json({
+        type: "promotion",
+        data: promo,
+      });
     }
 
-    // 3. Si no se encuentra en ninguna tabla, es inválido
     return NextResponse.json(
-      { type: 'invalid', message: 'El código ingresado no es válido.' },
+      { error: "Código no encontrado" },
       { status: 404 }
     );
   } catch (error) {
-    console.error('Error al validar el código:', error);
+    console.error("Error validating code:", error);
     return NextResponse.json(
-      { message: 'Error interno del servidor.' },
+      { error: "Error validando código" },
       { status: 500 }
     );
   }
-  
 }

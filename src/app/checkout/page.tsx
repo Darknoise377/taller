@@ -367,11 +367,13 @@ const CheckoutPage: React.FC = () => {
     setError(null); // Limpia error general
 
     try {
-      const response = await fetch(`/api/codes/validate?code=${encodeURIComponent(inputCode)}`);
+      // Prepare cart items for flash sale conflict check
+      const itemsForCheck = items.map((i) => ({ id: i.product.id, category: i.product.category }));
+      const response = await fetch(`/api/codes/validate?code=${encodeURIComponent(inputCode)}&items=${encodeURIComponent(JSON.stringify(itemsForCheck))}`);
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Código no válido');
+        throw new Error(result.error || result.message || 'Código no válido');
       }
 
       // Éxito: Guardamos el código validado

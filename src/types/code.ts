@@ -1,3 +1,5 @@
+export type DiscountMode = 'REAL' | 'ANCHOR' | 'FIXED_PRICE';
+
 export interface SellerCode {
   id: string;
   name: string;
@@ -16,4 +18,6 @@ export interface PromotionCode {
   appliesTo?: PromotionAppliesTo;
   targetCategories?: string[];
   targetProductIds?: string[];
+  mode?: DiscountMode;
+  targetPrice?: number | null;
 }

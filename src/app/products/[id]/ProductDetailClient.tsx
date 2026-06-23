@@ -27,7 +27,7 @@ import { VideoPlayer } from "@/components/VideoPlayer";
 import { BLUR_DATA_URL } from "@/lib/placeholder";
 import FloatingCombos from '@/components/FloatingCombos';
 import { FlashSale } from '@/types/flash-sale';
-import { formatCurrency } from '@/utils/formatCurrency';
+import { formatCurrency, formatCurrencyStrikethrough, calculateDisplayPrices } from '@/utils/formatCurrency';
 
 // --- Prop Interfaces ---
 interface ProductDetailClientProps {
@@ -371,10 +371,18 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
       .catch(() => {});
   }, [product.id, product.category]);
 
-  // Calcular precio tachado: Precio Tachado = Precio Actual / (1 - Descuento)
-  const originalPrice = useMemo(() => {
-    if (!flashSale) return null;
-    return Math.ceil(product.price / (1 - flashSale.discount / 100));
+// Calcular precios según tipo de oferta
+  const { displayPrice, originalPrice } = useMemo(() => {
+    if (!flashSale) return { displayPrice: product.price, originalPrice: null };
+
+    const result = calculateDisplayPrices({
+      basePrice: product.price,
+      discountPercentage: flashSale.discount,
+      mode: flashSale.mode,
+      targetPrice: flashSale.targetPrice,
+    });
+
+    return { displayPrice: result.displayPrice, originalPrice: result.originalPrice };
   }, [flashSale, product.price]);
 
   const handleCopySku = () => {
@@ -608,10 +616,10 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
                     -{flashSale.discount}%
                   </Tag>
                   <span className="text-lg text-slate-400 dark:text-slate-500 line-through">
-                    {formatCurrency(originalPrice, product.currency)}
+                    {formatCurrencyStrikethrough(originalPrice, product.currency)}
                   </span>
                   <span className="text-4xl font-black text-[#0A2A66] dark:text-white tracking-tight">
-                    {formatCurrency(product.price, product.currency)}
+                    {formatCurrency(displayPrice, product.currency)}
                   </span>
                 </>
               ) : (

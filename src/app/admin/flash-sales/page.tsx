@@ -18,17 +18,18 @@ import {
   Divider,
   Space,
   Card,
+  Radio,
 } from 'antd';
 import {
   PlusOutlined,
   EditOutlined,
   DeleteOutlined,
-  ThunderboltOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { PRODUCT_CATEGORY_OPTIONS } from '@/constants/productCategories';
 import { getProductCategoryLabel } from '@/constants/productCategories';
+import type { DiscountMode } from '@/types/flash-sale';
 
 interface ProductOption {
   id: string;
@@ -47,6 +48,8 @@ interface FlashSaleData {
   appliesTo: string;
   targetCategories: string[];
   targetProductIds: string[];
+  mode: DiscountMode;
+  targetPrice: number | null;
   _count?: { products?: number };
 }
 
@@ -96,12 +99,14 @@ export default function AdminFlashSalesPage() {
 
   const openCreate = () => {
     setEditingSale(null);
+    setSelectedAppliesTo('ALL');
     form.resetFields();
     setModalOpen(true);
   };
 
   const openEdit = (sale: FlashSaleData) => {
     setEditingSale(sale);
+    setSelectedAppliesTo(sale.appliesTo as 'ALL' | 'CATEGORY' | 'PRODUCT');
     form.setFieldsValue({
       name: sale.name,
       description: sale.description,
@@ -112,6 +117,8 @@ export default function AdminFlashSalesPage() {
       appliesTo: sale.appliesTo,
       targetCategories: sale.targetCategories,
       targetProductIds: sale.targetProductIds,
+      mode: sale.mode,
+      targetPrice: sale.targetPrice,
     });
     setModalOpen(true);
   };
@@ -133,6 +140,8 @@ export default function AdminFlashSalesPage() {
           values.appliesTo === 'CATEGORY' ? values.targetCategories : [],
         targetProductIds:
           values.appliesTo === 'PRODUCT' ? values.targetProductIds : [],
+        mode: values.mode ?? 'ANCHOR',
+        targetPrice: values.mode === 'FIXED_PRICE' ? values.targetPrice : null,
       };
 
       const url = editingSale
@@ -316,11 +325,36 @@ export default function AdminFlashSalesPage() {
             <DatePicker showTime style={{ width: '100%' }} />
           </Form.Item>
 
-          <Form.Item name="isActive" label="Activo" valuePropName="checked" initialValue={true}>
-            <Switch />
-          </Form.Item>
+<Form.Item name="isActive" label="Activo" valuePropName="checked" initialValue={true}>
+             <Switch />
+           </Form.Item>
 
-          <Divider>Alcance del descuento</Divider>
+           <Form.Item
+             name="mode"
+             label="Modo de descuento"
+             initialValue="ANCHOR"
+           >
+             <Radio.Group>
+               <Radio value="REAL">Descuento Real</Radio>
+               <Radio value="ANCHOR">Precio Anclado</Radio>
+               <Radio value="FIXED_PRICE">Precio Final Fijo</Radio>
+             </Radio.Group>
+           </Form.Item>
+
+<Form.Item
+              name="targetPrice"
+              label="Precio Final Deseado"
+              tooltip="Solo para modo FIXED_PRICE: el precio que pagará el cliente"
+              style={{ display: form.getFieldValue('mode') === 'FIXED_PRICE' ? 'block' : 'none' }}
+            >
+              <InputNumber
+                min={0}
+                style={{ width: '100%' }}
+                placeholder="Ej: 445000"
+              />
+            </Form.Item>
+
+           <Divider>Alcance del descuento</Divider>
 
           <Form.Item
             name="appliesTo"

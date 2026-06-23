@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, FormEvent, ChangeEvent } from 'react';
-import type { SellerCode as Seller, PromotionCode as Promotion } from '@/types/code';
+import type { SellerCode as Seller, PromotionCode as Promotion, DiscountMode } from '@/types/code';
 import * as codeService from '@/services/codeService';
 import { toast } from 'sonner';
 import { Pencil, Trash2, X } from 'lucide-react';
+import { Select, Radio } from 'antd';
 import { PRODUCT_CATEGORY_OPTIONS } from '@/constants/productCategories';
-import { Select } from 'antd';
 
 const initialSellerState = { name: '', code: '' };
 const initialPromoState = {
@@ -16,6 +16,8 @@ const initialPromoState = {
   appliesTo: 'ALL' as 'ALL' | 'CATEGORY' | 'PRODUCT',
   targetCategories: [] as string[],
   targetProductIds: [] as string[],
+  mode: 'ANCHOR' as 'REAL' | 'ANCHOR' | 'FIXED_PRICE',
+  targetPrice: null as number | null,
 };
 
 function getErrorMessage(err: unknown): string {
@@ -127,12 +129,17 @@ export default function AdminCodesPage() {
       toast.warning('El descuento debe ser entre 1 y 100');
       return;
     }
+    if (newPromo.mode === 'FIXED_PRICE' && (!newPromo.targetPrice || newPromo.targetPrice <= 0)) {
+      toast.warning('El precio final fijo es requerido para este modo');
+      return;
+    }
     try {
       await codeService.createPromotion({
         ...newPromo,
         code: newPromo.code.toUpperCase(),
         targetCategories: newPromo.appliesTo === 'CATEGORY' ? newPromo.targetCategories : [],
         targetProductIds: newPromo.appliesTo === 'PRODUCT' ? newPromo.targetProductIds : [],
+        targetPrice: newPromo.mode === 'FIXED_PRICE' ? newPromo.targetPrice : null,
       });
       toast.success('Promoción creada');
       setNewPromo(initialPromoState);
@@ -149,6 +156,10 @@ export default function AdminCodesPage() {
       toast.warning('El descuento debe ser entre 1 y 100');
       return;
     }
+    if (newPromo.mode === 'FIXED_PRICE' && (!newPromo.targetPrice || newPromo.targetPrice <= 0)) {
+      toast.warning('El precio final fijo es requerido para este modo');
+      return;
+    }
     try {
       await codeService.updatePromotion(editingPromo.id, {
         code: newPromo.code.toUpperCase(),
@@ -157,6 +168,8 @@ export default function AdminCodesPage() {
         appliesTo: newPromo.appliesTo,
         targetCategories: newPromo.appliesTo === 'CATEGORY' ? newPromo.targetCategories : [],
         targetProductIds: newPromo.appliesTo === 'PRODUCT' ? newPromo.targetProductIds : [],
+        mode: newPromo.mode,
+        targetPrice: newPromo.mode === 'FIXED_PRICE' ? newPromo.targetPrice : null,
       });
       toast.success('Promoción actualizada');
       setEditingPromo(null);
@@ -192,6 +205,8 @@ export default function AdminCodesPage() {
       appliesTo: (promo.appliesTo as 'ALL' | 'CATEGORY' | 'PRODUCT') ?? 'ALL',
       targetCategories: promo.targetCategories ?? [],
       targetProductIds: promo.targetProductIds ?? [],
+      mode: (promo.mode as DiscountMode) ?? 'ANCHOR',
+      targetPrice: promo.targetPrice ?? null,
     });
   };
 
@@ -305,7 +320,38 @@ export default function AdminCodesPage() {
               <input type="number" name="discount" min={1} max={100} value={newPromo.discount} onChange={handlePromoChange} required className={inputClass} />
             </div>
 
-            {/* Targeting */}
+<div>
+               <label className={labelClass}>Modo de descuento</label>
+               <div className="mt-1">
+                 <Radio.Group
+                   value={newPromo.mode}
+                   onChange={(e) => setNewPromo((p) => ({ ...p, mode: e.target.value }))}
+                   options={[
+                     { label: 'Descuento Real', value: 'REAL' },
+                     { label: 'Precio Anclado', value: 'ANCHOR' },
+                     { label: 'Precio Final Fijo', value: 'FIXED_PRICE' },
+                   ]}
+                 />
+               </div>
+             </div>
+
+             {newPromo.mode === 'FIXED_PRICE' && (
+               <div>
+                 <label className={labelClass}>Precio Final Deseado</label>
+                 <input
+                   type="number"
+                   name="targetPrice"
+                   min={0}
+                   value={newPromo.targetPrice ?? ''}
+                   onChange={handlePromoChange}
+                   required
+                   className={inputClass}
+                   placeholder="Ej: 445000"
+                 />
+               </div>
+             )}
+
+             {/* Targeting */}
             <div>
               <label className={labelClass}>Aplica a</label>
               <select

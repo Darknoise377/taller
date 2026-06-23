@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
@@ -8,6 +8,7 @@ import { ShoppingCartIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon, HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 
 import type { Product as ProductType, ProductSize } from "@/types/product";
+import type { FlashSale } from "@/types/flash-sale";
 import { useCart } from "@/hooks/useCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { makeProductPlaceholder, BLUR_DATA_URL } from "@/lib/placeholder";
@@ -28,7 +29,63 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
   const { toggle: toggleWishlist, isLiked } = useWishlist();
   const liked = isLiked(product.id);
   const { freeShippingThreshold, minShippingRate, isFreeShippingAll } = useShippingConfig();
-  const hasFreeShipping = isFreeShippingAll || product.price >= freeShippingThreshold;
+
+  // ── Oferta Flash Activa ──────────────────────
+  const [flashSale, setFlashSale] = useState<FlashSale | null>(null);
+
+  useEffect(() => {
+    fetch("/api/flash-sales")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((sales: FlashSale[]) => {
+        const now = new Date();
+        const activeSale = sales.find((s) => {
+          const start = new Date(s.startTime);
+          const end = s.endTime ? new Date(s.endTime) : null;
+          const inRange = start <= now && (!end || end >= now);
+          if (!inRange) return false;
+          if (s.appliesTo === "ALL") return true;
+          if (s.appliesTo === "CATEGORY" && s.targetCategories.includes(product.category)) return true;
+          if (s.appliesTo === "PRODUCT" && s.targetProductIds.includes(product.id)) return true;
+          return false;
+        });
+        setFlashSale(activeSale || null);
+      })
+      .catch(() => {});
+  }, [product.id, product.category]);
+
+  // Calcular precios según tipo de oferta
+  const { displayPrice, originalPrice, hasDiscount, discountPercentage } = useMemo(() => {
+    if (!flashSale) return { displayPrice: product.price, originalPrice: null, hasDiscount: false, discountPercentage: 0 };
+
+    const mode = flashSale.mode;
+    const safeDiscount = Math.min(99, Math.max(0, flashSale.discount));
+    const factor = 1 - safeDiscount / 100;
+
+    let dPrice = product.price;
+    let oPrice: number | null = null;
+
+    if (mode === "REAL") {
+      dPrice = Math.ceil(product.price * factor);
+      oPrice = product.price;
+    } else if (mode === "ANCHOR") {
+      dPrice = product.price;
+      if (factor > 0) oPrice = Math.ceil(product.price / factor);
+    } else if (mode === "FIXED_PRICE") {
+      if (flashSale.targetPrice != null && Number.isFinite(flashSale.targetPrice)) {
+        dPrice = flashSale.targetPrice;
+        if (factor > 0) oPrice = Math.ceil(flashSale.targetPrice / factor);
+      }
+    }
+
+    return {
+      displayPrice: dPrice,
+      originalPrice: oPrice,
+      hasDiscount: true,
+      discountPercentage: safeDiscount,
+    };
+  }, [flashSale, product.price]);
+
+  const hasFreeShipping = isFreeShippingAll || displayPrice >= freeShippingThreshold;
 
   const imageSrc = useMemo(
     () => product.images?.[0] ?? product.imageUrl ?? makeProductPlaceholder(product.name, product.id),
@@ -59,8 +116,14 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
       return;
     }
     setValidationError("");
+    
+    // Si hay descuento, el item del carrito debe heredar el precio final con descuento
     addToCart(
-      { ...product, imageUrl: product.images?.[0] ?? "/placeholder.png" },
+      { 
+        ...product, 
+        price: displayPrice,
+        imageUrl: product.images?.[0] ?? "/placeholder.png" 
+      },
       quantity,
       selectedSize as ProductSize,
       selectedColor
@@ -72,6 +135,9 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
     }, 900);
   };
 
+  const hasSizes = product.sizes && product.sizes.length > 0;
+  const hasColors = product.colors && product.colors.length > 0;
+
   return (
     <motion.article
       layout
@@ -79,7 +145,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -16 }}
       transition={{ duration: 0.4, delay: idx * 0.04, ease: "easeOut" }}
-      className="group relative flex flex-col bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
+      className="group relative flex flex-col bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 w-full"
     >
       {/* ── Imagen ──────────────────────────────── */}
       <Link
@@ -92,29 +158,34 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
           src={imageSrc}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+          className="object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           unoptimized={isDataUri}
           placeholder={isDataUri ? "empty" : "blur"}
           blurDataURL={isDataUri ? undefined : BLUR_DATA_URL}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
         {/* Overlay gradiente sutil */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+        {/* Badges superiores izquierdos */}
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 z-10">
+          {hasDiscount && (
+            <span className="bg-red-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-md animate-pulse">
+              -{discountPercentage}%
+            </span>
+          )}
           {isNew && (
-            <span className="bg-[#0A2A66] text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+            <span className="bg-[#0A2A66] text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow">
               Nuevo
             </span>
           )}
           {isLowStock && (
-            <span className="bg-amber-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow animate-pulse ring-1 ring-amber-300/40">
+            <span className="bg-amber-500 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow ring-1 ring-amber-300/40">
               ¡Últimas {product.stock}!
             </span>
           )}
           {isOutOfStock && (
-            <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+            <span className="bg-red-500 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow">
               Agotado
             </span>
           )}
@@ -124,97 +195,128 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
         <button
           type="button"
           aria-label={liked ? "Quitar de favoritos" : "Añadir a favoritos"}
-          onClick={(e) => { e.preventDefault(); toggleWishlist(product.id); }}
-          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 shadow border border-slate-200/80 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-10"
+          onClick={(e) => {
+            e.preventDefault();
+            toggleWishlist(product.id);
+          }}
+          className="absolute top-2 right-2 sm:top-3 sm:right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 shadow border border-slate-200/80 dark:border-slate-700 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-10"
         >
           {liked ? (
             <HeartSolid className="w-4 h-4 text-red-500" />
           ) : (
-            <HeartIcon className="w-4 h-4 text-slate-400 hover:text-red-400 transition-colors" />
+            <HeartIcon className="w-4 h-4 text-slate-500 dark:text-slate-400 hover:text-red-400 transition-colors" />
           )}
         </button>
       </Link>
 
       {/* ── Contenido ───────────────────────────── */}
       <div className="flex flex-col flex-1 p-3 sm:p-4 gap-2 sm:gap-3">
+        {/* Marca si existe */}
+        {product.brand && (
+          <span className="text-[10px] font-bold text-[#2E5FA7] dark:text-[#5B8DD9] uppercase tracking-wider">
+            {product.brand}
+          </span>
+        )}
+
         {/* Nombre + precio */}
-        <div>
+        <div className="space-y-1">
           <Link href={`/products/${product.slug ?? product.id}`}>
-            <h3 className="font-bold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2 text-sm sm:text-base hover:text-[#0A2A66] dark:hover:text-[#2E5FA7] transition-colors">
+            <h3 className="font-bold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2 text-xs sm:text-sm md:text-base hover:text-[#0A2A66] dark:hover:text-[#2E5FA7] transition-colors min-h-[2.5rem]">
               {product.name}
             </h3>
           </Link>
-          <p className="mt-1 text-lg sm:text-2xl font-extrabold text-[#0A2A66] dark:text-[#5B8DD9]">
-            ${Number(product.price).toLocaleString("es-CO")}
-          </p>
+          
+          {/* Precios (Display + original strikethrough si aplica) */}
+          <div className="flex flex-wrap items-baseline gap-1.5 pt-0.5">
+            <span className="text-base sm:text-lg md:text-xl font-extrabold text-[#0A2A66] dark:text-[#5B8DD9] leading-none">
+              ${displayPrice.toLocaleString("es-CO")}
+            </span>
+            {originalPrice && originalPrice > displayPrice && (
+              <span className="text-xs sm:text-sm text-slate-400 dark:text-slate-500 line-through leading-none">
+                ${originalPrice.toLocaleString("es-CO")}
+              </span>
+            )}
+          </div>
+
           {/* Shipping badge */}
           {hasFreeShipping ? (
-            <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold text-green-700 dark:text-green-400">
-              <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              Envío gratis incluido
-            </p>
+            <div className="inline-flex items-center gap-1 text-[10px] font-semibold text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-950/20 px-2 py-0.5 rounded-full mt-1">
+              <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+              Envío gratis
+            </div>
           ) : (
-            <p className="mt-0.5 text-[11px] text-slate-400 dark:text-slate-500">
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
               Envío desde ${minShippingRate.toLocaleString("es-CO")}
             </p>
           )}
         </div>
 
-                {/* Opciones de medida */}
-        {product.sizes && product.sizes.length > 0 && (
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1.5">
+        {/* Opciones de medida (Solo se muestra si hay información) */}
+        {hasSizes && (
+          <div className="hidden sm:block">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1">
               Medida
             </p>
-            <div className="flex flex-wrap gap-1.5">
-                            {product.sizes.slice(0, 3).map((s) => (
+            <div className="flex flex-wrap gap-1">
+              {product.sizes.slice(0, 3).map((s) => (
                 <button
                   key={s}
                   type="button"
                   onClick={() => setSelectedSize(s)}
-                  title={s} // Al poner el mouse encima se verá el texto completo
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all truncate max-w-[140px] sm:max-w-[180px] ${
+                  title={s}
+                  className={`px-2 py-0.5 text-[11px] font-semibold rounded-md border transition-all truncate max-w-[100px] ${
                     selectedSize === s
                       ? "bg-[#0A2A66] text-white border-[#0A2A66] shadow-sm"
-                      : "bg-transparent border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-[#0A2A66] dark:hover:border-[#2E5FA7]"
+                      : "bg-transparent border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-[#0A2A66]"
                   }`}
                 >
-                  {s.length > 25 ? s.substring(0, 25) + "..." : s}
+                  {s.length > 15 ? s.substring(0, 15) + "..." : s}
                 </button>
               ))}
               {product.sizes.length > 3 && (
                 <Link
                   href={`/products/${product.slug ?? product.id}`}
-                  className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-dashed border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center"
+                  className="px-2 py-0.5 text-[11px] font-semibold rounded-md border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
                 >
-                  +{product.sizes.length - 3} más...
+                  +{product.sizes.length - 3} más
                 </Link>
               )}
             </div>
           </div>
         )}
 
-        {/* Opciones de compatibilidad */}
-        {product.colors && product.colors.length > 0 && (
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1.5">
+        {/* Opciones de compatibilidad (Solo se muestra si hay información) */}
+        {hasColors && (
+          <div className="hidden sm:block">
+            <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500 mb-1">
               Compatibilidad
             </p>
-            <div className="flex flex-wrap gap-1.5">
-              {product.colors.map((c) => (
+            <div className="flex flex-wrap gap-1">
+              {product.colors.slice(0, 3).map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setSelectedColor(c)}
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-lg border transition-all ${
+                  title={c}
+                  className={`px-2 py-0.5 text-[11px] font-semibold rounded-md border transition-all truncate max-w-[100px] ${
                     selectedColor === c
                       ? "bg-[#2E5FA7] text-white border-[#2E5FA7] shadow-sm"
-                      : "bg-transparent border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-[#2E5FA7]"
+                      : "bg-transparent border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-[#2E5FA7]"
                   }`}
                 >
-                  {c}
+                  {c.length > 15 ? c.substring(0, 15) + "..." : c}
                 </button>
               ))}
+              {product.colors.length > 3 && (
+                <Link
+                  href={`/products/${product.slug ?? product.id}`}
+                  className="px-2 py-0.5 text-[11px] font-semibold rounded-md border border-dashed border-slate-200 dark:border-slate-800 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
+                >
+                  +{product.colors.length - 3} más
+                </Link>
+              )}
             </div>
           </div>
         )}
@@ -226,7 +328,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="text-red-500 text-xs font-medium"
+              className="text-red-500 text-[11px] font-medium"
             >
               {validationError}
             </motion.p>
@@ -237,19 +339,19 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
         <div className="flex-1" />
 
         {/* Cantidad + botón */}
-        <div className="flex flex-col gap-2 pt-3 border-t border-slate-100 dark:border-slate-800 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 xl:flex-row xl:items-center">
           {/* Qty */}
-          <div className="flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-800 sm:shrink-0">
+          <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-50 dark:bg-slate-900 shrink-0 mx-auto w-full xl:w-auto">
             <button
               type="button"
               aria-label="Disminuir cantidad"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               disabled={isOutOfStock || quantity <= 1}
-              className="w-8 h-9 sm:w-9 sm:h-10 flex items-center justify-center text-lg font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors"
+              className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
             >
               −
             </button>
-            <span className="w-8 text-center text-sm font-bold text-slate-800 dark:text-slate-100 tabular-nums">
+            <span className="w-8 text-center text-xs font-bold text-slate-800 dark:text-slate-200 tabular-nums">
               {quantity}
             </span>
             <button
@@ -257,7 +359,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
               aria-label="Aumentar cantidad"
               onClick={() => setQuantity((q) => Math.min(product.stock || 99, q + 1))}
               disabled={isOutOfStock || quantity >= (product.stock || 99)}
-              className="w-8 h-9 sm:w-9 sm:h-10 flex items-center justify-center text-lg font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 transition-colors"
+              className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
             >
               +
             </button>
@@ -268,25 +370,25 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
             type="button"
             disabled={isOutOfStock}
             onClick={handleAddToCart}
-            className={`w-full sm:flex-1 h-9 sm:h-10 flex items-center justify-center gap-1.5 rounded-xl text-sm font-bold transition-all duration-300 shadow-sm ${
+            className={`w-full xl:flex-1 h-8 sm:h-9 flex items-center justify-center gap-1 rounded-lg text-xs font-bold transition-all duration-300 shadow-sm ${
               added
-                ? "bg-green-500 text-white shadow-green-200 dark:shadow-green-900 scale-[0.97]"
+                ? "bg-green-500 text-white shadow-green-200 dark:shadow-green-900/20 scale-[0.97]"
                 : isOutOfStock
-                ? "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed"
-                : "bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white hover:opacity-90 hover:shadow-md active:scale-[0.97]"
+                ? "bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed"
+                : "bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white hover:opacity-95 active:scale-[0.97]"
             }`}
           >
             {added ? (
               <>
-                <CheckCircleIcon className="w-4 h-4 shrink-0" />
+                <CheckCircleIcon className="w-4.5 h-4.5 shrink-0" />
                 <span>¡Añadido!</span>
               </>
             ) : isOutOfStock ? (
               <span>Agotado</span>
             ) : (
               <>
-                <ShoppingCartIcon className="w-4 h-4 shrink-0" />
-                <span>Añadir al carrito</span>
+                <ShoppingCartIcon className="w-3.5 h-3.5 shrink-0" />
+                <span>Comprar</span>
               </>
             )}
           </button>

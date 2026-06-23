@@ -239,16 +239,22 @@ model Seller {
 // ¡Este modelo también es esencial!
 //
 model Promotion {
-  id               String    @id @default(cuid())
-  code             String    @unique // El código que ingresará el cliente
+  id               String       @id @default(cuid())
+  code             String       @unique // El código que ingresará el cliente
   discount         Float
   description      String
-  isActive         Boolean   @default(true)
+  isActive         Boolean      @default(true)
   expiresAt        DateTime?
   // Targeting: "ALL" | "CATEGORY" | "PRODUCT"
-  appliesTo        String    @default("ALL")
-  targetCategories String[]  @default([])
-  targetProductIds String[]  @default([])
+  appliesTo        String       @default("ALL")
+  targetCategories String[]     @default([])
+  targetProductIds String[]     @default([])
+  // Mode: REAL (descuento real), ANCHOR (precio anclado), FIXED_PRICE (precio final forzado)
+  mode             DiscountMode @default(ANCHOR)
+  targetPrice      Float?       // Precio final deseado cuando mode = FIXED_PRICE
+
+  @@index([code, isActive])
+  @@index([isActive, expiresAt])
 }
 
 //
@@ -368,6 +374,15 @@ enum JobStatus {
   PROCESSING
   FAILED
   COMPLETED
+}
+
+//
+// 🎯 Modos de Descuento
+//
+enum DiscountMode {
+  REAL
+  ANCHOR
+  FIXED_PRICE
 }
 
 //
@@ -524,18 +539,22 @@ model PageView {
 // ============================================================
 
 model FlashSale {
-  id          String   @id @default(cuid())
+  id          String       @id @default(cuid())
   name        String
   description String?
   discount    Float
   startTime   DateTime
   endTime     DateTime?
-  isActive    Boolean  @default(true)
+  isActive    Boolean      @default(true)
 
   // Targeting: "ALL" | "CATEGORY" | "PRODUCT"
-  appliesTo   String   @default("ALL")
+  appliesTo   String       @default("ALL")
   targetCategories String[] @default([])
   targetProductIds String[] @default([])
+
+  // Mode: REAL (descuento real), ANCHOR (precio anclado), FIXED_PRICE (precio final forzado)
+  mode        DiscountMode @default(ANCHOR)
+  targetPrice Float?       // Precio final deseado cuando mode = FIXED_PRICE
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

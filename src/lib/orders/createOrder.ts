@@ -4,7 +4,7 @@ import { estimateShippingWithConfig } from '@/config/shippingRates';
 import { sendOrderCreatedEmail } from '@/lib/email/orderEmails';
 import { buildWompiCheckoutUrl } from '@/lib/payments/wompi';
 import { getShippingConfig } from '@/lib/store/getShippingConfig';
-import { calculateDiscountedTotal, clampPercentage, normalizeAmount } from '@/utils/formatCurrency';
+import { calculateDiscountedTotal, clampPercentage, normalizeAmount, calculateDisplayPrices } from '@/utils/formatCurrency';
 
 export type CreateOrderErrorCode =
   | 'EMPTY_CART'
@@ -44,10 +44,8 @@ export type CreateOrderInput = {
   phone: string;
   cedula?: string | null;
   sellerId?: string | null;
-  /** Resolved by code when sellerId is not known (e.g. ASISTENTE_VIRTUAL). */
   sellerCode?: string | null;
   promoCodeApplied?: string | null;
-  /** Custom reference; otherwise Prisma generates a UUID. */
   referenceCode?: string;
   sendConfirmationEmail?: boolean;
 };
@@ -77,10 +75,10 @@ export function consolidateProductLines(products: OrderLineInput[]): Map<string,
     const productId = String(item.productId ?? '').trim();
     const quantity = Number(item.quantity);
     if (!productId) {
-      throw new CreateOrderError('Producto inv?lido', 'INVALID_PRODUCT');
+      throw new CreateOrderError('Producto inválido', 'INVALID_PRODUCT');
     }
     if (!Number.isInteger(quantity) || quantity <= 0) {
-      throw new CreateOrderError('Cantidad inv?lida', 'INVALID_QUANTITY');
+      throw new CreateOrderError('Cantidad inválida', 'INVALID_QUANTITY');
     }
     map.set(productId, (map.get(productId) ?? 0) + quantity);
   }
@@ -93,10 +91,10 @@ export function consolidateComboLines(combos: ComboLineInput[]): Map<string, num
     const comboId = String(item.comboId ?? '').trim();
     const quantity = Number(item.quantity);
     if (!comboId) {
-      throw new CreateOrderError('Combo inv?lido', 'INVALID_COMBO');
+      throw new CreateOrderError('Combo inválido', 'INVALID_COMBO');
     }
     if (!Number.isInteger(quantity) || quantity <= 0) {
-      throw new CreateOrderError('Cantidad inv?lida', 'INVALID_QUANTITY');
+      throw new CreateOrderError('Cantidad inválida', 'INVALID_QUANTITY');
     }
     map.set(comboId, (map.get(comboId) ?? 0) + quantity);
   }
@@ -110,23 +108,23 @@ export function generateBrandedReferenceCode(): string {
 function httpMessageForCode(code: CreateOrderErrorCode): string {
   switch (code) {
     case 'STOCK':
-      return 'No hay stock suficiente para uno o m?s productos';
+      return 'No hay stock suficiente para uno o más productos';
     case 'INVALID_PROMO':
-      return 'C?digo de promoci?n inv?lido';
+      return 'Código de promoción inválido';
     case 'PROMO_EXPIRED':
-      return 'Este c?digo de promoci?n ha expirado';
+      return 'Este código de promoción ha expirado';
     case 'COMBO_EXPIRED':
-      return 'Uno o m?s combos han expirado';
+      return 'Uno o más combos han expirado';
     case 'INVALID_COMBO':
-      return 'Uno o m?s combos no existen o no est?n disponibles';
+      return 'Uno o más combos no existen o no están disponibles';
     case 'EMPTY_CART':
       return 'Debes enviar al menos un producto o combo';
     case 'INVALID_PRICE':
-      return 'Hay productos con precio inv?lido';
+      return 'Hay productos con precio inválido';
     case 'MISSING_DEPARTMENT':
-      return 'Departamento requerido para calcular el env?o';
+      return 'Departamento requerido para calcular el envío';
     default:
-      return 'Datos inv?lidos';
+      return 'Datos inválidos';
   }
 }
 
@@ -169,10 +167,68 @@ export function toAssistantOrderResult(
   };
 }
 
-/**
- * Creates an order with server-side pricing, promo validation, combo support,
- * and atomic stock decrement (products + combo bundles).
- */
+interface ProductWithFlashSale {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  category: string;
+  currency: string;
+  finalPrice: number;
+  flashSaleId: string | null;
+}
+
+async function applyFlashSalesToProducts(
+  dbProducts: { id: string; price: number; category: string }[]
+): Promise<Map<string, { price: number; flashSaleId: string | null }>> {
+  const productPriceMap = new Map<string, { price: number; flashSaleId: string | null }>();
+  const now = new Date();
+
+  const activeFlashSales = await prisma.flashSale.findMany({
+    where: {
+      isActive: true,
+      startTime: { lte: now },
+      OR: [{ endTime: null }, { endTime: { gte: now } }],
+    },
+    select: {
+      id: true,
+      discount: true,
+      mode: true,
+      targetPrice: true,
+      appliesTo: true,
+      targetCategories: true,
+      targetProductIds: true,
+    },
+  });
+
+  for (const p of dbProducts) {
+    let finalPrice = p.price;
+    let appliedFlashSaleId: string | null = null;
+
+    for (const sale of activeFlashSales) {
+      let applies = false;
+      if (sale.appliesTo === 'ALL') applies = true;
+      else if (sale.appliesTo === 'CATEGORY' && sale.targetCategories.includes(p.category)) applies = true;
+      else if (sale.appliesTo === 'PRODUCT' && sale.targetProductIds.includes(p.id)) applies = true;
+
+      if (applies) {
+        const result = calculateDisplayPrices({
+          basePrice: p.price,
+          discountPercentage: sale.discount,
+          mode: sale.mode,
+          targetPrice: sale.targetPrice,
+        });
+        finalPrice = result.displayPrice;
+        appliedFlashSaleId = sale.id;
+        break;
+      }
+    }
+    productPriceMap.set(p.id, { price: normalizeAmount(finalPrice), flashSaleId: appliedFlashSaleId });
+  }
+
+  return productPriceMap;
+}
+
 export async function createOrderWithStock(input: CreateOrderInput): Promise<CreateOrderResult> {
   const directQuantities = consolidateProductLines(input.products ?? []);
   const combosById = consolidateComboLines(input.combos ?? []);
@@ -197,7 +253,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
       : [];
 
   if (dbCombos.length !== comboIds.length) {
-    throw new CreateOrderError('Uno o m?s combos no existen', 'INVALID_COMBO');
+    throw new CreateOrderError('Uno o más combos no existen', 'INVALID_COMBO');
   }
 
   const orderComboLines: Array<{ comboId: string; quantity: number; unitPrice: number }> = [];
@@ -206,7 +262,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
   for (const combo of dbCombos) {
     const qty = combosById.get(combo.id) ?? 0;
     if (combo.stock < qty) {
-      throw new CreateOrderError('No hay stock suficiente para uno o m?s combos', 'STOCK');
+      throw new CreateOrderError('No hay stock suficiente para uno o más combos', 'STOCK');
     }
     if (combo.expiresAt && new Date() > combo.expiresAt) {
       throw new CreateOrderError('Este combo ha expirado', 'COMBO_EXPIRED');
@@ -214,7 +270,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
 
     const comboPrice = normalizeAmount(combo.price);
     if (comboPrice < 0) {
-      throw new CreateOrderError('Combo con precio inv?lido', 'INVALID_PRICE');
+      throw new CreateOrderError('Combo con precio inválido', 'INVALID_PRICE');
     }
 
     comboSubtotal = normalizeAmount(comboSubtotal + comboPrice * qty);
@@ -240,8 +296,10 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
   });
 
   if (dbProducts.length !== productIds.length) {
-    throw new CreateOrderError('Uno o m?s productos no existen', 'INVALID_PRODUCT');
+    throw new CreateOrderError('Uno o más productos no existen', 'INVALID_PRODUCT');
   }
+
+  const productPriceMap = await applyFlashSalesToProducts(dbProducts);
 
   let directSubtotal = 0;
   for (const p of dbProducts) {
@@ -252,13 +310,10 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
       throw new CreateOrderError('No hay stock suficiente', 'STOCK');
     }
 
-    const normalizedPrice = normalizeAmount(p.price);
-    if (normalizedPrice < 0) {
-      throw new CreateOrderError('Precio inv?lido', 'INVALID_PRICE');
-    }
+    const { price: productPrice } = productPriceMap.get(p.id)!;
 
     if (directQty > 0) {
-      directSubtotal = normalizeAmount(directSubtotal + normalizedPrice * directQty);
+      directSubtotal = normalizeAmount(directSubtotal + productPrice * directQty);
     }
   }
 
@@ -281,15 +336,29 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
     });
 
     if (!promotion) {
-      throw new CreateOrderError('C?digo inv?lido', 'INVALID_PROMO');
+      throw new CreateOrderError('Código inválido', 'INVALID_PROMO');
     }
     if (promotion.expiresAt && new Date() > promotion.expiresAt) {
-      throw new CreateOrderError('C?digo expirado', 'PROMO_EXPIRED');
+      throw new CreateOrderError('Código expirado', 'PROMO_EXPIRED');
+    }
+
+    // Verificar stacking con Flash Sales activas
+    for (const p of dbProducts) {
+      const directQty = directQuantities.get(p.id) ?? 0;
+      if (directQty <= 0) continue;
+
+      const { flashSaleId } = productPriceMap.get(p.id)!;
+      if (flashSaleId) {
+        throw new CreateOrderError(
+          `No se puede aplicar cupón: "${p.name}" tiene una oferta Flash Sale activa`,
+          'INVALID_PROMO'
+        );
+      }
     }
 
     const normalizedDiscount = clampPercentage(promotion.discount);
     if (normalizedDiscount <= 0 || normalizedDiscount > 100) {
-      throw new CreateOrderError('Promoci?n inv?lida', 'INVALID_PROMO');
+      throw new CreateOrderError('Promoción inválida', 'INVALID_PROMO');
     }
 
     if (promotion.appliesTo === 'ALL') {
@@ -302,7 +371,8 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
         const directQty = directQuantities.get(p.id) ?? 0;
         if (directQty <= 0) continue;
 
-        const lineTotal = normalizeAmount(p.price) * directQty;
+        const { price: productPrice } = productPriceMap.get(p.id)!;
+        const lineTotal = productPrice * directQty;
         const matches =
           promotion.appliesTo === 'CATEGORY'
             ? promotion.targetCategories.includes(p.category)
@@ -330,7 +400,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
   if (needsShipping) {
     const department = input.department?.trim();
     if (!department) {
-      throw new CreateOrderError('Departamento requerido para calcular el env?o', 'MISSING_DEPARTMENT');
+      throw new CreateOrderError('Departamento requerido para calcular el envío', 'MISSING_DEPARTMENT');
     }
 
     const shippingConfig = await getShippingConfig();
@@ -361,7 +431,6 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
 
   const totalToStore = normalizeAmount(finalTotal);
   const currency = dbProducts[0]?.currency ?? 'COP';
-  const productById = new Map(dbProducts.map((p) => [p.id, p]));
 
   const order = await prisma.$transaction(async (tx) => {
     for (const [productId, qty] of stockQuantities.entries()) {
@@ -403,11 +472,11 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
         sellerId: sellerIdToStore,
         products: {
           create: Array.from(stockQuantities.entries()).map(([productId, quantity]) => {
-            const prod = productById.get(productId)!;
+            const { price } = productPriceMap.get(productId)!;
             return {
               product: { connect: { id: productId } },
               quantity,
-              unitPrice: normalizeAmount(prod.price),
+              unitPrice: price,
             };
           }),
         },
@@ -433,7 +502,15 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
         quantity: item.quantity,
         product: {
           name: item.product.name,
-          price: item.product.price,
+          price: item.unitPrice,
+        },
+      }));
+
+      const combosForEmail = order.orderCombos.map((item) => ({
+        quantity: item.quantity,
+        combo: {
+          name: item.combo.name,
+          price: item.unitPrice,
         },
       }));
 
@@ -447,6 +524,7 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
         paymentMethod: order.paymentMethod,
         status: order.status,
         products: productsForEmail,
+        combos: combosForEmail,
         address: order.address,
         city: order.city,
         department: order.department ?? undefined,

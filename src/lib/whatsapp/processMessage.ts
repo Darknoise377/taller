@@ -12,6 +12,7 @@ import {
   generateBrandedReferenceCode,
   CreateOrderError,
 } from '@/lib/orders/createOrder';
+import { calculateDisplayPrices, formatCurrency } from '@/utils/formatCurrency';
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_API_TOKEN;
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
@@ -241,18 +242,56 @@ export const searchProductsTool: Tool<SearchParams, SearchResult> = {
         return { found: false, message: 'No se encontraron productos con ese criterio.', products: [] };
       }
 
+      // Aplicar Flash Sales activas
+      const now = new Date();
+      const activeFlashSales = await prisma.flashSale.findMany({
+        where: {
+          isActive: true,
+          startTime: { lte: now },
+          OR: [{ endTime: null }, { endTime: { gte: now } }],
+        },
+        select: {
+          discount: true,
+          mode: true,
+          targetPrice: true,
+          appliesTo: true,
+          targetCategories: true,
+          targetProductIds: true,
+        },
+      });
+
       return {
         found: true,
         total: products.length,
-        products: products.map((p) => ({
-          id: p.id,
-          name: p.name,
-          price: new Intl.NumberFormat('es-CO', { style: 'currency', currency: p.currency ?? 'COP', minimumFractionDigits: 0 }).format(p.price),
-          category: p.category as string,
-          stock: p.stock,
-          sku: p.sku ?? null,
-          url: `${BASE_URL}/products/${p.slug ?? p.id}`,
-        })),
+        products: products.map((p) => {
+          let displayPrice = p.price;
+          for (const sale of activeFlashSales) {
+            let applies = false;
+            if (sale.appliesTo === 'ALL') applies = true;
+            else if (sale.appliesTo === 'CATEGORY' && sale.targetCategories.includes(p.category as string)) applies = true;
+            else if (sale.appliesTo === 'PRODUCT' && sale.targetProductIds.includes(p.id)) applies = true;
+
+            if (applies) {
+              const result = calculateDisplayPrices({
+                basePrice: p.price,
+                discountPercentage: sale.discount,
+                mode: sale.mode,
+                targetPrice: sale.targetPrice,
+              });
+              displayPrice = result.displayPrice;
+              break;
+            }
+          }
+          return {
+            id: p.id,
+            name: p.name,
+            price: formatCurrency(displayPrice, (p.currency ?? 'COP') as 'COP'),
+            category: p.category as string,
+            stock: p.stock,
+            sku: p.sku ?? null,
+            url: `${BASE_URL}/products/${p.slug ?? p.id}`,
+          };
+        }),
       };
     } catch {
       return { found: false, message: 'Error al consultar el catálogo.', products: [] };
