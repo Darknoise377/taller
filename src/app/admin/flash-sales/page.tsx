@@ -62,6 +62,7 @@ export default function AdminFlashSalesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [form] = Form.useForm();
   const [selectedAppliesTo, setSelectedAppliesTo] = useState<'ALL' | 'CATEGORY' | 'PRODUCT'>('ALL');
+  const [selectedMode, setSelectedMode] = useState<DiscountMode>('ANCHOR');
 
   const loadFlashSales = useCallback(async () => {
     setLoading(true);
@@ -100,6 +101,7 @@ export default function AdminFlashSalesPage() {
   const openCreate = () => {
     setEditingSale(null);
     setSelectedAppliesTo('ALL');
+    setSelectedMode('ANCHOR');
     form.resetFields();
     setModalOpen(true);
   };
@@ -107,6 +109,7 @@ export default function AdminFlashSalesPage() {
   const openEdit = (sale: FlashSaleData) => {
     setEditingSale(sale);
     setSelectedAppliesTo(sale.appliesTo as 'ALL' | 'CATEGORY' | 'PRODUCT');
+    setSelectedMode(sale.mode);
     form.setFieldsValue({
       name: sale.name,
       description: sale.description,
@@ -114,7 +117,7 @@ export default function AdminFlashSalesPage() {
       startTime: dayjs(sale.startTime),
       endTime: sale.endTime ? dayjs(sale.endTime) : null,
       isActive: sale.isActive,
-      appliesTo: sale.appliesTo,
+      appliesTo: sale.mode === 'FIXED_PRICE' ? 'PRODUCT' : sale.appliesTo,
       targetCategories: sale.targetCategories,
       targetProductIds: sale.targetProductIds,
       mode: sale.mode,
@@ -128,6 +131,16 @@ export default function AdminFlashSalesPage() {
       const values = await form.validateFields();
       setIsSaving(true);
 
+      const targetProductIds = values.appliesTo === 'PRODUCT' ? values.targetProductIds : [];
+      const targetPrice = values.mode === 'FIXED_PRICE' ? values.targetPrice : null;
+
+      // Validar que FIXED_PRICE solo aplique a productos específicos
+      if (values.mode === 'FIXED_PRICE' && (values.appliesTo !== 'PRODUCT' || targetProductIds.length === 0)) {
+        message.error('El modo FIXED_PRICE requiere seleccionar productos específicos');
+        setIsSaving(false);
+        return;
+      }
+
       const payload = {
         name: values.name,
         description: values.description,
@@ -138,10 +151,9 @@ export default function AdminFlashSalesPage() {
         appliesTo: values.appliesTo,
         targetCategories:
           values.appliesTo === 'CATEGORY' ? values.targetCategories : [],
-        targetProductIds:
-          values.appliesTo === 'PRODUCT' ? values.targetProductIds : [],
+        targetProductIds: targetProductIds,
         mode: values.mode ?? 'ANCHOR',
-        targetPrice: values.mode === 'FIXED_PRICE' ? values.targetPrice : null,
+        targetPrice: targetPrice,
       };
 
       const url = editingSale
@@ -166,6 +178,26 @@ export default function AdminFlashSalesPage() {
       message.error((err as Error).message ?? 'Error al guardar');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleModeChange = (e: { target: { value: DiscountMode } }) => {
+    const newMode = e.target.value;
+    setSelectedMode(newMode);
+    
+    // FIXED_PRICE solo aplica a productos específicos
+    if (newMode === 'FIXED_PRICE') {
+      setSelectedAppliesTo('PRODUCT');
+      form.setFieldsValue({ appliesTo: 'PRODUCT' });
+    }
+  };
+
+  const handleAppliesToChange = (val: 'ALL' | 'CATEGORY' | 'PRODUCT') => {
+    setSelectedAppliesTo(val);
+    // Si cambia de FIXED_PRICE a otro, resetear
+    if (selectedMode === 'FIXED_PRICE') {
+      setSelectedMode('ANCHOR');
+      form.setFieldsValue({ mode: 'ANCHOR', targetPrice: null });
     }
   };
 
@@ -325,27 +357,28 @@ export default function AdminFlashSalesPage() {
             <DatePicker showTime style={{ width: '100%' }} />
           </Form.Item>
 
-<Form.Item name="isActive" label="Activo" valuePropName="checked" initialValue={true}>
-             <Switch />
-           </Form.Item>
+          <Form.Item name="isActive" label="Activo" valuePropName="checked" initialValue={true}>
+            <Switch />
+          </Form.Item>
 
-           <Form.Item
-             name="mode"
-             label="Modo de descuento"
-             initialValue="ANCHOR"
-           >
-             <Radio.Group>
-               <Radio value="REAL">Descuento Real</Radio>
-               <Radio value="ANCHOR">Precio Anclado</Radio>
-               <Radio value="FIXED_PRICE">Precio Final Fijo</Radio>
-             </Radio.Group>
-           </Form.Item>
+          <Form.Item
+            name="mode"
+            label="Modo de descuento"
+            initialValue="ANCHOR"
+          >
+            <Radio.Group onChange={(e) => handleModeChange(e as unknown as { target: { value: DiscountMode } })}>
+              <Radio value="REAL">Descuento Real</Radio>
+              <Radio value="ANCHOR">Precio Anclado</Radio>
+              <Radio value="FIXED_PRICE">Precio Final Fijo</Radio>
+            </Radio.Group>
+          </Form.Item>
 
-<Form.Item
+          {selectedMode === 'FIXED_PRICE' && (
+            <Form.Item
               name="targetPrice"
               label="Precio Final Deseado"
               tooltip="Solo para modo FIXED_PRICE: el precio que pagará el cliente"
-              style={{ display: form.getFieldValue('mode') === 'FIXED_PRICE' ? 'block' : 'none' }}
+              rules={[{ required: true, message: 'Requerido para FIXED_PRICE' }]}
             >
               <InputNumber
                 min={0}
@@ -353,8 +386,9 @@ export default function AdminFlashSalesPage() {
                 placeholder="Ej: 445000"
               />
             </Form.Item>
+          )}
 
-           <Divider>Alcance del descuento</Divider>
+          <Divider>Alcance del descuento</Divider>
 
           <Form.Item
             name="appliesTo"
@@ -367,7 +401,8 @@ export default function AdminFlashSalesPage() {
                 { value: 'CATEGORY', label: 'Categorías específicas' },
                 { value: 'PRODUCT', label: 'Productos específicos' },
               ]}
-              onChange={(val) => setSelectedAppliesTo(val as 'ALL' | 'CATEGORY' | 'PRODUCT')}
+              onChange={handleAppliesToChange}
+              disabled={selectedMode === 'FIXED_PRICE'}
             />
           </Form.Item>
 
@@ -395,10 +430,20 @@ export default function AdminFlashSalesPage() {
             <Form.Item
               name="targetProductIds"
               label="Productos"
-              rules={[{ required: true, message: 'Selecciona al menos un producto' }]}
+              rules={[
+                { required: true, message: 'Selecciona al menos un producto' },
+                {
+                  validator: (_, value) => {
+                    if (selectedMode === 'FIXED_PRICE' && Array.isArray(value) && value.length !== 1) {
+                      return Promise.reject(new Error('FIXED_PRICE requiere exactamente un producto'));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
             >
               <Select
-                mode="multiple"
+                mode={selectedMode === 'FIXED_PRICE' ? undefined : 'multiple'}
                 showSearch
                 placeholder="Buscar productos..."
                 optionFilterProp="label"

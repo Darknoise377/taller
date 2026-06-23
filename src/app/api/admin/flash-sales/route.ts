@@ -73,8 +73,13 @@ export async function POST(req: Request) {
     const safeMode = ['REAL', 'ANCHOR', 'FIXED_PRICE'].includes(mode) ? mode : 'ANCHOR';
 
     // Validar targetPrice para modo FIXED_PRICE
-    if (mode === 'FIXED_PRICE' && (!targetPrice || !Number.isFinite(Number(targetPrice)))) {
-      return NextResponse.json({ error: 'Precio final fijo requerido para este modo' }, { status: 400 });
+    if (mode === 'FIXED_PRICE') {
+      if (!targetPrice || !Number.isFinite(Number(targetPrice))) {
+        return NextResponse.json({ error: 'Precio final fijo requerido para este modo' }, { status: 400 });
+      }
+      if (appliesTo !== 'PRODUCT' || !Array.isArray(targetProductIds) || targetProductIds.length !== 1) {
+        return NextResponse.json({ error: 'FIXED_PRICE requiere exactamente un producto específico' }, { status: 400 });
+      }
     }
 
     const sale = await prisma.flashSale.create({

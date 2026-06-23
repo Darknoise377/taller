@@ -325,7 +325,17 @@ export default function AdminCodesPage() {
                <div className="mt-1">
                  <Radio.Group
                    value={newPromo.mode}
-                   onChange={(e) => setNewPromo((p) => ({ ...p, mode: e.target.value }))}
+                   onChange={(e) => {
+                     const newMode = e.target.value;
+                     setNewPromo((p) => ({ 
+                       ...p, 
+                       mode: newMode,
+                       // FIXED_PRICE requiere productos específicos
+                       appliesTo: newMode === 'FIXED_PRICE' ? 'PRODUCT' : p.appliesTo,
+                       targetCategories: newMode === 'FIXED_PRICE' ? [] : p.targetCategories,
+                       targetProductIds: newMode === 'FIXED_PRICE' && p.appliesTo !== 'PRODUCT' ? [] : p.targetProductIds,
+                     }));
+                   }}
                    options={[
                      { label: 'Descuento Real', value: 'REAL' },
                      { label: 'Precio Anclado', value: 'ANCHOR' },
@@ -352,19 +362,23 @@ export default function AdminCodesPage() {
              )}
 
              {/* Targeting */}
-            <div>
-              <label className={labelClass}>Aplica a</label>
-              <select
-                title="Aplica a"
-                value={newPromo.appliesTo}
-                onChange={(e) => setNewPromo((p) => ({ ...p, appliesTo: e.target.value as 'ALL' | 'CATEGORY' | 'PRODUCT', targetCategories: [], targetProductIds: [] }))}
-                className={inputClass}
-              >
-                <option value="ALL">Todos los productos</option>
-                <option value="CATEGORY">Categoría específica</option>
-                <option value="PRODUCT">Productos específicos</option>
-              </select>
-            </div>
+             <div>
+               <label className={labelClass}>Aplica a</label>
+               <select
+                 title="Aplica a"
+                 value={newPromo.appliesTo}
+                 onChange={(e) => {
+                   const val = e.target.value as 'ALL' | 'CATEGORY' | 'PRODUCT';
+                   setNewPromo((p) => ({ ...p, appliesTo: val, targetCategories: [], targetProductIds: [] }));
+                 }}
+                 className={inputClass}
+                 disabled={newPromo.mode === 'FIXED_PRICE'}
+               >
+                 <option value="ALL">Todos los productos</option>
+                 <option value="CATEGORY">Categoría específica</option>
+                 <option value="PRODUCT">Productos específicos</option>
+               </select>
+             </div>
 
             {newPromo.appliesTo === 'CATEGORY' && (
               <div>
@@ -403,14 +417,23 @@ export default function AdminCodesPage() {
 
 {newPromo.appliesTo === 'PRODUCT' && (
               <div>
-                <label className={labelClass}>Productos (selecciona uno o más)</label>
+                <label className={labelClass}>
+                  {newPromo.mode === 'FIXED_PRICE' ? 'Producto (solo 1 permitido)' : 'Productos (selecciona uno o más)'}
+                </label>
                 <Select
-                  mode="multiple"
+                  mode={newPromo.mode === 'FIXED_PRICE' ? undefined : 'multiple'}
                   showSearch
                   placeholder="Buscar productos..."
                   optionFilterProp="label"
                   value={newPromo.targetProductIds}
-                  onChange={(values: string[]) => setNewPromo((p) => ({ ...p, targetProductIds: values }))}
+                  onChange={(values: string[]) => {
+                    // Para FIXED_PRICE, limitar a 1 solo producto
+                    if (newPromo.mode === 'FIXED_PRICE' && Array.isArray(values) && values.length > 1) {
+                      setNewPromo((p) => ({ ...p, targetProductIds: [values[values.length - 1]] }));
+                    } else {
+                      setNewPromo((p) => ({ ...p, targetProductIds: values }));
+                    }
+                  }}
                   options={products.map((p) => ({ value: p.id, label: p.name }))}
                   style={{ width: '100%', marginTop: 4 }}
                   maxTagCount="responsive"

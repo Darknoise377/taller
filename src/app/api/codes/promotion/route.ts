@@ -5,7 +5,19 @@ import { Prisma } from '@prisma/client';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const mode = ['REAL', 'ANCHOR', 'FIXED_PRICE'].includes(body.mode) ? body.mode : 'ANCHOR';
     const appliesTo = ['ALL', 'CATEGORY', 'PRODUCT'].includes(body.appliesTo) ? body.appliesTo : 'ALL';
+
+    // FIXED_PRICE requiere exactamente un producto específico
+    if (mode === 'FIXED_PRICE') {
+      if (appliesTo !== 'PRODUCT' || !Array.isArray(body.targetProductIds) || body.targetProductIds.length !== 1) {
+        return NextResponse.json({ error: 'FIXED_PRICE requiere exactamente un producto específico' }, { status: 400 });
+      }
+      if (!body.targetPrice || !Number.isFinite(Number(body.targetPrice))) {
+        return NextResponse.json({ error: 'Precio final fijo requerido para este modo' }, { status: 400 });
+      }
+    }
+
     const data = {
       code: String(body.code ?? '').trim().toUpperCase(),
       discount: Number(body.discount),
@@ -15,8 +27,8 @@ export async function POST(req: Request) {
       appliesTo,
       targetCategories: Array.isArray(body.targetCategories) ? body.targetCategories.map(String) : [],
       targetProductIds: Array.isArray(body.targetProductIds) ? body.targetProductIds.map(String) : [],
-      mode: ['REAL', 'ANCHOR', 'FIXED_PRICE'].includes(body.mode) ? body.mode : 'ANCHOR',
-      targetPrice: body.mode === 'FIXED_PRICE' ? Number(body.targetPrice) : null,
+      mode,
+      targetPrice: mode === 'FIXED_PRICE' ? Number(body.targetPrice) : null,
     };
 
     if (!data.code || !data.description || !Number.isFinite(data.discount) || data.discount <= 0 || data.discount > 100) {
