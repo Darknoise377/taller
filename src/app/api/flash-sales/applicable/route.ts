@@ -13,16 +13,12 @@ export async function GET(req: NextRequest) {
     isActive: boolean;
     startTime: { lte: Date };
     OR: Array<{ endTime: null } | { endTime: { gte: Date } }>;
-    appliesTo?: string;
-    targetCategories?: { has: string };
-    targetProductIds?: { has: string };
   } = {
     isActive: true,
     startTime: { lte: now },
     OR: [{ endTime: null }, { endTime: { gte: now } }],
   };
 
-  // Optimización: filtrar por applying criterios en la base de datos
   if (productId && category) {
     // Buscar ofertas que apliquen a este producto o categoría
     const sales = await prisma.flashSale.findMany({
@@ -30,8 +26,15 @@ export async function GET(req: NextRequest) {
         ...baseWhere,
         OR: [
           { appliesTo: 'ALL' },
-          { AND: { appliesTo: 'CATEGORY', targetCategories: { has: category } } },
-          { AND: { appliesTo: 'PRODUCT', targetProductIds: { has: productId } } },
+          { appliesTo: 'CATEGORY', targetCategories: { has: category } },
+          // PRODUCT: incluye FIXED_PRICE (busca en products relación) y PRODUCT común
+          {
+            appliesTo: 'PRODUCT',
+            OR: [
+              { targetProductIds: { has: productId } },
+              { products: { some: { productId } } },
+            ],
+          },
         ],
       },
       select: {
@@ -52,11 +55,12 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Aplicar filtro adicional para FIXED_PRICE (productos específicos)
+    // Aplicar filtro final: verificar que el producto realmente aplica
     const applicable = sales.find((s) => {
       if (s.appliesTo === 'ALL') return true;
       if (s.appliesTo === 'CATEGORY') return s.targetCategories.includes(category);
       if (s.appliesTo === 'PRODUCT') {
+        // Para FIXED_PRICE, verificar en la relación products
         if (s.mode === 'FIXED_PRICE') {
           return s.products.some(fp => fp.productId === productId);
         }

@@ -101,9 +101,11 @@ export async function POST(req: Request) {
         targetCategories: safeAppliesTo === 'CATEGORY' && Array.isArray(targetCategories)
           ? targetCategories.map(String)
           : [],
-        targetProductIds: safeAppliesTo === 'PRODUCT' && Array.isArray(targetProductIds)
+        targetProductIds: (safeAppliesTo === 'PRODUCT' && Array.isArray(targetProductIds))
           ? targetProductIds.map(String)
-          : [],
+          : (mode === 'FIXED_PRICE' && Array.isArray(productPrices) && productPrices.length > 0
+              ? productPrices.map((p: { productId: string }) => String(p.productId))
+              : []),
         mode: safeMode,
         targetPrice: null,
         // FIXED_PRICE: crear productos individuales

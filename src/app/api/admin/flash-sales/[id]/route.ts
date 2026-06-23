@@ -56,8 +56,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     // FIXED_PRICE: manejar productos individuales
-    if (mode === 'FIXED_PRICE' && Array.isArray(productPrices)) {
+    if (mode === 'FIXED_PRICE' && Array.isArray(productPrices) && productPrices.length > 0) {
       updateData.targetPrice = null;
+      updateData.targetProductIds = productPrices.map((p: { productId: string }) => String(p.productId));
       // Eliminar productos anteriores y crear nuevos
       await prisma.flashSaleProduct.deleteMany({ where: { flashSaleId: id } });
       updateData.products = {
