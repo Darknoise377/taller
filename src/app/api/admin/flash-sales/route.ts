@@ -19,6 +19,11 @@ export async function GET() {
 
   const sales = await prisma.flashSale.findMany({
     orderBy: { createdAt: 'desc' },
+    include: {
+      products: {
+        select: { productId: true, targetPrice: true },
+      },
+    },
   });
   return NextResponse.json(sales);
 }
@@ -42,7 +47,7 @@ export async function POST(req: Request) {
       targetCategories,
       targetProductIds,
       mode,
-      targetPrice,
+      productPrices = [],
     } = body;
 
     // Validación de entrada
@@ -72,13 +77,15 @@ export async function POST(req: Request) {
     const safeAppliesTo = ['ALL', 'CATEGORY', 'PRODUCT'].includes(appliesTo) ? appliesTo : 'ALL';
     const safeMode = ['REAL', 'ANCHOR', 'FIXED_PRICE'].includes(mode) ? mode : 'ANCHOR';
 
-    // Validar targetPrice para modo FIXED_PRICE
+    // FIXED_PRICE: validar productPrices
     if (mode === 'FIXED_PRICE') {
-      if (!targetPrice || !Number.isFinite(Number(targetPrice))) {
-        return NextResponse.json({ error: 'Precio final fijo requerido para este modo' }, { status: 400 });
+      if (!Array.isArray(productPrices) || productPrices.length === 0) {
+        return NextResponse.json({ error: 'FIXED_PRICE requiere productos con precios' }, { status: 400 });
       }
-      if (appliesTo !== 'PRODUCT' || !Array.isArray(targetProductIds) || targetProductIds.length !== 1) {
-        return NextResponse.json({ error: 'FIXED_PRICE requiere exactamente un producto específico' }, { status: 400 });
+      for (const item of productPrices) {
+        if (!item.productId || !item.targetPrice || !Number.isFinite(Number(item.targetPrice))) {
+          return NextResponse.json({ error: 'Cada producto debe tener targetPrice válido' }, { status: 400 });
+        }
       }
     }
 
@@ -98,7 +105,21 @@ export async function POST(req: Request) {
           ? targetProductIds.map(String)
           : [],
         mode: safeMode,
-        targetPrice: mode === 'FIXED_PRICE' ? Number(targetPrice) : null,
+        targetPrice: null,
+        // FIXED_PRICE: crear productos individuales
+        products: mode === 'FIXED_PRICE' && Array.isArray(productPrices) && productPrices.length > 0
+          ? {
+              create: productPrices.map((p: { productId: string; targetPrice: number }) => ({
+                productId: String(p.productId),
+                targetPrice: Number(p.targetPrice),
+              })),
+            }
+          : undefined,
+      },
+      include: {
+        products: {
+          select: { productId: true, targetPrice: true },
+        },
       },
     });
 

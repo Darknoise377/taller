@@ -37,6 +37,11 @@ interface ProductOption {
   price: number;
 }
 
+interface FlashSaleProductItem {
+  productId: string;
+  targetPrice: number;
+}
+
 interface FlashSaleData {
   id: string;
   name: string;
@@ -50,6 +55,7 @@ interface FlashSaleData {
   targetProductIds: string[];
   mode: DiscountMode;
   targetPrice: number | null;
+  products?: FlashSaleProductItem[];
   _count?: { products?: number };
 }
 
@@ -63,6 +69,9 @@ export default function AdminFlashSalesPage() {
   const [form] = Form.useForm();
   const [selectedAppliesTo, setSelectedAppliesTo] = useState<'ALL' | 'CATEGORY' | 'PRODUCT'>('ALL');
   const [selectedMode, setSelectedMode] = useState<DiscountMode>('ANCHOR');
+
+  // FIXED_PRICE: productos con precios individuales
+  const [fixedPriceItems, setFixedPriceItems] = useState<FlashSaleProductItem[]>([]);
 
   const loadFlashSales = useCallback(async () => {
     setLoading(true);
@@ -102,6 +111,7 @@ export default function AdminFlashSalesPage() {
     setEditingSale(null);
     setSelectedAppliesTo('ALL');
     setSelectedMode('ANCHOR');
+    setFixedPriceItems([]);
     form.resetFields();
     setModalOpen(true);
   };
@@ -110,6 +120,13 @@ export default function AdminFlashSalesPage() {
     setEditingSale(sale);
     setSelectedAppliesTo(sale.appliesTo as 'ALL' | 'CATEGORY' | 'PRODUCT');
     setSelectedMode(sale.mode);
+    // Cargar productos con precios fijos si existen
+    if (sale.mode === 'FIXED_PRICE' && sale.products) {
+      setFixedPriceItems(sale.products.map((p) => ({
+        productId: p.productId,
+        targetPrice: p.targetPrice,
+      })));
+    }
     form.setFieldsValue({
       name: sale.name,
       description: sale.description,
@@ -121,7 +138,6 @@ export default function AdminFlashSalesPage() {
       targetCategories: sale.targetCategories,
       targetProductIds: sale.targetProductIds,
       mode: sale.mode,
-      targetPrice: sale.targetPrice,
     });
     setModalOpen(true);
   };
@@ -131,12 +147,14 @@ export default function AdminFlashSalesPage() {
       const values = await form.validateFields();
       setIsSaving(true);
 
-      const targetProductIds = values.appliesTo === 'PRODUCT' ? values.targetProductIds : [];
-      const targetPrice = values.mode === 'FIXED_PRICE' ? values.targetPrice : null;
+      // FIXED_PRICE: usar fixedPriceItems, no targetPrice simple
+      const targetProductIds = selectedMode === 'FIXED_PRICE'
+        ? fixedPriceItems.map((i) => i.productId)
+        : (values.appliesTo === 'PRODUCT' ? values.targetProductIds : []);
 
-      // Validar que FIXED_PRICE solo aplique a productos específicos
-      if (values.mode === 'FIXED_PRICE' && (values.appliesTo !== 'PRODUCT' || targetProductIds.length === 0)) {
-        message.error('El modo FIXED_PRICE requiere seleccionar productos específicos');
+      // Validar que FIXED_PRICE tenga al menos un producto
+      if (selectedMode === 'FIXED_PRICE' && fixedPriceItems.length === 0) {
+        message.error('FIXED_PRICE requiere al menos un producto con precio');
         setIsSaving(false);
         return;
       }
@@ -149,11 +167,13 @@ export default function AdminFlashSalesPage() {
         endTime: values.endTime ? (values.endTime as dayjs.Dayjs).toISOString() : null,
         isActive: values.isActive ?? true,
         appliesTo: values.appliesTo,
-        targetCategories:
-          values.appliesTo === 'CATEGORY' ? values.targetCategories : [],
+        targetCategories: values.appliesTo === 'CATEGORY' ? values.targetCategories : [],
         targetProductIds: targetProductIds,
-        mode: values.mode ?? 'ANCHOR',
-        targetPrice: targetPrice,
+        mode: selectedMode,
+        // FIXED_PRICE: productos con precios individuales
+        productPrices: selectedMode === 'FIXED_PRICE'
+          ? fixedPriceItems.map((i) => ({ productId: i.productId, targetPrice: i.targetPrice }))
+          : undefined,
       };
 
       const url = editingSale
@@ -350,15 +370,15 @@ export default function AdminFlashSalesPage() {
             label="Fecha y hora de inicio"
             rules={[{ required: true, message: 'Selecciona fecha inicio' }]}
           >
-            <DatePicker showTime style={{ width: '100%' }} />
+            <DatePicker id="startTime" showTime style={{ width: '100%' }} />
           </Form.Item>
 
           <Form.Item name="endTime" label="Fecha y hora de fin (opcional)">
-            <DatePicker showTime style={{ width: '100%' }} />
+            <DatePicker id="endTime" showTime style={{ width: '100%' }} />
           </Form.Item>
 
           <Form.Item name="isActive" label="Activo" valuePropName="checked" initialValue={true}>
-            <Switch />
+            <Switch id="isActive" />
           </Form.Item>
 
           <Form.Item
@@ -366,7 +386,7 @@ export default function AdminFlashSalesPage() {
             label="Modo de descuento"
             initialValue="ANCHOR"
           >
-            <Radio.Group onChange={(e) => handleModeChange(e as unknown as { target: { value: DiscountMode } })}>
+            <Radio.Group id="mode" onChange={(e) => handleModeChange(e as unknown as { target: { value: DiscountMode } })}>
               <Radio value="REAL">Descuento Real</Radio>
               <Radio value="ANCHOR">Precio Anclado</Radio>
               <Radio value="FIXED_PRICE">Precio Final Fijo</Radio>
@@ -374,18 +394,54 @@ export default function AdminFlashSalesPage() {
           </Form.Item>
 
           {selectedMode === 'FIXED_PRICE' && (
-            <Form.Item
-              name="targetPrice"
-              label="Precio Final Deseado"
-              tooltip="Solo para modo FIXED_PRICE: el precio que pagará el cliente"
-              rules={[{ required: true, message: 'Requerido para FIXED_PRICE' }]}
-            >
-              <InputNumber
-                min={0}
-                style={{ width: '100%' }}
-                placeholder="Ej: 445000"
-              />
-            </Form.Item>
+            <div>
+              <Divider orientation="left">Productos con Precio Fijo</Divider>
+              <div className="mb-2">
+                <Select
+                  placeholder="Agregar producto..."
+                  style={{ width: '60%' }}
+                  options={products
+                    .filter((p) => !fixedPriceItems.some((i) => i.productId === p.id))
+                    .map((p) => ({ value: p.id, label: `${p.name} (base: $${(p.price || 0).toLocaleString()})` }))}
+                  onSelect={(productId: string) => {
+                    const product = products.find((p) => p.id === productId);
+                    if (product) {
+                      setFixedPriceItems([...fixedPriceItems, { productId, targetPrice: product.price }]);
+                    }
+                  }}
+                />
+              </div>
+
+              {fixedPriceItems.length > 0 && (
+                <div className="border rounded-lg p-3 bg-gray-50 dark:bg-slate-800/50">
+                  {fixedPriceItems.map((item, index) => {
+                    const product = products.find((p) => p.id === item.productId);
+                    return (
+                      <div key={item.productId} className="flex items-center gap-2 mb-2 last:mb-0">
+                        <span className="flex-1 text-sm truncate">{product?.name}</span>
+                        <InputNumber
+                          min={0}
+                          value={item.targetPrice}
+                          onChange={(val) => {
+                            const newItems = [...fixedPriceItems];
+                            newItems[index] = { ...newItems[index], targetPrice: val as number };
+                            setFixedPriceItems(newItems);
+                          }}
+                          style={{ width: 120 }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setFixedPriceItems(fixedPriceItems.filter((_, i) => i !== index))}
+                          className="text-red-500 hover:text-red-700 text-sm"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           )}
 
           <Divider>Alcance del descuento</Divider>
@@ -426,24 +482,14 @@ export default function AdminFlashSalesPage() {
             </Form.Item>
           )}
 
-          {selectedAppliesTo === 'PRODUCT' && (
+          {selectedAppliesTo === 'PRODUCT' && selectedMode !== 'FIXED_PRICE' && (
             <Form.Item
               name="targetProductIds"
               label="Productos"
-              rules={[
-                { required: true, message: 'Selecciona al menos un producto' },
-                {
-                  validator: (_, value) => {
-                    if (selectedMode === 'FIXED_PRICE' && Array.isArray(value) && value.length !== 1) {
-                      return Promise.reject(new Error('FIXED_PRICE requiere exactamente un producto'));
-                    }
-                    return Promise.resolve();
-                  },
-                },
-              ]}
+              rules={[{ required: true, message: 'Selecciona al menos un producto' }]}
             >
               <Select
-                mode={selectedMode === 'FIXED_PRICE' ? undefined : 'multiple'}
+                mode="multiple"
                 showSearch
                 placeholder="Buscar productos..."
                 optionFilterProp="label"

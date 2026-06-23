@@ -198,6 +198,9 @@ async function applyFlashSalesToProducts(
       appliesTo: true,
       targetCategories: true,
       targetProductIds: true,
+      products: {
+        select: { productId: true, targetPrice: true },
+      },
     },
   });
 
@@ -211,12 +214,24 @@ async function applyFlashSalesToProducts(
       else if (sale.appliesTo === 'CATEGORY' && sale.targetCategories.includes(p.category)) applies = true;
       else if (sale.appliesTo === 'PRODUCT' && sale.targetProductIds.includes(p.id)) applies = true;
 
+      if (sale.mode === 'FIXED_PRICE') {
+        applies = sale.products.some(fp => fp.productId === p.id);
+      }
+
       if (applies) {
+        let currentTargetPrice = sale.targetPrice;
+        if (sale.mode === 'FIXED_PRICE') {
+          const fpInfo = sale.products.find(fp => fp.productId === p.id);
+          if (fpInfo) {
+            currentTargetPrice = fpInfo.targetPrice;
+          }
+        }
+
         const result = calculateDisplayPrices({
           basePrice: p.price,
           discountPercentage: sale.discount,
           mode: sale.mode,
-          targetPrice: sale.targetPrice,
+          targetPrice: currentTargetPrice,
         });
         finalPrice = result.displayPrice;
         appliedFlashSaleId = sale.id;

@@ -554,10 +554,23 @@ model FlashSale {
 
   // Mode: REAL (descuento real), ANCHOR (precio anclado), FIXED_PRICE (precio final forzado)
   mode        DiscountMode @default(ANCHOR)
-  targetPrice Float?       // Precio final deseado cuando mode = FIXED_PRICE
+  targetPrice Float?       // Precio final deseado cuando mode = FIXED_PRICE (para un solo producto)
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Productos individuales con precios fijos para modo FIXED_PRICE
+  products    FlashSaleProduct[]
+
   @@index([isActive, startTime, endTime])
+}
+
+model FlashSaleProduct {
+  id         String  @id @default(cuid())
+  flashSale  FlashSale @relation(fields: [flashSaleId], references: [id], onDelete: Cascade)
+  flashSaleId String
+  productId   String
+  targetPrice  Float
+
+  @@unique([flashSaleId, productId])
 }

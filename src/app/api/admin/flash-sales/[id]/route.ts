@@ -30,7 +30,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       targetCategories,
       targetProductIds,
       mode,
-      targetPrice,
+      productPrices,
     } = body;
 
     const updateData: Record<string, unknown> = {};
@@ -41,15 +41,44 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (startTime !== undefined) updateData.startTime = new Date(startTime);
     if (endTime !== undefined) updateData.endTime = endTime ? new Date(endTime) : null;
     if (isActive !== undefined) updateData.isActive = Boolean(isActive);
-    if (appliesTo !== undefined) updateData.appliesTo = appliesTo;
-    if (targetCategories !== undefined) updateData.targetCategories = appliesTo === 'CATEGORY' ? targetCategories : [];
-    if (targetProductIds !== undefined) updateData.targetProductIds = appliesTo === 'PRODUCT' ? targetProductIds : [];
-    if (mode !== undefined) updateData.mode = ['REAL', 'ANCHOR', 'FIXED_PRICE'].includes(mode) ? mode : 'ANCHOR';
-    if (targetPrice !== undefined) updateData.targetPrice = mode === 'FIXED_PRICE' ? Number(targetPrice) : null;
+
+    const safeMode = ['REAL', 'ANCHOR', 'FIXED_PRICE'].includes(mode) ? mode : 'ANCHOR';
+    updateData.mode = safeMode;
+
+    if (appliesTo !== undefined) {
+      updateData.appliesTo = appliesTo;
+      updateData.targetCategories = appliesTo === 'CATEGORY' && Array.isArray(targetCategories)
+        ? targetCategories.map(String)
+        : [];
+      updateData.targetProductIds = appliesTo === 'PRODUCT' && Array.isArray(targetProductIds)
+        ? targetProductIds.map(String)
+        : [];
+    }
+
+    // FIXED_PRICE: manejar productos individuales
+    if (mode === 'FIXED_PRICE' && Array.isArray(productPrices)) {
+      updateData.targetPrice = null;
+      // Eliminar productos anteriores y crear nuevos
+      await prisma.flashSaleProduct.deleteMany({ where: { flashSaleId: id } });
+      updateData.products = {
+        create: productPrices.map((p: { productId: string; targetPrice: number }) => ({
+          productId: String(p.productId),
+          targetPrice: Number(p.targetPrice),
+        })),
+      };
+    } else if (mode !== 'FIXED_PRICE') {
+      updateData.targetPrice = null;
+      await prisma.flashSaleProduct.deleteMany({ where: { flashSaleId: id } });
+    }
 
     const sale = await prisma.flashSale.update({
       where: { id },
       data: updateData,
+      include: {
+        products: {
+          select: { productId: true, targetPrice: true },
+        },
+      },
     });
 
     return NextResponse.json(sale);

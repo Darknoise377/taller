@@ -13,4 +13,11 @@ export interface FlashSale {
   targetProductIds: string[];
   mode: DiscountMode;
   targetPrice: number | null;
+  products?: FlashSaleProduct[];
+}
+
+export interface FlashSaleProduct {
+  id: string;
+  productId: string;
+  targetPrice: number;
 }
