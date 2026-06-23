@@ -30,60 +30,51 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
   const liked = isLiked(product.id);
   const { freeShippingThreshold, minShippingRate, isFreeShippingAll } = useShippingConfig();
 
-  // ── Oferta Flash Activa ──────────────────────
-  const [flashSale, setFlashSale] = useState<FlashSale | null>(null);
+// ── Oferta Flash Activa (optimizado: fetch específico) ──────────────────────
+   useEffect(() => {
+     fetch(`/api/flash-sales/applicable?productId=${product.id}&category=${product.category}`)
+       .then((r) => (r.ok ? r.json() : null))
+       .then((sale: FlashSale | null) => setFlashSale(sale))
+       .catch(() => {});
+   }, [product.id, product.category]);
 
-  useEffect(() => {
-    fetch("/api/flash-sales")
-      .then((r) => (r.ok ? r.json() : []))
-      .then((sales: FlashSale[]) => {
-        const now = new Date();
-        const activeSale = sales.find((s) => {
-          const start = new Date(s.startTime);
-          const end = s.endTime ? new Date(s.endTime) : null;
-          const inRange = start <= now && (!end || end >= now);
-          if (!inRange) return false;
-          if (s.appliesTo === "ALL") return true;
-          if (s.appliesTo === "CATEGORY" && s.targetCategories.includes(product.category)) return true;
-          if (s.appliesTo === "PRODUCT" && s.targetProductIds.includes(product.id)) return true;
-          return false;
-        });
-        setFlashSale(activeSale || null);
-      })
-      .catch(() => {});
-  }, [product.id, product.category]);
+// Calcular precios según tipo de oferta (con soporte FIXED_PRICE multi-producto)
+   const { displayPrice, originalPrice, hasDiscount, discountPercentage } = useMemo(() => {
+     if (!flashSale) return { displayPrice: product.price, originalPrice: null, hasDiscount: false, discountPercentage: 0 };
 
-  // Calcular precios según tipo de oferta
-  const { displayPrice, originalPrice, hasDiscount, discountPercentage } = useMemo(() => {
-    if (!flashSale) return { displayPrice: product.price, originalPrice: null, hasDiscount: false, discountPercentage: 0 };
+     const mode = flashSale.mode;
+     const safeDiscount = Math.min(99, Math.max(0, flashSale.discount));
+     const factor = 1 - safeDiscount / 100;
 
-    const mode = flashSale.mode;
-    const safeDiscount = Math.min(99, Math.max(0, flashSale.discount));
-    const factor = 1 - safeDiscount / 100;
+     let dPrice = product.price;
+     let oPrice: number | null = null;
 
-    let dPrice = product.price;
-    let oPrice: number | null = null;
+     if (mode === "REAL") {
+       dPrice = Math.ceil(product.price * factor);
+       oPrice = product.price;
+     } else if (mode === "ANCHOR") {
+       dPrice = product.price;
+       if (factor > 0) oPrice = Math.ceil(product.price / factor);
+     } else if (mode === "FIXED_PRICE") {
+       // Para FIXED_PRICE, buscar el targetPrice específico del producto
+       let targetPrice = flashSale.targetPrice;
+       if (!targetPrice && flashSale.products?.length) {
+         const fpMatch = flashSale.products.find(p => p.productId === product.id);
+         if (fpMatch) targetPrice = fpMatch.targetPrice;
+       }
+       if (targetPrice != null && Number.isFinite(targetPrice)) {
+         dPrice = targetPrice;
+         if (factor > 0) oPrice = Math.ceil(targetPrice / factor);
+       }
+     }
 
-    if (mode === "REAL") {
-      dPrice = Math.ceil(product.price * factor);
-      oPrice = product.price;
-    } else if (mode === "ANCHOR") {
-      dPrice = product.price;
-      if (factor > 0) oPrice = Math.ceil(product.price / factor);
-    } else if (mode === "FIXED_PRICE") {
-      if (flashSale.targetPrice != null && Number.isFinite(flashSale.targetPrice)) {
-        dPrice = flashSale.targetPrice;
-        if (factor > 0) oPrice = Math.ceil(flashSale.targetPrice / factor);
-      }
-    }
-
-    return {
-      displayPrice: dPrice,
-      originalPrice: oPrice,
-      hasDiscount: true,
-      discountPercentage: safeDiscount,
-    };
-  }, [flashSale, product.price]);
+     return {
+       displayPrice: dPrice,
+       originalPrice: oPrice,
+       hasDiscount: true,
+       discountPercentage: safeDiscount,
+     };
+   }, [flashSale, product.price, product.id]);
 
   const hasFreeShipping = isFreeShippingAll || displayPrice >= freeShippingThreshold;
 
