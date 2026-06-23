@@ -52,10 +52,10 @@ export default function AdminMetaPage() {
 
   const loadProducts = useCallback(async () => {
     try {
-      const res = await fetch('/api/products');
+      const res = await fetch('/api/admin/products');
       if (res.ok) {
         const data = await res.json();
-        setProducts(data.products || []);
+        setProducts(data || []);
       }
     } catch { /* ignore */ }
   }, []);
