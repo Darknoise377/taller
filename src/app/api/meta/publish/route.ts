@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import {
+  publishToFacebook,
+  createInstagramMediaContainer,
+  publishInstagramContainer,
+} from '@/lib/meta/graphApi';
 
 async function validateCdnUrl(url: string): Promise<boolean> {
   try {
@@ -8,6 +13,51 @@ async function validateCdnUrl(url: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+async function processPublish(payload: {
+  socialPostId: string;
+  pageAccessToken: string;
+  pageId: string;
+  instagramAccountId?: string;
+  mediaUrl: string;
+  caption: string;
+  platform: string;
+}) {
+  const { socialPostId, pageAccessToken, pageId, instagramAccountId, mediaUrl, caption, platform } = payload;
+
+  const results: { facebookId?: string; instagramId?: string } = {};
+
+  if (platform === 'FACEBOOK' || platform === 'BOTH') {
+    const fbPostId = await publishToFacebook(pageAccessToken, pageId, mediaUrl, caption);
+    if (fbPostId) {
+      results.facebookId = fbPostId;
+    } else {
+      throw new Error('Error publicando en Facebook');
+    }
+  }
+
+  if ((platform === 'INSTAGRAM' || platform === 'BOTH') && instagramAccountId) {
+    const containerId = await createInstagramMediaContainer(pageAccessToken, instagramAccountId, mediaUrl, caption);
+    if (!containerId) {
+      throw new Error('Error creando contenedor de Instagram');
+    }
+    const igPostId = await publishInstagramContainer(pageAccessToken, instagramAccountId, containerId);
+    if (igPostId) {
+      results.instagramId = igPostId;
+    } else {
+      throw new Error('Error publicando en Instagram');
+    }
+  }
+
+  const metaPostId = results.facebookId || results.instagramId || undefined;
+  await prisma.socialPost.update({
+    where: { id: socialPostId },
+    data: {
+      status: 'PUBLISHED',
+      metaPostId,
+    },
+  });
 }
 
 export async function POST(req: Request) {
@@ -57,26 +107,35 @@ export async function POST(req: Request) {
       },
     });
 
-    await prisma.job.create({
-      data: {
-        type: 'social_publish',
-        payload: {
-          socialPostId: socialPost.id,
-          storeId,
-          pageAccessToken: token.pageAccessToken,
-          pageId: token.pageId,
-          instagramAccountId: token.instagramAccountId,
-          mediaUrl,
-          caption,
-          platform,
+    try {
+      await processPublish({
+        socialPostId: socialPost.id,
+        pageAccessToken: token.pageAccessToken,
+        pageId: token.pageId,
+        instagramAccountId: token.instagramAccountId,
+        mediaUrl,
+        caption,
+        platform,
+      });
+      
+      return NextResponse.json(
+        { message: 'Publicado exitosamente', postId: socialPost.id },
+        { status: 200 }
+      );
+    } catch (err) {
+      await prisma.socialPost.update({
+        where: { id: socialPost.id },
+        data: {
+          status: 'FAILED',
+          errorMessage: err instanceof Error ? err.message : String(err),
         },
-      },
-    });
-
-    return NextResponse.json(
-      { message: 'Publicación en cola', postId: socialPost.id },
-      { status: 202 }
-    );
+      });
+      
+      return NextResponse.json(
+        { error: err instanceof Error ? err.message : 'Error al publicar' },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error('Publish endpoint error:', error);
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
