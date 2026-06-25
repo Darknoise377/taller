@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
-  const { name, description, price } = await req.json();
+  const { name, description } = await req.json();
 
   if (!name) {
     return NextResponse.json({ error: 'Nombre del producto requerido' }, { status: 400 });

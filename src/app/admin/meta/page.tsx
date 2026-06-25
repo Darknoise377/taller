@@ -183,13 +183,6 @@ export default function AdminMetaPage() {
     }
   };
 
-  const loadInsights = async (postId: string) => {
-    const post = posts.find(p => p.id === postId);
-    if (!post?.metaPostId) return;
-    // TODO: Implementar carga de insights
-    console.log('Loading insights for post:', post.metaPostId);
-  };
-
   const columns: ColumnsType<SocialPostRow> = [
     {
       title: 'Producto',

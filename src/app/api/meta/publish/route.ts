@@ -112,7 +112,7 @@ export async function POST(req: Request) {
         socialPostId: socialPost.id,
         pageAccessToken: token.pageAccessToken,
         pageId: token.pageId,
-        instagramAccountId: token.instagramAccountId,
+        instagramAccountId: token.instagramAccountId ?? undefined,
         mediaUrl,
         caption,
         platform,
