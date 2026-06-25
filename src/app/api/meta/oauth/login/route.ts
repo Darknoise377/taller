@@ -5,8 +5,6 @@ const REDIRECT_URI = `${process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL}/
 const SCOPES = [
   'pages_show_list',
   'pages_manage_posts',
-  'instagram_basic',
-  'instagram_content_publish',
 ].join(',');
 
 export function GET(req: Request) {
