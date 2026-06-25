@@ -2,11 +2,10 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  Button, Card, Divider, Form, Input, message, Popconfirm, Spin, Table, Tag, Typography, Select, Modal,
+  Button, Card, Form, Input, message, Popconfirm, Spin, Table, Tag, Typography, Select, Modal, Image,
 } from 'antd';
 import {
-  ApiOutlined, CheckCircleOutlined, CloseCircleOutlined, DisconnectOutlined, ReloadOutlined,
-  SendOutlined, PictureOutlined,
+  ApiOutlined, CheckCircleOutlined, CloseCircleOutlined, DisconnectOutlined, SendOutlined, RobotOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 
@@ -24,6 +23,7 @@ interface Product {
   name: string;
   imageUrl?: string;
   price: number;
+  description?: string;
 }
 
 interface SocialPostRow {
@@ -41,6 +41,7 @@ export default function AdminMetaPage() {
   const [posts, setPosts] = useState<SocialPostRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
+  const [generatingCaption, setGeneratingCaption] = useState(false);
   const [manualModal, setManualModal] = useState(false);
   const [form] = Form.useForm<{ productId: string; caption: string; platform: string }>();
   const [manualForm] = Form.useForm<{ pageAccessToken: string; pageId: string; instagramAccountId?: string }>();
@@ -120,6 +121,35 @@ export default function AdminMetaPage() {
     }
   };
 
+  const generateCaptionAI = async (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+
+    setGeneratingCaption(true);
+    try {
+      const res = await fetch('/api/meta/generate-caption', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: product.name,
+          description: product.description,
+          price: product.price,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.caption) {
+        form.setFieldsValue({ caption: data.caption });
+        message.success('Descripción generada con IA');
+      } else {
+        message.error(data.error || 'Error al generar descripción');
+      }
+    } catch {
+      message.error('Error al generar descripción');
+    } finally {
+      setGeneratingCaption(false);
+    }
+  };
+
   const handlePublish = async (values: { productId: string; caption: string; platform: string }) => {
     setPublishing(true);
     try {
@@ -141,8 +171,9 @@ export default function AdminMetaPage() {
       });
 
       if (res.ok) {
-        message.success('Publicación en cola');
+        message.success('Publicado exitosamente');
         form.resetFields();
+        loadPosts();
       } else {
         const err = await res.json();
         message.error(err.error || 'Error al publicar');
@@ -152,34 +183,48 @@ export default function AdminMetaPage() {
     }
   };
 
+  const loadInsights = async (postId: string) => {
+    const post = posts.find(p => p.id === postId);
+    if (!post?.metaPostId) return;
+    // TODO: Implementar carga de insights
+    console.log('Loading insights for post:', post.metaPostId);
+  };
+
   const columns: ColumnsType<SocialPostRow> = [
+    {
+      title: 'Producto',
+      key: 'product',
+      width: 80,
+      render: (_, row) => {
+        const product = products.find(p => p.id === row.caption?.substring(0, 10) || p.id === row.metaPostId?.split('_')[0]);
+        return product?.imageUrl ? (
+          <Image src={product.imageUrl} alt="thumb" width={40} height={40} style={{ objectFit: 'cover', borderRadius: 4 }} />
+        ) : '—';
+      },
+    },
     {
       title: 'Plataforma',
       dataIndex: 'platform',
       key: 'platform',
-      width: 120,
+      width: 110,
       render: (v: string) => {
-        const color: Record<string, string> = {
-          FACEBOOK: 'blue',
-          INSTAGRAM: 'pink',
-          BOTH: 'purple',
-        };
-        return <Tag color={color[v] || 'default'}>{v}</Tag>;
+        const colorMap: Record<string, string> = { FACEBOOK: 'blue', INSTAGRAM: 'pink', BOTH: 'purple' };
+        return <Tag color={colorMap[v] || 'default'}>{v}</Tag>;
       },
     },
     {
       title: 'Estado',
       dataIndex: 'status',
       key: 'status',
-      width: 120,
+      width: 110,
       render: (v: string) => {
-        const color: Record<string, string> = {
+        const colorMap: Record<string, string> = {
           PUBLISHED: 'green',
           PROCESSING: 'orange',
           FAILED: 'red',
           PENDING: 'default',
         };
-        return <Tag color={color[v] || 'default'}>{v}</Tag>;
+        return <Tag color={colorMap[v] || 'default'}>{v}</Tag>;
       },
     },
     {
@@ -193,24 +238,22 @@ export default function AdminMetaPage() {
       title: 'Meta ID',
       dataIndex: 'metaPostId',
       key: 'metaPostId',
-      width: 180,
-      render: (v?: string) => v ? <Text copyable>{v}</Text> : '—',
+      width: 150,
+      render: (v?: string) => v ? <Text copyable style={{ fontSize: 12 }}>{v}</Text> : '—',
     },
     {
       title: 'Fecha',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 150,
-      render: (v: string) => new Date(v).toLocaleString('es-CO'),
+      width: 140,
+      render: (v: string) => new Date(v).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
     },
   ];
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Spin size="large">
-          <div className="mt-3 text-gray-500 text-sm">Cargando integración Meta...</div>
-        </Spin>
+        <Spin size="large"><div className="mt-3 text-gray-500">Cargando integración Meta...</div></Spin>
       </div>
     );
   }
@@ -218,37 +261,18 @@ export default function AdminMetaPage() {
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
       <Title level={2} className="!mb-0">Publicación en Redes Sociales</Title>
-      <Paragraph type="secondary">
-        Conecta tu Facebook Page e Instagram Business para publicar productos automáticamente.
-      </Paragraph>
+      <Paragraph type="secondary">Conecta tu Facebook Page e Instagram para publicar productos automáticamente.</Paragraph>
 
-      <Card
-        title={
-          <span className="flex items-center gap-2">
-            <ApiOutlined />
-            Conexión con Meta
-          </span>
-        }
-      >
+      <Card title={<span className="flex items-center gap-2"><ApiOutlined /> Conexión con Meta</span>}>
         {status?.connected ? (
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex items-center gap-2 text-green-600">
-              <CheckCircleOutlined />
-              <Text strong>Conectado</Text>
+              <CheckCircleOutlined /><Text strong>Conectado</Text>
             </div>
-            <div>
-              {status.pageId && <Text>Página: {status.pageId}</Text>}
-              {status.hasInstagram && <Text> · Instagram: Sí</Text>}
-            </div>
+            <div>{status.pageId && <Text>Página: {status.pageId}</Text>}</div>
             <div className="ml-auto flex gap-2">
               <Button onClick={() => setManualModal(true)}>Editar tokens</Button>
-              <Popconfirm
-                title="¿Desconectar cuenta de Meta?"
-                description="Se eliminarán los tokens guardados."
-                onConfirm={handleDisconnect}
-                okText="Sí, desconectar"
-                cancelText="Cancelar"
-              >
+              <Popconfirm title="¿Desconectar cuenta de Meta?" description="Se eliminarán los tokens guardados." onConfirm={handleDisconnect} okText="Sí" cancelText="Cancelar">
                 <Button danger icon={<DisconnectOutlined />}>Desconectar</Button>
               </Popconfirm>
             </div>
@@ -256,79 +280,25 @@ export default function AdminMetaPage() {
         ) : (
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex items-center gap-2 text-red-500">
-              <CloseCircleOutlined />
-              <Text type="danger">No conectado</Text>
+              <CloseCircleOutlined /><Text type="danger">No conectado</Text>
             </div>
-            <Text type="secondary">Conecta para publicar productos en Facebook e Instagram.</Text>
+            <Text type="secondary">Conecta para publicar productos.</Text>
             <div className="ml-auto flex gap-2">
               <Button onClick={() => setManualModal(true)}>Conexión manual</Button>
-              <Button type="primary" icon={<ApiOutlined />} onClick={handleConnect}>
-                Conectar con Meta
-              </Button>
+              <Button type="primary" icon={<ApiOutlined />} onClick={handleConnect}>Conectar con Meta</Button>
             </div>
           </div>
         )}
       </Card>
 
-      <Modal
-        title="Conexión manual con Meta"
-        open={manualModal}
-        onCancel={() => setManualModal(false)}
-        footer={null}
-      >
-        <Form
-          form={manualForm}
-          layout="vertical"
-          onFinish={handleManualConnect}
-        >
-          <Form.Item
-            name="pageAccessToken"
-            label="Page Access Token"
-            rules={[{ required: true }]}
-          >
-            <Input.TextArea rows={2} placeholder="Token de página infinito" />
-          </Form.Item>
-          <Form.Item
-            name="pageId"
-            label="Page ID"
-            rules={[{ required: true }]}
-          >
-            <Input placeholder="ID de la página" />
-          </Form.Item>
-          <Form.Item
-            name="instagramAccountId"
-            label="Instagram Account ID (opcional)"
-          >
-            <Input placeholder="ID de cuenta de Instagram Business" />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">Guardar</Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Card title="Publicar producto" className="mt-6">
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{ platform: 'BOTH' }}
-          onFinish={handlePublish}
-        >
-          <Form.Item
-            name="productId"
-            label="Producto"
-            rules={[{ required: true, message: 'Selecciona un producto' }]}
-          >
-            <Select
-              showSearch
-              placeholder="Buscar producto..."
-              optionFilterProp="children"
-              style={{ width: '100%' }}
-            >
+      <Card title="Publicar producto">
+        <Form form={form} layout="vertical" initialValues={{ platform: 'FACEBOOK' }} onFinish={handlePublish}>
+          <Form.Item name="productId" label="Producto" rules={[{ required: true }]}>
+            <Select showSearch optionFilterProp="children" style={{ width: '100%' }} onChange={(val) => generateCaptionAI(val as string)}>
               {products.map(p => (
                 <Select.Option key={p.id} value={p.id}>
                   <div className="flex items-center gap-2">
-                    {p.imageUrl && <img src={p.imageUrl} alt={p.name} className="w-8 h-8 object-cover rounded" />}
+                    {p.imageUrl && <Image src={p.imageUrl} alt={p.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} />}
                     <span>{p.name}</span>
                   </div>
                 </Select.Option>
@@ -338,10 +308,20 @@ export default function AdminMetaPage() {
 
           <Form.Item
             name="caption"
-            label="Descripción"
-            rules={[{ required: true, message: 'Ingresa una descripción' }]}
+            label={
+              <span className="flex items-center gap-2">
+                Descripción
+                <Button size="small" icon={<RobotOutlined />} loading={generatingCaption} onClick={() => {
+                  const prodId = form.getFieldValue('productId');
+                  if (prodId) generateCaptionAI(prodId);
+                }}>
+                  Generar con IA
+                </Button>
+              </span>
+            }
+            rules={[{ required: true }]}
           >
-            <Input.TextArea rows={3} placeholder="Descripción de la publicación..." maxLength={2200} />
+            <Input.TextArea rows={3} placeholder="Descripción atractiva para la publicación..." maxLength={2200} />
           </Form.Item>
 
           <Form.Item name="platform" label="Plataforma">
@@ -353,28 +333,32 @@ export default function AdminMetaPage() {
           </Form.Item>
 
           <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={publishing}
-              icon={<SendOutlined />}
-              disabled={!status?.connected}
-            >
-              Publicar
+            <Button type="primary" htmlType="submit" loading={publishing} icon={<SendOutlined />} disabled={!status?.connected}>
+              Publicar ahora
             </Button>
           </Form.Item>
         </Form>
       </Card>
 
-      <Card title="Historial de publicaciones" className="mt-6">
-        <Table
-          dataSource={posts}
-          columns={columns}
-          rowKey="id"
-          size="small"
-          pagination={{ pageSize: 10 }}
-          locale={{ emptyText: 'No hay publicaciones' }}
-        />
+      <Modal title="Conexión manual con Meta" open={manualModal} onCancel={() => setManualModal(false)} footer={null}>
+        <Form form={manualForm} layout="vertical" onFinish={handleManualConnect}>
+          <Form.Item name="pageAccessToken" label="Page Access Token" rules={[{ required: true }]}>
+            <Input.TextArea rows={2} placeholder="Pega el token de página infinito" />
+          </Form.Item>
+          <Form.Item name="pageId" label="Page ID" rules={[{ required: true }]}>
+            <Input placeholder="ID de la página (ej: 123456789)" />
+          </Form.Item>
+          <Form.Item name="instagramAccountId" label="Instagram Account ID (opcional)">
+            <Input placeholder="ID de cuenta de Instagram Business" />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">Guardar conexión</Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Card title="Historial de publicaciones">
+        <Table dataSource={posts} columns={columns} rowKey="id" size="small" pagination={{ pageSize: 10 }} locale={{ emptyText: 'No hay publicaciones' }} />
       </Card>
     </div>
   );
