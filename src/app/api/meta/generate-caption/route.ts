@@ -1,48 +1,51 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { generateText } from 'ai';
+import { verifyAdminToken } from '@/lib/auth';
+import { COOKIE_NAME } from '@/config/admin';
+import { getAIModel } from '@/lib/ai-provider';
+
+async function requireAdmin() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
+  if (!token) return null;
+  try { await verifyAdminToken(token); return true; } catch { return null; }
+}
 
 export async function POST(req: Request) {
+  if (!(await requireAdmin())) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  }
+
+  const { name, description, price } = await req.json();
+
+  if (!name) {
+    return NextResponse.json({ error: 'Nombre del producto requerido' }, { status: 400 });
+  }
+
+  const prompt = `Eres un experto en redes sociales para una tienda de repuestos de motos en Colombia.
+Genera una descripción corta (máximo 200 caracteres) para publicar en Facebook/Instagram.
+
+Incluye:
+- Tono comercial y atractivo
+- 1-2 emojis relevantes (motocicleta, herramienta, flecha)
+- Hashtags: #Repuestos #Motos #Taller (máximo 3)
+- NO menciones precios explícitos
+
+Producto: ${name}
+${description ? `Detalles: ${description.substring(0, 100)}` : ''}
+
+Responde SOLO el texto de la publicación.`;
+
   try {
-    const { name, description, price } = await req.json();
+    const { text } = await generateText({
+      model: getAIModel(),
+      prompt,
+    });
 
-    if (!name) {
-      return NextResponse.json({ error: 'Nombre del producto requerido' }, { status: 400 });
-    }
-
-    const prompt = `Genera una descripción atractiva para publicar en redes sociales (máximo 200 caracteres) para este repuesto de motos:
-    
-    Nombre: ${name}
-    ${description ? `Descripción: ${description}` : ''}
-    ${price ? `Precio: $${price}` : ''}
-    
-    Usa un tono comercial, incluye emojis relevantes y hashtags como #Repuestos #Motos #Taller`.trim();
-
-    // Llamada a IA (Gemini)
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-    if (!GEMINI_API_KEY) {
-      return NextResponse.json({ error: 'GEMINI_API_KEY no configurado' }, { status: 500 });
-    }
-
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-        }),
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error('Error en API de IA');
-    }
-
-    const data = await res.json();
-    const caption = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-
-    return NextResponse.json({ caption });
-  } catch (error) {
-    console.error('Generate caption error:', error);
+    return NextResponse.json({ caption: text.trim() });
+  } catch (err) {
+    console.error('[meta/generate-caption] AI error:', err);
     return NextResponse.json({ error: 'Error al generar descripción' }, { status: 500 });
   }
 }
