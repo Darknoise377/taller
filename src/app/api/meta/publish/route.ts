@@ -126,6 +126,13 @@ export async function POST(req: Request) {
       },
     });
 
+    console.log('=== DEBUG META PUBLISH ===');
+    console.log('1. pageId:', token.pageId);
+    console.log('2. pageAccessToken type:', typeof token.pageAccessToken);
+    console.log('3. mediaUrl:', mediaUrl);
+    console.log('4. Final URL:', `https://graph.facebook.com/v25.0/${token.pageId}/photos`);
+    console.log('========================');
+
     try {
       await processPublish({
         socialPostId: socialPost.id,
