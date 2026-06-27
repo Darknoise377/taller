@@ -6,6 +6,16 @@ import {
   publishInstagramContainer,
 } from '@/lib/meta/graphApi';
 
+async function validateToken(pageAccessToken: string, pageId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`https://graph.facebook.com/v25.0/${pageId}?fields=id&access_token=${pageAccessToken}`);
+    const data = await res.json();
+    return res.ok && !!data.id;
+  } catch {
+    return false;
+  }
+}
+
 async function validateCdnUrl(url: string): Promise<boolean> {
   try {
     const res = await fetch(url, { method: 'HEAD' });
@@ -93,6 +103,15 @@ export async function POST(req: Request) {
     if (!token || !token.isValid) {
       return NextResponse.json(
         { error: 'Token de Meta no configurado o inválido para esta tienda' },
+        { status: 401 }
+      );
+    }
+
+    // Validate page access token
+    const isValidToken = await validateToken(token.pageAccessToken, token.pageId);
+    if (!isValidToken) {
+      return NextResponse.json(
+        { error: 'El Page Access Token guardado no es válido. Reconecta la página.' },
         { status: 401 }
       );
     }
