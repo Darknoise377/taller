@@ -4,7 +4,10 @@ import {
   publishToFacebook,
   createInstagramMediaContainer,
   publishInstagramContainer,
+  fetchPostInsights,
+  editFacebookPost,
 } from '@/lib/meta/graphApi';
+import cloudinary from '@/lib/cloudinary';
 
 async function validateToken(pageAccessToken: string, pageId: string): Promise<boolean> {
   try {
@@ -16,12 +19,15 @@ async function validateToken(pageAccessToken: string, pageId: string): Promise<b
   }
 }
 
-async function validateCdnUrl(url: string): Promise<boolean> {
+async function validateMediaUrl(url: string): Promise<{ valid: boolean; isVideo: boolean }> {
   try {
     const res = await fetch(url, { method: 'HEAD' });
-    return res.ok && res.headers.get('content-type')?.startsWith('image/') === true;
+    const contentType = res.headers.get('content-type') || '';
+    const isVideo = contentType.startsWith('video/');
+    const isImage = contentType.startsWith('image/');
+    return { valid: res.ok && (isVideo || isImage), isVideo };
   } catch {
-    return false;
+    return { valid: false, isVideo: false };
   }
 }
 
@@ -33,13 +39,14 @@ async function processPublish(payload: {
   mediaUrl: string;
   caption: string;
   platform: string;
+  isVideo?: boolean;
 }) {
-  const { socialPostId, pageAccessToken, pageId, instagramAccountId, mediaUrl, caption, platform } = payload;
+  const { socialPostId, pageAccessToken, pageId, instagramAccountId, mediaUrl, caption, platform, isVideo } = payload;
 
   const results: { facebookId?: string; instagramId?: string } = {};
 
   if (platform === 'FACEBOOK' || platform === 'BOTH') {
-    const fbPostId = await publishToFacebook(pageAccessToken, pageId, mediaUrl, caption);
+    const fbPostId = await publishToFacebook(pageAccessToken, pageId, mediaUrl, caption, isVideo);
     if (fbPostId) {
       results.facebookId = fbPostId;
     } else {
@@ -72,66 +79,57 @@ async function processPublish(payload: {
 
 export async function POST(req: Request) {
   try {
-    const { storeId, mediaUrl, caption, platform = 'BOTH' } = await req.json();
+    const contentType = req.headers.get('content-type') || '';
+    
+    let storeId: string, mediaUrl: string, caption: string, platform = 'BOTH', isVideo = false;
 
-    if (!storeId || !mediaUrl || !caption) {
-      return NextResponse.json(
-        { error: 'storeId, mediaUrl y caption son requeridos' },
-        { status: 400 }
-      );
+    if (contentType.includes('multipart/form-data')) {
+      const form = await req.formData();
+      storeId = form.get('storeId') as string;
+      caption = form.get('caption') as string;
+      platform = (form.get('platform') as string) || 'BOTH';
+      isVideo = form.get('isVideo') === 'true';
+      
+      const file = form.get('file') as File | null;
+      if (file) {
+        const arrayBuffer = await file.arrayBuffer();
+        const uploaded = await new Promise<{ secure_url: string }>((resolve, reject) => {
+          cloudinary.uploader.upload_stream(
+            { resource_type: isVideo ? 'video' : 'image', folder: 'meta-publish' },
+            (err, result) => {
+              if (err || !result?.secure_url) reject(err || new Error('Upload failed'));
+              else resolve(result);
+            }
+          ).end(Buffer.from(arrayBuffer));
+        });
+        mediaUrl = uploaded.secure_url;
+      }
+    } else {
+      ({ storeId, mediaUrl, caption, platform, isVideo } = await req.json());
     }
 
-    if (!await validateCdnUrl(mediaUrl)) {
-      return NextResponse.json(
-        { error: 'La URL de imagen no es accesible o no es una imagen válida' },
-        { status: 400 }
-      );
+    if (!storeId || !mediaUrl && !isVideo && !caption) {
+      return NextResponse.json({ error: 'storeId y caption son requeridos' }, { status: 400 });
     }
 
     const validPlatforms = ['FACEBOOK', 'INSTAGRAM', 'BOTH'];
     if (!validPlatforms.includes(platform)) {
-      return NextResponse.json(
-        { error: 'platform debe ser FACEBOOK, INSTAGRAM o BOTH' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'platform debe ser FACEBOOK, INSTAGRAM o BOTH' }, { status: 400 });
     }
 
-    const token = await prisma.metaToken.findUnique({
-      where: { storeId },
-    });
+    const token = await prisma.metaToken.findUnique({ where: { storeId } });
 
     if (!token || !token.isValid) {
-      return NextResponse.json(
-        { error: 'Token de Meta no configurado o inválido para esta tienda' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Token de Meta no configurado o inválido' }, { status: 401 });
     }
 
-    // Validate page access token
-    const isValidToken = await validateToken(token.pageAccessToken, token.pageId);
-    if (!isValidToken) {
-      return NextResponse.json(
-        { error: 'El Page Access Token guardado no es válido. Reconecta la página.' },
-        { status: 401 }
-      );
+    if (!await validateToken(token.pageAccessToken, token.pageId)) {
+      return NextResponse.json({ error: 'Page Access Token inválido. Reconecta.' }, { status: 401 });
     }
 
     const socialPost = await prisma.socialPost.create({
-      data: {
-        storeId,
-        platform,
-        status: 'PROCESSING',
-        mediaUrl,
-        caption,
-      },
+      data: { storeId, platform, status: 'PROCESSING', mediaUrl: mediaUrl || '', caption },
     });
-
-    console.log('=== DEBUG META PUBLISH ===');
-    console.log('1. pageId:', token.pageId);
-    console.log('2. pageAccessToken type:', typeof token.pageAccessToken);
-    console.log('3. mediaUrl:', mediaUrl);
-    console.log('4. Final URL:', `https://graph.facebook.com/v25.0/${token.pageId}/photos`);
-    console.log('========================');
 
     try {
       await processPublish({
@@ -139,31 +137,97 @@ export async function POST(req: Request) {
         pageAccessToken: token.pageAccessToken,
         pageId: token.pageId,
         instagramAccountId: token.instagramAccountId ?? undefined,
-        mediaUrl,
+        mediaUrl: mediaUrl || '',
         caption,
         platform,
+        isVideo,
       });
-      
-      return NextResponse.json(
-        { message: 'Publicado exitosamente', postId: socialPost.id },
-        { status: 200 }
-      );
+      return NextResponse.json({ message: 'Publicado exitosamente', postId: socialPost.id });
     } catch (err) {
       await prisma.socialPost.update({
         where: { id: socialPost.id },
-        data: {
-          status: 'FAILED',
-          errorMessage: err instanceof Error ? err.message : String(err),
-        },
+        data: { status: 'FAILED', errorMessage: err instanceof Error ? err.message : String(err) },
       });
-      
-      return NextResponse.json(
-        { error: err instanceof Error ? err.message : 'Error al publicar' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: err instanceof Error ? err.message : 'Error al publicar' }, { status: 500 });
     }
   } catch (error) {
     console.error('Publish endpoint error:', error);
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    const { postId, caption } = await req.json();
+    
+    if (!postId || !caption) {
+      return NextResponse.json({ error: 'postId y caption son requeridos' }, { status: 400 });
+    }
+
+    const post = await prisma.socialPost.findUnique({ where: { id: postId } });
+    if (!post || !post.metaPostId) {
+      return NextResponse.json({ error: 'Publicación no encontrada' }, { status: 404 });
+    }
+
+    const token = await prisma.metaToken.findFirst({ where: { isValid: true } });
+    if (!token) {
+      return NextResponse.json({ error: 'Token no configurado' }, { status: 401 });
+    }
+
+    const success = await editFacebookPost(token.pageAccessToken, post.metaPostId, caption);
+    if (!success) {
+      return NextResponse.json({ error: 'Error editando en Meta' }, { status: 500 });
+    }
+
+    await prisma.socialPost.update({
+      where: { id: postId },
+      data: { caption, updatedAt: new Date() },
+    });
+
+    return NextResponse.json({ message: 'Actualizado exitosamente' });
+  } catch (error) {
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 });
+  }
+}
+
+export async function GET(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const postId = searchParams.get('postId');
+
+    const token = await prisma.metaToken.findFirst({ where: { isValid: true } });
+    if (!token?.pageAccessToken) {
+      return NextResponse.json({ error: 'Token no configurado' }, { status: 401 });
+    }
+
+    if (postId) {
+      const post = await prisma.socialPost.findUnique({ where: { id: postId } });
+      if (!post?.metaPostId) {
+        return NextResponse.json({ error: 'Post no encontrado' }, { status: 404 });
+      }
+
+      const insights = await fetchPostInsights(token.pageAccessToken, post.metaPostId);
+      return NextResponse.json({ insights });
+    }
+
+    const posts = await prisma.socialPost.findMany({
+      where: { storeId: 'default' },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+
+    const postsWithInsights = await Promise.all(
+      posts.map(async (p) => {
+        let insights = null;
+        if (p.metaPostId) {
+          insights = await fetchPostInsights(token.pageAccessToken, p.metaPostId);
+        }
+        return { ...p, insights };
+      })
+    );
+
+    return NextResponse.json({ posts: postsWithInsights });
+  } catch (error) {
+    return NextResponse.json({ error: 'Error obteniendo datos' }, { status: 500 });
   }
 }

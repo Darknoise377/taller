@@ -115,16 +115,26 @@ export async function fetchInstagramAccountId(
 export async function publishToFacebook(
   pageAccessToken: string,
   pageId: string,
-  photoUrl: string,
-  caption: string
+  mediaUrl: string,
+  caption: string,
+  isVideo?: boolean
 ): Promise<string | null> {
   const params = new URLSearchParams({
     access_token: pageAccessToken,
-    message: caption,
-    url: photoUrl,
   });
 
-  const res = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
+  let endpoint: string;
+  if (isVideo) {
+    params.append('description', caption);
+    params.append('source', mediaUrl);
+    endpoint = `${GRAPH_BASE}/${pageId}/videos`;
+  } else {
+    params.append('message', caption);
+    params.append('url', mediaUrl);
+    endpoint = `${GRAPH_BASE}/${pageId}/photos`;
+  }
+
+  const res = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -208,4 +218,61 @@ export async function publishInstagramContainer(
 
 export function isTokenInvalidError(errorCode: number): boolean {
   return errorCode === 190;
+}
+
+interface PostInsightsResponse {
+  data: Array<{
+    name: string;
+    values: Array<{ value: unknown }>;
+  }>;
+}
+
+export async function fetchPostInsights(
+  pageAccessToken: string,
+  postId: string
+): Promise<Record<string, number> | null> {
+  const params = new URLSearchParams({
+    access_token: pageAccessToken,
+    metric: 'engagement,like,count,reactions,comments,shares,reach,impressions',
+  });
+
+  const res = await fetch(`${GRAPH_BASE}/${postId}/insights?${params}`);
+  const data = await res.json();
+
+  if (isMetaError(data)) {
+    console.error('Post insights error:', data.error);
+    return null;
+  }
+
+  const insights: Record<string, number> = {};
+  for (const item of (data as PostInsightsResponse).data) {
+    insights[item.name] = (item.values[0]?.value as number) || 0;
+  }
+  return insights;
+}
+
+export async function editFacebookPost(
+  pageAccessToken: string,
+  postId: string,
+  caption: string
+): Promise<boolean> {
+  const params = new URLSearchParams({
+    access_token: pageAccessToken,
+    message: caption,
+  });
+
+  const res = await fetch(`${GRAPH_BASE}/${postId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: params.toString(),
+  });
+
+  const data = await res.json();
+  if (isMetaError(data)) {
+    console.error('Edit post error:', data.error);
+    return false;
+  }
+  return true;
 }

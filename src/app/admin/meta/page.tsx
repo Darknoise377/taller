@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  Button, Card, Form, Input, message, Popconfirm, Spin, Table, Tag, Typography, Select, Modal, Image,
+  Button, Card, Form, Input, message, Popconfirm, Spin, Table, Tag, Typography, Select, Modal, Image, Upload,
 } from 'antd';
 import {
-  ApiOutlined, CheckCircleOutlined, CloseCircleOutlined, DisconnectOutlined, SendOutlined, RobotOutlined,
+  ApiOutlined, CheckCircleOutlined, CloseCircleOutlined, DisconnectOutlined, SendOutlined, RobotOutlined, UploadOutlined, EditOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 
@@ -56,7 +56,9 @@ interface SocialPostRow {
   status: string;
   metaPostId?: string;
   caption: string;
+  mediaUrl?: string;
   createdAt: string;
+  insights?: Record<string, number>;
 }
 
 export default function AdminMetaPage() {
@@ -68,9 +70,12 @@ export default function AdminMetaPage() {
   const [publishing, setPublishing] = useState(false);
   const [generatingCaption, setGeneratingCaption] = useState(false);
   const [manualModal, setManualModal] = useState(false);
-  const [itemType, setItemType] = useState<'PRODUCT' | 'COMBO'>('PRODUCT');
+  const [editModal, setEditModal] = useState<{ visible: boolean; post: SocialPostRow | null }>({ visible: false, post: null });
+  const [itemType, setItemType] = useState<'PRODUCT' | 'COMBO' | 'UPLOAD'>('PRODUCT');
   const [form] = Form.useForm<{ itemId: string; caption: string; platform: string }>();
   const [manualForm] = Form.useForm<{ pageAccessToken: string; pageId: string; instagramAccountId?: string }>();
+  const [editForm] = Form.useForm<{ caption: string }>();
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const loadStatus = useCallback(async () => {
     try {
@@ -101,7 +106,7 @@ export default function AdminMetaPage() {
 
   const loadPosts = useCallback(async () => {
     try {
-      const res = await fetch('/api/meta/posts?storeId=default');
+      const res = await fetch('/api/meta/publish');
       if (res.ok) {
         const data = await res.json();
         setPosts(data.posts || []);
@@ -157,8 +162,8 @@ export default function AdminMetaPage() {
     }
   };
 
-  const generateCaptionAI = async (itemId: string, currentItemType: 'PRODUCT' | 'COMBO' = itemType) => {
-    const item = currentItemType === 'PRODUCT' 
+  const generateCaptionAI = async (itemId: string, currentItemType: 'PRODUCT' | 'COMBO' = itemType as 'PRODUCT' | 'COMBO') => {
+    const item = currentItemType === 'PRODUCT'
       ? products.find(p => p.id === itemId) as Product | undefined
       : combos.find(c => c.id === itemId) as Combo | undefined;
     
@@ -197,6 +202,32 @@ export default function AdminMetaPage() {
   const handlePublish = async (values: { itemId: string; caption: string; platform: string }) => {
     setPublishing(true);
     try {
+      let mediaUrl = '';
+      
+      if (itemType === 'UPLOAD' && uploadedFile) {
+        const formData = new FormData();
+        formData.append('storeId', 'default');
+        formData.append('caption', values.caption);
+        formData.append('platform', values.platform);
+        formData.append('file', uploadedFile);
+        formData.append('isVideo', uploadedFile.type.startsWith('video/') ? 'true' : 'false');
+
+        const res = await fetch('/api/meta/publish', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Error al publicar');
+        }
+        message.success('Publicado exitosamente');
+        form.resetFields();
+        setUploadedFile(null);
+        loadPosts();
+        return;
+      }
+
       const item = itemType === 'PRODUCT'
         ? products.find(p => p.id === values.itemId) as Product | undefined
         : combos.find(c => c.id === values.itemId) as Combo | undefined;
@@ -206,12 +237,14 @@ export default function AdminMetaPage() {
         return;
       }
 
+      mediaUrl = item.imageUrl;
+
       const res = await fetch('/api/meta/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           storeId: 'default',
-          mediaUrl: item.imageUrl,
+          mediaUrl,
           caption: values.caption,
           platform: values.platform,
         }),
@@ -225,28 +258,56 @@ export default function AdminMetaPage() {
         const err = await res.json();
         message.error(err.error || 'Error al publicar');
       }
+    } catch (err) {
+      message.error(err instanceof Error ? err.message : 'Error inesperado');
     } finally {
       setPublishing(false);
     }
   };
 
+  const handleEditPost = async (values: { caption: string }) => {
+    if (!editModal.post) return;
+    
+    try {
+      const res = await fetch('/api/meta/publish', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postId: editModal.post.id,
+          caption: values.caption,
+        }),
+      });
+
+      if (res.ok) {
+        message.success('Publicación actualizada');
+        setEditModal({ visible: false, post: null });
+        loadPosts();
+      } else {
+        const err = await res.json();
+        message.error(err.error || 'Error al actualizar');
+      }
+    } catch {
+      message.error('Error al actualizar');
+    }
+  };
+
   const columns: ColumnsType<SocialPostRow> = [
     {
-      title: 'Producto',
-      key: 'product',
-      width: 80,
+      title: 'Media',
+      key: 'media',
+      width: 60,
       render: (_, row) => {
-        const product = products.find(p => p.id === row.caption?.substring(0, 10) || p.id === row.metaPostId?.split('_')[0]);
-        return product?.imageUrl ? (
-          <Image src={product.imageUrl} alt="thumb" width={40} height={40} style={{ objectFit: 'cover', borderRadius: 4 }} />
-        ) : '—';
+        if (!row.mediaUrl) return '—';
+        return row.mediaUrl.includes('.mp4') || row.mediaUrl.includes('.webm') || row.mediaUrl.includes('.mov')
+          ? <video src={row.mediaUrl} className="w-10 h-10 object-cover rounded" />
+          : <Image src={row.mediaUrl} alt="thumb" width={40} height={40} style={{ objectFit: 'cover', borderRadius: 4 }} />;
       },
     },
     {
       title: 'Plataforma',
       dataIndex: 'platform',
       key: 'platform',
-      width: 110,
+      width: 100,
       render: (v: string) => {
         const colorMap: Record<string, string> = { FACEBOOK: 'blue', INSTAGRAM: 'pink', BOTH: 'purple' };
         return <Tag color={colorMap[v] || 'default'}>{v}</Tag>;
@@ -256,7 +317,7 @@ export default function AdminMetaPage() {
       title: 'Estado',
       dataIndex: 'status',
       key: 'status',
-      width: 110,
+      width: 100,
       render: (v: string) => {
         const colorMap: Record<string, string> = {
           PUBLISHED: 'green',
@@ -268,25 +329,56 @@ export default function AdminMetaPage() {
       },
     },
     {
+      title: 'Interacciones',
+      key: 'insights',
+      width: 120,
+      render: (_, row) => {
+        const insights = row.insights;
+        if (!insights) return '—';
+        const total = (insights.like || 0) + (insights.comments || 0) + (insights.shares || 0);
+        return (
+          <div className="text-xs">
+            <div>👍 {insights.like || 0}</div>
+            <div>💬 {insights.comments || 0}</div>
+            <div>🔁 {insights.shares || 0}</div>
+            <div className="font-bold">Total: {total}</div>
+          </div>
+        );
+      },
+    },
+    {
       title: 'Descripción',
       dataIndex: 'caption',
       key: 'caption',
       ellipsis: true,
-      render: (v: string) => <Text ellipsis>{v}</Text>,
+      render: (v: string) => <Text ellipsis style={{ maxWidth: 200 }}>{v}</Text>,
     },
     {
       title: 'Meta ID',
       dataIndex: 'metaPostId',
       key: 'metaPostId',
-      width: 150,
-      render: (v?: string) => v ? <Text copyable style={{ fontSize: 12 }}>{v}</Text> : '—',
+      width: 120,
+      render: (v?: string) => v ? <Text copyable style={{ fontSize: 11 }}>{v}</Text> : '—',
     },
     {
       title: 'Fecha',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      width: 140,
+      width: 130,
       render: (v: string) => new Date(v).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }),
+    },
+    {
+      title: 'Acciones',
+      key: 'actions',
+      width: 100,
+      render: (_, row) => row.status === 'PUBLISHED' ? (
+        <Button size="small" icon={<EditOutlined />} onClick={() => {
+          setEditModal({ visible: true, post: row });
+          editForm.setFieldsValue({ caption: row.caption });
+        }}>
+          Editar
+        </Button>
+      ) : null,
     },
   ];
 
@@ -300,8 +392,8 @@ export default function AdminMetaPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
-      <Title level={2} className="!mb-0">Publicación en Redes Sociales</Title>
-      <Paragraph type="secondary">Conecta tu Facebook Page e Instagram para publicar productos y combos automáticamente.</Paragraph>
+      <Title level={2} className="!mb-0">Centro de Publicaciones Meta</Title>
+      <Paragraph type="secondary">Gestiona y publica contenido en Facebook e Instagram desde tu tienda.</Paragraph>
 
       <Card title={<span className="flex items-center gap-2"><ApiOutlined /> Conexión con Meta</span>}>
         {status?.connected ? (
@@ -322,7 +414,7 @@ export default function AdminMetaPage() {
             <div className="flex items-center gap-2 text-red-500">
               <CloseCircleOutlined /><Text type="danger">No conectado</Text>
             </div>
-            <Text type="secondary">Conecta para publicar productos.</Text>
+            <Text type="secondary">Conecta para publicar contenido.</Text>
             <div className="ml-auto flex gap-2">
               <Button onClick={() => setManualModal(true)}>Conexión manual</Button>
               <Button type="primary" icon={<ApiOutlined />} onClick={handleConnect}>Conectar con Meta</Button>
@@ -331,68 +423,88 @@ export default function AdminMetaPage() {
         )}
       </Card>
 
-      <Card title="Publicar producto o combo">
+      <Card title="Publicar contenido">
         <Form form={form} layout="vertical" initialValues={{ platform: 'FACEBOOK' }} onFinish={handlePublish}>
           <Form.Item label="Tipo" required>
             <Select 
-              style={{ width: 200 }} 
+              style={{ width: 220 }} 
               value={itemType} 
               onChange={(val) => {
                 setItemType(val);
                 form.setFieldsValue({ itemId: '' });
               }}
             >
-              <Select.Option value="PRODUCT">Producto</Select.Option>
-              <Select.Option value="COMBO">Combo</Select.Option>
+              <Select.Option value="PRODUCT">📦 Producto existente</Select.Option>
+              <Select.Option value="COMBO">🎁 Combo existente</Select.Option>
+              <Select.Option value="UPLOAD">📤 Subir archivo</Select.Option>
             </Select>
           </Form.Item>
 
-          <Form.Item name="itemId" label="Producto/Combo" rules={[{ required: true }]}>
-            <Select 
-              showSearch 
-              optionFilterProp="children" 
-              style={{ width: '100%' }} 
-              onChange={(val) => generateCaptionAI(val, itemType)}
-              onClear={() => form.setFieldsValue({ caption: '' })}
-            >
-              {itemType === 'PRODUCT' && (
-                <Select.OptGroup label="Productos">
-                  {products.map(p => (
-                    <Select.Option key={`p_${p.id}`} value={p.id}>
-                      <div className="flex items-center gap-2">
-                        {p.imageUrl && <Image src={p.imageUrl} alt={p.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} />}
-                        <span>{p.name}</span>
-                      </div>
-                    </Select.Option>
-                  ))}
-                </Select.OptGroup>
-              )}
-              {itemType === 'COMBO' && (
-                <Select.OptGroup label="Combos">
-                  {combos.map(c => (
-                    <Select.Option key={`c_${c.id}`} value={c.id}>
-                      <div className="flex items-center gap-2">
-                        {c.imageUrl && <Image src={c.imageUrl} alt={c.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} />}
-                        <span>{c.name}</span>
-                      </div>
-                    </Select.Option>
-                  ))}
-                </Select.OptGroup>
-              )}
-            </Select>
-          </Form.Item>
+          {itemType === 'UPLOAD' && (
+            <Form.Item label="Archivo">
+              <Upload.Dragger
+                accept="image/*,video/*"
+                showUploadList={{ showRemoveIcon: true }}
+                beforeUpload={(file) => {
+                  setUploadedFile(file);
+                  return false;
+                }}
+                onRemove={() => setUploadedFile(null)}
+                maxCount={1}
+              >
+                <p className="ant-upload-drag-icon">
+                  <UploadOutlined />
+                </p>
+                <p className="ant-upload-text">Click o arrasta archivo</p>
+                <p className="ant-upload-hint">Imágenes (PNG,JPG,WebP) o Videos (MP4,WebM,Mov)</p>
+              </Upload.Dragger>
+            </Form.Item>
+          )}
+
+          {itemType !== 'UPLOAD' && (
+            <Form.Item name="itemId" label="Seleccionar" rules={[{ required: true }]}>
+              <Select showSearch optionFilterProp="children" style={{ width: '100%' }} onChange={(val) => generateCaptionAI(val as string)}>
+                {itemType === 'PRODUCT' && (
+                  <Select.OptGroup label="Productos">
+                    {products.map(p => (
+                      <Select.Option key={`p_${p.id}`} value={p.id}>
+                        <div className="flex items-center gap-2">
+                          {p.imageUrl && <Image src={p.imageUrl} alt={p.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} preview={false} />}
+                          <span>{p.name}</span>
+                        </div>
+                      </Select.Option>
+                    ))}
+                  </Select.OptGroup>
+                )}
+                {itemType === 'COMBO' && (
+                  <Select.OptGroup label="Combos">
+                    {combos.map(c => (
+                      <Select.Option key={`c_${c.id}`} value={c.id}>
+                        <div className="flex items-center gap-2">
+                          {c.imageUrl && <Image src={c.imageUrl} alt={c.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} preview={false} />}
+                          <span>{c.name}</span>
+                        </div>
+                      </Select.Option>
+                    ))}
+                  </Select.OptGroup>
+                )}
+              </Select>
+            </Form.Item>
+          )}
 
           <Form.Item
             name="caption"
             label={
               <span className="flex items-center gap-2">
                 Descripción
-                <Button size="small" icon={<RobotOutlined />} loading={generatingCaption} onClick={() => {
-                  const itemId = form.getFieldValue('itemId');
-                  if (itemId) generateCaptionAI(itemId, itemType);
-                }}>
-                  Generar con IA
-                </Button>
+                {itemType !== 'UPLOAD' && (
+                  <Button size="small" icon={<RobotOutlined />} loading={generatingCaption} onClick={() => {
+                    const itemId = form.getFieldValue('itemId');
+                    if (itemId) generateCaptionAI(itemId);
+                  }}>
+                    Generar con IA
+                  </Button>
+                )}
               </span>
             }
             rules={[{ required: true }]}
@@ -429,6 +541,17 @@ export default function AdminMetaPage() {
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">Guardar conexión</Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal title="Editar publicación" open={editModal.visible} onCancel={() => setEditModal({ visible: false, post: null })} footer={null}>
+        <Form form={editForm} layout="vertical" onFinish={handleEditPost}>
+          <Form.Item name="caption" label="Nueva descripción" rules={[{ required: true }]}>
+            <Input.TextArea rows={3} maxLength={2200} />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">Guardar cambios</Button>
           </Form.Item>
         </Form>
       </Modal>
