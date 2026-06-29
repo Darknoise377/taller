@@ -59,8 +59,6 @@ interface SocialPostRow {
   createdAt: string;
 }
 
-type PublishableItem = Product | Combo;
-
 export default function AdminMetaPage() {
   const [status, setStatus] = useState<MetaStatus | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -70,7 +68,8 @@ export default function AdminMetaPage() {
   const [publishing, setPublishing] = useState(false);
   const [generatingCaption, setGeneratingCaption] = useState(false);
   const [manualModal, setManualModal] = useState(false);
-  const [form] = Form.useForm<{ itemId: string; caption: string; platform: string; itemType: string }>();
+  const [itemType, setItemType] = useState<'PRODUCT' | 'COMBO'>('PRODUCT');
+  const [form] = Form.useForm<{ itemId: string; caption: string; platform: string }>();
   const [manualForm] = Form.useForm<{ pageAccessToken: string; pageId: string; instagramAccountId?: string }>();
 
   const loadStatus = useCallback(async () => {
@@ -158,14 +157,14 @@ export default function AdminMetaPage() {
     }
   };
 
-  const generateCaptionAI = async (itemId: string, itemType: string) => {
-    const item = itemType === 'PRODUCT' 
+  const generateCaptionAI = async (itemId: string, currentItemType: 'PRODUCT' | 'COMBO' = itemType) => {
+    const item = currentItemType === 'PRODUCT' 
       ? products.find(p => p.id === itemId) as Product | undefined
       : combos.find(c => c.id === itemId) as Combo | undefined;
     
     if (!item) return;
 
-    const productUrl = itemType === 'PRODUCT'
+    const productUrl = currentItemType === 'PRODUCT'
       ? `https://www.motoservicioayr.com/products/${item.slug || item.id}`
       : `https://www.motoservicioayr.com/combos/${item.slug}`;
 
@@ -195,10 +194,10 @@ export default function AdminMetaPage() {
     }
   };
 
-  const handlePublish = async (values: { itemId: string; caption: string; platform: string; itemType: string }) => {
+  const handlePublish = async (values: { itemId: string; caption: string; platform: string }) => {
     setPublishing(true);
     try {
-      const item = values.itemType === 'PRODUCT'
+      const item = itemType === 'PRODUCT'
         ? products.find(p => p.id === values.itemId) as Product | undefined
         : combos.find(c => c.id === values.itemId) as Combo | undefined;
 
@@ -333,39 +332,53 @@ export default function AdminMetaPage() {
       </Card>
 
       <Card title="Publicar producto o combo">
-        <Form form={form} layout="vertical" initialValues={{ platform: 'FACEBOOK', itemType: 'PRODUCT' }} onFinish={handlePublish}>
-          <Form.Item name="itemType" label="Tipo" rules={[{ required: true }]}>
-            <Select style={{ width: 200 }}>
+        <Form form={form} layout="vertical" initialValues={{ platform: 'FACEBOOK' }} onFinish={handlePublish}>
+          <Form.Item label="Tipo" required>
+            <Select 
+              style={{ width: 200 }} 
+              value={itemType} 
+              onChange={(val) => {
+                setItemType(val);
+                form.setFieldsValue({ itemId: '' });
+              }}
+            >
               <Select.Option value="PRODUCT">Producto</Select.Option>
               <Select.Option value="COMBO">Combo</Select.Option>
             </Select>
           </Form.Item>
 
           <Form.Item name="itemId" label="Producto/Combo" rules={[{ required: true }]}>
-            <Select showSearch optionFilterProp="children" style={{ width: '100%' }} onChange={(val) => {
-              const type = form.getFieldValue('itemType');
-              generateCaptionAI(val as string, type);
-            }}>
-              <Select.OptGroup label="Productos">
-                {products.map(p => (
-                  <Select.Option key={`p_${p.id}`} value={p.id} disabled={form.getFieldValue('itemType') !== 'PRODUCT'}>
-                    <div className="flex items-center gap-2">
-                      {p.imageUrl && <Image src={p.imageUrl} alt={p.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} />}
-                      <span>{p.name}</span>
-                    </div>
-                  </Select.Option>
-                ))}
-              </Select.OptGroup>
-              <Select.OptGroup label="Combos">
-                {combos.map(c => (
-                  <Select.Option key={`c_${c.id}`} value={c.id} disabled={form.getFieldValue('itemType') !== 'COMBO'}>
-                    <div className="flex items-center gap-2">
-                      {c.imageUrl && <Image src={c.imageUrl} alt={c.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} />}
-                      <span>{c.name}</span>
-                    </div>
-                  </Select.Option>
-                ))}
-              </Select.OptGroup>
+            <Select 
+              showSearch 
+              optionFilterProp="children" 
+              style={{ width: '100%' }} 
+              onChange={(val) => generateCaptionAI(val, itemType)}
+              onClear={() => form.setFieldsValue({ caption: '' })}
+            >
+              {itemType === 'PRODUCT' && (
+                <Select.OptGroup label="Productos">
+                  {products.map(p => (
+                    <Select.Option key={`p_${p.id}`} value={p.id}>
+                      <div className="flex items-center gap-2">
+                        {p.imageUrl && <Image src={p.imageUrl} alt={p.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} />}
+                        <span>{p.name}</span>
+                      </div>
+                    </Select.Option>
+                  ))}
+                </Select.OptGroup>
+              )}
+              {itemType === 'COMBO' && (
+                <Select.OptGroup label="Combos">
+                  {combos.map(c => (
+                    <Select.Option key={`c_${c.id}`} value={c.id}>
+                      <div className="flex items-center gap-2">
+                        {c.imageUrl && <Image src={c.imageUrl} alt={c.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} />}
+                        <span>{c.name}</span>
+                      </div>
+                    </Select.Option>
+                  ))}
+                </Select.OptGroup>
+              )}
             </Select>
           </Form.Item>
 
@@ -376,7 +389,6 @@ export default function AdminMetaPage() {
                 Descripción
                 <Button size="small" icon={<RobotOutlined />} loading={generatingCaption} onClick={() => {
                   const itemId = form.getFieldValue('itemId');
-                  const itemType = form.getFieldValue('itemType');
                   if (itemId) generateCaptionAI(itemId, itemType);
                 }}>
                   Generar con IA
