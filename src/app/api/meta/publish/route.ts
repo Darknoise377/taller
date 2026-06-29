@@ -19,18 +19,6 @@ async function validateToken(pageAccessToken: string, pageId: string): Promise<b
   }
 }
 
-async function validateMediaUrl(url: string): Promise<{ valid: boolean; isVideo: boolean }> {
-  try {
-    const res = await fetch(url, { method: 'HEAD' });
-    const contentType = res.headers.get('content-type') || '';
-    const isVideo = contentType.startsWith('video/');
-    const isImage = contentType.startsWith('image/');
-    return { valid: res.ok && (isVideo || isImage), isVideo };
-  } catch {
-    return { valid: false, isVideo: false };
-  }
-}
-
 async function processPublish(payload: {
   socialPostId: string;
   pageAccessToken: string;
@@ -70,10 +58,7 @@ async function processPublish(payload: {
   const metaPostId = results.facebookId || results.instagramId || undefined;
   await prisma.socialPost.update({
     where: { id: socialPostId },
-    data: {
-      status: 'PUBLISHED',
-      metaPostId,
-    },
+    data: { status: 'PUBLISHED', metaPostId },
   });
 }
 
@@ -81,7 +66,7 @@ export async function POST(req: Request) {
   try {
     const contentType = req.headers.get('content-type') || '';
     
-    let storeId: string, mediaUrl: string, caption: string, platform = 'BOTH', isVideo = false;
+    let storeId: string, mediaUrl = '', caption: string, platform = 'BOTH', isVideo = false;
 
     if (contentType.includes('multipart/form-data')) {
       const form = await req.formData();
@@ -108,7 +93,7 @@ export async function POST(req: Request) {
       ({ storeId, mediaUrl, caption, platform, isVideo } = await req.json());
     }
 
-    if (!storeId || !mediaUrl && !isVideo && !caption) {
+    if (!storeId || !caption) {
       return NextResponse.json({ error: 'storeId y caption son requeridos' }, { status: 400 });
     }
 
@@ -128,7 +113,7 @@ export async function POST(req: Request) {
     }
 
     const socialPost = await prisma.socialPost.create({
-      data: { storeId, platform, status: 'PROCESSING', mediaUrl: mediaUrl || '', caption },
+      data: { storeId, platform, status: 'PROCESSING', mediaUrl, caption },
     });
 
     try {
@@ -137,7 +122,7 @@ export async function POST(req: Request) {
         pageAccessToken: token.pageAccessToken,
         pageId: token.pageId,
         instagramAccountId: token.instagramAccountId ?? undefined,
-        mediaUrl: mediaUrl || '',
+        mediaUrl,
         caption,
         platform,
         isVideo,
@@ -150,8 +135,8 @@ export async function POST(req: Request) {
       });
       return NextResponse.json({ error: err instanceof Error ? err.message : 'Error al publicar' }, { status: 500 });
     }
-  } catch (error) {
-    console.error('Publish endpoint error:', error);
+  } catch (err) {
+    console.error('Publish endpoint error:', err);
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
@@ -185,7 +170,7 @@ export async function PUT(req: Request) {
     });
 
     return NextResponse.json({ message: 'Actualizado exitosamente' });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Error interno' }, { status: 500 });
   }
 }
@@ -227,7 +212,7 @@ export async function GET(req: Request) {
     );
 
     return NextResponse.json({ posts: postsWithInsights });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Error obteniendo datos' }, { status: 500 });
   }
 }
