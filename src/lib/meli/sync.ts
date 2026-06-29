@@ -16,6 +16,8 @@ import type { Product } from '@prisma/client';
 const SELLER_SKU  = 'SELLER_SKU';
 const BRAND       = 'BRAND';
 const PART_NUMBER = 'PART_NUMBER';
+const GTIN        = 'GTIN';
+const LINE        = 'LINE';
 
 type UnresolvedAttr = Pick<MeliCategoryAttribute, 'id' | 'name' | 'value_type' | 'values' | 'allowed_units'>;
 
@@ -80,7 +82,8 @@ async function buildAttributes(
     return []; // Non-fatal: proceed without attributes if the call fails
   }
 
-  const required = categoryAttrs.filter((a) => a.tags.required && !a.tags.hidden && !a.tags.read_only);
+  // Incluir atributos requeridos incluso si están hidden (structured-data)
+  const required = categoryAttrs.filter((a) => a.tags.required && !a.tags.read_only);
   const result: { id: string; value_name: string }[] = [];
   const unresolved: UnresolvedAttr[] = [];
 
@@ -133,6 +136,21 @@ async function buildAttributes(
       } else {
         unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: undefined, allowed_units: attr.allowed_units });
       }
+    } else if (attr.id === GTIN) {
+      // GTIN es obligatorio para muchas categorías. Usar SKU como fallback.
+      // Si no hay SKU/diagramNumber, usar un valor genérico basado en el ID del producto
+      const gtinValue = product.sku || product.diagramNumber || `GEN-${product.id.slice(-8)}`;
+      result.push({ id: GTIN, value_name: gtinValue });
+    } else if (attr.id === LINE || attr.name?.toLowerCase() === 'línea') {
+      // "Línea" es común en categorías de motos. Derivar de marca o tags.
+      const brand = (product as Product & { brand?: string | null }).brand;
+      const lineValue = brand || product.tags?.[0] || 'Genérico';
+      result.push({ id: LINE, value_name: lineValue.slice(0, 60) });
+    } else if (attr.id === 'MODEL_LINE' || attr.id === 'LINE_TYPE') {
+      // Variante del atributo "Línea"
+      const brand = (product as Product & { brand?: string | null }).brand;
+      const lineValue = brand || product.tags?.[0] || 'Genérico';
+      result.push({ id: attr.id, value_name: lineValue.slice(0, 60) });
     } else if (attr.value_type === 'string' || attr.value_type === 'number' || attr.value_type === 'number_unit') {
       // Free-text / numeric required attr — let AI infer a contextual value
       unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: undefined, allowed_units: attr.allowed_units });
@@ -236,6 +254,33 @@ async function resolveCategoryId(product: Product): Promise<string> {
 
   if (categoryMap[localCat]) return categoryMap[localCat];
 
+  // Mapa predeterminado de categorías de repuestos para motos (MCO - Colombia)
+  // NOTA: Estos IDs pueden estar desactualizados. Únete el categoryMap en /api/meli/config
+  // con los IDs reales obtenidos de: https://api.mercadolibre.com/sites/MCO/categories
+  const DEFAULT_CATEGORY_MAP: Record<string, string> = {
+    refrigeracion: 'MCO429228',   // Refrigeración (usar MCO_MOTO_REFRIGERATION cuando esté disponible)
+    motor: 'MCO429228',          // Motor - usa la misma categoría hasta encontrar la correcta
+    frenos: 'MCO429228',
+    llantas: 'MCO429228',
+    cilindros: 'MCO429228',
+    aceites_lubricantes: 'MCO429228',
+    filtros: 'MCO429228',
+    baterias: 'MCO429228',
+    transmision: 'MCO429228',
+    kit_arrastre: 'MCO429228',
+    suspension: 'MCO429228',
+    escape: 'MCO429228',
+    electrico: 'MCO429228',
+    iluminacion: 'MCO429228',
+    carenaje: 'MCO429228',
+    accesorios: 'MCO429228',
+  };
+
+  if (DEFAULT_CATEGORY_MAP[localCat]) {
+    console.info(`[meli/sync] Using fallback category ${DEFAULT_CATEGORY_MAP[localCat]} for local category ${localCat}. Update config to use correct IDs.`);
+    return DEFAULT_CATEGORY_MAP[localCat];
+  }
+
   // Auto-predict via MeLi API (best-effort)
   // MEJORA: Enriquecer el string de predicción para evitar malas categorizaciones (ej: Ventilador -> Electrodoméstico)
   try {
@@ -251,12 +296,21 @@ async function resolveCategoryId(product: Product): Promise<string> {
     
     if (predictions.length > 0) {
       // Forzamos que la predicción seleccionada contenga algo de motos o repuestos de vehículos para evitar que caiga en Agro/Electrodomésticos
-      const validPrediction = predictions.find(p => 
-        p.domain_id?.includes('MOTOCYCLE') || 
-        p.domain_id?.includes('VEHICLE') ||
-        p.domain_name?.toLowerCase().includes('moto') ||
-        p.category_name?.toLowerCase().includes('moto')
-      );
+      const validPrediction = predictions.find(p => {
+        const domainId = (p.domain_id || '').toLowerCase();
+        const domainName = (p.domain_name || '').toLowerCase();
+        const categoryName = (p.category_name || '').toLowerCase();
+        return (
+          domainId.includes('motocycle') ||
+          domainId.includes('vehicle') ||
+          domainId.includes('motorcycle') ||
+          domainId.includes('moto') ||
+          domainName.includes('moto') ||
+          categoryName.includes('moto') ||
+          categoryName.includes('repuesto') ||
+          categoryName.includes('radiador') // Casos específicos que sabemos que son correctos
+        );
+      });
 
       const finalCategoryId = validPrediction ? validPrediction.category_id : predictions[0].category_id;
       console.info(`[meli/sync] Predicted Category: ${finalCategoryId} (Domain: ${validPrediction?.domain_id || predictions[0].domain_id})`);
