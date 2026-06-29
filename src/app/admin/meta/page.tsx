@@ -51,6 +51,14 @@ interface Combo {
   items?: ComboItem[];
 }
 
+interface FlashSale {
+  id: string;
+  name: string;
+  description?: string;
+  discount: number;
+  isActive: boolean;
+}
+
 interface SocialPostRow {
   id: string;
   platform: string;
@@ -66,13 +74,14 @@ export default function AdminMetaPage() {
   const [status, setStatus] = useState<MetaStatus | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [combos, setCombos] = useState<Combo[]>([]);
+  const [flashSales, setFlashSales] = useState<FlashSale[]>([]);
   const [posts, setPosts] = useState<SocialPostRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [generatingCaption, setGeneratingCaption] = useState(false);
   const [manualModal, setManualModal] = useState(false);
   const [editModal, setEditModal] = useState<{ visible: boolean; post: SocialPostRow | null }>({ visible: false, post: null });
-  const [itemType, setItemType] = useState<'PRODUCT' | 'COMBO' | 'UPLOAD'>('PRODUCT');
+  const [itemType, setItemType] = useState<'PRODUCT' | 'COMBO' | 'FLASH_SALE' | 'UPLOAD'>('PRODUCT');
   const [form] = Form.useForm<{ itemId: string; caption: string; platform: string; useVideo?: boolean }>();
   const [manualForm] = Form.useForm<{ pageAccessToken: string; pageId: string; instagramAccountId?: string }>();
   const [editForm] = Form.useForm<{ caption: string }>();
@@ -105,6 +114,16 @@ export default function AdminMetaPage() {
     } catch { /* ignore */ }
   }, []);
 
+  const loadFlashSales = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/flash-sales');
+      if (res.ok) {
+        const data = await res.json();
+        setFlashSales(data || []);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   const loadPosts = useCallback(async () => {
     try {
       const res = await fetch('/api/meta/publish');
@@ -117,9 +136,9 @@ export default function AdminMetaPage() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([loadStatus(), loadProducts(), loadCombos(), loadPosts()])
+    Promise.all([loadStatus(), loadProducts(), loadCombos(), loadFlashSales(), loadPosts()])
       .finally(() => setLoading(false));
-  }, [loadStatus, loadProducts, loadCombos, loadPosts]);
+  }, [loadStatus, loadProducts, loadCombos, loadFlashSales, loadPosts]);
 
   const handleConnect = () => {
     window.location.href = '/api/meta/oauth/login?storeId=default';
@@ -163,16 +182,25 @@ export default function AdminMetaPage() {
     }
   };
 
-  const generateCaptionAI = async (itemId: string, currentItemType: 'PRODUCT' | 'COMBO' = itemType as 'PRODUCT' | 'COMBO') => {
-    const item = currentItemType === 'PRODUCT'
-      ? products.find(p => p.id === itemId) as Product | undefined
-      : combos.find(c => c.id === itemId) as Combo | undefined;
-    
+  const generateCaptionAI = async (itemId: string, currentItemType: 'PRODUCT' | 'COMBO' | 'FLASH_SALE' = itemType as 'PRODUCT' | 'COMBO' | 'FLASH_SALE') => {
+    let item: Product | Combo | FlashSale | undefined;
+    let productUrl = '';
+
+    if (currentItemType === 'PRODUCT') {
+      item = products.find(p => p.id === itemId);
+      if (item) productUrl = `https://www.motoservicioayr.com/products/${(item as Product).slug || item.id}`;
+    } else if (currentItemType === 'COMBO') {
+      item = combos.find(c => c.id === itemId);
+      if (item) productUrl = `https://www.motoservicioayr.com/combos/${(item as Combo).slug}`;
+    } else if (currentItemType === 'FLASH_SALE') {
+      item = flashSales.find(f => f.id === itemId);
+      productUrl = 'https://www.motoservicioayr.com/flash-sales';
+    }
+
     if (!item) return;
 
-    const productUrl = currentItemType === 'PRODUCT'
-      ? `https://www.motoservicioayr.com/products/${item.slug || item.id}`
-      : `https://www.motoservicioayr.com/combos/${item.slug}`;
+    const description = 'description' in item ? item.description : undefined;
+    const price = 'price' in item ? item.price : undefined;
 
     setGeneratingCaption(true);
     try {
@@ -181,7 +209,8 @@ export default function AdminMetaPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: item.name,
-          description: 'description' in item ? item.description : undefined,
+          description,
+          price,
           productUrl,
         }),
       });
@@ -230,24 +259,36 @@ export default function AdminMetaPage() {
         return;
       }
 
-      const item = itemType === 'PRODUCT'
-        ? products.find(p => p.id === values.itemId) as Product | undefined
-        : combos.find(c => c.id === values.itemId) as Combo | undefined;
-
-      if (!item) {
-        message.error('Selecciona un producto o combo');
-        return;
-      }
-
-      const selectedProduct = item as Product;
-      if (values.useVideo && selectedProduct.videoUrl) {
-        mediaUrl = selectedProduct.videoUrl;
-        isVideo = true;
-      } else if (item.imageUrl) {
-        mediaUrl = item.imageUrl;
+      if (itemType === 'FLASH_SALE') {
+        // Flash sales use default hero image or generic
+        const sale = flashSales.find(f => f.id === values.itemId);
+        if (!sale) {
+          message.error('Selecciona una oferta válida');
+          return;
+        }
+        // Use first product image or default
+        const firstProduct = products[0];
+        mediaUrl = firstProduct?.imageUrl || 'https://www.motoservicioayr.com/og-image.jpg';
       } else {
-        message.error('Selecciona un producto o combo con imagen/video');
-        return;
+        const item = itemType === 'PRODUCT'
+          ? products.find(p => p.id === values.itemId) as Product | undefined
+          : combos.find(c => c.id === values.itemId) as Combo | undefined;
+
+        if (!item) {
+          message.error('Selecciona un producto o combo');
+          return;
+        }
+
+        const selectedProduct = item as Product;
+        if (values.useVideo && selectedProduct.videoUrl) {
+          mediaUrl = selectedProduct.videoUrl;
+          isVideo = true;
+        } else if (item.imageUrl) {
+          mediaUrl = item.imageUrl;
+        } else {
+          message.error('Selecciona un producto o combo con imagen/video');
+          return;
+        }
       }
 
       const res = await fetch('/api/meta/publish', {
@@ -402,9 +443,6 @@ export default function AdminMetaPage() {
     );
   }
 
-  const selectedProduct = products.find(p => p.id === form.getFieldValue('itemId'));
-  const showVideoOption = itemType === 'PRODUCT' && selectedProduct?.videoUrl;
-
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
       <Title level={2} className="!mb-0">Centro de Publicaciones Meta</Title>
@@ -451,6 +489,7 @@ export default function AdminMetaPage() {
             >
               <Select.Option value="PRODUCT">📦 Producto existente</Select.Option>
               <Select.Option value="COMBO">🎁 Combo existente</Select.Option>
+              <Select.Option value="FLASH_SALE">⚡ Oferta relámpago</Select.Option>
               <Select.Option value="UPLOAD">📤 Subir archivo</Select.Option>
             </Select>
           </Form.Item>
@@ -504,11 +543,23 @@ export default function AdminMetaPage() {
                     ))}
                   </Select.OptGroup>
                 )}
+                {itemType === 'FLASH_SALE' && (
+                  <Select.OptGroup label="Ofertas Relámpago">
+                    {flashSales.map(f => (
+                      <Select.Option key={`f_${f.id}`} value={f.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{f.name}</span>
+                          <Tag color="orange">-{f.discount}%</Tag>
+                        </div>
+                      </Select.Option>
+                    ))}
+                  </Select.OptGroup>
+                )}
               </Select>
             </Form.Item>
           )}
 
-          {showVideoOption && (
+          {(itemType === 'PRODUCT' && products.find(p => p.id === form.getFieldValue('itemId'))?.videoUrl) && (
             <Form.Item name="useVideo" label="Tipo de media">
               <Select>
                 <Select.Option value={false}>📷 Usar imagen</Select.Option>
