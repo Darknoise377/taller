@@ -22,6 +22,7 @@ interface Product {
   id: string;
   name: string;
   imageUrl?: string;
+  videoUrl?: string;
   price: number;
   description?: string;
   slug?: string;
@@ -72,7 +73,7 @@ export default function AdminMetaPage() {
   const [manualModal, setManualModal] = useState(false);
   const [editModal, setEditModal] = useState<{ visible: boolean; post: SocialPostRow | null }>({ visible: false, post: null });
   const [itemType, setItemType] = useState<'PRODUCT' | 'COMBO' | 'UPLOAD'>('PRODUCT');
-  const [form] = Form.useForm<{ itemId: string; caption: string; platform: string }>();
+  const [form] = Form.useForm<{ itemId: string; caption: string; platform: string; useVideo?: boolean }>();
   const [manualForm] = Form.useForm<{ pageAccessToken: string; pageId: string; instagramAccountId?: string }>();
   const [editForm] = Form.useForm<{ caption: string }>();
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -181,7 +182,6 @@ export default function AdminMetaPage() {
         body: JSON.stringify({
           name: item.name,
           description: 'description' in item ? item.description : undefined,
-          price: item.price,
           productUrl,
         }),
       });
@@ -199,10 +199,11 @@ export default function AdminMetaPage() {
     }
   };
 
-  const handlePublish = async (values: { itemId: string; caption: string; platform: string }) => {
+  const handlePublish = async (values: { itemId: string; caption: string; platform: string; useVideo?: boolean }) => {
     setPublishing(true);
     try {
       let mediaUrl = '';
+      let isVideo = false;
       
       if (itemType === 'UPLOAD' && uploadedFile) {
         const formData = new FormData();
@@ -210,7 +211,8 @@ export default function AdminMetaPage() {
         formData.append('caption', values.caption);
         formData.append('platform', values.platform);
         formData.append('file', uploadedFile);
-        formData.append('isVideo', uploadedFile.type.startsWith('video/') ? 'true' : 'false');
+        isVideo = uploadedFile.type.startsWith('video/');
+        formData.append('isVideo', String(isVideo));
 
         const res = await fetch('/api/meta/publish', {
           method: 'POST',
@@ -232,12 +234,21 @@ export default function AdminMetaPage() {
         ? products.find(p => p.id === values.itemId) as Product | undefined
         : combos.find(c => c.id === values.itemId) as Combo | undefined;
 
-      if (!item?.imageUrl) {
-        message.error('Selecciona un producto o combo con imagen');
+      if (!item) {
+        message.error('Selecciona un producto o combo');
         return;
       }
 
-      mediaUrl = item.imageUrl;
+      const selectedProduct = item as Product;
+      if (values.useVideo && selectedProduct.videoUrl) {
+        mediaUrl = selectedProduct.videoUrl;
+        isVideo = true;
+      } else if (item.imageUrl) {
+        mediaUrl = item.imageUrl;
+      } else {
+        message.error('Selecciona un producto o combo con imagen/video');
+        return;
+      }
 
       const res = await fetch('/api/meta/publish', {
         method: 'POST',
@@ -247,6 +258,7 @@ export default function AdminMetaPage() {
           mediaUrl,
           caption: values.caption,
           platform: values.platform,
+          isVideo,
         }),
       });
 
@@ -390,6 +402,9 @@ export default function AdminMetaPage() {
     );
   }
 
+  const selectedProduct = products.find(p => p.id === form.getFieldValue('itemId'));
+  const showVideoOption = itemType === 'PRODUCT' && selectedProduct?.videoUrl;
+
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
       <Title level={2} className="!mb-0">Centro de Publicaciones Meta</Title>
@@ -471,6 +486,7 @@ export default function AdminMetaPage() {
                         <div className="flex items-center gap-2">
                           {p.imageUrl && <Image src={p.imageUrl} alt={p.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} preview={false} />}
                           <span>{p.name}</span>
+                          {p.videoUrl && <span className="text-xs text-blue-500">🎥</span>}
                         </div>
                       </Select.Option>
                     ))}
@@ -488,6 +504,15 @@ export default function AdminMetaPage() {
                     ))}
                   </Select.OptGroup>
                 )}
+              </Select>
+            </Form.Item>
+          )}
+
+          {showVideoOption && (
+            <Form.Item name="useVideo" label="Tipo de media">
+              <Select>
+                <Select.Option value={false}>📷 Usar imagen</Select.Option>
+                <Select.Option value={true}>🎥 Usar video</Select.Option>
               </Select>
             </Form.Item>
           )}
