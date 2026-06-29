@@ -17,11 +17,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 
-  const { name, description } = await req.json();
+  const { name, description, price, productUrl } = await req.json();
 
   if (!name) {
     return NextResponse.json({ error: 'Nombre del producto requerido' }, { status: 400 });
   }
+
+  const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://www.motoservicioayr.com';
 
   const prompt = `Eres un experto en redes sociales para una tienda de repuestos de motos en Colombia.
 Genera una descripción corta (máximo 200 caracteres) para publicar en Facebook/Instagram.
@@ -30,6 +32,8 @@ Incluye:
 - Tono comercial y atractivo
 - 1-2 emojis relevantes (motocicleta, herramienta, flecha)
 - Hashtags: #Repuestos #Motos #Taller (máximo 3)
+- Link: ${productUrl || APP_URL}
+- Dirección física: Bogotá, Colombia (si no hay link)
 - NO menciones precios explícitos
 
 Producto: ${name}

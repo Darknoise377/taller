@@ -24,6 +24,30 @@ interface Product {
   imageUrl?: string;
   price: number;
   description?: string;
+  slug?: string;
+}
+
+interface ComboItem {
+  id: string;
+  quantity: number;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    imageUrl?: string;
+    slug?: string;
+  };
+}
+
+interface Combo {
+  id: string;
+  name: string;
+  imageUrl?: string;
+  price: number;
+  description?: string;
+  slug: string;
+  originalPrice: number;
+  items?: ComboItem[];
 }
 
 interface SocialPostRow {
@@ -35,15 +59,18 @@ interface SocialPostRow {
   createdAt: string;
 }
 
+type PublishableItem = Product | Combo;
+
 export default function AdminMetaPage() {
   const [status, setStatus] = useState<MetaStatus | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [combos, setCombos] = useState<Combo[]>([]);
   const [posts, setPosts] = useState<SocialPostRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [generatingCaption, setGeneratingCaption] = useState(false);
   const [manualModal, setManualModal] = useState(false);
-  const [form] = Form.useForm<{ productId: string; caption: string; platform: string }>();
+  const [form] = Form.useForm<{ itemId: string; caption: string; platform: string; itemType: string }>();
   const [manualForm] = Form.useForm<{ pageAccessToken: string; pageId: string; instagramAccountId?: string }>();
 
   const loadStatus = useCallback(async () => {
@@ -63,6 +90,16 @@ export default function AdminMetaPage() {
     } catch { /* ignore */ }
   }, []);
 
+  const loadCombos = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/combos');
+      if (res.ok) {
+        const data = await res.json();
+        setCombos(data || []);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   const loadPosts = useCallback(async () => {
     try {
       const res = await fetch('/api/meta/posts?storeId=default');
@@ -75,9 +112,9 @@ export default function AdminMetaPage() {
 
   useEffect(() => {
     setLoading(true);
-    Promise.all([loadStatus(), loadProducts(), loadPosts()])
+    Promise.all([loadStatus(), loadProducts(), loadCombos(), loadPosts()])
       .finally(() => setLoading(false));
-  }, [loadStatus, loadProducts, loadPosts]);
+  }, [loadStatus, loadProducts, loadCombos, loadPosts]);
 
   const handleConnect = () => {
     window.location.href = '/api/meta/oauth/login?storeId=default';
@@ -121,9 +158,16 @@ export default function AdminMetaPage() {
     }
   };
 
-  const generateCaptionAI = async (productId: string) => {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
+  const generateCaptionAI = async (itemId: string, itemType: string) => {
+    const item = itemType === 'PRODUCT' 
+      ? products.find(p => p.id === itemId) as Product | undefined
+      : combos.find(c => c.id === itemId) as Combo | undefined;
+    
+    if (!item) return;
+
+    const productUrl = itemType === 'PRODUCT'
+      ? `https://www.motoservicioayr.com/products/${item.slug || item.id}`
+      : `https://www.motoservicioayr.com/combos/${item.slug}`;
 
     setGeneratingCaption(true);
     try {
@@ -131,9 +175,10 @@ export default function AdminMetaPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: product.name,
-          description: product.description,
-          price: product.price,
+          name: item.name,
+          description: 'description' in item ? item.description : undefined,
+          price: item.price,
+          productUrl,
         }),
       });
       const data = await res.json();
@@ -150,12 +195,15 @@ export default function AdminMetaPage() {
     }
   };
 
-  const handlePublish = async (values: { productId: string; caption: string; platform: string }) => {
+  const handlePublish = async (values: { itemId: string; caption: string; platform: string; itemType: string }) => {
     setPublishing(true);
     try {
-      const product = products.find(p => p.id === values.productId);
-      if (!product?.imageUrl) {
-        message.error('Selecciona un producto con imagen');
+      const item = values.itemType === 'PRODUCT'
+        ? products.find(p => p.id === values.itemId) as Product | undefined
+        : combos.find(c => c.id === values.itemId) as Combo | undefined;
+
+      if (!item?.imageUrl) {
+        message.error('Selecciona un producto o combo con imagen');
         return;
       }
 
@@ -164,7 +212,7 @@ export default function AdminMetaPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           storeId: 'default',
-          mediaUrl: product.imageUrl,
+          mediaUrl: item.imageUrl,
           caption: values.caption,
           platform: values.platform,
         }),
@@ -254,7 +302,7 @@ export default function AdminMetaPage() {
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
       <Title level={2} className="!mb-0">Publicación en Redes Sociales</Title>
-      <Paragraph type="secondary">Conecta tu Facebook Page e Instagram para publicar productos automáticamente.</Paragraph>
+      <Paragraph type="secondary">Conecta tu Facebook Page e Instagram para publicar productos y combos automáticamente.</Paragraph>
 
       <Card title={<span className="flex items-center gap-2"><ApiOutlined /> Conexión con Meta</span>}>
         {status?.connected ? (
@@ -284,18 +332,40 @@ export default function AdminMetaPage() {
         )}
       </Card>
 
-      <Card title="Publicar producto">
-        <Form form={form} layout="vertical" initialValues={{ platform: 'FACEBOOK' }} onFinish={handlePublish}>
-          <Form.Item name="productId" label="Producto" rules={[{ required: true }]}>
-            <Select showSearch optionFilterProp="children" style={{ width: '100%' }} onChange={(val) => generateCaptionAI(val as string)}>
-              {products.map(p => (
-                <Select.Option key={p.id} value={p.id}>
-                  <div className="flex items-center gap-2">
-                    {p.imageUrl && <Image src={p.imageUrl} alt={p.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} />}
-                    <span>{p.name}</span>
-                  </div>
-                </Select.Option>
-              ))}
+      <Card title="Publicar producto o combo">
+        <Form form={form} layout="vertical" initialValues={{ platform: 'FACEBOOK', itemType: 'PRODUCT' }} onFinish={handlePublish}>
+          <Form.Item name="itemType" label="Tipo" rules={[{ required: true }]}>
+            <Select style={{ width: 200 }}>
+              <Select.Option value="PRODUCT">Producto</Select.Option>
+              <Select.Option value="COMBO">Combo</Select.Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item name="itemId" label="Producto/Combo" rules={[{ required: true }]}>
+            <Select showSearch optionFilterProp="children" style={{ width: '100%' }} onChange={(val) => {
+              const type = form.getFieldValue('itemType');
+              generateCaptionAI(val as string, type);
+            }}>
+              <Select.OptGroup label="Productos">
+                {products.map(p => (
+                  <Select.Option key={`p_${p.id}`} value={p.id} disabled={form.getFieldValue('itemType') !== 'PRODUCT'}>
+                    <div className="flex items-center gap-2">
+                      {p.imageUrl && <Image src={p.imageUrl} alt={p.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} />}
+                      <span>{p.name}</span>
+                    </div>
+                  </Select.Option>
+                ))}
+              </Select.OptGroup>
+              <Select.OptGroup label="Combos">
+                {combos.map(c => (
+                  <Select.Option key={`c_${c.id}`} value={c.id} disabled={form.getFieldValue('itemType') !== 'COMBO'}>
+                    <div className="flex items-center gap-2">
+                      {c.imageUrl && <Image src={c.imageUrl} alt={c.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} />}
+                      <span>{c.name}</span>
+                    </div>
+                  </Select.Option>
+                ))}
+              </Select.OptGroup>
             </Select>
           </Form.Item>
 
@@ -305,8 +375,9 @@ export default function AdminMetaPage() {
               <span className="flex items-center gap-2">
                 Descripción
                 <Button size="small" icon={<RobotOutlined />} loading={generatingCaption} onClick={() => {
-                  const prodId = form.getFieldValue('productId');
-                  if (prodId) generateCaptionAI(prodId);
+                  const itemId = form.getFieldValue('itemId');
+                  const itemType = form.getFieldValue('itemType');
+                  if (itemId) generateCaptionAI(itemId, itemType);
                 }}>
                   Generar con IA
                 </Button>
