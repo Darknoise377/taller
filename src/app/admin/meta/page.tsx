@@ -262,13 +262,11 @@ export default function AdminMetaPage() {
       }
 
       if (itemType === 'FLASH_SALE') {
-        // Flash sales use first product image or default
         const sale = flashSales.find(f => f.id === values.itemId);
         if (!sale) {
           message.error('Selecciona una oferta válida');
           return;
         }
-        // Get image from any available product, or use default
         const allImages = products.flatMap(p => p.images || []).filter(Boolean);
         mediaUrls = allImages.length > 0 ? allImages : [products[0]?.imageUrl || 'https://www.motoservicioayr.com/og-image.jpg'];
       } else {
@@ -286,8 +284,9 @@ export default function AdminMetaPage() {
           mediaUrls = selectedProduct.videoUrl;
           isVideo = true;
         } else {
-          // Get all images: product.images array + imageUrl as fallback
-          const allImages = [...(item.images || []), item.imageUrl].filter(Boolean) as string[];
+          const allImages = itemType === 'PRODUCT'
+            ? [...(selectedProduct.images || []), selectedProduct.imageUrl].filter(Boolean) as string[]
+            : [item.imageUrl].filter(Boolean) as string[];
           if (allImages.length === 0) {
             message.error('Selecciona un producto o combo con imagen/video');
             return;
