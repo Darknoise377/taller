@@ -24,17 +24,17 @@ async function processPublish(payload: {
   pageAccessToken: string;
   pageId: string;
   instagramAccountId?: string;
-  mediaUrl: string;
+  mediaUrls: string | string[];
   caption: string;
   platform: string;
   isVideo?: boolean;
 }) {
-  const { socialPostId, pageAccessToken, pageId, instagramAccountId, mediaUrl, caption, platform, isVideo } = payload;
+  const { socialPostId, pageAccessToken, pageId, instagramAccountId, mediaUrls, caption, platform, isVideo } = payload;
 
   const results: { facebookId?: string; instagramId?: string } = {};
 
   if (platform === 'FACEBOOK' || platform === 'BOTH') {
-    const fbPostId = await publishToFacebook(pageAccessToken, pageId, mediaUrl, caption, isVideo);
+    const fbPostId = await publishToFacebook(pageAccessToken, pageId, mediaUrls, caption, isVideo);
     if (fbPostId) {
       results.facebookId = fbPostId;
     } else {
@@ -43,7 +43,7 @@ async function processPublish(payload: {
   }
 
   if ((platform === 'INSTAGRAM' || platform === 'BOTH') && instagramAccountId) {
-    const containerId = await createInstagramMediaContainer(pageAccessToken, instagramAccountId, mediaUrl, caption);
+    const containerId = await createInstagramMediaContainer(pageAccessToken, instagramAccountId, mediaUrls, caption, isVideo);
     if (!containerId) {
       throw new Error('Error creando contenedor de Instagram');
     }
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
   try {
     const contentType = req.headers.get('content-type') || '';
     
-    let storeId: string, mediaUrl = '', caption: string, platform = 'BOTH', isVideo = false;
+    let storeId: string, mediaUrls: string | string[] = [], caption: string, platform = 'BOTH', isVideo = false;
 
     if (contentType.includes('multipart/form-data')) {
       const form = await req.formData();
@@ -87,10 +87,10 @@ export async function POST(req: Request) {
             }
           ).end(Buffer.from(arrayBuffer));
         });
-        mediaUrl = uploaded.secure_url;
+        mediaUrls = [uploaded.secure_url];
       }
     } else {
-      ({ storeId, mediaUrl, caption, platform, isVideo } = await req.json());
+      ({ storeId, mediaUrls, caption, platform, isVideo } = await req.json());
     }
 
     if (!storeId || !caption) {
@@ -113,7 +113,7 @@ export async function POST(req: Request) {
     }
 
     const socialPost = await prisma.socialPost.create({
-      data: { storeId, platform, status: 'PROCESSING', mediaUrl, caption },
+      data: { storeId, platform, status: 'PROCESSING', mediaUrl: Array.isArray(mediaUrls) ? mediaUrls[0] : mediaUrls, caption },
     });
 
     try {
@@ -122,7 +122,7 @@ export async function POST(req: Request) {
         pageAccessToken: token.pageAccessToken,
         pageId: token.pageId,
         instagramAccountId: token.instagramAccountId ?? undefined,
-        mediaUrl,
+        mediaUrls,
         caption,
         platform,
         isVideo,

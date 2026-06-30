@@ -22,6 +22,7 @@ interface Product {
   id: string;
   name: string;
   imageUrl?: string;
+  images?: string[];
   videoUrl?: string;
   price: number;
   description?: string;
@@ -37,6 +38,7 @@ interface ComboItem {
     price: number;
     imageUrl?: string;
     slug?: string;
+    images?: string[];
   };
 }
 
@@ -231,7 +233,7 @@ export default function AdminMetaPage() {
   const handlePublish = async (values: { itemId: string; caption: string; platform: string; useVideo?: boolean }) => {
     setPublishing(true);
     try {
-      let mediaUrl = '';
+      let mediaUrls: string | string[] = [];
       let isVideo = false;
       
       if (itemType === 'UPLOAD' && uploadedFile) {
@@ -260,15 +262,15 @@ export default function AdminMetaPage() {
       }
 
       if (itemType === 'FLASH_SALE') {
-        // Flash sales use default hero image or generic
+        // Flash sales use first product image or default
         const sale = flashSales.find(f => f.id === values.itemId);
         if (!sale) {
           message.error('Selecciona una oferta válida');
           return;
         }
-        // Use first product image or default
-        const firstProduct = products[0];
-        mediaUrl = firstProduct?.imageUrl || 'https://www.motoservicioayr.com/og-image.jpg';
+        // Get image from any available product, or use default
+        const allImages = products.flatMap(p => p.images || []).filter(Boolean);
+        mediaUrls = allImages.length > 0 ? allImages : [products[0]?.imageUrl || 'https://www.motoservicioayr.com/og-image.jpg'];
       } else {
         const item = itemType === 'PRODUCT'
           ? products.find(p => p.id === values.itemId) as Product | undefined
@@ -281,13 +283,16 @@ export default function AdminMetaPage() {
 
         const selectedProduct = item as Product;
         if (values.useVideo && selectedProduct.videoUrl) {
-          mediaUrl = selectedProduct.videoUrl;
+          mediaUrls = selectedProduct.videoUrl;
           isVideo = true;
-        } else if (item.imageUrl) {
-          mediaUrl = item.imageUrl;
         } else {
-          message.error('Selecciona un producto o combo con imagen/video');
-          return;
+          // Get all images: product.images array + imageUrl as fallback
+          const allImages = [...(item.images || []), item.imageUrl].filter(Boolean) as string[];
+          if (allImages.length === 0) {
+            message.error('Selecciona un producto o combo con imagen/video');
+            return;
+          }
+          mediaUrls = allImages;
         }
       }
 
@@ -296,7 +301,7 @@ export default function AdminMetaPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           storeId: 'default',
-          mediaUrl,
+          mediaUrls,
           caption: values.caption,
           platform: values.platform,
           isVideo,
@@ -304,7 +309,7 @@ export default function AdminMetaPage() {
       });
 
       if (res.ok) {
-        message.success('Publicado exitosamente');
+        message.success(`Publicado exitosamente (${Array.isArray(mediaUrls) ? mediaUrls.length + ' imágenes' : '1 imagen/video'})`);
         form.resetFields();
         loadPosts();
       } else {
@@ -443,6 +448,9 @@ export default function AdminMetaPage() {
     );
   }
 
+  const selectedProduct = products.find(p => p.id === form.getFieldValue('itemId'));
+  const productHasVideo = itemType === 'PRODUCT' && selectedProduct?.videoUrl;
+
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
       <Title level={2} className="!mb-0">Centro de Publicaciones Meta</Title>
@@ -526,6 +534,9 @@ export default function AdminMetaPage() {
                           {p.imageUrl && <Image src={p.imageUrl} alt={p.name} width={32} height={32} style={{ objectFit: 'cover', borderRadius: 4 }} preview={false} />}
                           <span>{p.name}</span>
                           {p.videoUrl && <span className="text-xs text-blue-500">🎥</span>}
+                          {p.images && p.images.length > 1 && (
+                            <span className="text-xs text-purple-500">📷{p.images.length + 1}</span>
+                          )}
                         </div>
                       </Select.Option>
                     ))}
@@ -559,10 +570,10 @@ export default function AdminMetaPage() {
             </Form.Item>
           )}
 
-          {(itemType === 'PRODUCT' && products.find(p => p.id === form.getFieldValue('itemId'))?.videoUrl) && (
+          {productHasVideo && (
             <Form.Item name="useVideo" label="Tipo de media">
               <Select>
-                <Select.Option value={false}>📷 Usar imagen</Select.Option>
+                <Select.Option value={false}>📷 Usar imagen (todas las fotos)</Select.Option>
                 <Select.Option value={true}>🎥 Usar video</Select.Option>
               </Select>
             </Form.Item>
