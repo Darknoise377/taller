@@ -5,25 +5,9 @@ export type HomeSearchCatalogItem = {
 };
 
 const STOPWORDS = new Set([
-  'para',
-  'de',
-  'y',
-  'con',
-  'en',
-  'a',
-  'el',
-  'la',
-  'los',
-  'las',
-  'del',
-  'por',
-  'repuesto',
-  'kit',
-  'original',
-  'nuevo',
-  'usado',
-  'marca',
-  'medida',
+  'para', 'de', 'y', 'con', 'en', 'a', 'el', 'la', 'los', 'las', 'del', 'por',
+  'repuesto', 'kit', 'original', 'nuevo', 'usado', 'marca', 'medida', 'un', 'su',
+  'este', 'esa', 'ese', 'eso', 'muy', 'como', 'más', 'pero', 'sus', 'fue', 'han',
 ]);
 
 /** Builds popular search terms from product names/descriptions (for home search pills). */

@@ -274,12 +274,12 @@ export default function HomePageClient({
                               <span>Motoservicio A&amp;R <span className="opacity-60 font-medium px-1">·</span> La Ceja, Ant.</span>
                             </motion.div>
 
-                            <h1 className="text-[2.75rem] sm:text-6xl lg:text-[4rem] font-extrabold leading-[1.05] tracking-tight text-[#081F4D] dark:text-white drop-shadow-sm">
-                              El repuesto exacto<br />
-                              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0A2A66] to-[#5B9BD5] dark:from-[#5B9BD5] dark:to-[#8FA8CC]">
-                                para tu moto.
-                              </span>
-                            </h1>
+<h1 className="text-[2.75rem] sm:text-6xl lg:text-[4rem] font-extrabold leading-[1.05] tracking-tight text-[#081F4D] dark:text-white drop-shadow-sm">
+  Repuestos para motos<br />
+  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#0A2A66] to-[#5B9BD5] dark:from-[#5B9BD5] dark:to-[#8FA8CC]">
+    Bajaj, KTM, Pulsar y más en La Ceja, Colombia
+  </span>
+</h1>
 
                             <p className="mt-6 text-base sm:text-lg text-[#0A2A66]/80 dark:text-slate-300/80 max-w-xl leading-relaxed font-medium">
                               Más de 10 años equipando motociclistas. Piezas originales y genéricas de alta calidad, con stock permanente y <strong className="text-[#0A2A66] dark:text-white">despachos inmediatos a todo Colombia</strong>.
