@@ -121,10 +121,18 @@ export async function publishToFacebook(
   caption: string,
   isVideo?: boolean
 ): Promise<string | null> {
-  const urls = Array.isArray(mediaUrls) ? mediaUrls.slice(0, MAX_CAROUSEL_IMAGES) : [mediaUrls];
+  const urls = (Array.isArray(mediaUrls) ? mediaUrls : [mediaUrls])
+    .filter((u): u is string => typeof u === 'string' && u.startsWith('http'))
+    .slice(0, MAX_CAROUSEL_IMAGES);
 
+  if (urls.length === 0) {
+    console.error('[publishToFacebook] No valid image URLs provided');
+    return null;
+  }
+
+  // Fix: use file_url (not source) for URL-based video uploads
   if (isVideo) {
-    const params = new URLSearchParams({ access_token: pageAccessToken, description: caption, source: urls[0] });
+    const params = new URLSearchParams({ access_token: pageAccessToken, description: caption, file_url: urls[0] });
     const res = await fetch(`${GRAPH_BASE}/${pageId}/videos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -138,7 +146,45 @@ export async function publishToFacebook(
     return (data as FacebookPostResponse).id;
   }
 
+  // Download the image from Cloudinary on the server and upload binary to Facebook.
+  // This avoids silent failures that occur when Facebook's crawler can't fetch
+  // Cloudinary CDN URLs (returning an ID but an empty/broken photo).
+  const uploadAsBinary = async (url: string, published: boolean, message?: string): Promise<string | null> => {
+    try {
+      const imgRes = await fetch(url);
+      if (!imgRes.ok) {
+        console.warn('[fb-photo] Could not download image:', url, imgRes.status);
+        return null;
+      }
+      const buffer = await imgRes.arrayBuffer();
+      const contentType = imgRes.headers.get('content-type') || 'image/jpeg';
+
+      const fd = new FormData();
+      fd.append('access_token', pageAccessToken);
+      fd.append('published', String(published));
+      fd.append('source', new Blob([buffer], { type: contentType }), 'photo.jpg');
+      if (message) fd.append('message', message);
+
+      const r = await fetch(`${GRAPH_BASE}/${pageId}/photos`, { method: 'POST', body: fd });
+      const d = await r.json();
+      if (isMetaError(d) || !(d as FacebookPostResponse).id) {
+        console.error('[fb-photo] Binary upload failed:', d);
+        return null;
+      }
+      return (d as FacebookPostResponse).id;
+    } catch (err) {
+      console.error('[fb-photo] Error uploading photo:', err);
+      return null;
+    }
+  };
+
   if (urls.length === 1) {
+    // Single image — upload binary with caption
+    const id = await uploadAsBinary(urls[0], true, caption);
+    if (id) return id;
+
+    // Fallback: URL-based upload
+    console.warn('[fb-photo] Binary upload failed, trying URL fallback');
     const params = new URLSearchParams({ access_token: pageAccessToken, message: caption, url: urls[0] });
     const res = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
       method: 'POST',
@@ -153,74 +199,65 @@ export async function publishToFacebook(
     return (data as FacebookPostResponse).id;
   }
 
-// Carousel
-   const childIds: string[] = [];
-   for (const url of urls) {
-     console.log('[carousel] Creating unpublished photo for URL:', url);
-     const photoParams = new URLSearchParams({ access_token: pageAccessToken, published: 'false', url });
-     const photoRes = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-       body: photoParams.toString(),
-     });
-     const photoData = await photoRes.json();
-     console.log('[carousel] Photo response:', JSON.stringify(photoData));
-     if (isMetaError(photoData) || !photoData.id) {
-       console.error('Carousel photo error or missing ID:', photoData);
-       // Fallback: publish just the first image
-       console.log('[carousel] Falling back to single image publish');
-       const fallbackParams = new URLSearchParams({ access_token: pageAccessToken, message: caption, url: urls[0] });
-       const fallbackRes = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-         body: fallbackParams.toString(),
-       });
-       const fallbackData = await fallbackRes.json();
-       if (isMetaError(fallbackData)) {
-         console.error('Fallback single image error:', fallbackData.error);
-         return null;
-       }
-       return (fallbackData as FacebookPostResponse).id;
-     }
-     childIds.push(photoData.id);
-   }
+  // Multiple images — upload all concurrently as unpublished, then attach to a feed post
+  console.log('[carousel] Uploading', urls.length, 'photos as binary');
+  const uploadResults = await Promise.all(urls.map(url => uploadAsBinary(url, false)));
+  const childIds = uploadResults.filter((id): id is string => id !== null);
+  console.log('[carousel] Uploaded', childIds.length, '/', urls.length, 'photos successfully');
 
-   console.log('[carousel] Created', childIds.length, 'child IDs:', childIds);
+  if (childIds.length === 0) {
+    // All binary uploads failed — try URL approach for first image
+    console.warn('[carousel] All uploads failed, falling back to URL single-image publish');
+    const params = new URLSearchParams({ access_token: pageAccessToken, message: caption, url: urls[0] });
+    const res = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    });
+    const data = await res.json();
+    if (isMetaError(data)) {
+      console.error('Fallback single image error:', data.error);
+      return null;
+    }
+    return (data as FacebookPostResponse).id;
+  }
 
-   // Facebook carousel requires attached_media as JSON array with specific format
-   const attachedMediaArray = childIds.map(id => ({ media_fbid: id }));
-   const carouselEndpoint = `${GRAPH_BASE}/${pageId}/feed?access_token=${pageAccessToken}`;
-   console.log('[carousel] Making carousel request to:', carouselEndpoint);
+  // Use attached_media for 1 or more successfully uploaded photos
+  const attachedMediaArray = childIds.map(id => ({ media_fbid: id }));
+  console.log('[carousel] Creating feed post with', childIds.length, 'attached photos');
 
-   const res = await fetch(carouselEndpoint, {
-     method: 'POST',
-     headers: { 'Content-Type': 'application/json' },
-     body: JSON.stringify({
-       message: caption,
-       attached_media: attachedMediaArray,
-     }),
-   });
+  const res = await fetch(`${GRAPH_BASE}/${pageId}/feed`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      message: caption,
+      attached_media: attachedMediaArray,
+      access_token: pageAccessToken,
+    }),
+  });
 
-   const data = await res.json();
-   console.log('[carousel] Feed response:', JSON.stringify(data));
-   if (isMetaError(data) || !data.id) {
-     console.error('Facebook carousel error, falling back to single:', data);
-     // Fallback: publish just the first image
-     const fallbackParams = new URLSearchParams({ access_token: pageAccessToken, message: caption, url: urls[0] });
-     const fallbackRes = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-       body: fallbackParams.toString(),
-     });
-     const fallbackData = await fallbackRes.json();
-     if (isMetaError(fallbackData)) {
-       console.error('Fallback single image error:', fallbackData.error);
-       return null;
-     }
-     return (fallbackData as FacebookPostResponse).id;
-   }
-   return data.id;
- }
+  const data = await res.json();
+  console.log('[carousel] Feed response:', JSON.stringify(data));
+
+  if (isMetaError(data) || !(data as FacebookPostResponse).id) {
+    console.error('[carousel] Feed post failed:', data);
+    // Final fallback: publish first image via URL
+    const fallbackParams = new URLSearchParams({ access_token: pageAccessToken, message: caption, url: urls[0] });
+    const fallbackRes = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: fallbackParams.toString(),
+    });
+    const fallbackData = await fallbackRes.json();
+    if (isMetaError(fallbackData)) {
+      console.error('Fallback single image error:', fallbackData.error);
+      return null;
+    }
+    return (fallbackData as FacebookPostResponse).id;
+  }
+
+  return (data as FacebookPostResponse).id;
+}
 
 export async function createInstagramMediaContainer(
   pageAccessToken: string,
@@ -343,11 +380,10 @@ export function isTokenInvalidError(errorCode: number): boolean {
   return errorCode === 190;
 }
 
-interface PostInsightsResponse {
-  data: Array<{
-    name: string;
-    values: Array<{ value: unknown }>;
-  }>;
+interface PostFieldsResponse {
+  likes?: { summary?: { total_count?: number } };
+  comments?: { summary?: { total_count?: number } };
+  shares?: { count?: number };
 }
 
 export async function fetchPostInsights(
@@ -356,22 +392,23 @@ export async function fetchPostInsights(
 ): Promise<Record<string, number> | null> {
   const params = new URLSearchParams({
     access_token: pageAccessToken,
-    metric: 'engagement,reactions,comments,shares,reach,impressions',
+    fields: 'likes.summary(true),comments.summary(true),shares',
   });
 
-  const res = await fetch(`${GRAPH_BASE}/${postId}/insights?${params}`);
+  const res = await fetch(`${GRAPH_BASE}/${postId}?${params}`);
   const data = await res.json();
 
   if (isMetaError(data)) {
-    console.error('Post insights error:', data.error);
+    // Post may not exist or token lacks permission — fail silently
     return null;
   }
 
-  const insights: Record<string, number> = {};
-  for (const item of (data as PostInsightsResponse).data) {
-    insights[item.name] = (item.values[0]?.value as number) || 0;
-  }
-  return insights;
+  const fields = data as PostFieldsResponse;
+  return {
+    like: fields.likes?.summary?.total_count || 0,
+    comments: fields.comments?.summary?.total_count || 0,
+    shares: fields.shares?.count || 0,
+  };
 }
 
 export async function editFacebookPost(

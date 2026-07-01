@@ -577,6 +577,40 @@ export default function AdminMetaPage() {
             </Form.Item>
           )}
 
+          {(itemType === 'PRODUCT' || itemType === 'COMBO') && (
+            <Form.Item shouldUpdate={(prev, curr) => prev.itemId !== curr.itemId} noStyle>
+              {({ getFieldValue }) => {
+                const itemId = getFieldValue('itemId') as string;
+                if (!itemId) return null;
+
+                let previewImages: string[] = [];
+                if (itemType === 'PRODUCT') {
+                  const prod = products.find(p => p.id === itemId);
+                  if (prod) previewImages = [...(prod.images || []), prod.imageUrl].filter(Boolean) as string[];
+                } else {
+                  const combo = combos.find(c => c.id === itemId);
+                  if (combo) previewImages = [...(combo.images || []), combo.imageUrl].filter(Boolean) as string[];
+                }
+
+                if (previewImages.length === 0) return null;
+
+                return (
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      📷 {previewImages.length} imagen{previewImages.length !== 1 ? 'es' : ''} que se publicarán:
+                    </Text>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {previewImages.map((url, i) => (
+                        <Image key={i} src={url} alt={`Imagen ${i + 1}`} width={64} height={64}
+                          style={{ objectFit: 'cover', borderRadius: 4, border: '1px solid #e5e7eb' }} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              }}
+            </Form.Item>
+          )}
+
           {productHasVideo && (
             <Form.Item name="useVideo" label="Tipo de media">
               <Select>
