@@ -290,12 +290,12 @@ export default function ProductsClient({
   );
   const modelSuggestions = useMemo(() => {
     const counts = new Map<string, number>();
-    const stopwords = new Set(["para","de","y","con","en","a","el","la","los","las","del","por","repuesto","kit","original","nuevo","usado","marca","medida"]);
+    const stopwords = new Set(["para","de","y","con","en","a","el","la","los","las","del","por","repuesto","kit","original","nuevo","usado","marca","medida","un","su","este","esa","ese","eso","muy","como","más","pero","sus","fue","han","tu","una","ns","fi","ug","cr","sr"]);
     products.forEach((p) => {
       const text = `${p.name} ${p.description || ""}`.toLowerCase();
-      const tokens = text.match(/[a-z0-9�������]+/gi) || [];
+      const tokens = text.match(/[a-z0-9áéíóúñü]+/gi) || [];
       tokens.forEach((t) => {
-        if (t.length < 2 || stopwords.has(t)) return;
+        if (t.length < 2 || stopwords.has(t) || /^\d+$/.test(t)) return;
         counts.set(t, (counts.get(t) ?? 0) + 1);
       });
     });
