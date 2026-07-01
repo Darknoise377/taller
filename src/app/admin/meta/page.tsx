@@ -8,6 +8,7 @@ import {
   RefreshCw, Zap, Package, Gift, Settings, Copy, Check,
 } from 'lucide-react';
 import Image from 'next/image';
+import { Search } from 'lucide-react';
 
 interface MetaStatus {
   connected: boolean;
@@ -86,6 +87,7 @@ export default function AdminMetaPage() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -600,30 +602,86 @@ export default function AdminMetaPage() {
               Seleccionar {itemType === 'PRODUCT' ? 'producto' : itemType === 'COMBO' ? 'combo' : 'oferta'}
             </label>
             <div className="relative">
-              <select
-                value={formData.itemId}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setFormData(prev => ({ ...prev, itemId: val }));
-                  if (val) generateCaptionAI(val);
-                }}
-                required
-                aria-label={`Seleccionar ${itemType === 'PRODUCT' ? 'producto' : itemType === 'COMBO' ? 'combo' : 'oferta'}`}
-                className="w-full px-4 py-3 pr-10 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E5FA7] focus:border-transparent outline-none transition-all"
-              >
-                <option value="">-- Seleccionar --</option>
-                {itemType === 'PRODUCT' && products.map(p => (
-                  <option key={p.id} value={p.id}>{p.name} {p.videoUrl ? '🎥' : ''} {p.images && p.images.length > 1 ? `📷${p.images.length}` : ''}</option>
-                ))}
-                {itemType === 'COMBO' && combos.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-                {itemType === 'FLASH_SALE' && flashSales.map(f => (
-                  <option key={f.id} value={f.id}>{f.name} (-{f.discount}%)</option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={18} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                placeholder={`Buscar ${itemType === 'PRODUCT' ? 'productos' : itemType === 'COMBO' ? 'combos' : 'ofertas'}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E5FA7] focus:border-transparent outline-none transition-all"
+              />
             </div>
+            {searchQuery && (
+              <div className="mt-2 max-h-60 overflow-y-auto border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
+                {(() => {
+                  let items: Array<{ id: string; name: string; extra?: string }> = [];
+                  if (itemType === 'PRODUCT') {
+                    items = products
+                      .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map(p => ({ id: p.id, name: p.name, extra: p.videoUrl ? '🎥' : ((p.images?.length || 0) > 1 ? `📷${p.images?.length || 0}` : '') }));
+                  } else if (itemType === 'COMBO') {
+                    items = combos.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase())).map(c => ({ id: c.id, name: c.name }));
+                  } else {
+                    items = flashSales.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase())).map(f => ({ id: f.id, name: `${f.name} (-${f.discount}%)` }));
+                  }
+                  return items.length > 0 ? (
+                    items.map(item => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, itemId: item.id }));
+                          setSearchQuery('');
+                          generateCaptionAI(item.id);
+                        }}
+                        className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                      >
+                        <span className="flex-1 text-sm text-gray-900 dark:text-white">{item.name}</span>
+                        {item.extra && <span className="text-xs">{item.extra}</span>}
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-4 py-3 text-sm text-gray-500 dark:text-slate-400">No se encontraron resultados</p>
+                  );
+                })()}
+              </div>
+            )}
+            {!searchQuery && (
+              <div className="mt-2 max-h-60 overflow-y-auto border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
+                {(() => {
+                  let items: Array<{ id: string; name: string; extra?: string }> = [];
+                  if (itemType === 'PRODUCT') {
+                    items = products.map(p => ({ id: p.id, name: p.name, extra: p.videoUrl ? '🎥' : ((p.images?.length || 0) > 1 ? `📷${p.images?.length || 0}` : '') }));
+                  } else if (itemType === 'COMBO') {
+                    items = combos.map(c => ({ id: c.id, name: c.name }));
+                  } else {
+                    items = flashSales.map(f => ({ id: f.id, name: `${f.name} (-${f.discount}%)` }));
+                  }
+                  return items.slice(0, 10).map(item => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, itemId: item.id }));
+                        generateCaptionAI(item.id);
+                      }}
+                      className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
+                    >
+                      <span className="flex-1 text-sm text-gray-900 dark:text-white">{item.name}</span>
+                      {item.extra && <span className="text-xs">{item.extra}</span>}
+                    </button>
+                  ));
+                })()}
+                {(() => {
+                  const count = itemType === 'PRODUCT' ? products.length : itemType === 'COMBO' ? combos.length : flashSales.length;
+                  return count > 10 && (
+                    <p className="px-4 py-2 text-xs text-gray-500 dark:text-slate-400">
+                      +{count - 10} más. Usa la búsqueda para encontrar
+                    </p>
+                  );
+                })()}
+              </div>
+            )}
           </div>
         )}
 
