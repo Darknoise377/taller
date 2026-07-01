@@ -274,17 +274,17 @@ export default function AdminMetaPage() {
       let isVideo = false;
       
       if (itemType === 'UPLOAD' && uploadedFile) {
-        const formData = new FormData();
-        formData.append('storeId', 'default');
-        formData.append('caption', formData.caption);
-        formData.append('platform', formData.platform);
-        formData.append('file', uploadedFile);
+        const fd = new FormData();
+        fd.append('storeId', 'default');
+        fd.append('caption', formData.caption);
+        fd.append('platform', formData.platform);
+        fd.append('file', uploadedFile);
         isVideo = uploadedFile.type.startsWith('video/');
-        formData.append('isVideo', String(isVideo));
+        fd.append('isVideo', String(isVideo));
 
         const res = await fetch('/api/meta/publish', {
           method: 'POST',
-          body: formData,
+          body: fd,
         });
 
         const data = await res.json();
