@@ -34,6 +34,7 @@ export async function GET() {
                 price: true,
                 imageUrl: true,
                 slug: true,
+                images: true,
               },
             },
           },
@@ -48,7 +49,20 @@ export async function GET() {
       orderBy: [{ isFeatured: 'desc' }, { soldCount: 'desc' }, { createdAt: 'desc' }],
     });
 
-    return NextResponse.json(combos);
+    const mappedCombos = combos.map(c => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      description: c.description,
+      price: c.price,
+      originalPrice: c.originalPrice,
+      imageUrl: c.imageUrl,
+      images: c.images,
+      isActive: c.isActive,
+      items: c.items,
+    }));
+
+    return NextResponse.json(mappedCombos);
   } catch (error) {
     console.error('Error al obtener combos (admin):', error);
     return NextResponse.json({ error: 'Error al obtener combos' }, { status: 500 });

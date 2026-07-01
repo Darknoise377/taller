@@ -46,6 +46,7 @@ interface Combo {
   id: string;
   name: string;
   imageUrl?: string;
+  images?: string[];
   price: number;
   description?: string;
   slug: string;
@@ -280,13 +281,14 @@ export default function AdminMetaPage() {
         }
 
         const selectedProduct = item as Product;
+        const selectedCombo = item as Combo;
         if (values.useVideo && selectedProduct.videoUrl) {
           mediaUrls = selectedProduct.videoUrl;
           isVideo = true;
         } else {
           const allImages = itemType === 'PRODUCT'
             ? [...(selectedProduct.images || []), selectedProduct.imageUrl].filter(Boolean) as string[]
-            : [item.imageUrl].filter(Boolean) as string[];
+            : [...(selectedCombo.images || []), selectedCombo.imageUrl].filter(Boolean) as string[];
           if (allImages.length === 0) {
             message.error('Selecciona un producto o combo con imagen/video');
             return;
@@ -294,6 +296,12 @@ export default function AdminMetaPage() {
           mediaUrls = allImages;
         }
       }
+      
+      console.log('[handlePublish] Media URLs:', { 
+        itemType, 
+        mediaUrlsCount: Array.isArray(mediaUrls) ? mediaUrls.length : 1,
+        mediaUrlsSample: Array.isArray(mediaUrls) ? mediaUrls.slice(0, 3) : mediaUrls 
+      });
 
       const res = await fetch('/api/meta/publish', {
         method: 'POST',

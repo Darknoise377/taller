@@ -34,7 +34,6 @@ const APP_SECRET = process.env.META_APP_SECRET;
 const GRAPH_API_VERSION = process.env.META_GRAPH_VERSION ?? 'v22.0';
 const GRAPH_BASE = `https://graph.facebook.com/${GRAPH_API_VERSION}`;
 
-// Facebook/Instagram limits
 const MAX_CAROUSEL_IMAGES = 10;
 
 function isMetaError(data: unknown): data is MetaErrorResponse {
@@ -123,8 +122,7 @@ export async function publishToFacebook(
   isVideo?: boolean
 ): Promise<string | null> {
   const urls = Array.isArray(mediaUrls) ? mediaUrls.slice(0, MAX_CAROUSEL_IMAGES) : [mediaUrls];
-  
-  // Video: only single
+
   if (isVideo) {
     const params = new URLSearchParams({ access_token: pageAccessToken, description: caption, source: urls[0] });
     const res = await fetch(`${GRAPH_BASE}/${pageId}/videos`, {
@@ -140,7 +138,6 @@ export async function publishToFacebook(
     return (data as FacebookPostResponse).id;
   }
 
-  // Single image
   if (urls.length === 1) {
     const params = new URLSearchParams({ access_token: pageAccessToken, message: caption, url: urls[0] });
     const res = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
@@ -156,37 +153,74 @@ export async function publishToFacebook(
     return (data as FacebookPostResponse).id;
   }
 
-  // Carousel
-  const childIds: string[] = [];
-  for (const url of urls) {
-    const photoParams = new URLSearchParams({ access_token: pageAccessToken, published: 'false', url });
-    const photoRes = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: photoParams.toString(),
-    });
-    const photoData = await photoRes.json();
-    if (isMetaError(photoData)) {
-      console.error('Carousel photo error:', photoData.error);
-      return null;
-    }
-    childIds.push((photoData as FacebookPostResponse).id);
-  }
+// Carousel
+   const childIds: string[] = [];
+   for (const url of urls) {
+     console.log('[carousel] Creating unpublished photo for URL:', url);
+     const photoParams = new URLSearchParams({ access_token: pageAccessToken, published: 'false', url });
+     const photoRes = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+       body: photoParams.toString(),
+     });
+     const photoData = await photoRes.json();
+     console.log('[carousel] Photo response:', JSON.stringify(photoData));
+     if (isMetaError(photoData) || !photoData.id) {
+       console.error('Carousel photo error or missing ID:', photoData);
+       // Fallback: publish just the first image
+       console.log('[carousel] Falling back to single image publish');
+       const fallbackParams = new URLSearchParams({ access_token: pageAccessToken, message: caption, url: urls[0] });
+       const fallbackRes = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+         body: fallbackParams.toString(),
+       });
+       const fallbackData = await fallbackRes.json();
+       if (isMetaError(fallbackData)) {
+         console.error('Fallback single image error:', fallbackData.error);
+         return null;
+       }
+       return (fallbackData as FacebookPostResponse).id;
+     }
+     childIds.push(photoData.id);
+   }
 
-  const carouselParams = new URLSearchParams({ access_token: pageAccessToken, message: caption, children: childIds.join(',') });
-  const res = await fetch(`${GRAPH_BASE}/${pageId}/feed`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: carouselParams.toString(),
-  });
+   console.log('[carousel] Created', childIds.length, 'child IDs:', childIds);
 
-  const data = await res.json();
-  if (isMetaError(data)) {
-    console.error('Facebook carousel error:', data.error);
-    return null;
-  }
-  return (data as FacebookPostResponse).id;
-}
+   // Facebook carousel requires attached_media as JSON array with specific format
+   const attachedMediaArray = childIds.map(id => ({ media_fbid: id }));
+   const carouselEndpoint = `${GRAPH_BASE}/${pageId}/feed?access_token=${pageAccessToken}`;
+   console.log('[carousel] Making carousel request to:', carouselEndpoint);
+
+   const res = await fetch(carouselEndpoint, {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({
+       message: caption,
+       attached_media: attachedMediaArray,
+     }),
+   });
+
+   const data = await res.json();
+   console.log('[carousel] Feed response:', JSON.stringify(data));
+   if (isMetaError(data) || !data.id) {
+     console.error('Facebook carousel error, falling back to single:', data);
+     // Fallback: publish just the first image
+     const fallbackParams = new URLSearchParams({ access_token: pageAccessToken, message: caption, url: urls[0] });
+     const fallbackRes = await fetch(`${GRAPH_BASE}/${pageId}/photos`, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+       body: fallbackParams.toString(),
+     });
+     const fallbackData = await fallbackRes.json();
+     if (isMetaError(fallbackData)) {
+       console.error('Fallback single image error:', fallbackData.error);
+       return null;
+     }
+     return (fallbackData as FacebookPostResponse).id;
+   }
+   return data.id;
+ }
 
 export async function createInstagramMediaContainer(
   pageAccessToken: string,
@@ -227,37 +261,52 @@ export async function createInstagramMediaContainer(
     return (data as InstagramContainerResponse).id;
   }
 
-  // Carousel
-  const containerParams = new URLSearchParams({ access_token: pageAccessToken, caption, media_type: 'CAROUSEL' });
-  const res = await fetch(`${GRAPH_BASE}/${instagramAccountId}/media`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: containerParams.toString(),
-  });
-  const data = await res.json();
+// Carousel
+   const childIds: string[] = [];
+   for (const url of urls) {
+     const childParams = new URLSearchParams({
+       access_token: pageAccessToken,
+       image_url: url,
+       is_carousel_item: 'true',
+     });
+     const childRes = await fetch(`${GRAPH_BASE}/${instagramAccountId}/media`, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+       body: childParams.toString(),
+     });
+     const childData = await childRes.json();
+     console.log('[ig-carousel] Child response:', JSON.stringify(childData));
+     if (isMetaError(childData)) {
+       console.error('Instagram carousel child error:', childData.error);
+       return null;
+     }
+     childIds.push((childData as InstagramContainerResponse).id);
+   }
 
-  if (isMetaError(data)) {
-    console.error('Instagram carousel container error:', data.error);
-    return null;
-  }
+   console.log('[ig-carousel] Created', childIds.length, 'child IDs, now creating main container');
 
-  const creationId = (data as InstagramContainerResponse).id;
+   const mainParams = new URLSearchParams({
+     access_token: pageAccessToken,
+     caption,
+     media_type: 'CAROUSEL',
+   });
+   childIds.forEach(id => mainParams.append('children', id));
 
-  for (const url of urls) {
-    const childParams = new URLSearchParams({ access_token: pageAccessToken, ig_container_id: creationId, image_url: url });
-    const childRes = await fetch(`${GRAPH_BASE}/${instagramAccountId}/media`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: childParams.toString(),
-    });
-    const childData = await childRes.json();
-    if (isMetaError(childData)) {
-      console.error('Instagram carousel child error:', childData.error);
-    }
-  }
+   const mainRes = await fetch(`${GRAPH_BASE}/${instagramAccountId}/media`, {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+     body: mainParams.toString(),
+   });
+   const mainData = await mainRes.json();
+   console.log('[ig-carousel] Main container response:', JSON.stringify(mainData));
 
-  return creationId;
-}
+   if (isMetaError(mainData)) {
+     console.error('Instagram carousel container error:', mainData.error);
+     return null;
+   }
+
+   return (mainData as InstagramContainerResponse).id;
+ }
 
 export async function publishInstagramContainer(
   pageAccessToken: string,
@@ -307,7 +356,7 @@ export async function fetchPostInsights(
 ): Promise<Record<string, number> | null> {
   const params = new URLSearchParams({
     access_token: pageAccessToken,
-    metric: 'engagement,like,count,reactions,comments,shares,reach,impressions',
+    metric: 'engagement,reactions,comments,shares,reach,impressions',
   });
 
   const res = await fetch(`${GRAPH_BASE}/${postId}/insights?${params}`);

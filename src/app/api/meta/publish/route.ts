@@ -31,6 +31,14 @@ async function processPublish(payload: {
 }) {
   const { socialPostId, pageAccessToken, pageId, instagramAccountId, mediaUrls, caption, platform, isVideo } = payload;
 
+  console.log('[publish] Starting publish:', {
+    socialPostId,
+    platform,
+    mediaUrlsCount: Array.isArray(mediaUrls) ? mediaUrls.length : 1,
+    isVideo,
+    captionLength: caption.length
+  });
+
   const results: { facebookId?: string; instagramId?: string } = {};
 
   if (platform === 'FACEBOOK' || platform === 'BOTH') {
@@ -62,10 +70,12 @@ async function processPublish(payload: {
   });
 }
 
+const validPlatforms = ['FACEBOOK', 'INSTAGRAM', 'BOTH'];
+
 export async function POST(req: Request) {
   try {
     const contentType = req.headers.get('content-type') || '';
-    
+
     let storeId: string, mediaUrls: string | string[] = [], caption: string, platform = 'BOTH', isVideo = false;
 
     if (contentType.includes('multipart/form-data')) {
@@ -74,7 +84,7 @@ export async function POST(req: Request) {
       caption = form.get('caption') as string;
       platform = (form.get('platform') as string) || 'BOTH';
       isVideo = form.get('isVideo') === 'true';
-      
+
       const file = form.get('file') as File | null;
       if (file) {
         const arrayBuffer = await file.arrayBuffer();
@@ -93,11 +103,18 @@ export async function POST(req: Request) {
       ({ storeId, mediaUrls, caption, platform, isVideo } = await req.json());
     }
 
-    if (!storeId || !caption) {
+if (!storeId || !caption) {
       return NextResponse.json({ error: 'storeId y caption son requeridos' }, { status: 400 });
     }
 
-    const validPlatforms = ['FACEBOOK', 'INSTAGRAM', 'BOTH'];
+    // Validate mediaUrls
+    const urlsArray = Array.isArray(mediaUrls) ? mediaUrls.filter(Boolean) : [mediaUrls].filter(Boolean);
+    if (urlsArray.length === 0) {
+      return NextResponse.json({ error: 'Se requiere al menos una URL de imagen válida' }, { status: 400 });
+    }
+
+    console.log('[publish] Received request:', { storeId, captionLength: caption.length, platform, isVideo, mediaUrlsCount: urlsArray.length, sampleUrl: urlsArray[0] });
+
     if (!validPlatforms.includes(platform)) {
       return NextResponse.json({ error: 'platform debe ser FACEBOOK, INSTAGRAM o BOTH' }, { status: 400 });
     }
@@ -108,12 +125,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Token de Meta no configurado o inválido' }, { status: 401 });
     }
 
-    if (!await validateToken(token.pageAccessToken, token.pageId)) {
+    if (!(await validateToken(token.pageAccessToken, token.pageId))) {
       return NextResponse.json({ error: 'Page Access Token inválido. Reconecta.' }, { status: 401 });
     }
 
     const socialPost = await prisma.socialPost.create({
-      data: { storeId, platform, status: 'PROCESSING', mediaUrl: Array.isArray(mediaUrls) ? mediaUrls[0] : mediaUrls, caption },
+      data: { storeId, platform, status: 'PROCESSING', mediaUrl: urlsArray[0], caption },
     });
 
     try {
@@ -122,7 +139,7 @@ export async function POST(req: Request) {
         pageAccessToken: token.pageAccessToken,
         pageId: token.pageId,
         instagramAccountId: token.instagramAccountId ?? undefined,
-        mediaUrls,
+        mediaUrls: urlsArray,
         caption,
         platform,
         isVideo,
@@ -144,7 +161,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const { postId, caption } = await req.json();
-    
+
     if (!postId || !caption) {
       return NextResponse.json({ error: 'postId y caption son requeridos' }, { status: 400 });
     }
