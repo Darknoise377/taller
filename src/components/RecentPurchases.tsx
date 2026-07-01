@@ -26,13 +26,26 @@ const NAMES = [
   "Valentina",
   "Felipe",
   "Paola",
+  "Jorge",
+  "Andrea",
+  "Martín",
+  "Carolina",
+  "Sergio",
+  "Daniela",
+  "Rafael",
+  "Gabriela",
+  "Óscar",
+  "Marina",
 ];
+
+const ACTIONS = ["compró", "adquirió", "solicitó", "añadió", "se llevó"];
 
 function random<T>(arr: T[]) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
 function timeAgoText(mins: number) {
+  if (mins <= 0) return "hace instantes";
   if (mins <= 1) return "hace 1 min";
   if (mins < 60) return `hace ${mins} min`;
   const hrs = Math.floor(mins / 60);
@@ -82,7 +95,7 @@ export default function RecentPurchases({ products = [], maxItems = 4 }: Props) 
         const updated = [next, ...prev].slice(0, maxItems);
         return updated.map((it, idx) => ({ ...it, minutes: it.minutes + (idx === 0 ? 0 : 1) }));
       });
-    }, 10000 + Math.floor(Math.random() * 8000));
+    }, 25000 + Math.floor(Math.random() * 35000));
 
     return () => clearInterval(iv);
   }, [products, maxItems]);
@@ -108,9 +121,9 @@ export default function RecentPurchases({ products = [], maxItems = 4 }: Props) 
               <div className="relative w-9 h-9 rounded-md overflow-hidden border border-slate-200 dark:border-slate-800">
                 <Image src={it.image || "/placeholder.png"} alt={`Imagen de ${it.product}`} fill className="object-cover" sizes="36px" />
               </div>
-              <div className="flex-1">
+<div className="flex-1">
                 <div className="text-sm font-semibold leading-tight text-slate-700 dark:text-slate-200">
-                  {it.name} compró <span className="text-[#0A2A66] dark:text-[#5B9BD5] font-semibold">{it.product}</span>
+                  {it.name} {random(ACTIONS)} <span className="text-[#0A2A66] dark:text-[#5B9BD5] font-semibold">{it.product}</span>
                 </div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">{timeAgoText(it.minutes)}</div>
               </div>
