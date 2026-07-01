@@ -67,7 +67,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     redirect(`/products/category/${categoryParam}`);
   }
 
-  const { products, totalCount } = await getCatalogProducts({ limit: 48 });
+  const { products, totalCount } = await getCatalogProducts({ limit: 20 });
   const baseUrl = getBaseUrl();
 
   const collectionJsonLd = {
