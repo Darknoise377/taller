@@ -12,6 +12,11 @@ import {
   Clock,
   DollarSign,
   RefreshCw,
+  ArrowUpRight,
+  Activity,
+  ShoppingBag,
+  Layers,
+  ChevronRight,
 } from 'lucide-react';
 
 type DashboardStats = {
@@ -40,13 +45,13 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: 'Cancelado',
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-  APPROVED: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-  REJECTED: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-  SHIPPED: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-  DELIVERED: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
-  CANCELLED: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
+const STATUS_CONFIG: Record<string, { dot: string; text: string; bg: string }> = {
+  PENDING:   { dot: 'bg-amber-400',   text: 'text-amber-700 dark:text-amber-300',   bg: 'bg-amber-50 dark:bg-amber-900/20' },
+  APPROVED:  { dot: 'bg-emerald-400', text: 'text-emerald-700 dark:text-emerald-300', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+  REJECTED:  { dot: 'bg-red-400',     text: 'text-red-700 dark:text-red-300',       bg: 'bg-red-50 dark:bg-red-900/20' },
+  SHIPPED:   { dot: 'bg-blue-400',    text: 'text-blue-700 dark:text-blue-300',     bg: 'bg-blue-50 dark:bg-blue-900/20' },
+  DELIVERED: { dot: 'bg-teal-400',    text: 'text-teal-700 dark:text-teal-300',     bg: 'bg-teal-50 dark:bg-teal-900/20' },
+  CANCELLED: { dot: 'bg-gray-400',    text: 'text-gray-600 dark:text-gray-400',     bg: 'bg-gray-100 dark:bg-gray-800/40' },
 };
 
 export default function AdminDashboard() {
@@ -77,26 +82,32 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className="space-y-6 animate-pulse">
+        <div className="h-10 w-48 rounded-xl bg-gray-200 dark:bg-slate-800" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-28 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 animate-pulse" />
+            <div key={i} className="h-36 rounded-2xl bg-gray-200 dark:bg-slate-800" />
           ))}
         </div>
-        <div className="h-80 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 animate-pulse" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="h-72 rounded-2xl bg-gray-200 dark:bg-slate-800" />
+          <div className="lg:col-span-2 h-72 rounded-2xl bg-gray-200 dark:bg-slate-800" />
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-6">
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
-          <AlertTriangle className="mx-auto mb-2 text-red-500" size={32} />
-          <p className="text-red-700 dark:text-red-300 font-medium">{error}</p>
+      <div className="flex items-center justify-center min-h-[40vh]">
+        <div className="bg-white dark:bg-slate-900 border border-red-200 dark:border-red-800/50 rounded-2xl p-8 text-center shadow-lg max-w-sm w-full">
+          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="text-red-500" size={28} />
+          </div>
+          <p className="text-red-700 dark:text-red-300 font-semibold mb-4">{error}</p>
           <button
             onClick={loadDashboard}
-            className="mt-3 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+            className="px-5 py-2.5 bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white rounded-xl hover:opacity-90 transition-opacity text-sm font-medium"
           >
             Reintentar
           </button>
@@ -109,167 +120,219 @@ export default function AdminDashboard() {
 
   const kpis = [
     {
-      label: 'Ingresos',
+      label: 'Ingresos Totales',
       value: `$${stats.totalRevenue.toLocaleString('es-CO')}`,
       icon: DollarSign,
-      color: 'text-emerald-600 dark:text-emerald-400',
-      bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+      gradient: 'from-emerald-500 to-teal-600',
+      iconBg: 'bg-emerald-400/20',
+      sub: 'Acumulado',
+      subIcon: TrendingUp,
     },
     {
       label: 'Órdenes',
       value: stats.totalOrders,
       sub: `${stats.pendingOrders} pendientes`,
       icon: PackageSearch,
-      color: 'text-[#0A2A66] dark:text-blue-400',
-      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      gradient: 'from-[#0A2A66] to-[#2E5FA7]',
+      iconBg: 'bg-blue-400/20',
       onClick: () => router.push('/admin/orders'),
     },
     {
       label: 'Productos',
       value: stats.totalProducts,
-      sub: stats.lowStockProducts > 0 ? `${stats.lowStockProducts} stock bajo` : undefined,
+      sub: stats.lowStockProducts > 0 ? `⚠ ${stats.lowStockProducts} stock bajo` : 'Stock saludable',
       icon: Package,
-      color: 'text-violet-600 dark:text-violet-400',
-      bg: 'bg-violet-50 dark:bg-violet-900/20',
+      gradient: 'from-violet-500 to-purple-700',
+      iconBg: 'bg-violet-400/20',
       onClick: () => router.push('/admin/products'),
       alert: stats.lowStockProducts > 0,
     },
     {
       label: 'Usuarios',
       value: stats.totalUsers,
+      sub: 'Registrados',
       icon: Users,
-      color: 'text-amber-600 dark:text-amber-400',
-      bg: 'bg-amber-50 dark:bg-amber-900/20',
+      gradient: 'from-amber-500 to-orange-600',
+      iconBg: 'bg-amber-400/20',
       onClick: () => router.push('/admin/users'),
     },
   ];
 
+  const quickActions = [
+    { label: 'Gestionar Productos', icon: Package, href: '/admin/products', desc: 'Inventario y catálogo', color: 'text-violet-500', bg: 'bg-violet-50 dark:bg-violet-900/20' },
+    { label: 'Ver Órdenes', icon: ShoppingBag, href: '/admin/orders', desc: 'Gestión de pedidos', color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+    { label: 'Usuarios', icon: Users, href: '/admin/users', desc: 'Clientes y roles', color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+    { label: 'Promociones', icon: BadgePercent, href: '/admin/codes', desc: 'Códigos y descuentos', color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+    { label: 'Combos', icon: Layers, href: '/admin/combos', desc: 'Paquetes de productos', color: 'text-pink-500', bg: 'bg-pink-50 dark:bg-pink-900/20' },
+    { label: 'Analytics', icon: Activity, href: '/admin/analytics', desc: 'Métricas y reportes', color: 'text-indigo-500', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
+  ];
+
   return (
-    <div className="p-4 sm:p-6 space-y-6">
+    <div className="space-y-6">
+      {/* —— Page Header —— */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-slate-100">
-          Dashboard
-        </h2>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={loadDashboard}
-            title="Actualizar datos"
-            className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 transition-colors"
-          >
-            <RefreshCw size={15} />
-            <span className="hidden sm:inline">Actualizar</span>
-          </button>
-          <span className="text-sm text-gray-500 dark:text-slate-400">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+            Dashboard
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5 capitalize">
             {new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-          </span>
+          </p>
         </div>
+        <button
+          onClick={loadDashboard}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 text-sm text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors shadow-sm font-medium"
+        >
+          <RefreshCw size={14} />
+          <span className="hidden sm:inline">Actualizar</span>
+        </button>
       </div>
 
-      {/* KPI Cards */}
+      {/* —— KPI Cards —— */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((kpi) => (
           <button
             key={kpi.label}
             onClick={kpi.onClick}
             disabled={!kpi.onClick}
-            className={`relative text-left p-5 rounded-xl bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 shadow-sm transition-all ${kpi.onClick ? 'hover:shadow-md hover:border-gray-300 dark:hover:border-slate-700 cursor-pointer active:scale-[0.98]' : 'cursor-default'}`}
+            className={`relative group overflow-hidden text-left rounded-2xl shadow-sm transition-all duration-300 ${
+              kpi.onClick
+                ? 'hover:shadow-xl hover:-translate-y-0.5 cursor-pointer active:translate-y-0 active:shadow-md'
+                : 'cursor-default'
+            }`}
           >
-            {kpi.alert && (
-              <span className="absolute top-3 right-3">
-                <AlertTriangle className="text-amber-500" size={18} />
-              </span>
-            )}
-            <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg ${kpi.bg} mb-3`}>
-              <kpi.icon className={kpi.color} size={20} />
+            <div className={`bg-gradient-to-br ${kpi.gradient} p-5 h-full`}>
+              {/* Icon */}
+              <div className={`inline-flex w-11 h-11 rounded-xl ${kpi.iconBg} items-center justify-center mb-4`}>
+                <kpi.icon className="text-white" size={22} />
+              </div>
+
+              {/* Alert badge */}
+              {kpi.alert && (
+                <span className="absolute top-3 right-3 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center">
+                  <AlertTriangle size={12} className="text-white" />
+                </span>
+              )}
+
+              {/* Arrow on hover */}
+              {kpi.onClick && (
+                <ArrowUpRight
+                  size={16}
+                  className="absolute top-3 right-3 text-white/50 group-hover:text-white transition-colors"
+                />
+              )}
+
+              <p className="text-white/70 text-xs font-medium mb-1 uppercase tracking-wider">{kpi.label}</p>
+              <p className="text-white text-2xl font-bold leading-none mb-1.5">{kpi.value}</p>
+              {kpi.sub && (
+                <p className="text-white/60 text-xs flex items-center gap-1">
+                  {kpi.sub}
+                </p>
+              )}
+
+              {/* Decorative blob */}
+              <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full bg-white/5" />
+              <div className="absolute -bottom-8 -right-8 w-32 h-32 rounded-full bg-white/5" />
             </div>
-            <p className="text-sm text-gray-500 dark:text-slate-400">{kpi.label}</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{kpi.value}</p>
-            {kpi.sub && (
-              <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">{kpi.sub}</p>
-            )}
           </button>
         ))}
       </div>
 
-      {/* Quick Actions + Recent Orders */}
+      {/* —— Quick Actions + Recent Orders —— */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
         {/* Quick Actions */}
-        <div className="bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-slate-100 mb-4">
-            Acciones rápidas
+        <div className="bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+          <h3 className="text-base font-bold text-gray-800 dark:text-slate-100 mb-4 flex items-center gap-2">
+            <span className="w-1 h-5 rounded-full bg-gradient-to-b from-[#0A2A66] to-[#2E5FA7] inline-block" />
+            Acceso Rápido
           </h3>
-          <div className="space-y-2">
-            {[
-              { label: 'Gestionar productos', icon: Package, href: '/admin/products' },
-              { label: 'Ver órdenes', icon: PackageSearch, href: '/admin/orders' },
-              { label: 'Administrar usuarios', icon: Users, href: '/admin/users' },
-              { label: 'Códigos y promociones', icon: BadgePercent, href: '/admin/codes' },
-            ].map((action) => (
+          <div className="space-y-1.5">
+            {quickActions.map((action) => (
               <button
                 key={action.href}
                 onClick={() => router.push(action.href)}
-                className="w-full flex items-center gap-3 p-3 rounded-lg text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-sm"
+                className="w-full group flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-800/80 transition-all duration-200"
               >
-                <action.icon size={18} className="text-gray-400 dark:text-slate-500" />
-                {action.label}
-                <TrendingUp size={14} className="ml-auto text-gray-300 dark:text-slate-600" />
+                <span className={`flex-shrink-0 w-9 h-9 rounded-xl ${action.bg} flex items-center justify-center`}>
+                  <action.icon size={17} className={action.color} />
+                </span>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-slate-100">{action.label}</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-500">{action.desc}</p>
+                </div>
+                <ChevronRight size={15} className="text-gray-300 dark:text-slate-600 group-hover:text-gray-500 dark:group-hover:text-slate-400 transition-colors" />
               </button>
             ))}
           </div>
         </div>
 
         {/* Recent Orders */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-xl p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-slate-100">
-              Órdenes recientes
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-gray-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-base font-bold text-gray-800 dark:text-slate-100 flex items-center gap-2">
+              <span className="w-1 h-5 rounded-full bg-gradient-to-b from-[#0A2A66] to-[#2E5FA7] inline-block" />
+              Órdenes Recientes
             </h3>
             <button
               onClick={() => router.push('/admin/orders')}
-              className="text-sm text-[#0A2A66] dark:text-blue-400 hover:underline"
+              className="flex items-center gap-1 text-xs font-semibold text-[#2E5FA7] dark:text-blue-400 hover:underline"
             >
               Ver todas
+              <ChevronRight size={13} />
             </button>
           </div>
 
           {stats.recentOrders.length === 0 ? (
-            <div className="text-center py-10 text-gray-400 dark:text-slate-500">
-              <Clock className="mx-auto mb-2" size={32} />
-              <p>No hay órdenes aún</p>
+            <div className="flex flex-col items-center justify-center py-12 text-gray-400 dark:text-slate-500">
+              <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+                <Clock size={26} className="opacity-60" />
+              </div>
+              <p className="text-sm font-medium">Sin órdenes aún</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-1 px-1">
+              <table className="w-full text-sm min-w-[460px]">
                 <thead>
-                  <tr className="text-left text-gray-500 dark:text-slate-400 border-b border-gray-100 dark:border-slate-800">
-                    <th className="pb-3 font-medium">Cliente</th>
-                    <th className="pb-3 font-medium">Total</th>
-                    <th className="pb-3 font-medium">Estado</th>
-                    <th className="pb-3 font-medium hidden sm:table-cell">Fecha</th>
+                  <tr className="text-left">
+                    <th className="pb-3 text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Cliente</th>
+                    <th className="pb-3 text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Total</th>
+                    <th className="pb-3 text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider">Estado</th>
+                    <th className="pb-3 text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wider hidden sm:table-cell">Fecha</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50 dark:divide-slate-800">
-                  {stats.recentOrders.map((order) => (
-                    <tr key={order.id} className="text-gray-700 dark:text-slate-300">
-                      <td className="py-3 pr-4">
-                        <p className="font-medium truncate max-w-[150px]">{order.customerName}</p>
-                        <p className="text-xs text-gray-400 dark:text-slate-500 font-mono truncate max-w-[120px]">
-                          {order.referenceCode.slice(0, 8)}...
-                        </p>
-                      </td>
-                      <td className="py-3 pr-4 font-medium">
-                        ${order.total.toLocaleString('es-CO')}
-                      </td>
-                      <td className="py-3 pr-4">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-600'}`}>
-                          {STATUS_LABELS[order.status] || order.status}
-                        </span>
-                      </td>
-                      <td className="py-3 text-gray-400 dark:text-slate-500 hidden sm:table-cell">
-                        {new Date(order.createdAt).toLocaleDateString('es-CO')}
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-800/80">
+                  {stats.recentOrders.map((order) => {
+                    const sc = STATUS_CONFIG[order.status];
+                    return (
+                      <tr key={order.id} className="group hover:bg-gray-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                        <td className="py-3.5 pr-4">
+                          <p className="font-semibold text-gray-800 dark:text-slate-100 truncate max-w-[160px]">{order.customerName}</p>
+                          <p className="text-[11px] text-gray-400 dark:text-slate-500 font-mono">
+                            #{order.referenceCode.slice(0, 10)}
+                          </p>
+                        </td>
+                        <td className="py-3.5 pr-4">
+                          <span className="font-bold text-gray-900 dark:text-white">
+                            ${order.total.toLocaleString('es-CO')}
+                          </span>
+                        </td>
+                        <td className="py-3.5 pr-4">
+                          {sc ? (
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${sc.bg} ${sc.text}`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+                              {STATUS_LABELS[order.status]}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-500">{order.status}</span>
+                          )}
+                        </td>
+                        <td className="py-3.5 text-xs text-gray-400 dark:text-slate-500 hidden sm:table-cell">
+                          {new Date(order.createdAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -279,4 +342,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-

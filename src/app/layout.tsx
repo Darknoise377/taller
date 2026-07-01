@@ -133,9 +133,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
+return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#0A2A66" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#070617" media="(prefers-color-scheme: dark)" />
