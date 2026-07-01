@@ -88,6 +88,7 @@ export default function AdminMetaPage() {
   const [showDisconnectConfirm, setShowDisconnectConfirm] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -177,6 +178,16 @@ export default function AdminMetaPage() {
     Promise.all([loadStatus(), loadProducts(), loadCombos(), loadFlashSales(), loadPosts()])
       .finally(() => setLoading(false));
   }, [loadStatus, loadProducts, loadCombos, loadFlashSales, loadPosts]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.relative')) setShowDropdown(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleConnect = () => {
     window.location.href = '/api/meta/oauth/login?storeId=default';
@@ -597,7 +608,7 @@ export default function AdminMetaPage() {
 
         {/* Selector de item */}
         {itemType !== 'UPLOAD' && (
-          <div>
+          <div className="relative">
             <label className="block text-sm font-semibold text-gray-700 dark:text-slate-300 mb-2">
               Seleccionar {itemType === 'PRODUCT' ? 'producto' : itemType === 'COMBO' ? 'combo' : 'oferta'}
             </label>
@@ -607,22 +618,31 @@ export default function AdminMetaPage() {
                 type="text"
                 placeholder={`Buscar ${itemType === 'PRODUCT' ? 'productos' : itemType === 'COMBO' ? 'combos' : 'ofertas'}...`}
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onClick={() => setShowDropdown(true)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  if (!showDropdown) setShowDropdown(true);
+                }}
                 className="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-[#2E5FA7] focus:border-transparent outline-none transition-all"
               />
             </div>
-            {searchQuery && (
-              <div className="mt-2 max-h-60 overflow-y-auto border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
+            {showDropdown && (
+              <div className="absolute z-10 mt-2 w-full max-h-60 overflow-y-auto border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 shadow-lg">
                 {(() => {
                   let items: Array<{ id: string; name: string; extra?: string }> = [];
+                  const query = searchQuery.toLowerCase();
                   if (itemType === 'PRODUCT') {
-                    items = products
-                      .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                      .map(p => ({ id: p.id, name: p.name, extra: p.videoUrl ? '🎥' : ((p.images?.length || 0) > 1 ? `📷${p.images?.length || 0}` : '') }));
+                    items = searchQuery
+                      ? products.filter(p => p.name.toLowerCase().includes(query)).map(p => ({ id: p.id, name: p.name, extra: p.videoUrl ? '🎥' : ((p.images?.length || 0) > 1 ? `📷${p.images?.length || 0}` : '') }))
+                      : products.slice(0, 10).map(p => ({ id: p.id, name: p.name, extra: p.videoUrl ? '🎥' : ((p.images?.length || 0) > 1 ? `📷${p.images?.length || 0}` : '') }));
                   } else if (itemType === 'COMBO') {
-                    items = combos.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase())).map(c => ({ id: c.id, name: c.name }));
+                    items = searchQuery
+                      ? combos.filter(c => c.name.toLowerCase().includes(query)).map(c => ({ id: c.id, name: c.name }))
+                      : combos.slice(0, 10).map(c => ({ id: c.id, name: c.name }));
                   } else {
-                    items = flashSales.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase())).map(f => ({ id: f.id, name: `${f.name} (-${f.discount}%)` }));
+                    items = searchQuery
+                      ? flashSales.filter(f => f.name.toLowerCase().includes(query)).map(f => ({ id: f.id, name: `${f.name} (-${f.discount}%)` }))
+                      : flashSales.slice(0, 10).map(f => ({ id: f.id, name: `${f.name} (-${f.discount}%)` }));
                   }
                   return items.length > 0 ? (
                     items.map(item => (
@@ -632,6 +652,7 @@ export default function AdminMetaPage() {
                         onClick={() => {
                           setFormData(prev => ({ ...prev, itemId: item.id }));
                           setSearchQuery('');
+                          setShowDropdown(false);
                           generateCaptionAI(item.id);
                         }}
                         className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
@@ -642,42 +663,6 @@ export default function AdminMetaPage() {
                     ))
                   ) : (
                     <p className="px-4 py-3 text-sm text-gray-500 dark:text-slate-400">No se encontraron resultados</p>
-                  );
-                })()}
-              </div>
-            )}
-            {!searchQuery && (
-              <div className="mt-2 max-h-60 overflow-y-auto border border-gray-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800">
-                {(() => {
-                  let items: Array<{ id: string; name: string; extra?: string }> = [];
-                  if (itemType === 'PRODUCT') {
-                    items = products.map(p => ({ id: p.id, name: p.name, extra: p.videoUrl ? '🎥' : ((p.images?.length || 0) > 1 ? `📷${p.images?.length || 0}` : '') }));
-                  } else if (itemType === 'COMBO') {
-                    items = combos.map(c => ({ id: c.id, name: c.name }));
-                  } else {
-                    items = flashSales.map(f => ({ id: f.id, name: `${f.name} (-${f.discount}%)` }));
-                  }
-                  return items.slice(0, 10).map(item => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => {
-                        setFormData(prev => ({ ...prev, itemId: item.id }));
-                        generateCaptionAI(item.id);
-                      }}
-                      className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center gap-2"
-                    >
-                      <span className="flex-1 text-sm text-gray-900 dark:text-white">{item.name}</span>
-                      {item.extra && <span className="text-xs">{item.extra}</span>}
-                    </button>
-                  ));
-                })()}
-                {(() => {
-                  const count = itemType === 'PRODUCT' ? products.length : itemType === 'COMBO' ? combos.length : flashSales.length;
-                  return count > 10 && (
-                    <p className="px-4 py-2 text-xs text-gray-500 dark:text-slate-400">
-                      +{count - 10} más. Usa la búsqueda para encontrar
-                    </p>
                   );
                 })()}
               </div>
