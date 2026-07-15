@@ -27,10 +27,12 @@ model Product {
   brand       String?
   tags        String[]       @default([])
   diagramNumber String?
+  cost        Float?         // Costo base del producto (para calculadora)
   category    Category
   sizes       String[]
   colors      String[]
   stock       Int
+  soldCount   Int            @default(0) // Cantidad total vendida
   slug        String?        @unique
 
   createdAt   DateTime       @default(now())
@@ -504,6 +506,7 @@ model MeliListing {
   meliItemId String   @unique       // e.g. "MCO1234567890"
   status     MeliListingStatus @default(ACTIVE)
   meliPrice  Float               // Last price sent to MeLi (after markup)
+  meliPermalink String?         // Permalink from MeLi API (cached for quick access)
   syncedProductPrice Float?      // Snapshot at last successful sync
   syncedProductStock   Int?       // Snapshot at last successful sync
   meliVisitsTotal      Int?       // Cached visits (last 30d) from MeLi API

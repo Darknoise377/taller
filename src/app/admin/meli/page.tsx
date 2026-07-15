@@ -701,10 +701,15 @@ export default function AdminMeliPage() {
       <Card title="Últimas Órdenes en Mercado Libre" className="mt-8">
         <Table
           dataSource={orders}
-          rowKey="id"
+          rowKey="meliOrderId"
           loading={ordersLoading}
           size="small"
           pagination={{ pageSize: 10 }}
+          locale={{
+            emptyText: orders.length === 0
+              ? 'No hay órdenes de Mercado Libre registradas aún'
+              : 'Cargando...'
+          }}
           columns={[
             {
               title: 'Orden ID',
@@ -733,7 +738,7 @@ export default function AdminMeliPage() {
               title: 'Fecha',
               dataIndex: 'createdAt',
               key: 'createdAt',
-              render: (val) => new Date(val).toLocaleString(),
+              render: (val: string | Date) => new Date(val).toLocaleString(),
             }
           ]}
         />

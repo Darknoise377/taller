@@ -39,11 +39,10 @@ export async function GET(req: Request) {
     if (category && isProductCategory(category)) where.category = category;
 
     if (minPrice || maxPrice) {
-      // Inicializamos como FloatFilter para asignar gte/lte correctamente
-      where.price = {} as Prisma.FloatFilter;
-      const priceFilter = where.price as Prisma.FloatFilter;
+      const priceFilter = {} as Prisma.FloatFilter;
       if (minPrice && !Number.isNaN(Number(minPrice))) priceFilter.gte = Number(minPrice);
       if (maxPrice && !Number.isNaN(Number(maxPrice))) priceFilter.lte = Number(maxPrice);
+      where.price = priceFilter;
     }
 
     if (size) {
@@ -77,13 +76,11 @@ export async function GET(req: Request) {
           description: true,
           price: true,
           currency: true,
-
-
-
+          cost: true,
           imageUrl: true,
-                    images: true,
-                    videoUrl: true,
-                    sku: true,
+          images: true,
+          videoUrl: true,
+          sku: true,
           tags: true,
           diagramNumber: true,
           category: true,
@@ -108,7 +105,6 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ items, total, page, limit }, {
       headers: {
-        // 60s en CDN, revalidar en segundo plano hasta 5min
         'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
       },
     });
@@ -127,19 +123,20 @@ export async function POST(req: Request) {
       description,
       price,
       currency,
-
-
-
+      cost,
       images,
-            imageUrl,
-            videoUrl,
-            category,
+      imageUrl,
+      videoUrl,
+      category,
       sizes,
       colors,
       stock,
       sku,
       tags,
       diagramNumber,
+      brand,
+      meliExport,
+      meliListingType,
     } = body;
 
     // Validaciones
@@ -160,49 +157,39 @@ export async function POST(req: Request) {
       );
     }
 
-    // Crear producto — construimos el objeto `data` evitando incluir
-    // propiedades opcionales que no provengan del payload. Esto evita que
-    // Prisma intente escribir columnas que no existen en la BD y reduce
-    // errores P2022 en entornos sin migraciones aplicadas.
     const data: Prisma.ProductCreateInput = {
       name,
       description,
       price,
       currency,
-
-
-
-      images: Array.isArray(images) ? images : [], // puede venir vacío si usas solo imageUrl
-            imageUrl: imageUrl ?? null, // guardamos la URL de Cloudinary
-                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                  // @ts-ignore
-                  videoUrl: videoUrl ?? null,
-                  category,
+      images: Array.isArray(images) ? images : [],
+      imageUrl: imageUrl ?? null,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      videoUrl: videoUrl ?? null,
+      category,
       sizes: Array.isArray(sizes) ? sizes : [],
       colors: Array.isArray(colors) ? colors : [],
       stock: typeof stock === 'number' ? stock : 0,
     };
 
-    // Añadimos tags solo si vienen explícitamente en el body. Esto evita que
-    // Prisma intente escribir la columna cuando la migración no se ha aplicado
-    // en el entorno (causa común de P2022).
-    if (tags !== undefined) {
-      data.tags = Array.isArray(tags) ? tags : [];
-    }
-
-    // Añadimos campos opcionales solo si vienen explícitamente en el body
+    if (tags !== undefined) data.tags = Array.isArray(tags) ? tags : [];
     if (sku !== undefined) data.sku = sku;
     if (diagramNumber !== undefined) data.diagramNumber = diagramNumber ?? null;
+    if (cost !== undefined) data.cost = cost;
+    if (brand !== undefined) data.brand = brand;
+    if (meliExport !== undefined) data.meliExport = meliExport;
+    if (meliListingType !== undefined) data.meliListingType = meliListingType;
 
     const product = await prisma.product.create({ data });
 
-    // Generate SEO slug asynchronously after we have the product ID
+    // Generate SEO slug asynchronously
     void prisma.product.update({
       where: { id: product.id },
       data: { slug: generateProductSlug(product.name, product.id) },
     }).catch((e) => console.error('[slug] product create:', e));
 
-    // Indexar embedding de forma asíncrona (no bloquea la respuesta)
+    // Indexar embedding de forma asíncrona
     void createAndStoreEmbedding({
       text: buildProductText({ name: product.name, description: product.description, sku: product.sku, tags: product.tags, diagramNumber: product.diagramNumber, category: product.category }),
       sourceType: 'product',

@@ -10,6 +10,7 @@ export type AdminMeliListingRow = {
   basePrice: number;
   meliPrice: number;
   meliItemId?: string;
+  meliPermalink?: string | null;
   localStatus?: string;
   lastSyncAt?: string;
   meliExport: boolean;
@@ -116,7 +117,7 @@ export function filterBySyncState(
 export async function loadAdminMeliListings(options: {
   refreshLive?: boolean;
 }): Promise<AdminMeliListingRow[]> {
-  const products = await prisma.product.findMany({
+const products = await prisma.product.findMany({
     select: {
       id: true,
       name: true,
@@ -135,6 +136,7 @@ export async function loadAdminMeliListings(options: {
           syncedProductStock: true,
           meliVisitsTotal: true,
           meliVisitsCheckedAt: true,
+          meliPermalink: true,
         },
       },
     },
@@ -237,6 +239,7 @@ export async function loadAdminMeliListings(options: {
       basePrice: p.price,
       meliPrice: p.meliListing?.meliPrice ?? 0,
       meliItemId,
+      meliPermalink: p.meliListing?.meliPermalink ?? null,
       localStatus,
       lastSyncAt: p.meliListing?.lastSyncAt?.toISOString(),
       meliExport: p.meliExport,

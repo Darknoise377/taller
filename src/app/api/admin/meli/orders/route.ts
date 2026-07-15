@@ -26,6 +26,13 @@ export async function GET() {
     const orders = await prisma.meliOrder.findMany({
       orderBy: { createdAt: 'desc' },
       take: 50,
+      select: {
+        id: true,
+        meliOrderId: true,
+        status: true,
+        rawPayload: true,
+        createdAt: true,
+      },
     });
 
     return NextResponse.json({ orders });

@@ -37,6 +37,7 @@ export interface OrderProduct {
     price: number;
     name: string;
     imageUrl?: string;
+    currency?: 'USD' | 'EUR' | 'COP';
   };
 }
 

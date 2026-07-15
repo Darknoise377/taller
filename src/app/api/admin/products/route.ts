@@ -18,41 +18,57 @@ export async function GET() {
   }
 
   try {
-    const products = await prisma.product.findMany({
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        price: true,
-        currency: true,
-        imageUrl: true,
-                images: true,
-                videoUrl: true,
-                sku: true,
-        tags: true,
-        diagramNumber: true,
-        category: true,
-        sizes: true,
-        colors: true,
-        stock: true,
-        brand: true,
-        slug: true,
-        createdAt: true,
-        updatedAt: true,
-        meliExport: true,
-        meliListing: {
-          select: {
-            meliItemId: true,
-            status: true,
-            meliPrice: true,
-            lastSyncAt: true,
+    const [products, salesAgg] = await prisma.$transaction([
+      prisma.product.findMany({
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          price: true,
+          currency: true,
+          cost: true,
+          imageUrl: true,
+          images: true,
+          videoUrl: true,
+          sku: true,
+          tags: true,
+          diagramNumber: true,
+          category: true,
+          sizes: true,
+          colors: true,
+          stock: true,
+          brand: true,
+          slug: true,
+          createdAt: true,
+          updatedAt: true,
+          meliExport: true,
+          meliListingType: true,
+          meliListing: {
+            select: {
+              meliItemId: true,
+              status: true,
+              meliPrice: true,
+              lastSyncAt: true,
+              meliPermalink: true,
+            },
           },
         },
-      },
-    });
+      }),
+      prisma.orderProduct.groupBy({
+        by: ['productId'],
+        _sum: { quantity: true },
+        orderBy: { productId: 'asc' },
+      }),
+    ]);
 
-    return NextResponse.json(products);
+    const salesMap = new Map(salesAgg.map((s) => [s.productId, s._sum?.quantity ?? 0]));
+    const productsWithSales = products.map((p) => ({
+      ...p,
+      soldCount: salesMap.get(p.id) || 0,
+    }));
+
+    return NextResponse.json(productsWithSales);
   } catch (error) {
     console.error('Error al obtener productos (admin):', error);
     return NextResponse.json({ error: 'Error al obtener productos' }, { status: 500 });

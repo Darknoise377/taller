@@ -42,10 +42,13 @@ import {
   InfoCircleOutlined,
   ThunderboltOutlined,
   VideoCameraOutlined,
+  EyeOutlined,
+  ShoppingCartOutlined,
 } from '@ant-design/icons';
 import type { SkuLookupResult } from '@/app/api/admin/products/lookup-sku/route';
 import type { UploadFile } from 'antd/es/upload/interface';
 import type { ColumnsType } from 'antd/es/table';
+import type { MeliListing } from '@prisma/client';
 import { productService, uploadImage } from '@/services/productService';
 import { PRODUCT_CATEGORY_OPTIONS, getProductCategoryLabel } from '@/constants/productCategories';
 import { formatCurrency } from '@/utils/formatCurrency';
@@ -390,11 +393,15 @@ useEffect(() => {
     }
   }, []);
 
-  // --- Funciones del Modal y Formulario ---
+// --- Funciones del Modal y Formulario ---
   const openModal = useCallback((product?: Product & { videoUrl?: string | null }) => {
       setEditingProduct(product || null);
       if (product) {
         form.setFieldsValue({ ...product });
+        // Cargar costo en la calculadora si existe
+        if (product.cost) {
+          setCalcCost(product.cost);
+        }
         const initialFileList = (product.images ?? []).map((url, index) => ({
           uid: `${-index - 1}`,
           name: `imagen-${index + 1}.jpg`,
@@ -404,15 +411,17 @@ useEffect(() => {
         setFileList(initialFileList);
       
         if (product.videoUrl) {
-                 setVideoUrlForm(product.videoUrl);
-              } else {
-                 setVideoUrlForm('');
-              }
+               setVideoUrlForm(product.videoUrl);
             } else {
-              form.resetFields();
-              setFileList([]);
-              setVideoUrlForm('');
+               setVideoUrlForm('');
             }
+          } else {
+            form.resetFields();
+            setFileList([]);
+            setVideoUrlForm('');
+            // Resetear calculadora para nuevo producto
+            setCalcCost(0);
+          }
     setAiImgOpen(false);
     setAiImgPrompt('');
     setAiImgResult(null);
@@ -611,23 +620,55 @@ useEffect(() => {
         key: 'meliExport',
         align: 'center',
         responsive: ['md'],
-        render: (_, record) => (
-          <Tooltip title={record.meliExport ? 'Exportar a MeLi: ON' : 'Exportar a MeLi: OFF'}>
-            <Tag
-              color={record.meliExport ? 'green' : 'default'}
-              style={{ cursor: 'pointer', margin: 0, padding: '2px 8px' }}
-              onClick={async (e) => {
-                e.stopPropagation(); // Evita abrir el modal de edición
-                try {
-                  await productService.updateProduct(record.id, { meliExport: !record.meliExport });
-                  await fetchProducts();
-                  message.success(`MercadoLibre ${!record.meliExport ? 'activado' : 'desactivado'} para ${record.name}`);
-                } catch { message.error('Error al actualizar'); }
-              }}
-            >
-              {record.meliExport ? 'ON' : 'OFF'}
-            </Tag>
-          </Tooltip>
+        render: (_, record) => {
+          const hasMelItem = record.meliItemId && record.meliItemId.trim() !== '';
+          const meliUrl = record.meliPermalink || (hasMelItem ? `https://articulo.mercadolibre.com.co/${record.meliItemId}` : null);
+          
+          return (
+            <Space size="small">
+              <Tooltip title={record.meliExport ? 'Exportar a MeLi: ON' : 'Exportar a MeLi: OFF'}>
+                <Tag
+                  color={record.meliExport ? 'green' : 'default'}
+                  style={{ cursor: 'pointer', margin: 0, padding: '2px 8px' }}
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    try {
+                      await productService.updateProduct(record.id, { meliExport: !record.meliExport });
+                      await fetchProducts();
+                      message.success(`MercadoLibre ${!record.meliExport ? 'activado' : 'desactivado'} para ${record.name}`);
+                    } catch { message.error('Error al actualizar'); }
+                  }}
+                >
+                  {record.meliExport ? 'ON' : 'OFF'}
+                </Tag>
+              </Tooltip>
+              {meliUrl && (
+                <Tooltip title="Ver detalles en Mercado Libre">
+                  <Button
+                    type="text"
+                    size="small"
+                    icon={<EyeOutlined style={{ color: '#1890ff' }} />}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(meliUrl, '_blank', 'noopener,noreferrer');
+                    }}
+                  />
+                </Tooltip>
+              )}
+            </Space>
+          );
+        },
+      },
+      {
+        title: 'Ventas',
+        dataIndex: 'soldCount',
+        key: 'sales',
+        align: 'center',
+        sorter: (a, b) => (a.soldCount ?? 0) - (b.soldCount ?? 0),
+        render: (soldCount: number) => (
+          <span style={{ fontWeight: 600, color: soldCount > 0 ? '#52c41a' : '#8c8c8c' }}>
+            {soldCount ?? 0}
+          </span>
         ),
       },
       {
@@ -640,6 +681,7 @@ useEffect(() => {
               type="text"
               icon={<EditOutlined style={{ color: '#0A2A66' }} />}
               onClick={() => openModal(record)}
+              title="Editar producto"
             />
             <Popconfirm
               title="¿Eliminar producto?"
@@ -654,6 +696,7 @@ useEffect(() => {
                  danger 
                  icon={<DeleteOutlined />} 
                  onClick={(e) => e.stopPropagation()} 
+                 title="Eliminar producto"
               />
             </Popconfirm>
           </Space>
@@ -689,7 +732,7 @@ return (
 
       {/* --- Stats row --- */}
       <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={6}>
           <Card size="small" style={{ borderRadius: 10, background: '#f0f5ff', border: '1px solid #adc6ff' }}>
             <Statistic
               title="Total productos"
@@ -698,7 +741,17 @@ return (
             />
           </Card>
         </Col>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={6}>
+          <Card size="small" style={{ borderRadius: 10, background: '#e6f7ff', border: '1px solid #91d5ff' }}>
+            <Statistic
+              title="Ventas totales"
+              value={products.reduce((sum, p) => sum + (p.soldCount ?? 0), 0)}
+              valueStyle={{ color: '#1890ff', fontWeight: 700 }}
+              prefix={<ShoppingCartOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={6}>
           <Card size="small" style={{ borderRadius: 10, background: '#fff7e6', border: '1px solid #ffd591' }}>
             <Statistic
               title="Stock bajo (≤ 5)"
@@ -707,7 +760,7 @@ return (
             />
           </Card>
         </Col>
-        <Col xs={24} sm={8}>
+        <Col xs={24} sm={6}>
           <Card size="small" style={{ borderRadius: 10, background: '#fff1f0', border: '1px solid #ffa39e' }}>
             <Statistic
               title="Sin stock"
@@ -949,6 +1002,21 @@ return (
           <Col xs={24} md={6}>
             <Form.Item label="Stock" name="stock" rules={[{ required: true }]}>
               <InputNumber min={0} size="large" style={{ width: '100%' }} placeholder="0" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item label="Costo base (COP)" name="cost">
+              <InputNumber<number>
+                min={0}
+                size="large"
+                style={{ width: '100%' }}
+                formatter={(value) => value ? `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''}
+                parser={(value) => Number(value?.replace(/\$\s?|(,*)/g, '') || 0)}
+                placeholder="Ej: 15.000 (opcional, para cálculo de precios MeLi)"
+              />
             </Form.Item>
           </Col>
         </Row>

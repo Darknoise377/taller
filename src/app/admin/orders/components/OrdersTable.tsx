@@ -17,6 +17,7 @@ import {
 } from 'antd';
 import type { TableProps } from 'antd';
 import { Order } from '@/types/order';
+import { formatCurrency } from '@/utils/formatCurrency';
 import {
   UserOutlined,
   PhoneOutlined,
@@ -108,16 +109,22 @@ const ExpandedRowContent: React.FC<{ record: Order }> = ({ record }) => {
         </Space>
       </Descriptions.Item>
 
-      <Descriptions.Item label="Detalle de Productos" span={2}>
-          {record.products?.map(p => (
-              <div key={p.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
-                  <Avatar src={p.product?.imageUrl || '/placeholder.png'} style={{ marginRight: 12 }} />
-                  <div>
-                      <Text>{p.product?.name || 'Producto no disponible'}</Text><br/>
-                      <Text type="secondary">Cantidad: {p.quantity} | Precio Unit: ${p.product?.price != null ? p.product.price.toLocaleString('es-CO') : '0'}</Text>
-                  </div>
+<Descriptions.Item label="Detalle de Productos" span={2}>
+        {record.products && record.products.length > 0 ? (
+          record.products.map(p => (
+            <div key={p.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+              <Avatar src={p.product?.imageUrl || '/placeholder.png'} style={{ marginRight: 12 }} />
+              <div>
+                <Text>{p.product?.name || 'Producto no disponible'}</Text><br/>
+                <Text type="secondary">
+                  Cantidad: {p.quantity} | Precio Unit: {p.product?.price != null ? formatCurrency(p.product.price, p.product.currency ?? 'COP') : '—'}
+                </Text>
               </div>
-          ))}
+            </div>
+          ))
+        ) : (
+          <Text type="secondary">Sin productos en el detalle</Text>
+        )}
       </Descriptions.Item>
 
       <Descriptions.Item label="Tracking" span={2}>

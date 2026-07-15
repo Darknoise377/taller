@@ -17,6 +17,13 @@ export interface Product {
   imageUrl?: string;
     images?: string[];
     videoUrl?: string | null;
+    sku?: string;
+    slug?: string;
+    brand?: string;
+    cost?: number;
+    tags?: string[];
+    diagramNumber?: string;
+    rating?: number;
   category:
     | 'cilindros'
     | 'llantas'
@@ -36,18 +43,17 @@ export interface Product {
   sizes: ProductSize[];
   colors: string[];
   stock: number;
+  soldCount?: number;
   createdAt?: string;
   updatedAt?: string;
-  // Opcionales para detalles extendidos
-  sku?: string;
-  slug?: string;
-  brand?: string;
-  tags?: string[];
-  diagramNumber?: string;
-  rating?: number;
   // MeLi integration
   meliExport?: boolean;
   meliListingType?: string;
+  meliItemId?: string;
+  meliPermalink?: string;
+  meliPrice?: number;
+  meliStatus?: string;
+  meliLastSync?: string;
 }
 
 /**

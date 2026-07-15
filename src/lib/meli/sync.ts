@@ -346,6 +346,7 @@ export async function publishProduct(productId: string): Promise<{ meliItemId: s
     data: {
       productId,
       meliItemId: response.id,
+      meliPermalink: response.permalink,
       status: mapApiStatusToDb(response.status),
       meliPrice,
       syncedProductPrice: product.price,
