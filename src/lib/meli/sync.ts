@@ -343,11 +343,9 @@ async function resolveCategoryId(product: Product): Promise<string> {
     accesorios: 'MCO_MOTO_ACCESSORIES',
   };
 
-  if (DEFAULT_CATEGORY_MAP[localCat]) {
-    console.info(`[meli/sync] Using fallback category ${DEFAULT_CATEGORY_MAP[localCat]} for local category ${localCat}. Update config to use correct IDs.`);
-    return DEFAULT_CATEGORY_MAP[localCat];
-  }
-
+  // Usar predicción automática siempre que el mapa no tenga la categoría
+  console.info(`[meli/sync] No mapping found for ${localCat}, using auto-prediction`);
+  
   // Auto-predict via MeLi API (best-effort)
   // MEJORA: Enriquecer el string de predicción para evitar malas categorizaciones (ej: Ventilador -> Electrodoméstico)
   try {
