@@ -531,7 +531,7 @@ export default function AdminMeliPage() {
         <Button
           size="small"
           icon={<SyncOutlined spin={syncingRow === row.productId} />}
-          onClick={() => handleSyncProduct(row.productId)}
+          onClick={(e) => { e.stopPropagation(); handleSyncProduct(row.productId); }}
           disabled={!!syncingRow || syncingAll || syncingPending}
         >
           {row.meliItemId ? 'Actualizar' : 'Publicar'}
