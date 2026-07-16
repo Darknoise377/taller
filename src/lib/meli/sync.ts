@@ -98,10 +98,6 @@ async function buildAttributes(
     read_only: a.tags.read_only 
   })));
   
-  const requiredAttrs = categoryAttrs.filter((a) => a.tags.required && !a.tags.read_only);
-  const result: { id: string; value_name: string }[] = [];
-  const unresolved: UnresolvedAttr[] = [];
-
   console.info(`[meli/sync] Required attrs for ${categoryId}:`, requiredAttrs.map(a => ({ id: a.id, name: a.name, hidden: a.tags.hidden, value_type: a.value_type })));
   
   // También intentar con hidden required (catalog required) que pueden no estar en requiredAttrs
