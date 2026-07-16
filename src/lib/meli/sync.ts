@@ -83,11 +83,12 @@ async function buildAttributes(
   }
 
   // Incluir atributos requeridos incluso si están hidden (structured-data)
-  const required = categoryAttrs.filter((a) => a.tags.required && !a.tags.read_only);
+  // El error "item.attribute.missing_catalog_required" requiere hidden requeridos
+  const requiredAttrs = categoryAttrs.filter((a) => a.tags.required && !a.tags.read_only);
   const result: { id: string; value_name: string }[] = [];
   const unresolved: UnresolvedAttr[] = [];
 
-  for (const attr of required) {
+  for (const attr of requiredAttrs) {
     // Detectar atributos con id o nombre "LINE" que pueden estar ocultos
     const isLineAttr = attr.id === LINE || attr.id === 'LINE' || attr.name?.toLowerCase().includes('línea');
     if (isLineAttr) {
