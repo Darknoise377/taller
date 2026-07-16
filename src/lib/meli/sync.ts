@@ -100,14 +100,15 @@ async function buildAttributes(
   
   console.info(`[meli/sync] Required attrs for ${categoryId}:`, requiredAttrs.map(a => ({ id: a.id, name: a.name, hidden: a.tags.hidden, value_type: a.value_type })));
   
-  // También intentar con hidden required (catalog required) que pueden no estar en requiredAttrs
-  const hiddenRequiredAttrs = categoryAttrs.filter((a) => 
-    a.tags.hidden && a.tags.required && !a.tags.read_only && !requiredAttrs.some(r => r.id === a.id)
+  // Forzar inclusión de atributos comunes que vienen como catalog_required sin required flag
+  // Estos son obligatorios pero MeLi no los marca como required=true en la API
+  const catalogRequiredIds = ['LINE', 'GTIN', 'MODEL'];
+  const catalogRequiredAttrs = categoryAttrs.filter((a) => 
+    catalogRequiredIds.includes(a.id) && !a.tags.read_only && !requiredAttrs.some(r => r.id === a.id)
   );
-  if (hiddenRequiredAttrs.length > 0) {
-    console.info(`[meli/sync] Hidden required attrs for ${categoryId}:`, hiddenRequiredAttrs.map(a => ({ id: a.id, name: a.name, value_type: a.value_type })));
-    // Agregar los hidden required al proceso
-    requiredAttrs.push(...hiddenRequiredAttrs);
+  if (catalogRequiredAttrs.length > 0) {
+    console.info(`[meli/sync] Catalog required attrs added:`, catalogRequiredAttrs.map(a => a.id));
+    requiredAttrs.push(...catalogRequiredAttrs);
   }
 
   for (const attr of requiredAttrs) {
