@@ -322,13 +322,15 @@ export default function AdminMeliPage() {
       title: 'Producto',
       dataIndex: 'productName',
       key: 'productName',
-      width: 260,
+      width: 240,
       ellipsis: true,
       render: (name: string, row) => (
         <Tooltip title={name} placement="topLeft">
-          <div>
-            <Text strong className="hover:text-blue-600 transition-colors block truncate">{name}</Text>
-            <div className="text-xs text-slate-500 mt-0.5 truncate">
+          <div className="flex flex-col">
+            <Text strong className="hover:text-blue-600 transition-colors" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '220px', display: 'block' }}>
+              {name}
+            </Text>
+            <div className="text-xs text-slate-500 mt-0.5" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '220px' }}>
               Stock: {row.stock}
               {row.meliItemId && (
                 <>
@@ -338,9 +340,9 @@ export default function AdminMeliPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="truncate inline-block max-w-[180px]"
+                    style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: '140px' }}
                   >
-                    {row.live?.permalink ? 'Ver en MeLi' : row.meliItemId}
+                    Ver en MeLi
                   </a>
                 </>
               )}
