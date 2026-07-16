@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Product } from '@/types/product';
 import {
@@ -61,7 +61,7 @@ const CATEGORY_OPTIONS = PRODUCT_CATEGORY_OPTIONS;
 const CURRENCY_OPTIONS = ['USD', 'EUR', 'COP'];
 
 // --- Componente Principal ---
-export default function AdminProductsPage() {
+function AdminProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   // --- Estados ---
@@ -1471,6 +1471,15 @@ return (
     </Modal>
   </div>
 );
+}
+
+// Wrapper con Suspense para useSearchParams()
+export default function AdminProductsPage() {
+  return (
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen"><Spin /></div>}>
+      <AdminProductsContent />
+    </Suspense>
+  );
 }
 
 // Puedes añadir otros datos del token aquí si los necesitas
