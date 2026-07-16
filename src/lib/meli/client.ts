@@ -84,6 +84,12 @@ export const meliApi = {
   getOrder: (orderId: string) =>
     meliRequest<MeliOrderResponse>('GET', `/orders/${orderId}`),
 
+  searchOrders: (sellerId: number, limit = 50) =>
+    meliRequest<{ results: MeliOrderResponse[]; paging: { total: number; offset: number; limit: number } }>(
+      'GET',
+      `/orders/search?seller=${sellerId}&sort=date_desc&limit=${limit}&offset=0`,
+    ),
+
   // ─── Shipments ─────────────────────────────────────────────────────────────
   getShipment: (shipmentId: string) =>
     meliRequest<MeliShipmentResponse>('GET', `/shipments/${shipmentId}`),

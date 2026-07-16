@@ -3,6 +3,8 @@ import { cookies } from 'next/headers';
 import { verifyAdminToken } from '@/lib/auth';
 import { COOKIE_NAME } from '@/config/admin';
 import { prisma } from '@/lib/prisma';
+import { meliApi } from '@/lib/meli/client';
+import { processMeliOrder } from '@/lib/meli/sync';
 
 async function requireAdmin() {
   const cookieStore = await cookies();
@@ -39,5 +41,42 @@ export async function GET() {
   } catch (err) {
     console.error('[meli/orders]', err);
     return NextResponse.json({ error: 'Error al cargar órdenes' }, { status: 500 });
+  }
+}
+
+/** POST /api/admin/meli/orders — fetch recent orders from MeLi API and save missing ones */
+export async function POST() {
+  if (!(await requireAdmin())) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+  }
+
+  try {
+    // Identify the connected seller account
+    const me = await meliApi.getMe();
+
+    // Fetch up to 50 most recent orders from MeLi
+    const result = await meliApi.searchOrders(me.id, 50);
+
+    let synced = 0;
+    const errors: string[] = [];
+
+    for (const order of result.results) {
+      const orderId = String(order.id);
+      try {
+        const exists = await prisma.meliOrder.findUnique({ where: { meliOrderId: orderId } });
+        if (!exists) {
+          await processMeliOrder(orderId);
+          synced++;
+        }
+      } catch (err) {
+        console.error(`[meli/orders/sync] Failed to process order ${orderId}:`, err);
+        errors.push(orderId);
+      }
+    }
+
+    return NextResponse.json({ synced, errors });
+  } catch (err) {
+    console.error('[meli/orders/sync]', err);
+    return NextResponse.json({ error: 'Error al sincronizar órdenes desde MeLi' }, { status: 500 });
   }
 }

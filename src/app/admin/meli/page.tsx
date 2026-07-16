@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import {
     Button, Card, Col, Divider, Form, Input, InputNumber, message,
   Popconfirm, Row, Select, Segmented, Spin, Table, Tag, Tooltip, Typography,
@@ -92,6 +93,7 @@ function healthIcon(health?: string) {
 }
 
 export default function AdminMeliPage() {
+  const router = useRouter();
   const [status, setStatus] = useState<MeliStatus | null>(null);
   const [config, setConfig] = useState<MeliConfig | null>(null);
   const [listings, setListings] = useState<ListingRow[]>([]);
@@ -106,6 +108,7 @@ export default function AdminMeliPage() {
   const [syncingPending, setSyncingPending] = useState(false);
   const [refreshingStatus, setRefreshingStatus] = useState(false);
   const [syncingRow, setSyncingRow] = useState<string | null>(null);
+  const [syncingOrders, setSyncingOrders] = useState(false);
 
   const [form] = Form.useForm<Omit<MeliConfig, 'id' | 'categoryMap'>>();
 
@@ -163,6 +166,28 @@ export default function AdminMeliPage() {
       setOrdersLoading(false);
     }
   }, []);
+
+  const handleSyncOrdersFromMeli = useCallback(async () => {
+    if (!status?.connected) {
+      message.warning('Conecta MeLi primero');
+      return;
+    }
+    setSyncingOrders(true);
+    try {
+      const res = await fetch('/api/admin/meli/orders', { method: 'POST' });
+      const body = await res.json();
+      if (res.ok) {
+        message.success(`Órdenes importadas: ${body.synced} nueva(s)`);
+        await loadOrders();
+      } else {
+        message.error(body.error ?? 'Error al importar órdenes');
+      }
+    } catch {
+      message.error('Error de red al importar órdenes');
+    } finally {
+      setSyncingOrders(false);
+    }
+  }, [status, loadOrders]);
 
   useEffect(() => {
         setLoading(true);
@@ -300,13 +325,18 @@ export default function AdminMeliPage() {
       ellipsis: true,
       render: (name: string, row) => (
         <div>
-          <Text strong>{name}</Text>
+          <Text strong className="hover:text-blue-600 transition-colors">{name}</Text>
           <div className="text-xs text-slate-500 mt-0.5">
             Stock local: {row.stock}
             {row.meliItemId && (
               <>
                 {' · '}
-                <a href={row.live?.permalink ?? `https://articulo.mercadolibre.com.co/${row.meliItemId}`} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={row.live?.permalink ?? `https://articulo.mercadolibre.com.co/${row.meliItemId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   Ver en MeLi
                 </a>
               </>
@@ -321,7 +351,7 @@ export default function AdminMeliPage() {
       key: 'basePrice',
       render: (v: number) => formatCurrency(v),
       align: 'right',
-      width: 110,
+      width: 100,
     },
     {
       title: 'Precio MeLi',
@@ -354,12 +384,12 @@ export default function AdminMeliPage() {
         return <Text strong>{formatCurrency(v)}</Text>;
       },
       align: 'right',
-      width: 120,
+      width: 110,
     },
     {
-      title: 'Sincronización',
+      title: 'Sync',
       key: 'syncState',
-      width: 130,
+      width: 115,
       render: (_: unknown, row) => {
         if (!row.meliExport && !row.meliItemId) {
           return <Tag>No exportado</Tag>;
@@ -381,9 +411,9 @@ export default function AdminMeliPage() {
       },
     },
     {
-      title: 'Visitas MeLi (30d)',
+      title: 'Visitas (30d)',
       key: 'visits',
-      width: 120,
+      width: 100,
       align: 'center',
       render: (_: unknown, row) => {
         if (!row.meliItemId) return <Text type="secondary">—</Text>;
@@ -410,7 +440,7 @@ export default function AdminMeliPage() {
     {
       title: 'Estado en MeLi',
       key: 'liveStatus',
-      width: 200,
+      width: 175,
       render: (_: unknown, row) => {
         if (!row.meliItemId) {
           return row.meliExport ? (
@@ -475,13 +505,21 @@ export default function AdminMeliPage() {
       title: 'Última sync',
       dataIndex: 'lastSyncAt',
       key: 'lastSyncAt',
-      width: 150,
-      render: (v?: string) => (v ? new Date(v).toLocaleString('es-CO') : '—'),
+      width: 130,
+      render: (v?: string) => {
+        if (!v) return '—';
+        const d = new Date(v);
+        return (
+          <Tooltip title={d.toLocaleString('es-CO')}>
+            <span className="text-xs">{d.toLocaleDateString('es-CO')}</span>
+          </Tooltip>
+        );
+      },
     },
     {
       title: 'Acciones',
       key: 'actions',
-      width: 120,
+      width: 110,
       fixed: 'right',
       render: (_: unknown, row) => (
         <Button
@@ -694,11 +732,29 @@ export default function AdminMeliPage() {
           rowKey="productId"
           size="small"
           pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (t) => `${t} filas` }}
-          scroll={{ x: 960 }}
+          scroll={{ x: 'max-content' }}
+          onRow={(record) => ({
+            onClick: () => router.push(`/admin/products?edit=${record.productId}`),
+            style: { cursor: 'pointer' },
+          })}
         />
       </Card>
 
-      <Card title="Últimas Órdenes en Mercado Libre" className="mt-8">
+      <Card
+        title="Últimas Órdenes en Mercado Libre"
+        className="mt-8"
+        extra={
+          <Button
+            icon={<SyncOutlined spin={syncingOrders} />}
+            loading={syncingOrders}
+            disabled={!status?.connected}
+            onClick={handleSyncOrdersFromMeli}
+            size="small"
+          >
+            Importar desde MeLi
+          </Button>
+        }
+      >
         <Table
           dataSource={orders}
           rowKey="meliOrderId"

@@ -551,10 +551,12 @@ model SearchLog {
   id        Int      @id @default(autoincrement())
   query     String   // Término buscado (normalizado a minúsculas)
   results   Int      @default(0) // Cantidad de resultados encontrados
+  ip        String?  // IP del visitante para contar únicos
   createdAt DateTime @default(now())
 
   @@index([query])
   @@index([createdAt])
+  @@index([ip])
 }
 
 /// Registra visitas a páginas de productos y secciones clave.

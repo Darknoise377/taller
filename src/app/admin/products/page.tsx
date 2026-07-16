@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Product } from '@/types/product';
 import {
   Button,
@@ -62,6 +63,8 @@ const CURRENCY_OPTIONS = ['USD', 'EUR', 'COP'];
 
 // --- Componente Principal ---
 export default function AdminProductsPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   // --- Estados ---
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -429,6 +432,18 @@ useEffect(() => {
     setLookupResult(null);
     setModalOpen(true);
   }, [form]);
+
+  // Auto-open edit modal when navigated from MeLi page with ?edit=<productId>
+  useEffect(() => {
+    if (loading || products.length === 0) return;
+    const editId = searchParams.get('edit');
+    if (!editId) return;
+    const product = products.find((p) => p.id === editId);
+    if (product) {
+      openModal(product);
+      router.replace('/admin/products');
+    }
+  }, [loading, products, searchParams, router, openModal]);
 
   const handleLookupSku = useCallback(async () => {
     const ref = skuLookupRef.trim() || (form.getFieldValue('sku') as string | undefined)?.trim();
