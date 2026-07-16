@@ -129,12 +129,15 @@ async function buildAttributes(
     }
     
     if (isGtinAttr) {
-      // GTIN debe ser un valor numérico o EAN válido para MeLi
-      const rawGtin = product.sku || product.diagramNumber || product.id;
-      // Extraer solo números y asegurar longitud adecuada (8-14 dígitos)
+      // GTIN debe ser un EAN válido real. Si no hay uno real, no enviarlo para evitar error
+      const rawGtin = product.sku || product.diagramNumber || '';
       const numericOnly = rawGtin.replace(/\D/g, '');
-      const gtinValue = numericOnly.length >= 8 ? numericOnly : `1${numericOnly.padStart(12, '0')}`;
-      result.push({ id: GTIN, value_name: gtinValue.slice(0, 14) });
+      // EAN-13 debe tener 13 dígitos exactos
+      if (numericOnly.length >= 12 && numericOnly.length <= 14 && /^\d+$/.test(numericOnly)) {
+        result.push({ id: GTIN, value_name: numericOnly.slice(0, 13) });
+      } else {
+        console.info(`[meli/sync] Skipping GTIN for ${product.id}: no valid EAN found (raw: ${rawGtin})`);
+      }
       continue;
     }
     
