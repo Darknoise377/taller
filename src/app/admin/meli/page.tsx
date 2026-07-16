@@ -322,27 +322,31 @@ export default function AdminMeliPage() {
       title: 'Producto',
       dataIndex: 'productName',
       key: 'productName',
+      width: 260,
       ellipsis: true,
       render: (name: string, row) => (
-        <div>
-          <Text strong className="hover:text-blue-600 transition-colors">{name}</Text>
-          <div className="text-xs text-slate-500 mt-0.5">
-            Stock local: {row.stock}
-            {row.meliItemId && (
-              <>
-                {' · '}
-                <a
-                  href={row.live?.permalink ?? `https://articulo.mercadolibre.com.co/${row.meliItemId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Ver en MeLi
-                </a>
-              </>
-            )}
+        <Tooltip title={name} placement="topLeft">
+          <div>
+            <Text strong className="hover:text-blue-600 transition-colors block truncate">{name}</Text>
+            <div className="text-xs text-slate-500 mt-0.5 truncate">
+              Stock: {row.stock}
+              {row.meliItemId && (
+                <>
+                  {' · '}
+                  <a
+                    href={row.live?.permalink ?? `https://articulo.mercadolibre.com.co/${row.meliItemId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="truncate inline-block max-w-[180px]"
+                  >
+                    {row.live?.permalink ? 'Ver en MeLi' : row.meliItemId}
+                  </a>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        </Tooltip>
       ),
     },
     {
