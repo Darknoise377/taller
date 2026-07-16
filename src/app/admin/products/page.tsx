@@ -49,7 +49,6 @@ import {
 import type { SkuLookupResult } from '@/app/api/admin/products/lookup-sku/route';
 import type { UploadFile } from 'antd/es/upload/interface';
 import type { ColumnsType } from 'antd/es/table';
-import type { MeliListing } from '@prisma/client';
 import { productService, uploadImage } from '@/services/productService';
 import { PRODUCT_CATEGORY_OPTIONS, getProductCategoryLabel } from '@/constants/productCategories';
 import { formatCurrency } from '@/utils/formatCurrency';
