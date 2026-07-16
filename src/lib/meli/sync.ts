@@ -321,24 +321,25 @@ async function resolveCategoryId(product: Product): Promise<string> {
   if (categoryMap[localCat]) return categoryMap[localCat];
 
   // Mapa predeterminado de categorías de repuestos para motos (MCO - Colombia)
-  // Basado en dominios Motos: https://api.mercadolibre.com/sites/MCO/categories
-  // MCO_MOTO_PARTS es el dominio principal, pero necesitamos categorías específicas
+  // NOTA: Estos IDs pueden no ser correctos. Usa la predicción automática si el mapa no tiene la categoría
+  // IDs reales deben mapearse en /api/meli/config -> categoryMap
   const DEFAULT_CATEGORY_MAP: Record<string, string> = {
-    refrigeracion: 'MCO_MOTO_COOLING_OIL_SUPPLIES',  // Radiadores y aceites en refrigeración
-    motor: 'MCO_MOTO_ENGINE_PARTS',
-    frenos: 'MCO_MOTO_BRAKES_PARTS',
-    llantas: 'MCO_MOTO_TIRES_PARTS',
-    cilindros: 'MCO_MOTO_ENGINE_PARTS',
-    aceites_lubricantes: 'MCO_MOTO_OIL_SUPPLIES',
-    filtros: 'MCO_MOTO_MOTORCYCLE_FILTERS',
-    baterias: 'MCO_MOTO_ELECTRIC_PARTS',
-    transmision: 'MCO_MOTO_TRANSMISSION_PARTS',
-    kit_arrastre: 'MCO_MOTO_Luggage_And_Accessories',
-    suspension: 'MCO_MOTO_SUSPENSION_PARTS',
-    escape: 'MCO_MOTO_EXHAUST_AND_MUFFLER',
-    electrico: 'MCO_MOTO_ELECTRIC_PARTS',
-    iluminacion: 'MCO_MOTO_ELECTRIC_PARTS',
-    carenaje: 'MCO_MOTO_BODY_PARTS',
+    // Usar "MCO_MOTO_ACCESSORIES" como fallback general - MeLi lo acepta para varios repuestos
+    refrigeracion: 'MCO_MOTO_ACCESSORIES',
+    motor: 'MCO_MOTO_ACCESSORIES',
+    frenos: 'MCO_MOTO_ACCESSORIES',
+    llantas: 'MCO_MOTO_ACCESSORIES',
+    cilindros: 'MCO_MOTO_ACCESSORIES',
+    aceites_lubricantes: 'MCO_MOTO_ACCESSORIES',
+    filtros: 'MCO_MOTO_ACCESSORIES',
+    baterias: 'MCO_MOTO_ACCESSORIES',
+    transmision: 'MCO_MOTO_ACCESSORIES',
+    kit_arrastre: 'MCO_MOTO_ACCESSORIES',
+    suspension: 'MCO_MOTO_ACCESSORIES',
+    escape: 'MCO_MOTO_ACCESSORIES',
+    electrico: 'MCO_MOTO_ACCESSORIES',
+    iluminacion: 'MCO_MOTO_ACCESSORIES',
+    carenaje: 'MCO_MOTO_ACCESSORIES',
     accesorios: 'MCO_MOTO_ACCESSORIES',
   };
 
