@@ -197,10 +197,10 @@ const TrafficChart: React.FC<{ data: TrafficPoint[] }> = ({ data }) => (
       <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
       <XAxis dataKey="date" stroke="#888" fontSize={12} />
       <YAxis stroke="#888" fontSize={12} />
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
       <Tooltip 
         contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0' }}
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        formatter={(value: any) => [`${value}`, 'Visitantes/Búsquedas']}
+        formatter={(value: unknown) => [`${String(value)}`, 'Visitantes/Búsquedas']}
       />
       <Line type="monotone" dataKey="visitors" stroke="#1890ff" strokeWidth={2} dot={{ r: 3 }} name="visitantes" />
       <Line type="monotone" dataKey="searches" stroke="#52c41a" strokeWidth={2} dot={{ r: 3 }} name="búsquedas" />
@@ -392,11 +392,12 @@ export default function StoreAnalyticsPage() {
         <Col xs={24} lg={12}>
           <Card title="Distribución de Búsquedas" size="small">
             <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={data.topSearches.slice(0, 10)}>
+<BarChart data={data.topSearches.slice(0, 10)}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="query" stroke="#888" fontSize={10} tick={{ transform: 'rotate(-45)' }} />
-<YAxis stroke="#888" fontSize={12} />
-                <Tooltip formatter={/* eslint-disable-next-line @typescript-eslint/no-explicit-any */ (_: any) => [`${_} búsquedas`, 'Total']} />
+                <YAxis stroke="#888" fontSize={12} />
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                <Tooltip formatter={(_: unknown) => [`${String(_)} búsquedas`, 'Total']} />
                 <Bar dataKey="count" fill="#1890ff" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
