@@ -88,6 +88,24 @@ async function buildAttributes(
   const unresolved: UnresolvedAttr[] = [];
 
   for (const attr of required) {
+    // Detectar atributos con id o nombre "LINE" que pueden estar ocultos
+    const isLineAttr = attr.id === LINE || attr.id === 'LINE' || attr.name?.toLowerCase().includes('línea');
+    if (isLineAttr) {
+      const brand = (product as Product & { brand?: string | null }).brand;
+      const lineValue = brand || product.tags?.[0] || 'Genérico';
+      if (attr.value_type === 'list' && attr.values) {
+        const matched = attr.values.find(v => v.name.toLowerCase().includes(lineValue.toLowerCase()));
+        if (matched) {
+          result.push({ id: attr.id, value_name: matched.name });
+        } else {
+          // Intentar con IA si no hay match exacto
+          unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: attr.values });
+        }
+      } else {
+        result.push({ id: attr.id, value_name: lineValue.slice(0, 60) });
+      }
+      continue;
+    }
     if (attr.id === SELLER_SKU && product.sku) {
       result.push({ id: SELLER_SKU, value_name: product.sku });
     } else if (attr.id === BRAND) {
@@ -134,7 +152,9 @@ async function buildAttributes(
         const unit = rawUnit === 'l' ? 'L' : rawUnit === 'ml' || rawUnit === 'cc' ? 'mL' : rawUnit;
         result.push({ id: 'UNIT_VOLUME', value_name: `${num} ${unit}` });
       } else {
-        unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: undefined, allowed_units: attr.allowed_units });
+        // Fallback genérico que cumple el formato requerido
+        console.info(`[meli/sync] UNIT_VOLUME using 1 mL fallback for ${product.id}`);
+        result.push({ id: 'UNIT_VOLUME', value_name: '1 mL' });
       }
     } else if (attr.id === GTIN) {
       // GTIN es obligatorio para muchas categorías. Usar SKU como fallback.
@@ -145,7 +165,18 @@ async function buildAttributes(
       // "Línea" es común en categorías de motos. Derivar de marca o tags.
       const brand = (product as Product & { brand?: string | null }).brand;
       const lineValue = brand || product.tags?.[0] || 'Genérico';
-      result.push({ id: LINE, value_name: lineValue.slice(0, 60) });
+      // Si es list-type, intentar match de valores
+      if (attr.value_type === 'list' && attr.values) {
+        const matched = attr.values.find(v => v.name.toLowerCase().includes(lineValue.toLowerCase()));
+        if (matched) {
+          result.push({ id: LINE, value_name: matched.name });
+        } else {
+          // No hay match, intentar con IA
+          unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: attr.values });
+        }
+      } else {
+        result.push({ id: LINE, value_name: lineValue.slice(0, 60) });
+      }
     } else if (attr.id === 'MODEL_LINE' || attr.id === 'LINE_TYPE') {
       // Variante del atributo "Línea"
       const brand = (product as Product & { brand?: string | null }).brand;
@@ -170,6 +201,9 @@ async function buildAttributes(
     const existingIds = new Set(result.map((a) => a.id));
     for (const attr of aiResolved) {
       if (!attr.id || !attr.value_name?.trim()) continue;
+      // Rechazar valores inválidos como "No aplica", "N/A", etc.
+      const lowerVal = attr.value_name.toLowerCase();
+      if (lowerVal.includes('no aplica') || lowerVal.includes('n/a') || lowerVal === '-') continue;
       if (existingIds.has(attr.id)) continue;
       result.push(attr);
       existingIds.add(attr.id);
