@@ -162,22 +162,6 @@ async function buildAttributes(
       // Si no hay SKU/diagramNumber, usar un valor genérico basado en el ID del producto
       const gtinValue = product.sku || product.diagramNumber || `GEN-${product.id.slice(-8)}`;
       result.push({ id: GTIN, value_name: gtinValue });
-    } else if (attr.id === LINE || attr.name?.toLowerCase() === 'línea') {
-      // "Línea" es común en categorías de motos. Derivar de marca o tags.
-      const brand = (product as Product & { brand?: string | null }).brand;
-      const lineValue = brand || product.tags?.[0] || 'Genérico';
-      // Si es list-type, intentar match de valores
-      if (attr.value_type === 'list' && attr.values) {
-        const matched = attr.values.find(v => v.name.toLowerCase().includes(lineValue.toLowerCase()));
-        if (matched) {
-          result.push({ id: LINE, value_name: matched.name });
-        } else {
-          // No hay match, intentar con IA
-          unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: attr.values });
-        }
-      } else {
-        result.push({ id: LINE, value_name: lineValue.slice(0, 60) });
-      }
     } else if (attr.id === 'MODEL_LINE' || attr.id === 'LINE_TYPE') {
       // Variante del atributo "Línea"
       const brand = (product as Product & { brand?: string | null }).brand;
