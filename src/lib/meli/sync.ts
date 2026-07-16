@@ -89,8 +89,30 @@ async function buildAttributes(
   const result: { id: string; value_name: string }[] = [];
   const unresolved: UnresolvedAttr[] = [];
 
-  // Debug: log todos los atributos requeridos
+  // Debug: log todos los atributos de la categoría
+  console.info(`[meli/sync] ALL attrs for ${categoryId}:`, categoryAttrs.map(a => ({ 
+    id: a.id, 
+    name: a.name, 
+    hidden: a.tags.hidden, 
+    required: a.tags.required,
+    read_only: a.tags.read_only 
+  })));
+  
+  const requiredAttrs = categoryAttrs.filter((a) => a.tags.required && !a.tags.read_only);
+  const result: { id: string; value_name: string }[] = [];
+  const unresolved: UnresolvedAttr[] = [];
+
   console.info(`[meli/sync] Required attrs for ${categoryId}:`, requiredAttrs.map(a => ({ id: a.id, name: a.name, hidden: a.tags.hidden, value_type: a.value_type })));
+  
+  // También intentar con hidden required (catalog required) que pueden no estar en requiredAttrs
+  const hiddenRequiredAttrs = categoryAttrs.filter((a) => 
+    a.tags.hidden && a.tags.required && !a.tags.read_only && !requiredAttrs.some(r => r.id === a.id)
+  );
+  if (hiddenRequiredAttrs.length > 0) {
+    console.info(`[meli/sync] Hidden required attrs for ${categoryId}:`, hiddenRequiredAttrs.map(a => ({ id: a.id, name: a.name, value_type: a.value_type })));
+    // Agregar los hidden required al proceso
+    requiredAttrs.push(...hiddenRequiredAttrs);
+  }
 
   for (const attr of requiredAttrs) {
     // Detectar y resolver atributos LINE y GTIN primero (los más problemáticos)
