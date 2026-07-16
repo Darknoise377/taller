@@ -203,6 +203,7 @@ async function buildAttributes(
   if (unresolved.length > 0) {
     console.info(`[meli/sync] Asking AI to resolve ${unresolved.length} attribute(s): ${unresolved.map((a) => a.id).join(', ')}`);
     const aiResolved = await resolveAttributesWithAI(product, unresolved);
+    console.info(`[meli/sync] AI resolved:`, aiResolved);
     
     // No agregar si ya fue resuelto manualmente, y filtrar valores vacíos/inválidos devueltos por IA
     const existingIds = new Set(result.map((a) => a.id));
