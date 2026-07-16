@@ -89,6 +89,9 @@ async function buildAttributes(
   const result: { id: string; value_name: string }[] = [];
   const unresolved: UnresolvedAttr[] = [];
 
+  // Debug: log todos los atributos requeridos
+  console.info(`[meli/sync] Required attrs for ${categoryId}:`, requiredAttrs.map(a => ({ id: a.id, name: a.name, hidden: a.tags.hidden, value_type: a.value_type })));
+
   for (const attr of requiredAttrs) {
     // Detectar y resolver atributos LINE y GTIN primero (los más problemáticos)
     const isLineAttr = attr.id === LINE || attr.id === 'LINE' || attr.name?.toLowerCase().includes('línea');
