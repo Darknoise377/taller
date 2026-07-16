@@ -129,8 +129,12 @@ async function buildAttributes(
     }
     
     if (isGtinAttr) {
-      const gtinValue = product.sku || product.diagramNumber || `GEN-${product.id.slice(-8)}`;
-      result.push({ id: GTIN, value_name: gtinValue });
+      // GTIN debe ser un valor numérico o EAN válido para MeLi
+      const rawGtin = product.sku || product.diagramNumber || product.id;
+      // Extraer solo números y asegurar longitud adecuada (8-14 dígitos)
+      const numericOnly = rawGtin.replace(/\D/g, '');
+      const gtinValue = numericOnly.length >= 8 ? numericOnly : `1${numericOnly.padStart(12, '0')}`;
+      result.push({ id: GTIN, value_name: gtinValue.slice(0, 14) });
       continue;
     }
     
@@ -189,6 +193,16 @@ async function buildAttributes(
       const brand = (product as Product & { brand?: string | null }).brand;
       const lineValue = brand || product.tags?.[0] || 'Genérico';
       result.push({ id: attr.id, value_name: lineValue.slice(0, 60) });
+    } else if (attr.id === 'VISCOSITY_GRADE') {
+      // Para suspensiones y otros repuestos que no son fluidos, usar valor genérico
+      // MeLi requiere este atributo incluso cuando no aplica
+      const viscosityTag = product.tags?.find(t => /S[AE]\d{2}i?\d{2}/i.test(t) || /viscos/i.test(t));
+      if (viscosityTag) {
+        result.push({ id: 'VISCOSITY_GRADE', value_name: viscosityTag });
+      } else {
+        // Fallback genérico - "No aplica" causará error, usar valor neutro
+        result.push({ id: 'VISCOSITY_GRADE', value_name: 'No definido' });
+      }
     } else if (attr.value_type === 'string' || attr.value_type === 'number' || attr.value_type === 'number_unit') {
       // Free-text / numeric required attr — let AI infer a contextual value
       unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: undefined, allowed_units: attr.allowed_units });
