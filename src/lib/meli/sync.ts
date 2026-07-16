@@ -321,25 +321,25 @@ async function resolveCategoryId(product: Product): Promise<string> {
   if (categoryMap[localCat]) return categoryMap[localCat];
 
   // Mapa predeterminado de categorías de repuestos para motos (MCO - Colombia)
-  // NOTA: Estos IDs pueden estar desactualizados. Únete el categoryMap en /api/meli/config
-  // con los IDs reales obtenidos de: https://api.mercadolibre.com/sites/MCO/categories
+  // Basado en dominios Motos: https://api.mercadolibre.com/sites/MCO/categories
+  // MCO_MOTO_PARTS es el dominio principal, pero necesitamos categorías específicas
   const DEFAULT_CATEGORY_MAP: Record<string, string> = {
-    refrigeracion: 'MCO429228',   // Refrigeración (usar MCO_MOTO_REFRIGERATION cuando esté disponible)
-    motor: 'MCO429228',          // Motor - usa la misma categoría hasta encontrar la correcta
-    frenos: 'MCO429228',
-    llantas: 'MCO429228',
-    cilindros: 'MCO429228',
-    aceites_lubricantes: 'MCO429228',
-    filtros: 'MCO429228',
-    baterias: 'MCO429228',
-    transmision: 'MCO429228',
-    kit_arrastre: 'MCO429228',
-    suspension: 'MCO429228',
-    escape: 'MCO429228',
-    electrico: 'MCO429228',
-    iluminacion: 'MCO429228',
-    carenaje: 'MCO429228',
-    accesorios: 'MCO429228',
+    refrigeracion: 'MCO_MOTO_COOLING_OIL_SUPPLIES',  // Radiadores y aceites en refrigeración
+    motor: 'MCO_MOTO_ENGINE_PARTS',
+    frenos: 'MCO_MOTO_BRAKES_PARTS',
+    llantas: 'MCO_MOTO_TIRES_PARTS',
+    cilindros: 'MCO_MOTO_ENGINE_PARTS',
+    aceites_lubricantes: 'MCO_MOTO_OIL_SUPPLIES',
+    filtros: 'MCO_MOTO_MOTORCYCLE_FILTERS',
+    baterias: 'MCO_MOTO_ELECTRIC_PARTS',
+    transmision: 'MCO_MOTO_TRANSMISSION_PARTS',
+    kit_arrastre: 'MCO_MOTO_Luggage_And_Accessories',
+    suspension: 'MCO_MOTO_SUSPENSION_PARTS',
+    escape: 'MCO_MOTO_EXHAUST_AND_MUFFLER',
+    electrico: 'MCO_MOTO_ELECTRIC_PARTS',
+    iluminacion: 'MCO_MOTO_ELECTRIC_PARTS',
+    carenaje: 'MCO_MOTO_BODY_PARTS',
+    accesorios: 'MCO_MOTO_ACCESSORIES',
   };
 
   if (DEFAULT_CATEGORY_MAP[localCat]) {
