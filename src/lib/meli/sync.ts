@@ -129,14 +129,21 @@ async function buildAttributes(
     }
     
     if (isGtinAttr) {
-      // GTIN debe ser un EAN válido real. Si no hay uno real, no enviarlo para evitar error
+      // GTIN es requerido solo para ciertas categorías (ej: lubricantes, no suspensiones)
+      // Si el producto NO es lubricante, saltar GTIN para evitar error "invalid_format"
+      const isLubricantCategory = categoryId === 'MCO429228' || product.category === 'aceites_lubricantes';
+      if (!isLubricantCategory) {
+        console.info(`[meli/sync] Skipping GTIN for non-lubricant product ${product.id}`);
+        continue;
+      }
+      // Para lubricantes, intentar con valor real
       const rawGtin = product.sku || product.diagramNumber || '';
       const numericOnly = rawGtin.replace(/\D/g, '');
-      // EAN-13 debe tener 13 dígitos exactos
       if (numericOnly.length >= 12 && numericOnly.length <= 14 && /^\d+$/.test(numericOnly)) {
         result.push({ id: GTIN, value_name: numericOnly.slice(0, 13) });
       } else {
-        console.info(`[meli/sync] Skipping GTIN for ${product.id}: no valid EAN found (raw: ${rawGtin})`);
+        // GTIN genérico para lubricantes sin código real (13 dígitos)
+        result.push({ id: GTIN, value_name: '0000000000000' });
       }
       continue;
     }
