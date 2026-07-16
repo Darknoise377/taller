@@ -136,6 +136,11 @@ function AdminProductsContent() {
       .catch(() => {});
   }, []);
 
+  // Sincronizar costo de calculadora → campo del formulario
+  useEffect(() => {
+    form.setFieldValue('cost', calcCost);
+  }, [calcCost, form]);
+
   const avgShippingRate = useMemo(() => {
     if (shippingConfig.freeShippingAll) return 0;
     const rates = shippingConfig.regions.map(r => r.baseRate);
