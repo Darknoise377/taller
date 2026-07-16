@@ -83,30 +83,35 @@ async function buildAttributes(
   }
 
   // Incluir atributos requeridos incluso si están hidden (structured-data)
-  // El error "item.attribute.missing_catalog_required" requiere hidden requeridos
+  // El error "item.attribute.missing_catalog_required" indica que hay hidden requeridos
+  // Procesamos TODOS los atributos no read_only (incluye required + hidden required)
   const requiredAttrs = categoryAttrs.filter((a) => a.tags.required && !a.tags.read_only);
   const result: { id: string; value_name: string }[] = [];
   const unresolved: UnresolvedAttr[] = [];
 
   for (const attr of requiredAttrs) {
-    // Detectar atributos con id o nombre "LINE" que pueden estar ocultos
+    // Detectar y resolver atributos LINE y GTIN primero (los más problemáticos)
     const isLineAttr = attr.id === LINE || attr.id === 'LINE' || attr.name?.toLowerCase().includes('línea');
+    const isGtinAttr = attr.id === GTIN;
+    
     if (isLineAttr) {
       const brand = (product as Product & { brand?: string | null }).brand;
       const lineValue = brand || product.tags?.[0] || 'Genérico';
       if (attr.value_type === 'list' && attr.values) {
         const matched = attr.values.find(v => v.name.toLowerCase().includes(lineValue.toLowerCase()));
-        if (matched) {
-          result.push({ id: attr.id, value_name: matched.name });
-        } else {
-          // Intentar con IA si no hay match exacto
-          unresolved.push({ id: attr.id, name: attr.name, value_type: attr.value_type, values: attr.values });
-        }
+        if (matched) result.push({ id: attr.id, value_name: matched.name });
       } else {
         result.push({ id: attr.id, value_name: lineValue.slice(0, 60) });
       }
       continue;
     }
+    
+    if (isGtinAttr) {
+      const gtinValue = product.sku || product.diagramNumber || `GEN-${product.id.slice(-8)}`;
+      result.push({ id: GTIN, value_name: gtinValue });
+      continue;
+    }
+    
     if (attr.id === SELLER_SKU && product.sku) {
       result.push({ id: SELLER_SKU, value_name: product.sku });
     } else if (attr.id === BRAND) {
@@ -157,11 +162,6 @@ async function buildAttributes(
         console.info(`[meli/sync] UNIT_VOLUME using 1 mL fallback for ${product.id}`);
         result.push({ id: 'UNIT_VOLUME', value_name: '1 mL' });
       }
-    } else if (attr.id === GTIN) {
-      // GTIN es obligatorio para muchas categorías. Usar SKU como fallback.
-      // Si no hay SKU/diagramNumber, usar un valor genérico basado en el ID del producto
-      const gtinValue = product.sku || product.diagramNumber || `GEN-${product.id.slice(-8)}`;
-      result.push({ id: GTIN, value_name: gtinValue });
     } else if (attr.id === 'MODEL_LINE' || attr.id === 'LINE_TYPE') {
       // Variante del atributo "Línea"
       const brand = (product as Product & { brand?: string | null }).brand;
