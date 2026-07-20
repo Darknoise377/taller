@@ -2,6 +2,12 @@ export type HomeSearchCatalogItem = {
   id: string;
   name: string;
   description: string;
+  slug?: string;
+  image?: string;
+  price?: number;
+  category?: string;
+  brand?: string;
+  tags?: string[];
 };
 
 const STOPWORDS = new Set([

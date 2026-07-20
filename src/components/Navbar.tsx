@@ -19,6 +19,7 @@ import {
   TruckIcon,
 } from '@heroicons/react/24/outline';
 import { Package } from 'lucide-react';
+import MegaMenu from '@/components/home/MegaMenu';
 
 const Navbar = () => {
   const { totalItems, openCartModal } = useCart();
@@ -99,6 +100,9 @@ const Navbar = () => {
               {label}
             </Link>
           ))}
+
+          {/* Mega Menu de Categorías */}
+          <MegaMenu />
 
           {/* Cuenta / Mis pedidos (desktop) */}
           {user ? (

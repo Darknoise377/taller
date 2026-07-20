@@ -27,16 +27,23 @@ body {
 }
 
 /* Smooth scroll */
+/* Smooth scroll - only for anchor links, not general scrolling */
 html {
+  scroll-behavior: auto;
+}
+
+html:focus-within {
   scroll-behavior: smooth;
 }
 
 /* Hide scrollbar utility */
-.no-scrollbar {
+.no-scrollbar,
+.scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.no-scrollbar::-webkit-scrollbar {
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 

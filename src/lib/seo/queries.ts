@@ -106,13 +106,19 @@ function mapDbProductToClient(p: {
 export async function getProductsForHomeSearch(): Promise<HomeSearchCatalogItem[]> {
   try {
     const rows = await prisma.product.findMany({
-      select: { id: true, name: true, description: true },
+      select: { id: true, name: true, description: true, slug: true, images: true, price: true, category: true, brand: true, tags: true },
       orderBy: { createdAt: 'desc' },
     });
     return rows.map((p) => ({
       id: p.id,
       name: p.name,
       description: p.description ?? '',
+      slug: p.slug ?? undefined,
+      image: (p.images as string[] | null)?.[0] ?? undefined,
+      price: p.price ?? undefined,
+      category: p.category ?? undefined,
+      brand: p.brand ?? undefined,
+      tags: (p.tags as string[] | null) ?? undefined,
     }));
   } catch {
     return [];

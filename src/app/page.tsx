@@ -1,8 +1,7 @@
 ﻿import type { Metadata } from 'next';
-import HomePageClient from '@/components/home/HomePageClient';
+import HomePageOptimized from '@/components/home/HomePageOptimized';
 import {
   getCategoriesForSeo,
-  getHomeSliderProducts,
   getFeaturedProductsForHome,
   getFeaturedCombosForHome,
   getProductsForHomeSearch,
@@ -30,13 +29,11 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const [
     initialCategories,
-    initialSliderProducts,
     initialFeaturedProducts,
     initialFeaturedCombos,
     searchCatalog,
   ] = await Promise.all([
     getCategoriesForSeo(),
-    getHomeSliderProducts(),
     getFeaturedProductsForHome(8),
     getFeaturedCombosForHome(6),
     getProductsForHomeSearch(),
@@ -59,14 +56,8 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homeJsonLd) }}
       />
-      <HomePageClient
+      <HomePageOptimized
         initialCategories={initialCategories}
-        initialSliderProducts={initialSliderProducts.map((p) => ({
-          id: p.id,
-          name: p.name,
-          description: p.description ?? '',
-          images: p.images ?? [],
-        }))}
         initialFeaturedProducts={initialFeaturedProducts}
         initialFeaturedCombos={initialFeaturedCombos}
         searchCatalog={searchCatalog}
