@@ -41,6 +41,11 @@ const nextConfig: NextConfig = {
         hostname: 'picsum.photos',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
     ],
   },
 
@@ -61,7 +66,7 @@ const nextConfig: NextConfig = {
           "default-src 'self'",
           "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
           "style-src 'self' 'unsafe-inline'",
-          "img-src 'self' data: blob: https://res.cloudinary.com https://placehold.co https://picsum.photos",
+          "img-src 'self' data: blob: https://res.cloudinary.com https://placehold.co https://picsum.photos https://images.unsplash.com",
           "media-src 'self' https://res.cloudinary.com",
           "font-src 'self' data:",
           "connect-src 'self' https://res.cloudinary.com https://api.cloudinary.com",

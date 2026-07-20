@@ -15,16 +15,16 @@ export interface Brand {
 
 // Marcas populares con imagen referente de una moto icónica
 const DEFAULT_BRANDS: Brand[] = [
-  { id: '1', name: 'Bajaj', slug: 'bajaj', image: 'https://imgd.aeplcdn.com/1056x594/n/cw/ec/130591/pulsar-ns200-right-front-three-quarter-2.jpeg', model: 'Pulsar NS200' },
-  { id: '2', name: 'KTM', slug: 'ktm', image: 'https://imgd.aeplcdn.com/1056x594/n/cw/ec/124865/duke-200-right-front-three-quarter.jpeg', model: 'Duke 200' },
-  { id: '3', name: 'Pulsar', slug: 'pulsar', image: 'https://imgd.aeplcdn.com/1056x594/n/cw/ec/130583/pulsar-220f-right-front-three-quarter.jpeg', model: 'Pulsar 220F' },
-  { id: '4', name: 'Honda', slug: 'honda', image: 'https://imgd.aeplcdn.com/1056x594/n/cw/ec/44686/cb-190r-right-front-three-quarter.jpeg', model: 'CB 190R' },
-  { id: '5', name: 'Yamaha', slug: 'yamaha', image: 'https://imgd.aeplcdn.com/1056x594/n/cw/ec/114423/mt-15-v2-right-front-three-quarter.jpeg', model: 'MT-15' },
-  { id: '6', name: 'Suzuki', slug: 'suzuki', image: 'https://imgd.aeplcdn.com/1056x594/n/cw/ec/44228/gixxer-sf-right-front-three-quarter-3.jpeg', model: 'Gixxer SF' },
-  { id: '7', name: 'AKT', slug: 'akt', image: 'https://www.auteco.com.co/sites/default/files/2023-06/AKT-CR5-200-Roja.png', model: 'CR5 200' },
-  { id: '8', name: 'Auteco', slug: 'auteco', image: 'https://www.auteco.com.co/sites/default/files/2023-06/BAJAJ-DOMINAR-400-Negra.png', model: 'Dominar 400' },
-  { id: '9', name: 'TVS', slug: 'tvs', image: 'https://imgd.aeplcdn.com/1056x594/n/cw/ec/106413/apache-rtr-200-4v-right-front-three-quarter.jpeg', model: 'Apache RTR 200' },
-  { id: '10', name: 'Hero', slug: 'hero', image: 'https://imgd.aeplcdn.com/1056x594/n/cw/ec/101875/xpulse-200-right-front-three-quarter.jpeg', model: 'XPulse 200' },
+  { id: '1', name: 'Bajaj', slug: 'bajaj', image: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=400&h=300&fit=crop', model: 'Pulsar NS200' },
+  { id: '2', name: 'KTM', slug: 'ktm', image: 'https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?w=400&h=300&fit=crop', model: 'Duke 200' },
+  { id: '3', name: 'Pulsar', slug: 'pulsar', image: 'https://images.unsplash.com/photo-1609630875171-b1321377ee65?w=400&h=300&fit=crop', model: 'Pulsar 220F' },
+  { id: '4', name: 'Honda', slug: 'honda', image: 'https://images.unsplash.com/photo-1547549082-6bc09f2049ae?w=400&h=300&fit=crop', model: 'CB 190R' },
+  { id: '5', name: 'Yamaha', slug: 'yamaha', image: 'https://images.unsplash.com/photo-1580310614729-ccd69652491d?w=400&h=300&fit=crop', model: 'MT-15' },
+  { id: '6', name: 'Suzuki', slug: 'suzuki', image: 'https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=400&h=300&fit=crop', model: 'Gixxer SF' },
+  { id: '7', name: 'AKT', slug: 'akt', image: 'https://images.unsplash.com/photo-1622185135505-2d795003994a?w=400&h=300&fit=crop', model: 'CR5 200' },
+  { id: '8', name: 'Auteco', slug: 'auteco', image: 'https://images.unsplash.com/photo-1449426468159-d96dbf08f19f?w=400&h=300&fit=crop', model: 'Dominar 400' },
+  { id: '9', name: 'TVS', slug: 'tvs', image: 'https://images.unsplash.com/photo-1615172282427-9a57ef2d142e?w=400&h=300&fit=crop', model: 'Apache RTR 200' },
+  { id: '10', name: 'Hero', slug: 'hero', image: 'https://images.unsplash.com/photo-1508357941501-0924cf312bbd?w=400&h=300&fit=crop', model: 'XPulse 200' },
 ];
 
 interface BrandsStripProps {
