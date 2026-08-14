@@ -25,10 +25,14 @@ const MELI_SECRET = process.env.MELI_SECRET_KEY ?? '';
  * Ref: https://developers.mercadolibre.com/es_ar/notificaciones-de-estados#Configurar-notificaciones
  */
 function validateSignature(req: Request): boolean {
-  // Skip validation in local dev when secret is not set
+  // Allow missing secret only in development.
   if (!MELI_SECRET) {
-    console.warn('[meli/webhook] MELI_SECRET_KEY not set — skipping signature check');
-    return true;
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[meli/webhook] MELI_SECRET_KEY not set in development — skipping signature check');
+      return true;
+    }
+    console.error('[meli/webhook] MELI_SECRET_KEY is missing in non-development environment');
+    return false;
   }
 
   const xSignature = req.headers.get('x-signature');
@@ -81,13 +85,24 @@ export async function POST(req: Request) {
   // ─── orders_v2: process synchronously (reduce stock, save record) ──────────
   if (topic === 'orders_v2' && resource) {
     // resource is like "/orders/2000003801"
-    const orderId = resource.split('/').filter(Boolean).pop();
+    const rawOrderId = resource.split('/').filter(Boolean).pop();
+    const orderId = rawOrderId?.split('?')[0];
     if (orderId) {
       try {
         await processMeliOrder(orderId);
       } catch (err) {
         console.error('[meli/webhook] Failed to process order', orderId, err);
-        // Still return 200 — MeLi will retry if we return non-2xx
+        // Store for background retry, then still acknowledge webhook.
+        try {
+          await prisma.job.create({
+            data: {
+              type: 'MELI_ORDER_RETRY',
+              payload: { orderId, topic, resource, receivedAt: new Date().toISOString() },
+            },
+          });
+        } catch (jobErr) {
+          console.error('[meli/webhook] Failed to enqueue MELI_ORDER_RETRY job:', jobErr);
+        }
       }
     }
     return NextResponse.json({ ok: true });

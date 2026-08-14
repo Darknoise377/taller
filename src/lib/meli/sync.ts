@@ -603,16 +603,63 @@ export async function unpublishProduct(productId: string): Promise<void> {
 
 // ─── Process a MeLi order: reduce stock, save record (idempotent) ─────────────
 export async function processMeliOrder(meliOrderId: string): Promise<void> {
-  // Idempotency — skip if already processed
-  const existing = await prisma.meliOrder.findUnique({ where: { meliOrderId } });
-  if (existing) return;
-
   // Fetch order details from MeLi
   const order = await meliApi.getOrder(meliOrderId);
 
-  // Only process orders where payment is confirmed
   const processableStatuses = ['paid', 'payment_required', 'partially_refunded'];
-  if (!processableStatuses.includes(order.status)) {
+  const isProcessable = (status: string) => processableStatuses.includes(status);
+
+  const applyStockDeductions = async () => {
+    // Reduce stock for each item sold
+    for (const orderItem of order.order_items) {
+      const listing = await prisma.meliListing.findFirst({
+        where: { meliItemId: orderItem.item.id },
+        select: { productId: true },
+      });
+      if (!listing) {
+        console.warn(`[meli/order] No local product found for MeLi item ${orderItem.item.id}`);
+        continue;
+      }
+
+      // Decrement local stock (floor at 0)
+      const currentProduct = await prisma.product.findUniqueOrThrow({
+        where: { id: listing.productId },
+        select: { stock: true },
+      });
+
+      await prisma.product.update({
+        where: { id: listing.productId },
+        data: { stock: Math.max(0, currentProduct.stock - orderItem.quantity) },
+      });
+
+      // Push updated stock back to MeLi listing
+      try {
+        await updateStockAndPrice(listing.productId);
+      } catch (err) {
+        console.error(`[meli/order] Failed to sync stock back to MeLi for ${listing.productId}:`, err);
+      }
+    }
+  };
+
+  const existing = await prisma.meliOrder.findUnique({ where: { meliOrderId } });
+  if (existing) {
+    // If payment status changed from non-processable -> processable, apply stock now.
+    if (!isProcessable(existing.status) && isProcessable(order.status)) {
+      await applyStockDeductions();
+    }
+
+    await prisma.meliOrder.update({
+      where: { meliOrderId },
+      data: {
+        rawPayload: order as unknown as import('@prisma/client').Prisma.InputJsonValue,
+        status: order.status,
+        shipmentId: order.shipping?.id ? String(order.shipping.id) : null,
+      },
+    });
+    return;
+  }
+
+  if (!isProcessable(order.status)) {
     // Save record but don't touch stock (e.g. cancelled / pending)
     await prisma.meliOrder.create({
       data: {
@@ -625,35 +672,7 @@ export async function processMeliOrder(meliOrderId: string): Promise<void> {
     return;
   }
 
-  // Reduce stock for each item sold
-  for (const orderItem of order.order_items) {
-    const listing = await prisma.meliListing.findFirst({
-      where: { meliItemId: orderItem.item.id },
-      select: { productId: true },
-    });
-    if (!listing) {
-      console.warn(`[meli/order] No local product found for MeLi item ${orderItem.item.id}`);
-      continue;
-    }
-
-        // Decrement local stock (floor at 0 real)
-    const currentProduct = await prisma.product.findUniqueOrThrow({
-      where: { id: listing.productId },
-      select: { stock: true },
-    });
-
-    await prisma.product.update({
-      where: { id: listing.productId },
-      data: { stock: Math.max(0, currentProduct.stock - orderItem.quantity) },
-    });
-
-    // Push updated stock back to MeLi listing
-    try {
-      await updateStockAndPrice(listing.productId);
-    } catch (err) {
-      console.error(`[meli/order] Failed to sync stock back to MeLi for ${listing.productId}:`, err);
-    }
-  }
+  await applyStockDeductions();
 
   // Persist the order record
   await prisma.meliOrder.create({
