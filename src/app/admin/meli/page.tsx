@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    Button, Card, Col, Divider, Form, Input, InputNumber, message,
+    Button, Card, Col, DatePicker, Divider, Form, Input, InputNumber, message,
   Popconfirm, Row, Select, Segmented, Spin, Table, Tag, Tooltip, Typography,
 } from 'antd';
 import {
@@ -73,7 +73,20 @@ interface ListingsSummary {
 interface MeliOrderRow {
   meliOrderId: string;
   status: string;
-  rawPayload?: { total_amount?: number } | null;
+  rawPayload?: {
+    total_amount?: number;
+    date_created?: string;
+    buyer?: {
+      nickname?: string;
+      email?: string;
+    };
+    order_items?: Array<{
+      quantity?: number;
+      item?: {
+        title?: string;
+      };
+    }>;
+  } | null;
   createdAt: string | Date;
 }
 
@@ -102,6 +115,7 @@ export default function AdminMeliPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<MeliOrderRow[]>([]);
+  const [orderDateRange, setOrderDateRange] = useState<[string, string] | null>(null);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [configLoading, setConfigLoading] = useState(false);
   const [syncingAll, setSyncingAll] = useState(false);
@@ -189,6 +203,55 @@ export default function AdminMeliPage() {
     }
   }, [status, loadOrders]);
 
+  const formatOrderProducts = useCallback((payload: MeliOrderRow['rawPayload']) => {
+    if (!payload?.order_items?.length) return 'Sin detalle de producto';
+
+    return payload.order_items
+      .map((orderItem) => {
+        const title = orderItem?.item?.title?.trim();
+        if (!title) return null;
+        const quantity = orderItem?.quantity ?? 1;
+        return quantity > 1 ? `${title} (x${quantity})` : title;
+      })
+      .filter(Boolean)
+      .join(', ');
+  }, []);
+
+  const getOrderSaleDate = useCallback((order: MeliOrderRow) => {
+    return new Date(order.rawPayload?.date_created ?? order.createdAt);
+  }, []);
+
+  const formatSaleDate = useCallback((order: MeliOrderRow) => {
+    return getOrderSaleDate(order).toLocaleString();
+  }, [getOrderSaleDate]);
+
+  const formatOrderBuyer = useCallback((payload: MeliOrderRow['rawPayload']) => {
+    const nickname = payload?.buyer?.nickname?.trim();
+    const email = payload?.buyer?.email?.trim();
+    if (nickname && email) return `${nickname} (${email})`;
+    if (nickname) return nickname;
+    if (email) return email;
+    return 'Sin datos';
+  }, []);
+
+  const renderOrderStatus = useCallback((status: string) => {
+    const normalized = status?.toLowerCase?.() ?? '';
+    const statusMap: Record<string, { label: string; color: string }> = {
+      paid: { label: 'Pagada', color: 'success' },
+      cancelled: { label: 'Cancelada', color: 'error' },
+      payment_required: { label: 'Pago pendiente', color: 'warning' },
+      partially_refunded: { label: 'Reembolso parcial', color: 'processing' },
+      confirmed: { label: 'Confirmada', color: 'processing' },
+    };
+
+    const mapped = statusMap[normalized] ?? {
+      label: normalized ? normalized.replace(/_/g, ' ') : 'Sin estado',
+      color: 'default',
+    };
+
+    return <Tag color={mapped.color}>{mapped.label.toUpperCase()}</Tag>;
+  }, []);
+
   useEffect(() => {
         setLoading(true);
     Promise.all([loadStatus(), loadConfig(), loadOrders()])
@@ -215,6 +278,23 @@ export default function AdminMeliPage() {
   }, [listings, syncFilter, searchTerm]);
 
   const outOfSyncCount = summary?.outOfSync ?? listings.filter((r) => r.syncState === 'out_of_sync').length;
+
+  const filteredOrders = useMemo(() => {
+    if (!orderDateRange) return orders;
+
+    const [start, end] = orderDateRange;
+    const startDate = new Date(`${start}T00:00:00`);
+    const endDate = new Date(`${end}T23:59:59.999`);
+    const startTime = startDate.getTime();
+    const endTime = endDate.getTime();
+
+    if (Number.isNaN(startTime) || Number.isNaN(endTime)) return orders;
+
+    return orders.filter((order) => {
+      const saleTime = getOrderSaleDate(order).getTime();
+      return !Number.isNaN(saleTime) && saleTime >= startTime && saleTime <= endTime;
+    });
+  }, [orders, orderDateRange, getOrderSaleDate]);
 
   const handleConnect = () => { window.location.href = '/api/meli/auth'; };
 
@@ -761,16 +841,34 @@ export default function AdminMeliPage() {
           </Button>
         }
       >
+        <div className="mb-4 flex flex-wrap gap-2 items-center">
+          <Text strong>Filtrar por fecha de venta:</Text>
+          <DatePicker.RangePicker
+            format="YYYY-MM-DD"
+            allowClear
+            onChange={(_, dateStrings) => {
+              const [start, end] = dateStrings;
+              if (start && end) {
+                setOrderDateRange([start, end]);
+                return;
+              }
+              setOrderDateRange(null);
+            }}
+          />
+        </div>
+
         <Table
-          dataSource={orders}
+          dataSource={filteredOrders}
           rowKey="meliOrderId"
           loading={ordersLoading}
           size="small"
           pagination={{ pageSize: 10 }}
           locale={{
-            emptyText: orders.length === 0
+            emptyText: ordersLoading
+              ? 'Cargando...'
+              : orders.length === 0
               ? 'No hay órdenes de Mercado Libre registradas aún'
-              : 'Cargando...'
+              : 'No hay órdenes en el rango de fechas seleccionado'
           }}
           columns={[
             {
@@ -782,13 +880,13 @@ export default function AdminMeliPage() {
               title: 'Estado',
               dataIndex: 'status',
               key: 'status',
-              render: (status: string) => {
-                let color = 'default';
-                if (status === 'paid') color = 'success';
-                if (status === 'cancelled') color = 'error';
-                if (status === 'payment_required') color = 'warning';
-                return <Tag color={color}>{status.toUpperCase()}</Tag>;
-              }
+              render: (status: string) => renderOrderStatus(status)
+            },
+            {
+              title: 'Comprador',
+              dataIndex: 'rawPayload',
+              key: 'buyer',
+              render: (payload: MeliOrderRow['rawPayload']) => formatOrderBuyer(payload),
             },
             {
               title: 'Monto',
@@ -797,10 +895,15 @@ export default function AdminMeliPage() {
               render: (payload: { total_amount?: number } | null) => formatCurrency(payload?.total_amount || 0)
             },
             {
-              title: 'Fecha',
-              dataIndex: 'createdAt',
-              key: 'createdAt',
-              render: (val: string | Date) => new Date(val).toLocaleString(),
+              title: 'Producto vendido',
+              dataIndex: 'rawPayload',
+              key: 'products',
+              render: (payload: MeliOrderRow['rawPayload']) => formatOrderProducts(payload),
+            },
+            {
+              title: 'Fecha de venta',
+              key: 'saleDate',
+              render: (_: unknown, order: MeliOrderRow) => formatSaleDate(order),
             }
           ]}
         />
