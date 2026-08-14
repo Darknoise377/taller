@@ -9,7 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 const WHATSAPP_NUMBER = "573015271104";
 const WHATSAPP_MESSAGE = "Hola, estoy interesado en los repuestos de Motoservicio A&R";
 
-const WHATSAPP_AI_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_AI_NUMBER ?? "573203267829";
+const WHATSAPP_AI_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_AI_NUMBER?.replace(/\D/g, '') ?? "";
 const WHATSAPP_AI_MESSAGE = "Hola, necesito ayuda para encontrar un repuesto";
 
 function WaIcon({ className = "w-5 h-5" }: { className?: string }) {
@@ -60,7 +60,10 @@ export default function FloatingButtons() {
 
   const isProductDetail = !!pathname?.match(/^\/products\/[^/]+$/);
   const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
-  const whatsappAIUrl = `https://wa.me/${WHATSAPP_AI_NUMBER}?text=${encodeURIComponent(WHATSAPP_AI_MESSAGE)}`;
+  const hasWhatsAppAI = WHATSAPP_AI_NUMBER.length > 0;
+  const whatsappAIUrl = hasWhatsAppAI
+    ? `https://wa.me/${WHATSAPP_AI_NUMBER}?text=${encodeURIComponent(WHATSAPP_AI_MESSAGE)}`
+    : null;
 
   return (
     <div
@@ -109,30 +112,34 @@ export default function FloatingButtons() {
                 {/* Options */}
                 <div className="p-2 flex flex-col gap-1.5">
                   {/* Criss – AI assistant */}
-                  <a
-                    href={whatsappAIUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors group"
-                  >
-                    <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
-                      <BotIcon className="w-5 h-5 text-white" />
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-tight">
-                        Criss
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">
-                        Asistente servicios virtuales y pedidos
-                      </p>
-                    </div>
-                    <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <path d="m9 18 6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </a>
+                  {whatsappAIUrl && (
+                    <>
+                      <a
+                        href={whatsappAIUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors group"
+                      >
+                        <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                          <BotIcon className="w-5 h-5 text-white" />
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 leading-tight">
+                            Criss
+                          </p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 leading-tight">
+                            Asistente servicios virtuales y pedidos
+                          </p>
+                        </div>
+                        <svg className="w-4 h-4 text-slate-300 dark:text-slate-600 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                          <path d="m9 18 6-6-6-6" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </a>
 
-                  <div className="mx-3 h-px bg-slate-100 dark:bg-slate-700/60" />
+                      <div className="mx-3 h-px bg-slate-100 dark:bg-slate-700/60" />
+                    </>
+                  )}
 
                   {/* Direct line */}
                   <a

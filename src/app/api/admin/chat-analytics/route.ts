@@ -49,12 +49,20 @@ export async function GET(req: NextRequest) {
   type SessionSummary = {
     id: number;
     phone: string;
+    source: 'whatsapp' | 'meta_messenger' | 'web_assistant' | 'unknown';
     messageCount: number;
     lastActivity: string;
     hoursSinceLastMsg: number;
     possibleCause: string;
     lastMessages: Array<{ role: string; content: string; createdAt: string }>;
   };
+
+  function classifySessionSource(session: { phone: string | null; userId: string | null }): SessionSummary['source'] {
+    if (session.phone?.startsWith('messenger_')) return 'meta_messenger';
+    if (session.phone) return 'whatsapp';
+    if (session.userId?.startsWith('ip:')) return 'web_assistant';
+    return 'unknown';
+  }
 
   const abandonedSessions: SessionSummary[] = [];
   const causeCounts = new Map<string, number>();
@@ -89,6 +97,7 @@ export async function GET(req: NextRequest) {
       abandonedSessions.push({
         id: session.id,
         phone: session.phone ?? 'desconocido',
+        source: classifySessionSource(session),
         messageCount: realMessages.length,
         lastActivity: lastMsg.createdAt.toISOString(),
         hoursSinceLastMsg: hoursSince,

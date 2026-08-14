@@ -47,6 +47,7 @@ type AbandonCause = { cause: string; count: number };
 type SessionSummary = {
   id: number;
   phone: string;
+  source: 'whatsapp' | 'meta_messenger' | 'web_assistant' | 'unknown';
   messageCount: number;
   lastActivity: string;
   hoursSinceLastMsg: number;
@@ -69,6 +70,13 @@ const CAUSE_COLORS: Record<string, string> = {
   'Consultó producto pero no compró': 'geekblue',
   'Abandonó en saludo inicial': 'gray',
   'Razón no identificada': 'default',
+};
+
+const SOURCE_META: Record<SessionSummary['source'], { label: string; color: string }> = {
+  whatsapp: { label: 'WhatsApp', color: 'green' },
+  meta_messenger: { label: 'Meta Messenger', color: 'blue' },
+  web_assistant: { label: 'Asistente web', color: 'purple' },
+  unknown: { label: 'Sin clasificar', color: 'default' },
 };
 
 function maskPhone(phone: string) {
@@ -100,6 +108,18 @@ export default function ChatAnalyticsPage() {
       key: 'phone',
       render: (p) => <Text code>{maskPhone(p)}</Text>,
       width: 140,
+    },
+    {
+      title: 'Canal',
+      dataIndex: 'source',
+      key: 'source',
+      filters: Object.entries(SOURCE_META).map(([value, meta]) => ({ text: meta.label, value })),
+      onFilter: (value, record) => record.source === value,
+      render: (source: SessionSummary['source']) => {
+        const meta = SOURCE_META[source] ?? SOURCE_META.unknown;
+        return <Tag color={meta.color}>{meta.label}</Tag>;
+      },
+      width: 130,
     },
     {
       title: 'Mensajes',
@@ -178,7 +198,7 @@ export default function ChatAnalyticsPage() {
     <div style={{ padding: 24 }}>
       <Space style={{ marginBottom: 20 }} align="center">
         <Title level={4} style={{ margin: 0 }}>
-          📊 Analytics de conversaciones WhatsApp
+          📊 Analytics de conversaciones del asistente
         </Title>
         <Select
           value={days}

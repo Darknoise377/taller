@@ -6,25 +6,34 @@ import { processFbComment } from '@/lib/messenger/processComment';
 
 export const maxDuration = 60; // allow up to 60s for AI processing (Vercel Pro)
 
-const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
-// Both WhatsApp and Messenger webhooks from the same Meta app share the secret.
-// If you use a separate secret for the page webhook, set META_APP_SECRET instead.
-const APP_SECRET = process.env.META_APP_SECRET ?? process.env.WHATSAPP_APP_SECRET;
+const VERIFY_TOKENS = [
+  process.env.WHATSAPP_VERIFY_TOKEN,
+  process.env.META_VERIFY_TOKEN,
+].filter((token): token is string => Boolean(token));
+
+const APP_SECRETS = [
+  process.env.WHATSAPP_APP_SECRET,
+  process.env.META_APP_SECRET,
+  process.env.MESSENGER_APP_SECRET,
+].filter((secret): secret is string => Boolean(secret));
 
 function isValidSignature(rawBody: string, signatureHeader: string | null): boolean {
-  if (!APP_SECRET || !signatureHeader) return false;
+  if (APP_SECRETS.length === 0 || !signatureHeader) return false;
   const [algo, signature] = signatureHeader.split('=');
   if (algo !== 'sha256' || !signature) return false;
 
-  const expectedSignature = crypto
-    .createHmac('sha256', APP_SECRET)
-    .update(rawBody, 'utf8')
-    .digest('hex');
-
-  const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
   const incomingBuffer = Buffer.from(signature, 'utf8');
-  if (expectedBuffer.length !== incomingBuffer.length) return false;
-  return crypto.timingSafeEqual(expectedBuffer, incomingBuffer);
+
+  return APP_SECRETS.some((secret) => {
+    const expectedSignature = crypto
+      .createHmac('sha256', secret)
+      .update(rawBody, 'utf8')
+      .digest('hex');
+
+    const expectedBuffer = Buffer.from(expectedSignature, 'utf8');
+    if (expectedBuffer.length !== incomingBuffer.length) return false;
+    return crypto.timingSafeEqual(expectedBuffer, incomingBuffer);
+  });
 }
 
 export async function GET(request: Request) {
@@ -33,7 +42,7 @@ export async function GET(request: Request) {
   const token = url.searchParams.get('hub.verify_token');
   const challenge = url.searchParams.get('hub.challenge');
 
-  if (mode === 'subscribe' && token && token === VERIFY_TOKEN) {
+  if (mode === 'subscribe' && token && VERIFY_TOKENS.includes(token)) {
     return new NextResponse(challenge ?? 'OK', { status: 200 });
   }
 
@@ -48,7 +57,7 @@ export async function POST(request: Request) {
     const rawBody = await request.text();
     const signatureHeader = request.headers.get('x-hub-signature-256');
 
-    if (!APP_SECRET || !isValidSignature(rawBody, signatureHeader)) {
+    if (APP_SECRETS.length === 0 || !isValidSignature(rawBody, signatureHeader)) {
       console.error('Invalid Meta webhook signature');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
