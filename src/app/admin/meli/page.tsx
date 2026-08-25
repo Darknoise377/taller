@@ -3,104 +3,47 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-    Button, Card, Col, DatePicker, Divider, Form, Input, InputNumber, message,
-  Popconfirm, Row, Select, Segmented, Spin, Table, Tag, Tooltip, Typography,
+  Form,
+  message,
+  Spin,
+  Typography,
+  ConfigProvider,
+  Divider,
+  Tag,
+  Tooltip,
+  Button,
 } from 'antd';
 import {
-  ApiOutlined, CheckCircleOutlined, CloseCircleOutlined,
-  DisconnectOutlined, ExclamationCircleOutlined, ReloadOutlined,
-  SyncOutlined, WarningOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ExclamationCircleOutlined,
+  SyncOutlined,
 } from '@ant-design/icons';
+import 'dayjs/locale/es';
+import esES from 'antd/locale/es_ES';
 import type { ColumnsType } from 'antd/es/table';
 import { formatCurrency } from '@/utils/formatCurrency';
-import { previewPrices, MELI_COMMISSION_RATES } from '@/lib/meli/pricing';
+import { previewPrices } from '@/lib/meli/pricing';
 import type { MeliSyncFilter } from '@/lib/meli/listingStatus';
+
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
+import MeliProductsTab from './components/MeliProductsTab';
+import MeliSalesTab from './components/MeliSalesTab';
+import MeliNetReportTab from './components/MeliNetReportTab';
+
+import type {
+  MeliStatus,
+  MeliConfig,
+  ListingRow,
+  ListingsSummary,
+  MeliOrderRow,
+} from './types';
 
 const { Title, Text, Paragraph } = Typography;
 
-interface MeliStatus {
-  connected: boolean;
-  nickname?: string;
-  email?: string;
-  expiresAt?: string;
-}
-
-interface MeliConfig {
-  id: number;
-  extraMarginPercent: number;
-  fixedCostCOP: number;
-  defaultListingType: string;
-  freeInstallments: number;
-  categoryMap: Record<string, string>;
-}
-
-interface ListingRow {
-  productId: string;
-  productName: string;
-  basePrice: number;
-  meliPrice: number;
-  meliItemId?: string;
-  localStatus?: string;
-  lastSyncAt?: string;
-  meliExport: boolean;
-  stock: number;
-  syncState: 'synced' | 'pending' | 'issues' | 'out_of_sync';
-  resyncReasons: string[];
-  meliVisitsTotal?: number | null;
-  meliVisitsCheckedAt?: string | null;
-  live?: {
-    statusLabel: string;
-    statusDetail: string | null;
-    pauseReason: string | null;
-    isPaused: boolean;
-    isActive: boolean;
-    health: 'ok' | 'warning' | 'error' | 'unknown';
-    permalink: string | null;
-    availableQuantity: number | null;
-    livePrice: number | null;
-    liveStatus: string;
-  } | null;
-}
-
-interface ListingsSummary {
-  total: number;
-  synced: number;
-  pending: number;
-  issues: number;
-  outOfSync: number;
-}
-
-interface MeliOrderRow {
-  meliOrderId: string;
-  status: string;
-  rawPayload?: {
-    total_amount?: number;
-    date_created?: string;
-    buyer?: {
-      nickname?: string;
-      email?: string;
-    };
-    order_items?: Array<{
-      quantity?: number;
-      item?: {
-        title?: string;
-      };
-    }>;
-  } | null;
-  createdAt: string | Date;
-}
-
-const FILTER_OPTIONS: { value: MeliSyncFilter; label: string }[] = [
-  { value: 'all', label: 'Todos' },
-  { value: 'synced', label: 'Sincronizados' },
-  { value: 'pending', label: 'Pendientes' },
-  { value: 'out_of_sync', label: 'Cambios sin sync' },
-  { value: 'issues', label: 'Con alertas' },
-];
-
 function healthIcon(health?: string) {
   if (health === 'ok') return <CheckCircleOutlined className="text-green-600" />;
-  if (health === 'warning') return <WarningOutlined className="text-amber-500" />;
+  if (health === 'warning') return <ExclamationCircleOutlined className="text-amber-500" />;
   if (health === 'error') return <CloseCircleOutlined className="text-red-500" />;
   return <ExclamationCircleOutlined className="text-slate-400" />;
 }
@@ -111,7 +54,7 @@ export default function AdminMeliPage() {
   const [config, setConfig] = useState<MeliConfig | null>(null);
   const [listings, setListings] = useState<ListingRow[]>([]);
   const [summary, setSummary] = useState<ListingsSummary | null>(null);
-    const [syncFilter, setSyncFilter] = useState<MeliSyncFilter>('all');
+  const [syncFilter, setSyncFilter] = useState<MeliSyncFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState<MeliOrderRow[]>([]);
@@ -123,6 +66,7 @@ export default function AdminMeliPage() {
   const [refreshingStatus, setRefreshingStatus] = useState(false);
   const [syncingRow, setSyncingRow] = useState<string | null>(null);
   const [syncingOrders, setSyncingOrders] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('products');
 
   const [form] = Form.useForm<Omit<MeliConfig, 'id' | 'categoryMap'>>();
 
@@ -149,7 +93,7 @@ export default function AdminMeliPage() {
     } catch { /* ignore */ }
   }, [form]);
 
-    const loadListings = useCallback(async (refreshLive = false) => {
+  const loadListings = useCallback(async (refreshLive = false) => {
     try {
       const qs = refreshLive ? '?refresh=1' : '';
       const res = await fetch(`/api/meli/listings${qs}`);
@@ -203,100 +147,9 @@ export default function AdminMeliPage() {
     }
   }, [status, loadOrders]);
 
-  const formatOrderProducts = useCallback((payload: MeliOrderRow['rawPayload']) => {
-    if (!payload?.order_items?.length) return 'Sin detalle de producto';
-
-    return payload.order_items
-      .map((orderItem) => {
-        const title = orderItem?.item?.title?.trim();
-        if (!title) return null;
-        const quantity = orderItem?.quantity ?? 1;
-        return quantity > 1 ? `${title} (x${quantity})` : title;
-      })
-      .filter(Boolean)
-      .join(', ');
-  }, []);
-
-  const getOrderSaleDate = useCallback((order: MeliOrderRow) => {
-    return new Date(order.rawPayload?.date_created ?? order.createdAt);
-  }, []);
-
-  const formatSaleDate = useCallback((order: MeliOrderRow) => {
-    return getOrderSaleDate(order).toLocaleString();
-  }, [getOrderSaleDate]);
-
-  const formatOrderBuyer = useCallback((payload: MeliOrderRow['rawPayload']) => {
-    const nickname = payload?.buyer?.nickname?.trim();
-    const email = payload?.buyer?.email?.trim();
-    if (nickname && email) return `${nickname} (${email})`;
-    if (nickname) return nickname;
-    if (email) return email;
-    return 'Sin datos';
-  }, []);
-
-  const renderOrderStatus = useCallback((status: string) => {
-    const normalized = status?.toLowerCase?.() ?? '';
-    const statusMap: Record<string, { label: string; color: string }> = {
-      paid: { label: 'Pagada', color: 'success' },
-      cancelled: { label: 'Cancelada', color: 'error' },
-      payment_required: { label: 'Pago pendiente', color: 'warning' },
-      partially_refunded: { label: 'Reembolso parcial', color: 'processing' },
-      confirmed: { label: 'Confirmada', color: 'processing' },
-    };
-
-    const mapped = statusMap[normalized] ?? {
-      label: normalized ? normalized.replace(/_/g, ' ') : 'Sin estado',
-      color: 'default',
-    };
-
-    return <Tag color={mapped.color}>{mapped.label.toUpperCase()}</Tag>;
-  }, []);
-
-  useEffect(() => {
-        setLoading(true);
-    Promise.all([loadStatus(), loadConfig(), loadOrders()])
-      .then(() => loadListings(false))
-      .finally(() => setLoading(false));
-
-    const interval = setInterval(loadStatus, 60_000);
-    return () => clearInterval(interval);
-  }, [loadStatus, loadConfig, loadListings, loadOrders]);
-
-    const filteredListings = useMemo(() => {
-    let filtered = listings;
-    if (syncFilter === 'synced') {
-      filtered = filtered.filter((row) => Boolean(row.meliItemId) && row.syncState === 'synced');
-    } else if (syncFilter !== 'all') {
-      filtered = filtered.filter((row) => row.syncState === syncFilter);
-    }
-    
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(row => row.productName.toLowerCase().includes(term) || row?.meliItemId?.toLowerCase().includes(term));
-    }
-    return filtered;
-  }, [listings, syncFilter, searchTerm]);
-
-  const outOfSyncCount = summary?.outOfSync ?? listings.filter((r) => r.syncState === 'out_of_sync').length;
-
-  const filteredOrders = useMemo(() => {
-    if (!orderDateRange) return orders;
-
-    const [start, end] = orderDateRange;
-    const startDate = new Date(`${start}T00:00:00`);
-    const endDate = new Date(`${end}T23:59:59.999`);
-    const startTime = startDate.getTime();
-    const endTime = endDate.getTime();
-
-    if (Number.isNaN(startTime) || Number.isNaN(endTime)) return orders;
-
-    return orders.filter((order) => {
-      const saleTime = getOrderSaleDate(order).getTime();
-      return !Number.isNaN(saleTime) && saleTime >= startTime && saleTime <= endTime;
-    });
-  }, [orders, orderDateRange, getOrderSaleDate]);
-
-  const handleConnect = () => { window.location.href = '/api/meli/auth'; };
+  const handleConnect = () => {
+    window.location.href = '/api/meli/auth';
+  };
 
   const handleDisconnect = async () => {
     const res = await fetch('/api/meli/status', { method: 'DELETE' });
@@ -345,27 +198,30 @@ export default function AdminMeliPage() {
     }
   };
 
-  const handleSyncProduct = async (productId: string) => {
-    setSyncingRow(productId);
-    try {
-      const res = await fetch(`/api/meli/sync/${productId}`, { method: 'POST' });
-      const body = await res.json();
-      if (res.ok) {
-        const actionLabel =
-          body.action === 'published'
-            ? 'publicado'
-            : body.action === 'republished'
-              ? 'republicado'
-              : 'actualizado';
-        message.success(`Producto ${actionLabel} en MeLi`);
-        await loadListings(status?.connected ?? false);
-      } else {
-        message.error(body.error ?? 'Error al sincronizar');
+  const handleSyncProduct = useCallback(
+    async (productId: string) => {
+      setSyncingRow(productId);
+      try {
+        const res = await fetch(`/api/meli/sync/${productId}`, { method: 'POST' });
+        const body = await res.json();
+        if (res.ok) {
+          const actionLabel =
+            body.action === 'published'
+              ? 'publicado'
+              : body.action === 'republished'
+                ? 'republicado'
+                : 'actualizado';
+          message.success(`Producto ${actionLabel} en MeLi`);
+          await loadListings(status?.connected ?? false);
+        } else {
+          message.error(body.error ?? 'Error al sincronizar');
+        }
+      } finally {
+        setSyncingRow(null);
       }
-    } finally {
-      setSyncingRow(null);
-    }
-  };
+    },
+    [loadListings, status],
+  );
 
   const runBulkSync = async (onlyPending: boolean) => {
     if (onlyPending) setSyncingPending(true);
@@ -397,523 +253,395 @@ export default function AdminMeliPage() {
     }
   };
 
-  const columns: ColumnsType<ListingRow> = [
-    {
-      title: 'Producto',
-      dataIndex: 'productName',
-      key: 'productName',
-      width: 240,
-      ellipsis: true,
-      render: (name: string, row) => (
-        <Tooltip title={name} placement="topLeft">
-          <div className="flex flex-col">
-            <Text strong className="hover:text-blue-600 transition-colors" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '220px', display: 'block' }}>
-              {name}
-            </Text>
-            <div className="text-xs text-slate-500 mt-0.5" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '220px' }}>
-              Stock: {row.stock}
-              {row.meliItemId && (
-                <>
-                  {' · '}
-                  <a
-                    href={row.live?.permalink ?? `https://articulo.mercadolibre.com.co/${row.meliItemId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'inline-block', maxWidth: '140px' }}
-                  >
-                    Ver en MeLi
-                  </a>
-                </>
-              )}
+  const filteredListings = useMemo(() => {
+    let filtered = listings;
+    if (syncFilter === 'synced') {
+      filtered = filtered.filter((row) => Boolean(row.meliItemId) && row.syncState === 'synced');
+    } else if (syncFilter !== 'all') {
+      filtered = filtered.filter((row) => row.syncState === syncFilter);
+    }
+
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (row) =>
+          row.productName.toLowerCase().includes(term) ||
+          row?.meliItemId?.toLowerCase().includes(term),
+      );
+    }
+    return filtered;
+  }, [listings, syncFilter, searchTerm]);
+
+  const outOfSyncCount =
+    summary?.outOfSync ?? listings.filter((r) => r.syncState === 'out_of_sync').length;
+
+  const columns: ColumnsType<ListingRow> = useMemo(
+    () => [
+      {
+        title: 'Producto',
+        dataIndex: 'productName',
+        key: 'productName',
+        width: 240,
+        ellipsis: true,
+        render: (name: string, row) => (
+          <Tooltip title={name} placement="topLeft">
+            <div className="flex flex-col">
+              <Text
+                strong
+                className="hover:text-blue-600 transition-colors"
+                style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '220px',
+                  display: 'block',
+                }}
+              >
+                {name}
+              </Text>
+              <div
+                className="text-xs text-slate-500 mt-0.5"
+                style={{
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '220px',
+                }}
+              >
+                Stock: {row.stock}
+                {row.meliItemId && (
+                  <>
+                    {' · '}
+                    <a
+                      href={
+                        row.live?.permalink ??
+                        `https://articulo.mercadolibre.com.co/${row.meliItemId}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: 'inline-block',
+                        maxWidth: '140px',
+                      }}
+                    >
+                      Ver en MeLi
+                    </a>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        </Tooltip>
-      ),
-    },
-    {
-      title: 'Precio base',
-      dataIndex: 'basePrice',
-      key: 'basePrice',
-      render: (v: number) => formatCurrency(v),
-      align: 'right',
-      width: 100,
-    },
-    {
-      title: 'Precio MeLi',
-      dataIndex: 'meliPrice',
-      key: 'meliPrice',
-      render: (v: number, row) => {
-        if (row.live?.livePrice != null) {
-          return (
-            <Tooltip title="Precio en vivo en MeLi">
-              <Text strong>{formatCurrency(row.live.livePrice)}</Text>
-            </Tooltip>
-          );
-        }
-        if (!row.meliItemId || !v) {
-          if (config) {
-            const [preview] = previewPrices(
-              [{ productPrice: row.basePrice, listingType: config.defaultListingType }],
-              config.extraMarginPercent,
-              config.fixedCostCOP,
-              config.defaultListingType,
-            );
+          </Tooltip>
+        ),
+      },
+      {
+        title: 'Precio base',
+        dataIndex: 'basePrice',
+        key: 'basePrice',
+        render: (v: number) => formatCurrency(v),
+        align: 'right',
+        width: 100,
+      },
+      {
+        title: 'Precio MeLi',
+        dataIndex: 'meliPrice',
+        key: 'meliPrice',
+        render: (v: number, row) => {
+          if (row.live?.livePrice != null) {
             return (
-              <Tooltip title="Precio estimado (no publicado)">
-                <Text type="secondary">{formatCurrency(preview.meliPrice)}</Text>
+              <Tooltip title="Precio en vivo en MeLi">
+                <Text strong>{formatCurrency(row.live.livePrice)}</Text>
               </Tooltip>
             );
           }
-          return '—';
-        }
-        return <Text strong>{formatCurrency(v)}</Text>;
-      },
-      align: 'right',
-      width: 110,
-    },
-    {
-      title: 'Sync',
-      key: 'syncState',
-      width: 115,
-      render: (_: unknown, row) => {
-        if (!row.meliExport && !row.meliItemId) {
-          return <Tag>No exportado</Tag>;
-        }
-        if (row.syncState === 'pending') {
-          return <Tag color="orange">Pendiente</Tag>;
-        }
-        if (row.syncState === 'out_of_sync') {
-          return (
-            <Tooltip title={row.resyncReasons.join(' · ')}>
-              <Tag color="volcano">Re-sincronizar</Tag>
-            </Tooltip>
-          );
-        }
-        if (row.syncState === 'issues') {
-          return <Tag color="red">Revisar</Tag>;
-        }
-        return <Tag color="green">Sincronizado</Tag>;
-      },
-    },
-    {
-      title: 'Visitas (30d)',
-      key: 'visits',
-      width: 100,
-      align: 'center',
-      render: (_: unknown, row) => {
-        if (!row.meliItemId) return <Text type="secondary">—</Text>;
-        if (row.meliVisitsTotal == null) {
-          return (
-            <Tooltip title="Pulsa «Actualizar estados» para cargar visitas desde MeLi">
-              <Text type="secondary" className="text-xs">Sin datos</Text>
-            </Tooltip>
-          );
-        }
-        return (
-          <Tooltip
-            title={
-              row.meliVisitsCheckedAt
-                ? `Consultado: ${new Date(row.meliVisitsCheckedAt).toLocaleString('es-CO')}`
-                : 'Últimos 30 días'
+          if (!row.meliItemId || !v) {
+            if (config) {
+              const [preview] = previewPrices(
+                [{ productPrice: row.basePrice, listingType: config.defaultListingType }],
+                config.extraMarginPercent,
+                config.fixedCostCOP,
+                config.defaultListingType,
+              );
+              return (
+                <Tooltip title="Precio estimado (no publicado)">
+                  <Text type="secondary">{formatCurrency(preview.meliPrice)}</Text>
+                </Tooltip>
+              );
             }
-          >
-            <Text strong>{row.meliVisitsTotal.toLocaleString('es-CO')}</Text>
-          </Tooltip>
-        );
+            return '—';
+          }
+          return <Text strong>{formatCurrency(v)}</Text>;
+        },
+        align: 'right',
+        width: 110,
       },
-    },
-    {
-      title: 'Estado en MeLi',
-      key: 'liveStatus',
-      width: 175,
-      render: (_: unknown, row) => {
-        if (!row.meliItemId) {
-          return row.meliExport ? (
-            <Tag color="orange">Por publicar</Tag>
-          ) : (
-            <Tag>—</Tag>
-          );
-        }
-
-        if (!row.live) {
-          const colorMap: Record<string, string> = {
-            ACTIVE: 'green',
-            PAUSED: 'gold',
-            CLOSED: 'default',
-            UNDER_REVIEW: 'blue',
-            ERROR: 'red',
-          };
+      {
+        title: 'Sync',
+        key: 'syncState',
+        width: 115,
+        render: (_: unknown, row) => {
+          if (!row.meliExport && !row.meliItemId) {
+            return <Tag>No exportado</Tag>;
+          }
+          if (row.syncState === 'pending') {
+            return <Tag color="orange">Pendiente</Tag>;
+          }
+          if (row.syncState === 'out_of_sync') {
+            return (
+              <Tooltip title={row.resyncReasons.join(' · ')}>
+                <Tag color="volcano">Re-sincronizar</Tag>
+              </Tooltip>
+            );
+          }
+          if (row.syncState === 'issues') {
+            return <Tag color="red">Revisar</Tag>;
+          }
+          return <Tag color="green">Sincronizado</Tag>;
+        },
+      },
+      {
+        title: 'Visitas (30d)',
+        key: 'visits',
+        width: 100,
+        align: 'center',
+        render: (_: unknown, row) => {
+          if (!row.meliItemId) return <Text type="secondary">—</Text>;
+          if (row.meliVisitsTotal == null) {
+            return (
+              <Tooltip title="Pulsa «Actualizar estados» para cargar visitas desde MeLi">
+                <Text type="secondary" className="text-xs">
+                  Sin datos
+                </Text>
+              </Tooltip>
+            );
+          }
           return (
-            <Tooltip title="Pulsa «Actualizar estados» para consultar MeLi en vivo">
-              <Tag color={colorMap[row.localStatus ?? ''] ?? 'default'}>
-                {row.localStatus ?? 'Local'} (sin consultar)
-              </Tag>
+            <Tooltip
+              title={
+                row.meliVisitsCheckedAt
+                  ? `Consultado: ${new Date(row.meliVisitsCheckedAt).toLocaleString('es-CO')}`
+                  : 'Últimos 30 días'
+              }
+            >
+              <Text strong>{row.meliVisitsTotal.toLocaleString('es-CO')}</Text>
             </Tooltip>
           );
-        }
+        },
+      },
+      {
+        title: 'Estado en MeLi',
+        key: 'liveStatus',
+        width: 175,
+        render: (_: unknown, row) => {
+          if (!row.meliItemId) {
+            return row.meliExport ? (
+              <Tag color="orange">Por publicar</Tag>
+            ) : (
+              <Tag>—</Tag>
+            );
+          }
 
-        const tagColor =
-          row.live.health === 'ok'
-            ? 'green'
-            : row.live.health === 'warning'
-              ? 'gold'
-              : row.live.health === 'error'
-                ? 'red'
-                : 'default';
+          if (!row.live) {
+            const colorMap: Record<string, string> = {
+              ACTIVE: 'green',
+              PAUSED: 'gold',
+              CLOSED: 'default',
+              UNDER_REVIEW: 'blue',
+              ERROR: 'red',
+            };
+            return (
+              <Tooltip title="Pulsa «Actualizar estados» para consultar MeLi en vivo">
+                <Tag color={colorMap[row.localStatus ?? ''] ?? 'default'}>
+                  {row.localStatus ?? 'Local'} (sin consultar)
+                </Tag>
+              </Tooltip>
+            );
+          }
 
-        const detail = row.live.pauseReason ?? row.live.statusDetail;
+          const tagColor =
+            row.live.health === 'ok'
+              ? 'green'
+              : row.live.health === 'warning'
+                ? 'gold'
+                : row.live.health === 'error'
+                  ? 'red'
+                  : 'default';
 
-        return (
-          <div className="flex items-start gap-1.5">
-            {healthIcon(row.live.health)}
-            <div>
-              <Tag color={tagColor}>{row.live.statusLabel}</Tag>
-              {row.resyncReasons.length > 0 && (
-                <div className="text-xs text-volcano mt-1 max-w-[220px] leading-snug">
-                  {row.resyncReasons[0]}
-                </div>
-              )}
-              {detail && (
-                <div className="text-xs text-slate-500 mt-1 max-w-[200px] leading-snug">
-                  {detail}
-                </div>
-              )}
-              {row.live.availableQuantity != null && row.live.availableQuantity === 0 && (
-                <div className="text-xs text-amber-600 mt-0.5">0 unidades en MeLi</div>
-              )}
+          const detail = row.live.pauseReason ?? row.live.statusDetail;
+
+          return (
+            <div className="flex items-start gap-1.5">
+              {healthIcon(row.live.health)}
+              <div>
+                <Tag color={tagColor}>{row.live.statusLabel}</Tag>
+                {row.resyncReasons.length > 0 && (
+                  <div className="text-xs text-volcano mt-1 max-w-[220px] leading-snug">
+                    {row.resyncReasons[0]}
+                  </div>
+                )}
+                {detail && (
+                  <div className="text-xs text-slate-500 mt-1 max-w-[200px] leading-snug">
+                    {detail}
+                  </div>
+                )}
+                {row.live.availableQuantity != null &&
+                  row.live.availableQuantity === 0 && (
+                    <div className="text-xs text-amber-600 mt-0.5">
+                      0 unidades en MeLi
+                    </div>
+                  )}
+              </div>
             </div>
-          </div>
-        );
+          );
+        },
       },
-    },
-    {
-      title: 'Última sync',
-      dataIndex: 'lastSyncAt',
-      key: 'lastSyncAt',
-      width: 130,
-      render: (v?: string) => {
-        if (!v) return '—';
-        const d = new Date(v);
-        return (
-          <Tooltip title={d.toLocaleString('es-CO')}>
-            <span className="text-xs">{d.toLocaleDateString('es-CO')}</span>
-          </Tooltip>
-        );
+      {
+        title: 'Última sync',
+        dataIndex: 'lastSyncAt',
+        key: 'lastSyncAt',
+        width: 130,
+        render: (v?: string) => {
+          if (!v) return '—';
+          const d = new Date(v);
+          return (
+            <Tooltip title={d.toLocaleString('es-CO')}>
+              <span className="text-xs">{d.toLocaleDateString('es-CO')}</span>
+            </Tooltip>
+          );
+        },
       },
-    },
-    {
-      title: 'Acciones',
-      key: 'actions',
-      width: 110,
-      fixed: 'right',
-      render: (_: unknown, row) => (
-        <Button
-          size="small"
-          icon={<SyncOutlined spin={syncingRow === row.productId} />}
-          onClick={(e) => { e.stopPropagation(); handleSyncProduct(row.productId); }}
-          disabled={!!syncingRow || syncingAll || syncingPending}
-        >
-          {row.meliItemId ? 'Actualizar' : 'Publicar'}
-        </Button>
-      ),
-    },
-  ];
+      {
+        title: 'Acciones',
+        key: 'actions',
+        width: 110,
+        render: (_: unknown, row) => (
+          <Button
+            size="small"
+            icon={<SyncOutlined spin={syncingRow === row.productId} />}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleSyncProduct(row.productId);
+            }}
+            disabled={!!syncingRow || syncingAll || syncingPending}
+          >
+            {row.meliItemId ? 'Actualizar' : 'Publicar'}
+          </Button>
+        ),
+      },
+    ],
+    [config, syncingRow, syncingAll, syncingPending, handleSyncProduct],
+  );
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([loadStatus(), loadConfig(), loadOrders()])
+      .then(() => loadListings(false))
+      .finally(() => setLoading(false));
+
+    const interval = setInterval(loadStatus, 60_000);
+    return () => clearInterval(interval);
+  }, [loadStatus, loadConfig, loadListings, loadOrders]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Spin size="large">
-          <div className="mt-3 text-gray-500 text-sm">Cargando integración MeLi...</div>
+          <div className="mt-3 text-gray-500 text-sm">
+            Cargando integración MeLi...
+          </div>
         </Spin>
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
-      <Title level={2} className="!mb-0">Integración Mercado Libre</Title>
-      <Paragraph type="secondary">
-        Conexión OAuth, precios, estado en vivo de cada publicación (activa, pausada y motivo)
-        y sincronización del catálogo con MeLi Colombia (MCO).
-      </Paragraph>
+    <ConfigProvider locale={esES}>
+      <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
+        <Title level={2} className="!mb-0">
+          Integración Mercado Libre
+        </Title>
+        <Paragraph type="secondary">
+          Conexión OAuth, precios, estado en vivo de cada publicación (activa, pausada y motivo)
+          y sincronización del catálogo con MeLi Colombia (MCO).
+        </Paragraph>
 
-      <Card
-        title={
-          <span className="flex items-center gap-2">
-            <ApiOutlined />
-            Conexión con Mercado Libre
-          </span>
-        }
-      >
-        {status?.connected ? (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex items-center gap-2 text-green-600">
-              <CheckCircleOutlined />
-              <Text strong>Conectado</Text>
-            </div>
-            <div>
-              {status.nickname && <Text>Cuenta: <strong>{status.nickname}</strong></Text>}
-              {status.expiresAt && (
-                <Text type="secondary" className="ml-3 text-xs">
-                  Token expira: {new Date(status.expiresAt).toLocaleString('es-CO')}
-                </Text>
-              )}
-            </div>
-            <div className="ml-auto flex gap-2">
-              <Button icon={<ReloadOutlined />} onClick={loadStatus}>Verificar</Button>
-              <Popconfirm
-                title="¿Desconectar cuenta de MeLi?"
-                description="Se eliminarán los tokens guardados."
-                onConfirm={handleDisconnect}
-                okText="Sí, desconectar"
-                cancelText="Cancelar"
-              >
-                <Button danger icon={<DisconnectOutlined />}>Desconectar</Button>
-              </Popconfirm>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex items-center gap-2 text-red-500">
-              <CloseCircleOutlined />
-              <Text type="danger">No conectado</Text>
-            </div>
-            <Text type="secondary">Conecta tu cuenta para sincronizar productos con MeLi Colombia.</Text>
-            <Button type="primary" className="ml-auto" icon={<ApiOutlined />} onClick={handleConnect}>
-              Conectar con Mercado Libre
-            </Button>
-          </div>
-        )}
-      </Card>
-
-      <Card title="Configuración de precios y publicación">
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{
-            extraMarginPercent: 0,
-            fixedCostCOP: 3500,
-            defaultListingType: 'gold_special',
-            freeInstallments: 3,
-          }}
+        {/* ── Tab Navigation ── */}
+        <Tabs
+          defaultValue="products"
+          onValueChange={setActiveTab}
+          className="w-full"
         >
-          <Row gutter={16}>
-            <Col xs={24} sm={6}>
-              <Form.Item name="defaultListingType" label="Tipo de publicación">
-                <Select>
-                  <Select.Option value="gold_special">
-                    Clásica — {MELI_COMMISSION_RATES['gold_special']}%
-                  </Select.Option>
-                  <Select.Option value="gold_premium">
-                    Premium — {MELI_COMMISSION_RATES['gold_premium']}%
-                  </Select.Option>
-                  <Select.Option value="free">
-                    Gratuita — {MELI_COMMISSION_RATES['free']}%
-                  </Select.Option>
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={6}>
-              <Form.Item name="freeInstallments" label="Cuotas sin interés" rules={[{ required: true }]}>
-                <Select>
-                  <Select.Option value={3}>3 cuotas</Select.Option>
-                  <Select.Option value={6}>6 cuotas (Cuotas Extra)</Select.Option>
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={6}>
-              <Form.Item name="extraMarginPercent" label="Margen adicional (%)" rules={[{ required: true }]}>
-                <InputNumber min={0} max={79} step={0.5} suffix="%" className="w-full" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={6}>
-              <Form.Item name="fixedCostCOP" label="Costo fijo (COP)" rules={[{ required: true }]}>
-                <InputNumber min={0} step={500} prefix="$" className="w-full" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Button type="primary" loading={configLoading} onClick={handleSaveConfig}>
-            Guardar configuración
-          </Button>
-        </Form>
-      </Card>
+          <TabsList className="border-b border-slate-200 dark:border-slate-800">
+            <TabsTrigger value="products">Productos</TabsTrigger>
+            <TabsTrigger value="sales">Ventas y productos vendidos</TabsTrigger>
+            <TabsTrigger value="net">Vendido vs Liquidado (Neto)</TabsTrigger>
+          </TabsList>
 
-      <Card
-        title="Catálogo de productos"
-        extra={
-          <div className="flex flex-wrap gap-2 justify-end">
-            <Button
-              icon={<ReloadOutlined spin={refreshingStatus} />}
-              loading={refreshingStatus}
-              disabled={!status?.connected}
-              onClick={handleRefreshLiveStatus}
-            >
-              Actualizar estados
-            </Button>
-            <Button
-              icon={<SyncOutlined spin={syncingPending} />}
-              loading={syncingPending}
-              disabled={!status?.connected || syncingAll}
-              onClick={() => runBulkSync(true)}
-            >
-              Sync pendientes
-            </Button>
-            <Button
-              type="primary"
-              icon={<SyncOutlined spin={syncingAll} />}
-              loading={syncingAll}
-              disabled={!status?.connected || syncingPending}
-              onClick={() => runBulkSync(false)}
-            >
-              Sincronizar todos
-            </Button>
-          </div>
-        }
-      >
-        {!status?.connected && (
-          <Paragraph type="warning" className="!mb-3">
-            Conecta tu cuenta de MeLi para publicar y consultar estados en vivo.
-          </Paragraph>
-        )}
+          <TabsContent value="products">
+            {activeTab === 'products' && (
+              <MeliProductsTab
+                status={status}
+                config={config}
+                form={form}
+                configLoading={configLoading}
+                handleConnect={handleConnect}
+                handleDisconnect={handleDisconnect}
+                handleSaveConfig={handleSaveConfig}
+                handleRefreshLiveStatus={handleRefreshLiveStatus}
+                refreshingStatus={refreshingStatus}
+                loadStatus={loadStatus}
+                summary={summary}
+                outOfSyncCount={outOfSyncCount}
+                filteredListings={filteredListings}
+                syncFilter={syncFilter}
+                setSyncFilter={setSyncFilter}
+                setSearchTerm={setSearchTerm}
+                columns={columns}
+                syncingAll={syncingAll}
+                syncingPending={syncingPending}
+                runBulkSync={runBulkSync}
+                onListingClick={(productId) =>
+                  router.push(`/admin/products?edit=${productId}`)
+                }
+              />
+            )}
+          </TabsContent>
 
-        {summary && (
-          <div className="flex flex-wrap gap-3 mb-4 text-sm">
-            <Tag>{summary.total} productos</Tag>
-            <Tag color="green">{summary.synced} sincronizados</Tag>
-            <Tag color="orange">{summary.pending} pendientes</Tag>
-            <Tag color="volcano">{summary.outOfSync} con cambios locales</Tag>
-            <Tag color="red">{summary.issues} con alertas</Tag>
-          </div>
-        )}
+          <TabsContent value="sales">
+            {activeTab === 'sales' && (
+              <MeliSalesTab
+                status={status}
+                orders={orders}
+                ordersLoading={ordersLoading}
+                orderDateRange={orderDateRange}
+                setOrderDateRange={setOrderDateRange}
+                syncingOrders={syncingOrders}
+                handleSyncOrdersFromMeli={handleSyncOrdersFromMeli}
+              />
+            )}
+          </TabsContent>
 
-        {outOfSyncCount > 0 && (
-          <Paragraph type="warning" className="!mb-3 text-sm">
-            Hay {outOfSyncCount} producto(s) con cambios en la tienda que aún no se reflejan en MeLi.
-            Usa <strong>Actualizar</strong> en cada fila o <strong>Sync pendientes</strong> / <strong>Sincronizar todos</strong>.
-          </Paragraph>
-        )}
+          <TabsContent value="net">
+            {activeTab === 'net' && (
+              <MeliNetReportTab
+                status={status}
+                orders={orders}
+                config={config}
+                loading={ordersLoading}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
 
-                <div className="flex flex-col sm:flex-row gap-4 mb-4 items-center justify-between">
-          <Segmented
-            value={syncFilter}
-            onChange={(v) => setSyncFilter(v as MeliSyncFilter)}
-            options={FILTER_OPTIONS.map((o) => ({
-              value: o.value,
-              label: o.label,
-            }))}
-          />
-          <Input.Search 
-            placeholder="Buscar producto por nombre o ID MeLi" 
-            allowClear 
-            onSearch={setSearchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ maxWidth: 350 }}
-          />
-        </div>
-
-        <Table
-          dataSource={filteredListings}
-          columns={columns}
-          rowKey="productId"
-          size="small"
-          pagination={{ pageSize: 20, showSizeChanger: true, showTotal: (t) => `${t} filas` }}
-          scroll={{ x: 'max-content' }}
-          onRow={(record) => ({
-            onClick: () => router.push(`/admin/products?edit=${record.productId}`),
-            style: { cursor: 'pointer' },
-          })}
-        />
-      </Card>
-
-      <Card
-        title="Últimas Órdenes en Mercado Libre"
-        className="mt-8"
-        extra={
-          <Button
-            icon={<SyncOutlined spin={syncingOrders} />}
-            loading={syncingOrders}
-            disabled={!status?.connected}
-            onClick={handleSyncOrdersFromMeli}
-            size="small"
-          >
-            Importar desde MeLi
-          </Button>
-        }
-      >
-        <div className="mb-4 flex flex-wrap gap-2 items-center">
-          <Text strong>Filtrar por fecha de venta:</Text>
-          <DatePicker.RangePicker
-            format="YYYY-MM-DD"
-            allowClear
-            onChange={(_, dateStrings) => {
-              const [start, end] = dateStrings;
-              if (start && end) {
-                setOrderDateRange([start, end]);
-                return;
-              }
-              setOrderDateRange(null);
-            }}
-          />
-        </div>
-
-        <Table
-          dataSource={filteredOrders}
-          rowKey="meliOrderId"
-          loading={ordersLoading}
-          size="small"
-          pagination={{ pageSize: 10 }}
-          locale={{
-            emptyText: ordersLoading
-              ? 'Cargando...'
-              : orders.length === 0
-              ? 'No hay órdenes de Mercado Libre registradas aún'
-              : 'No hay órdenes en el rango de fechas seleccionado'
-          }}
-          columns={[
-            {
-              title: 'Orden ID',
-              dataIndex: 'meliOrderId',
-              key: 'meliOrderId',
-            },
-            {
-              title: 'Estado',
-              dataIndex: 'status',
-              key: 'status',
-              render: (status: string) => renderOrderStatus(status)
-            },
-            {
-              title: 'Comprador',
-              dataIndex: 'rawPayload',
-              key: 'buyer',
-              render: (payload: MeliOrderRow['rawPayload']) => formatOrderBuyer(payload),
-            },
-            {
-              title: 'Monto',
-              dataIndex: 'rawPayload',
-              key: 'total_amount',
-              render: (payload: { total_amount?: number } | null) => formatCurrency(payload?.total_amount || 0)
-            },
-            {
-              title: 'Producto vendido',
-              dataIndex: 'rawPayload',
-              key: 'products',
-              render: (payload: MeliOrderRow['rawPayload']) => formatOrderProducts(payload),
-            },
-            {
-              title: 'Fecha de venta',
-              key: 'saleDate',
-              render: (_: unknown, order: MeliOrderRow) => formatSaleDate(order),
-            }
-          ]}
-        />
-      </Card>
-
-      <Divider />
-      <Paragraph type="secondary" className="text-xs">
-        Variables: <code>MELI_APP_ID</code>, <code>MELI_SECRET_KEY</code>,{' '}
-        <code>MELI_REDIRECT_URI</code>
-      </Paragraph>
+        <Divider />
+        <Paragraph type="secondary" className="text-xs">
+          Variables: <code>MELI_APP_ID</code>, <code>MELI_SECRET_KEY</code>,{' '}
+          <code>MELI_REDIRECT_URI</code>
+        </Paragraph>
       </div>
-    );
-  }
+    </ConfigProvider>
+  );
+}

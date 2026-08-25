@@ -114,3 +114,88 @@ xt color (footer credit) */
 .dark .skeleton-line {
   background-color: rgb(30 41 59); /* slate-800 */
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Custom Tabs Component Styles
+   Modern, clean tabbed navigation with subtle borders and blue accents.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Tab list container — horizontal navigation rail */
+.tabs-list {
+  /* The border is applied via a pseudo-element so it lives under ALL triggers */
+  position: relative;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: #e5e7eb; /* slate-200 */
+}
+.dark .tabs-list {
+  border-bottom-color: #1e293b; /* slate-800 */
+}
+
+/* Horizontal layout: triggers sit in a flex row */
+.tabs-list--horizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+/* Vertical layout: triggers stack vertically with a side border */
+.tabs-list--vertical {
+  display: flex;
+  flex-direction: column;
+  align-items stretch;
+  gap: 2px;
+  border-bottom: none;
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: #e5e7eb;
+}
+.dark .tabs-list--vertical {
+  border-right-color: #1e293b;
+}
+
+/* Tab trigger base styles */
+.tab-trigger {
+  background: transparent;
+  border: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  position: relative;
+  outline: none;
+}
+
+/* Active indicator — a thin colored bar at the very bottom of the trigger */
+.tab-trigger[data-state="active"]::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #1890ff; /* antd primary blue */
+  border-radius: 3px 3px 0 0;
+  pointer-events: none;
+}
+
+/* Tab content panel */
+.tab-content {
+  /* content is hidden via data-[state=inactive]:hidden */
+  animation-duration: 0.15s;
+  animation-timing-function: ease-out;
+}
+
+/* Fade-in animation for tab content */
+@keyframes tab-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.tab-content[data-state="active"] {
+  animation: tab-fade-in 0.15s ease-out;
+}
