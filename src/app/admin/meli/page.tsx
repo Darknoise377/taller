@@ -26,7 +26,8 @@ import { formatCurrency } from '@/utils/formatCurrency';
 import { previewPrices } from '@/lib/meli/pricing';
 import type { MeliSyncFilter } from '@/lib/meli/listingStatus';
 
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/Tabs';
+import MeliTabBar from './components/MeliTabBar';
+import type { MeliTabId } from './components/MeliTabBar';
 import MeliProductsTab from './components/MeliProductsTab';
 import MeliSalesTab from './components/MeliSalesTab';
 import MeliNetReportTab from './components/MeliNetReportTab';
@@ -66,7 +67,7 @@ export default function AdminMeliPage() {
   const [refreshingStatus, setRefreshingStatus] = useState(false);
   const [syncingRow, setSyncingRow] = useState<string | null>(null);
   const [syncingOrders, setSyncingOrders] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>('products');
+  const [activeTab, setActiveTab] = useState<MeliTabId>('products');
 
   const [form] = Form.useForm<Omit<MeliConfig, 'id' | 'categoryMap'>>();
 
@@ -568,73 +569,62 @@ export default function AdminMeliPage() {
           y sincronización del catálogo con MeLi Colombia (MCO).
         </Paragraph>
 
-        {/* ── Tab Navigation ── */}
-        <Tabs
-          defaultValue="products"
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
-          <TabsList className="border-b border-slate-200 dark:border-slate-800">
-            <TabsTrigger value="products">Productos</TabsTrigger>
-            <TabsTrigger value="sales">Ventas y productos vendidos</TabsTrigger>
-            <TabsTrigger value="net">Vendido vs Liquidado (Neto)</TabsTrigger>
-          </TabsList>
+         {/* ── Tab Navigation ── */}
+        <MeliTabBar
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          variant="tabs"
+        />
 
-          <TabsContent value="products">
-            {activeTab === 'products' && (
-              <MeliProductsTab
-                status={status}
-                config={config}
-                form={form}
-                configLoading={configLoading}
-                handleConnect={handleConnect}
-                handleDisconnect={handleDisconnect}
-                handleSaveConfig={handleSaveConfig}
-                handleRefreshLiveStatus={handleRefreshLiveStatus}
-                refreshingStatus={refreshingStatus}
-                loadStatus={loadStatus}
-                summary={summary}
-                outOfSyncCount={outOfSyncCount}
-                filteredListings={filteredListings}
-                syncFilter={syncFilter}
-                setSyncFilter={setSyncFilter}
-                setSearchTerm={setSearchTerm}
-                columns={columns}
-                syncingAll={syncingAll}
-                syncingPending={syncingPending}
-                runBulkSync={runBulkSync}
-                onListingClick={(productId) =>
-                  router.push(`/admin/products?edit=${productId}`)
-                }
-              />
-            )}
-          </TabsContent>
+        {/* ── Tab Content (only active tab renders) ── */}
+        {activeTab === 'products' && (
+          <MeliProductsTab
+            status={status}
+            config={config}
+            form={form}
+            configLoading={configLoading}
+            handleConnect={handleConnect}
+            handleDisconnect={handleDisconnect}
+            handleSaveConfig={handleSaveConfig}
+            handleRefreshLiveStatus={handleRefreshLiveStatus}
+            refreshingStatus={refreshingStatus}
+            loadStatus={loadStatus}
+            summary={summary}
+            outOfSyncCount={outOfSyncCount}
+            filteredListings={filteredListings}
+            syncFilter={syncFilter}
+            setSyncFilter={setSyncFilter}
+            setSearchTerm={setSearchTerm}
+            columns={columns}
+            syncingAll={syncingAll}
+            syncingPending={syncingPending}
+            runBulkSync={runBulkSync}
+            onListingClick={(productId) =>
+              router.push(`/admin/products?edit=${productId}`)
+            }
+          />
+        )}
 
-          <TabsContent value="sales">
-            {activeTab === 'sales' && (
-              <MeliSalesTab
-                status={status}
-                orders={orders}
-                ordersLoading={ordersLoading}
-                orderDateRange={orderDateRange}
-                setOrderDateRange={setOrderDateRange}
-                syncingOrders={syncingOrders}
-                handleSyncOrdersFromMeli={handleSyncOrdersFromMeli}
-              />
-            )}
-          </TabsContent>
+        {activeTab === 'sales' && (
+          <MeliSalesTab
+            status={status}
+            orders={orders}
+            ordersLoading={ordersLoading}
+            orderDateRange={orderDateRange}
+            setOrderDateRange={setOrderDateRange}
+            syncingOrders={syncingOrders}
+            handleSyncOrdersFromMeli={handleSyncOrdersFromMeli}
+          />
+        )}
 
-          <TabsContent value="net">
-            {activeTab === 'net' && (
-              <MeliNetReportTab
-                status={status}
-                orders={orders}
-                config={config}
-                loading={ordersLoading}
-              />
-            )}
-          </TabsContent>
-        </Tabs>
+        {activeTab === 'net' && (
+          <MeliNetReportTab
+            status={status}
+            orders={orders}
+            config={config}
+            loading={ordersLoading}
+          />
+        )}
 
         <Divider />
         <Paragraph type="secondary" className="text-xs">
