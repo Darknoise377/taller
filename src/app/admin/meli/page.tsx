@@ -573,7 +573,6 @@ export default function AdminMeliPage() {
         <MeliTabBar
           activeTab={activeTab}
           onChange={setActiveTab}
-          variant="tabs"
         />
 
         {/* ── Tab Content (only active tab renders) ── */}
