@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { after, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { processWhatsAppMessage } from '@/lib/whatsapp/processMessage';
 import { processMessengerMessage } from '@/lib/messenger/processMessage';
@@ -49,10 +49,64 @@ export async function GET(request: Request) {
   return new NextResponse('Forbidden', { status: 403 });
 }
 
-// sendWhatsAppText helper removed (unused) to silence ESLint warnings
+async function processMetaEntry(entry: {
+  messaging?: Array<{
+    sender?: { id?: string };
+    message?: { text?: string; is_echo?: boolean };
+  }>;
+  changes?: Array<{
+    field?: string;
+    value?: {
+      item?: string;
+      verb?: string;
+      message?: string;
+      comment_id?: string;
+      from?: { name?: string };
+      messages?: Array<{ from?: string; type?: string; text?: { body?: string } }>;
+      contacts?: Array<{ wa_id?: string }>;
+    };
+  }>;
+}) {
+  for (const messengerEvent of entry.messaging ?? []) {
+    const psid = messengerEvent.sender?.id;
+    const text = messengerEvent.message?.text;
+    const isEcho = messengerEvent.message?.is_echo === true;
+
+    if (psid && text && !isEcho) {
+      console.log('[Messenger] DM from', psid, text.substring(0, 200));
+      await processMessengerMessage(psid, text, messengerEvent);
+    }
+  }
+
+  for (const change of entry.changes ?? []) {
+    if (change.field === 'feed') {
+      const feedValue = change.value;
+      const isNewComment =
+        feedValue?.item === 'comment' && feedValue.verb === 'add' && feedValue.message;
+
+      if (isNewComment && feedValue.comment_id && feedValue.message) {
+        console.log('[FB Comment] from', feedValue.from?.name, '-', feedValue.message.substring(0, 200));
+        await processFbComment(feedValue.comment_id, feedValue.message, feedValue.from?.name);
+      }
+      continue;
+    }
+
+    if (change.field !== 'messages') continue;
+
+    const contact = change.value?.contacts?.[0];
+    for (const message of change.value?.messages ?? []) {
+      const sender = message.from ?? contact?.wa_id;
+      const userText = message.type === 'text' ? message.text?.body : undefined;
+
+      if (userText && sender) {
+        console.log('[WhatsApp] Message from', sender, userText.substring(0, 200));
+        await processWhatsAppMessage(sender, userText, message);
+      }
+    }
+  }
+}
 
 export async function POST(request: Request) {
-  // Always return 200 quickly to avoid repeated retries from Meta.
   try {
     const rawBody = await request.text();
     const signatureHeader = request.headers.get('x-hub-signature-256');
@@ -62,78 +116,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
-    const body = JSON.parse(rawBody);
-    const entry = body?.entry?.[0];
-
-    // ── Messenger DM ───────────────────────────────────────────────────────
-    // Payload: entry.messaging[].{sender.id, message.text}
-    const messengerEvent = entry?.messaging?.[0];
-    if (messengerEvent) {
-      const psid: string | undefined = messengerEvent?.sender?.id;
-      const text: string | undefined = messengerEvent?.message?.text;
-
-      // Ignore echo events (messages sent by the page itself)
-      const isEcho = messengerEvent?.message?.is_echo === true;
-
-      if (psid && text && !isEcho) {
-        console.log('[Messenger] DM from', psid, text.substring(0, 200));
-        await processMessengerMessage(psid, text, messengerEvent);
-      } else {
-        console.log('[Messenger] Non-text or echo event — ignored');
-      }
-
-      return NextResponse.json({ status: 'received' }, { status: 200 });
-    }
-
-    // ── WhatsApp & Facebook feed events (via changes[]) ────────────────────
-    const change = entry?.changes?.[0];
-
-    // ── Facebook post comment ──────────────────────────────────────────────
-    // Payload: change.field === 'feed', change.value.item === 'comment'
-    if (change?.field === 'feed') {
-      const feedValue = change?.value;
-      const isNewComment =
-        feedValue?.item === 'comment' && feedValue?.verb === 'add' && feedValue?.message;
-
-      if (isNewComment) {
-        const commentId: string | undefined = feedValue?.comment_id;
-        const commentText: string | undefined = feedValue?.message;
-        const authorName: string | undefined = feedValue?.from?.name;
-
-        if (commentId && commentText) {
-          console.log('[FB Comment] from', authorName, '—', commentText.substring(0, 200));
-          await processFbComment(commentId, commentText, authorName);
+    const body = JSON.parse(rawBody) as { entry?: Parameters<typeof processMetaEntry>[0][] };
+    after(async () => {
+      for (const entry of body.entry ?? []) {
+        try {
+          await processMetaEntry(entry);
+        } catch (error) {
+          console.error('[Webhook] Error processing entry:', error);
         }
-      } else {
-        console.log('[FB Feed] Non-comment feed event — ignored');
       }
-
-      return NextResponse.json({ status: 'received' }, { status: 200 });
-    }
-
-    // ── WhatsApp Business message ─────────────────────────────────────────
-    // Payload: change.field === 'messages', change.value.messages[]
-    const value = change?.value;
-    const message = value?.messages?.[0];
-    const contact = value?.contacts?.[0];
-
-    if (!message) {
-      // Status update, delivery receipt, read receipt — ignore
-      console.log('[Webhook] Non-message event received — ignored');
-      return NextResponse.json({ status: 'ok' }, { status: 200 });
-    }
-
-    const sender: string | undefined = message.from ?? contact?.wa_id;
-    const userText: string | undefined =
-      message?.type === 'text' ? (message?.text?.body as string | undefined) : undefined;
-
-    if (userText && sender) {
-      console.log('[WhatsApp] Message from', sender, userText.substring(0, 200));
-      await processWhatsAppMessage(sender, userText, message);
-    }
+    });
   } catch (error) {
-    console.error('[Webhook] Error handling POST:', error);
-    // swallow — return 200 so Meta won't retry aggressively
+    console.error('[Webhook] Error accepting POST:', error);
   }
 
   return NextResponse.json({ status: 'received' }, { status: 200 });
