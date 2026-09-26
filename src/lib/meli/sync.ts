@@ -345,12 +345,22 @@ async function resolveCategoryId(product: Product): Promise<string> {
       const carExclusionTerms = [
         'carro', 'camioneta', 'automóvil', 'automovil', 'auto ', 'coche', 'pickup', 'furgon', 'furgón', 'suv',
       ];
-      const isCarCategory = (p: MeliCategoryPrediction) => {
-        const combined = `${p.domain_id || ''} ${p.domain_name || ''} ${p.category_name || ''}`.toLowerCase();
-        return carExclusionTerms.some((t) => combined.includes(t));
+      const isCarCategory = async (p: MeliCategoryPrediction): Promise<boolean> => {
+        const leafText = `${p.domain_id || ''} ${p.domain_name || ''} ${p.category_name || ''}`.toLowerCase();
+        if (carExclusionTerms.some((t) => leafText.includes(t))) return true;
+        // El nombre de la hoja (ej. "Tensores de Cadena") no siempre delata que es de carros;
+        // hay que revisar el árbol completo de categorías (ej. "... > Repuestos Carros y Camionetas > ...")
+        try {
+          const detail = await meliApi.getCategory(p.category_id);
+          const pathText = detail.path_from_root.map((c) => c.name).join(' ').toLowerCase();
+          return carExclusionTerms.some((t) => pathText.includes(t));
+        } catch {
+          return false; // si falla la consulta de la categoría, no bloqueamos la predicción por esto
+        }
       };
 
-      const nonCarPredictions = predictions.filter((p) => !isCarCategory(p));
+      const carFlags = await Promise.all(predictions.map(isCarCategory));
+      const nonCarPredictions = predictions.filter((_, i) => !carFlags[i]);
 
       if (nonCarPredictions.length === 0) {
         throw new Error(
@@ -379,7 +389,9 @@ async function resolveCategoryId(product: Product): Promise<string> {
       console.info(`[meli/sync] Predicted Category: ${finalCategoryId} (Domain: ${validPrediction?.domain_id || nonCarPredictions[0].domain_id})`);
       return finalCategoryId;
     }
-  } catch {
+  } catch (err) {
+    // Preservar el error de "todas las predicciones son de carros" — es información accionable, no un fallo de red
+    if (err instanceof Error && err.message.includes('son de carros/camionetas')) throw err;
     // ignore — caller must configure category map
   }
 

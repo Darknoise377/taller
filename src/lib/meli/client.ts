@@ -107,6 +107,9 @@ export const meliApi = {
   getCategoryAttributes: (categoryId: string) =>
     meliRequest<MeliCategoryAttribute[]>('GET', `/categories/${categoryId}/attributes`),
 
+  getCategory: (categoryId: string) =>
+    meliRequest<MeliCategoryDetail>('GET', `/categories/${categoryId}`),
+
   // ─── Account ───────────────────────────────────────────────────────────────
   getMe: () => meliRequest<MeliUser>('GET', '/users/me'),
 };
@@ -204,6 +207,12 @@ export interface MeliCategoryPrediction {
   domain_name: string;
   category_id: string;
   category_name: string;
+}
+
+export interface MeliCategoryDetail {
+  id: string;
+  name: string;
+  path_from_root: { id: string; name: string }[];
 }
 
 export interface MeliCategoryAttribute {
