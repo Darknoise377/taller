@@ -7,7 +7,7 @@
  * - unpublishProduct: Close the listing on MeLi.
  */
 import { prisma } from '@/lib/prisma';
-import { meliApi, type MeliItemPayload, type MeliCategoryAttribute } from './client';
+import { meliApi, type MeliItemPayload, type MeliCategoryAttribute, type MeliCategoryPrediction } from './client';
 import { mapApiStatusToDb } from './listingStatus';
 import { calculateMeliPrice, getMeliConfig } from './pricing';
 import type { Product } from '@prisma/client';
@@ -340,8 +340,26 @@ async function resolveCategoryId(product: Product): Promise<string> {
     const predictions = await meliApi.predictCategory(enrichedPredictionString);
     
     if (predictions.length > 0) {
+      // Excluir categorías de carros/camionetas: la tienda es 100% de motos y estas caen por error
+      // cuando el nombre del producto es ambiguo (ej. "Tensor de cadena" también existe para carros)
+      const carExclusionTerms = [
+        'carro', 'camioneta', 'automóvil', 'automovil', 'auto ', 'coche', 'pickup', 'furgon', 'furgón', 'suv',
+      ];
+      const isCarCategory = (p: MeliCategoryPrediction) => {
+        const combined = `${p.domain_id || ''} ${p.domain_name || ''} ${p.category_name || ''}`.toLowerCase();
+        return carExclusionTerms.some((t) => combined.includes(t));
+      };
+
+      const nonCarPredictions = predictions.filter((p) => !isCarCategory(p));
+
+      if (nonCarPredictions.length === 0) {
+        throw new Error(
+          `Todas las categorías predichas para "${product.name}" son de carros/camionetas. Configura la categoría manualmente en Ajustes de MeLi.`,
+        );
+      }
+
       // Forzamos que la predicción seleccionada contenga algo de motos o repuestos de vehículos para evitar que caiga en Agro/Electrodomésticos
-      const validPrediction = predictions.find(p => {
+      const validPrediction = nonCarPredictions.find(p => {
         const domainId = (p.domain_id || '').toLowerCase();
         const domainName = (p.domain_name || '').toLowerCase();
         const categoryName = (p.category_name || '').toLowerCase();
@@ -357,8 +375,8 @@ async function resolveCategoryId(product: Product): Promise<string> {
         );
       });
 
-      const finalCategoryId = validPrediction ? validPrediction.category_id : predictions[0].category_id;
-      console.info(`[meli/sync] Predicted Category: ${finalCategoryId} (Domain: ${validPrediction?.domain_id || predictions[0].domain_id})`);
+      const finalCategoryId = validPrediction ? validPrediction.category_id : nonCarPredictions[0].category_id;
+      console.info(`[meli/sync] Predicted Category: ${finalCategoryId} (Domain: ${validPrediction?.domain_id || nonCarPredictions[0].domain_id})`);
       return finalCategoryId;
     }
   } catch {
