@@ -114,7 +114,8 @@ export const meliApi = {
 // ─── Payload / Response types ─────────────────────────────────────────────────
 
 export interface MeliItemPayload {
-  title: string;
+  // Cuenta migrada al modelo User Products: MeLi rechaza "title" y usa "family_name" en su lugar
+  title?: string;
   family_name?: string;
   category_id: string;
   price: number;

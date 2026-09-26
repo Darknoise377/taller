@@ -288,8 +288,7 @@ async function buildPayload(
   const title = sanitizeTitle(product.name);
 
   return {
-    title,
-    // Requerido por MeLi para agrupar publicaciones similares (body.required_fields: family_name)
+    // No enviar "title": la cuenta está en el modelo User Products, que lo rechaza (body.invalid_fields)
     family_name: title,
     category_id: categoryId,
     price: meliPrice,
