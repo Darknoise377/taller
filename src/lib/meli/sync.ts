@@ -285,8 +285,12 @@ async function buildPayload(
 
   const attributes = await buildAttributes(product, categoryId);
 
+  const title = sanitizeTitle(product.name);
+
   return {
-    title: sanitizeTitle(product.name),
+    title,
+    // Requerido por MeLi para agrupar publicaciones similares (body.required_fields: family_name)
+    family_name: title,
     category_id: categoryId,
     price: meliPrice,
     currency_id: 'COP',

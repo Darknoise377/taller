@@ -115,6 +115,7 @@ export const meliApi = {
 
 export interface MeliItemPayload {
   title: string;
+  family_name?: string;
   category_id: string;
   price: number;
   currency_id: string;          // 'COP'

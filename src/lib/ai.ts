@@ -81,7 +81,7 @@ export default async function sendToAI({ userText, systemPrompt, history = [] }:
     })();
 
     const location = process.env.VERTEX_LOCATION ?? 'us-central1';
-    const model = process.env.GENAI_MODEL ?? process.env.GEMINI_MODEL ?? process.env.GOOGLE_GENAI_MODEL ?? 'gemini-3.1-flash-lite';
+    const model = process.env.GENAI_MODEL ?? process.env.GEMINI_MODEL ?? process.env.GOOGLE_GENAI_MODEL ?? 'gemini-2.5-flash';
 
     if (maybeProjectId) {
       const v = await import('./vertex');
@@ -131,7 +131,7 @@ export default async function sendToAI({ userText, systemPrompt, history = [] }:
       const client = new GoogleGenAIConstructor(clientOptions);
       const genClient = client as GenAIClientLike;
 
-      const model = process.env.GEMINI_MODEL ?? process.env.GOOGLE_GENAI_MODEL ?? 'gemini-3.1-flash-lite';
+      const model = process.env.GEMINI_MODEL ?? process.env.GOOGLE_GENAI_MODEL ?? 'gemini-2.5-flash';
       const historyContext = Array.isArray(history) && history.length ? history.map(h => `${h.role}: ${h.content}`).join('\n\n') + '\n\n' : '';
       const content = `${system}\n\n${historyContext}Usuario: ${userText}`;
 
