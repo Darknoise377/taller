@@ -340,58 +340,42 @@ async function resolveCategoryId(product: Product): Promise<string> {
     const predictions = await meliApi.predictCategory(enrichedPredictionString);
     
     if (predictions.length > 0) {
-      // Excluir categorías de carros/camionetas: la tienda es 100% de motos y estas caen por error
-      // cuando el nombre del producto es ambiguo (ej. "Tensor de cadena" también existe para carros)
-      const carExclusionTerms = [
-        'carro', 'camioneta', 'automóvil', 'automovil', 'auto ', 'coche', 'pickup', 'furgon', 'furgón', 'suv',
-      ];
-      const isCarCategory = async (p: MeliCategoryPrediction): Promise<boolean> => {
+      // Estrategia de lista blanca (no negra): en vez de excluir marcas de rubros no-moto una por una
+      // (carros, agro, industrial, náutica...) exigimos que el árbol completo de categorías mencione
+      // explícitamente "moto". Así evitamos publicaciones erróneas en rubros que no anticipamos
+      // (ej. "Repuestos Maquinaria Agrícola > ... > Tensores Poly V").
+      const motoPathTerms = ['moto', 'motocycle', 'motorcycle', 'motociclet'];
+
+      const isMotoCategory = async (p: MeliCategoryPrediction): Promise<boolean> => {
         const leafText = `${p.domain_id || ''} ${p.domain_name || ''} ${p.category_name || ''}`.toLowerCase();
-        if (carExclusionTerms.some((t) => leafText.includes(t))) return true;
-        // El nombre de la hoja (ej. "Tensores de Cadena") no siempre delata que es de carros;
-        // hay que revisar el árbol completo de categorías (ej. "... > Repuestos Carros y Camionetas > ...")
+        if (motoPathTerms.some((t) => leafText.includes(t))) return true;
+        // El nombre de la hoja (ej. "Tensores Poly V") no siempre delata el rubro real;
+        // hay que revisar el árbol completo (ej. "... > Repuestos Maquinaria Agrícola > ...")
         try {
           const detail = await meliApi.getCategory(p.category_id);
           const pathText = detail.path_from_root.map((c) => c.name).join(' ').toLowerCase();
-          return carExclusionTerms.some((t) => pathText.includes(t));
+          return motoPathTerms.some((t) => pathText.includes(t));
         } catch {
-          return false; // si falla la consulta de la categoría, no bloqueamos la predicción por esto
+          return false; // si falla la consulta, no la damos por válida — mejor pedir configuración manual
         }
       };
 
-      const carFlags = await Promise.all(predictions.map(isCarCategory));
-      const nonCarPredictions = predictions.filter((_, i) => !carFlags[i]);
+      const motoFlags = await Promise.all(predictions.map(isMotoCategory));
+      const motoPredictions = predictions.filter((_, i) => motoFlags[i]);
 
-      if (nonCarPredictions.length === 0) {
+      if (motoPredictions.length === 0) {
         throw new Error(
-          `Todas las categorías predichas para "${product.name}" son de carros/camionetas. Configura la categoría manualmente en Ajustes de MeLi.`,
+          `Ninguna categoría predicha para "${product.name}" pertenece al rubro de motos (candidatas: ${predictions.map((p) => p.category_name).join(', ')}). Configura la categoría manualmente en Ajustes de MeLi.`,
         );
       }
 
-      // Forzamos que la predicción seleccionada contenga algo de motos o repuestos de vehículos para evitar que caiga en Agro/Electrodomésticos
-      const validPrediction = nonCarPredictions.find(p => {
-        const domainId = (p.domain_id || '').toLowerCase();
-        const domainName = (p.domain_name || '').toLowerCase();
-        const categoryName = (p.category_name || '').toLowerCase();
-        return (
-          domainId.includes('motocycle') ||
-          domainId.includes('vehicle') ||
-          domainId.includes('motorcycle') ||
-          domainId.includes('moto') ||
-          domainName.includes('moto') ||
-          categoryName.includes('moto') ||
-          categoryName.includes('repuesto') ||
-          categoryName.includes('radiador') // Casos específicos que sabemos que son correctos
-        );
-      });
-
-      const finalCategoryId = validPrediction ? validPrediction.category_id : nonCarPredictions[0].category_id;
-      console.info(`[meli/sync] Predicted Category: ${finalCategoryId} (Domain: ${validPrediction?.domain_id || nonCarPredictions[0].domain_id})`);
+      const finalCategoryId = motoPredictions[0].category_id;
+      console.info(`[meli/sync] Predicted Category: ${finalCategoryId} (Domain: ${motoPredictions[0].domain_id})`);
       return finalCategoryId;
     }
   } catch (err) {
-    // Preservar el error de "todas las predicciones son de carros" — es información accionable, no un fallo de red
-    if (err instanceof Error && err.message.includes('son de carros/camionetas')) throw err;
+    // Preservar el error de categorización — es información accionable, no un fallo de red
+    if (err instanceof Error && err.message.includes('rubro de motos')) throw err;
     // ignore — caller must configure category map
   }
 
