@@ -324,29 +324,6 @@ async function resolveCategoryId(product: Product): Promise<string> {
 
   if (categoryMap[localCat]) return categoryMap[localCat];
 
-  // Mapa predeterminado de categorías de repuestos para motos (MCO - Colombia)
-  // NOTA: Estos IDs pueden no ser correctos. Usa la predicción automática si el mapa no tiene la categoría
-  // IDs reales deben mapearse en /api/meli/config -> categoryMap
-  const DEFAULT_CATEGORY_MAP: Record<string, string> = {
-    // Usar "MCO_MOTO_ACCESSORIES" como fallback general - MeLi lo acepta para varios repuestos
-    refrigeracion: 'MCO_MOTO_ACCESSORIES',
-    motor: 'MCO_MOTO_ACCESSORIES',
-    frenos: 'MCO_MOTO_ACCESSORIES',
-    llantas: 'MCO_MOTO_ACCESSORIES',
-    cilindros: 'MCO_MOTO_ACCESSORIES',
-    aceites_lubricantes: 'MCO_MOTO_ACCESSORIES',
-    filtros: 'MCO_MOTO_ACCESSORIES',
-    baterias: 'MCO_MOTO_ACCESSORIES',
-    transmision: 'MCO_MOTO_ACCESSORIES',
-    kit_arrastre: 'MCO_MOTO_ACCESSORIES',
-    suspension: 'MCO_MOTO_ACCESSORIES',
-    escape: 'MCO_MOTO_ACCESSORIES',
-    electrico: 'MCO_MOTO_ACCESSORIES',
-    iluminacion: 'MCO_MOTO_ACCESSORIES',
-    carenaje: 'MCO_MOTO_ACCESSORIES',
-    accesorios: 'MCO_MOTO_ACCESSORIES',
-  };
-
   // Usar predicción automática siempre que el mapa no tenga la categoría
   console.info(`[meli/sync] No mapping found for ${localCat}, using auto-prediction`);
   
