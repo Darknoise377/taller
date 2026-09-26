@@ -48,6 +48,9 @@ async function resolveAttributesWithAI(
       const units = a.allowed_units?.map((u) => u.name).join(', ');
       return `- ${a.name} (ID: ${a.id}): número con unidad${units ? `, unidades permitidas: ${units}` : ''}, ej. "1 L" o "500 mL"`;
     }
+    if (a.value_type === 'number') {
+      return `- ${a.name} (ID: ${a.id}): SOLO un número entero, sin texto ni rangos (ej. "2020", nunca "2015-2020" ni "Varios")`;
+    }
     return `- ${a.name} (ID: ${a.id}): texto libre, máximo 60 caracteres`;
   }).join('\n');
 
@@ -229,6 +232,8 @@ async function buildAttributes(
     const aiResolved = await resolveAttributesWithAI(product, unresolved);
     console.info(`[meli/sync] AI resolved:`, aiResolved);
     
+    const unresolvedById = new Map(unresolved.map((a) => [a.id, a]));
+
     // No agregar si ya fue resuelto manualmente, y filtrar valores vacíos/inválidos devueltos por IA
     const existingIds = new Set(result.map((a) => a.id));
     for (const attr of aiResolved) {
@@ -237,6 +242,21 @@ async function buildAttributes(
       const lowerVal = attr.value_name.toLowerCase();
       if (lowerVal.includes('no aplica') || lowerVal.includes('n/a') || lowerVal === '-') continue;
       if (existingIds.has(attr.id)) continue;
+
+      // MeLi exige formato numérico estricto para value_type "number" (ej. "Año"): la IA a veces
+      // devuelve texto ("2015-2020", "Varios") que MeLi rechaza con item.attribute.number_invalid_format
+      const meta = unresolvedById.get(attr.id);
+      if (meta?.value_type === 'number') {
+        const yearOrNumberMatch = attr.value_name.match(/\d{4}|\d+/);
+        if (!yearOrNumberMatch) {
+          console.warn(`[meli/sync] Skipping "${attr.id}" — AI value "${attr.value_name}" is not numeric.`);
+          continue;
+        }
+        result.push({ id: attr.id, value_name: yearOrNumberMatch[0] });
+        existingIds.add(attr.id);
+        continue;
+      }
+
       result.push(attr);
       existingIds.add(attr.id);
     }
@@ -316,15 +336,37 @@ async function buildPayload(
   };
 }
 
+const MOTO_PATH_TERMS = ['moto', 'motocycle', 'motorcycle', 'motociclet'];
+
+// Revisa el árbol completo de categorías (no solo la hoja) porque nombres como
+// "Tensores de Cadena" o "Tensores Poly V" no delatan el rubro real (carros, agro, etc.)
+async function categoryPathIsMoto(categoryId: string): Promise<boolean> {
+  try {
+    const detail = await meliApi.getCategory(categoryId);
+    const pathText = detail.path_from_root.map((c) => c.name).join(' ').toLowerCase();
+    return MOTO_PATH_TERMS.some((t) => pathText.includes(t));
+  } catch {
+    return false; // si falla la consulta, no la damos por válida — mejor pedir configuración manual
+  }
+}
+
 // ─── Resolve MeLi category_id for a local product ───────────────────────────
 async function resolveCategoryId(product: Product): Promise<string> {
   const { categoryMap } = await getMeliConfig();
   const localCat = String(product.category).toLowerCase();
 
-  if (categoryMap[localCat]) return categoryMap[localCat];
+  const mappedCategoryId = categoryMap[localCat];
+  if (mappedCategoryId) {
+    // Validar el mapeo manual también: si quedó guardado apuntando a un rubro incorrecto
+    // (carros, agro, etc.), ignorarlo en vez de publicar mal una y otra vez
+    if (await categoryPathIsMoto(mappedCategoryId)) return mappedCategoryId;
+    console.warn(
+      `[meli/sync] El mapeo de categoría para "${localCat}" (${mappedCategoryId}) no pertenece al rubro de motos. Se ignora y se usa predicción automática. Corrige el mapeo en Ajustes > MeLi.`,
+    );
+  }
 
-  // Usar predicción automática siempre que el mapa no tenga la categoría
-  console.info(`[meli/sync] No mapping found for ${localCat}, using auto-prediction`);
+  // Usar predicción automática siempre que el mapa no tenga la categoría (o esté mal configurada)
+  console.info(`[meli/sync] No valid mapping for ${localCat}, using auto-prediction`);
   
   // Auto-predict via MeLi API (best-effort)
   // MEJORA: Enriquecer el string de predicción para evitar malas categorizaciones (ej: Ventilador -> Electrodoméstico)
@@ -344,20 +386,10 @@ async function resolveCategoryId(product: Product): Promise<string> {
       // (carros, agro, industrial, náutica...) exigimos que el árbol completo de categorías mencione
       // explícitamente "moto". Así evitamos publicaciones erróneas en rubros que no anticipamos
       // (ej. "Repuestos Maquinaria Agrícola > ... > Tensores Poly V").
-      const motoPathTerms = ['moto', 'motocycle', 'motorcycle', 'motociclet'];
-
       const isMotoCategory = async (p: MeliCategoryPrediction): Promise<boolean> => {
         const leafText = `${p.domain_id || ''} ${p.domain_name || ''} ${p.category_name || ''}`.toLowerCase();
-        if (motoPathTerms.some((t) => leafText.includes(t))) return true;
-        // El nombre de la hoja (ej. "Tensores Poly V") no siempre delata el rubro real;
-        // hay que revisar el árbol completo (ej. "... > Repuestos Maquinaria Agrícola > ...")
-        try {
-          const detail = await meliApi.getCategory(p.category_id);
-          const pathText = detail.path_from_root.map((c) => c.name).join(' ').toLowerCase();
-          return motoPathTerms.some((t) => pathText.includes(t));
-        } catch {
-          return false; // si falla la consulta, no la damos por válida — mejor pedir configuración manual
-        }
+        if (MOTO_PATH_TERMS.some((t) => leafText.includes(t))) return true;
+        return categoryPathIsMoto(p.category_id);
       };
 
       const motoFlags = await Promise.all(predictions.map(isMotoCategory));
