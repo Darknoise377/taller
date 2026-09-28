@@ -28,7 +28,9 @@ interface NetReportRow {
   grossAmount: number;
   commissionRate: number;
   meliCommission: number;
-  fixedCost: number;
+  isCommissionReal: boolean;
+  shippingCost: number;
+  isShippingReal: boolean;
   extraMargin: number;
   netAmount: number;
   saleDate: string;
@@ -65,10 +67,21 @@ export default function MeliNetReportTab({
 
     return orders.map((order) => {
       const grossAmount = order.rawPayload?.total_amount || 0;
+
+      // Preferir datos REALES que MeLi ya calculó (payments[].marketplace_fee y
+      // shipment.order_cost) en vez de re-estimar con una comisión/costo fijos que
+      // no reflejan lo que realmente se liquida por pedido.
+      const isCommissionReal = order.realCommission != null;
       const commissionRate = MELI_COMMISSION_RATES[selectedListingType] ?? 16.5;
-      const meliCommission = Math.round((grossAmount * commissionRate) / 100);
+      const meliCommission = isCommissionReal
+        ? (order.realCommission as number)
+        : Math.round((grossAmount * commissionRate) / 100);
+
+      const isShippingReal = order.realShippingCost != null;
+      const shippingCost = isShippingReal ? (order.realShippingCost as number) : fixedCost;
+
       const extraMarginAmount = Math.round((grossAmount * extraMargin) / 100);
-      const netAmount = grossAmount - meliCommission - fixedCost - extraMarginAmount;
+      const netAmount = grossAmount - meliCommission - shippingCost - extraMarginAmount;
       const saleDate = new Date(
         order.rawPayload?.date_created ?? order.createdAt,
       ).toLocaleDateString('es-CO');
@@ -80,7 +93,9 @@ export default function MeliNetReportTab({
         grossAmount,
         commissionRate,
         meliCommission,
-        fixedCost,
+        isCommissionReal,
+        shippingCost,
+        isShippingReal,
         extraMargin: extraMarginAmount,
         netAmount,
         saleDate,
@@ -93,14 +108,14 @@ export default function MeliNetReportTab({
       (acc, row) => ({
         grossAmount: acc.grossAmount + row.grossAmount,
         meliCommission: acc.meliCommission + row.meliCommission,
-        fixedCost: acc.fixedCost + row.fixedCost,
+        shippingCost: acc.shippingCost + row.shippingCost,
         extraMargin: acc.extraMargin + row.extraMargin,
         netAmount: acc.netAmount + row.netAmount,
       }),
       {
         grossAmount: 0,
         meliCommission: 0,
-        fixedCost: 0,
+        shippingCost: 0,
         extraMargin: 0,
         netAmount: 0,
       },
@@ -147,12 +162,13 @@ export default function MeliNetReportTab({
         `${formatCurrency(v)} (${row.commissionRate}%)`,
     },
     {
-      title: 'Costo fijo',
-      dataIndex: 'fixedCost',
-      key: 'fixedCost',
+      title: 'Envío',
+      dataIndex: 'shippingCost',
+      key: 'shippingCost',
       width: 120,
       align: 'right',
-      render: (v: number) => formatCurrency(v),
+      render: (v: number, row: NetReportRow) =>
+        `${formatCurrency(v)}${row.isShippingReal ? '' : ' (fijo)'}`,
     },
     {
       title: 'Margen extra',
@@ -217,8 +233,8 @@ export default function MeliNetReportTab({
         <Col xs={24} sm={12} md={6}>
           <Card size="small" style={{ borderRadius: 10, background: '#fff7e6', border: '1px solid #ffd591' }}>
             <Statistic
-              title="Costos fijos + Margen extra"
-              value={totals.fixedCost + totals.extraMargin}
+              title="Envíos + Margen extra"
+              value={totals.shippingCost + totals.extraMargin}
               prefix="$"
               valueStyle={{ color: '#d46b08', fontWeight: 700 }}
               groupSeparator="."

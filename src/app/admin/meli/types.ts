@@ -71,6 +71,8 @@ export interface MeliOrderRow {
     }>;
   } | null;
   createdAt: string | Date;
+  realCommission?: number | null;
+  realShippingCost?: number | null;
 }
 
 export type MeliTab = 'products' | 'sales' | 'net';

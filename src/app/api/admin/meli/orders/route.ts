@@ -34,8 +34,38 @@ export async function GET() {
         status: true,
         rawPayload: true,
         createdAt: true,
+        realCommission: true,
+        realShippingCost: true,
       },
     });
+
+    // Backfill acotado: para órdenes ya guardadas antes de trackear costos reales,
+    // reprocesarlas (idempotente) para calcular comisión/envío reales.
+    // Se espera (no fire-and-forget) porque en serverless (Vercel) el proceso puede
+    // terminar apenas se responde, matando cualquier promesa en segundo plano.
+    const pending = orders.filter((o) => o.realCommission == null).slice(0, 10);
+    if (pending.length > 0) {
+      await Promise.all(
+        pending.map((o) =>
+          processMeliOrder(o.meliOrderId).catch((err) => {
+            console.warn(`[meli/orders] Backfill de costos reales falló para ${o.meliOrderId}:`, err);
+          }),
+        ),
+      );
+      // Releer solo las filas backfilleadas para devolver los valores frescos
+      const refreshed = await prisma.meliOrder.findMany({
+        where: { meliOrderId: { in: pending.map((o) => o.meliOrderId) } },
+        select: { meliOrderId: true, realCommission: true, realShippingCost: true },
+      });
+      const refreshedMap = new Map(refreshed.map((r) => [r.meliOrderId, r]));
+      for (const o of orders) {
+        const fresh = refreshedMap.get(o.meliOrderId);
+        if (fresh) {
+          o.realCommission = fresh.realCommission;
+          o.realShippingCost = fresh.realShippingCost;
+        }
+      }
+    }
 
     return NextResponse.json({ orders });
   } catch (err) {

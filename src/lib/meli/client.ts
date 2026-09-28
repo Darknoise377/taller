@@ -180,17 +180,29 @@ export interface MeliOrderResponse {
     item: { id: string; title: string };
     quantity: number;
     unit_price: number;
+    sale_fee?: number;          // Real MeLi commission for this line (per unit, same basis as unit_price)
+    listing_type_id?: string;   // Real listing type this item was sold under
+    gross_price?: number;       // Real gross total before discounts, for this line
   }>;
   total_amount: number;
   currency_id: string;
   shipping?: { id: number; status: string };
-  payments?: Array<{ id: number; status: string; payment_method_id: string }>;
+  payments?: Array<{
+    id: number;
+    status: string;
+    payment_method_id: string;
+    marketplace_fee?: number;   // Real total MeLi commission charged for this payment
+    shipping_cost?: number;
+    transaction_amount?: number;
+  }>;
   tags?: string[];
 }
 
 export interface MeliShipmentResponse {
   id: number;
   status: string;
+  order_cost?: number;   // Real shipping cost charged to the seller
+  base_cost?: number;    // Base cost before seller discounts
   tracking_number?: string;
   receiver_address?: {
     city: { name: string };

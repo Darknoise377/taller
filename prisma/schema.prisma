@@ -539,6 +539,10 @@ model MeliOrder {
   rawPayload   Json                 // Full order payload from MeLi API
   status       String               // MeLi order status
   shipmentId   String?
+  /// Real commission MeLi charged (sum of payments[].marketplace_fee, or sale_fee*qty fallback). Null until computed.
+  realCommission   Float?
+  /// Real shipping cost charged to the seller (shipment.order_cost from GET /shipments/{id}). Null until fetched.
+  realShippingCost Float?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

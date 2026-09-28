@@ -669,9 +669,37 @@ export async function unpublishProduct(productId: string): Promise<void> {
 }
 
 // ─── Process a MeLi order: reduce stock, save record (idempotent) ─────────────
+function computeRealCommission(order: import('./client').MeliOrderResponse): number | null {
+  const fromPayments = order.payments
+    ?.map((p) => p.marketplace_fee)
+    .filter((v): v is number => typeof v === 'number')
+    .reduce((sum, v) => sum + v, 0);
+  if (fromPayments !== undefined && fromPayments > 0) return fromPayments;
+
+  // Fallback: sum sale_fee * quantity per line (sale_fee is expressed per unit, like unit_price)
+  const fromItems = order.order_items
+    .filter((oi) => typeof oi.sale_fee === 'number')
+    .reduce((sum, oi) => sum + (oi.sale_fee as number) * oi.quantity, 0);
+  return fromItems > 0 ? fromItems : null;
+}
+
+/** Best-effort: real shipping cost charged to the seller for this order's shipment. */
+async function fetchRealShippingCost(order: import('./client').MeliOrderResponse): Promise<number | null> {
+  if (!order.shipping?.id) return null;
+  try {
+    const shipment = await meliApi.getShipment(String(order.shipping.id));
+    return typeof shipment.order_cost === 'number' ? shipment.order_cost : null;
+  } catch (err) {
+    console.warn(`[meli/order] Failed to fetch shipment cost for order ${order.id}:`, err);
+    return null;
+  }
+}
+
 export async function processMeliOrder(meliOrderId: string): Promise<void> {
   // Fetch order details from MeLi
   const order = await meliApi.getOrder(meliOrderId);
+  const realCommission = computeRealCommission(order);
+  const realShippingCost = await fetchRealShippingCost(order);
 
   const processableStatuses = ['paid', 'payment_required', 'partially_refunded'];
   const isProcessable = (status: string) => processableStatuses.includes(status);
@@ -721,6 +749,8 @@ export async function processMeliOrder(meliOrderId: string): Promise<void> {
         rawPayload: order as unknown as import('@prisma/client').Prisma.InputJsonValue,
         status: order.status,
         shipmentId: order.shipping?.id ? String(order.shipping.id) : null,
+        realCommission,
+        realShippingCost,
       },
     });
     return;
@@ -734,6 +764,8 @@ export async function processMeliOrder(meliOrderId: string): Promise<void> {
         rawPayload: order as unknown as import('@prisma/client').Prisma.InputJsonValue,
         status: order.status,
         shipmentId: order.shipping?.id ? String(order.shipping.id) : null,
+        realCommission,
+        realShippingCost,
       },
     });
     return;
@@ -748,6 +780,8 @@ export async function processMeliOrder(meliOrderId: string): Promise<void> {
       rawPayload: order as unknown as import('@prisma/client').Prisma.InputJsonValue,
       status: order.status,
       shipmentId: order.shipping?.id ? String(order.shipping.id) : null,
+      realCommission,
+      realShippingCost,
     },
   });
 }
