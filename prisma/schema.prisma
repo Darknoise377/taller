@@ -511,6 +511,9 @@ model MeliListing {
   syncedProductStock   Int?       // Snapshot at last successful sync
   meliVisitsTotal      Int?       // Cached visits (last 30d) from MeLi API
   meliVisitsCheckedAt  DateTime?
+  meliCategoryId    String?     // MeLi category_id the item was published under (e.g. "MCO438303")
+  meliCategoryName  String?     // Leaf category name (e.g. "Tensores de Cadena")
+  meliCategoryPath  String?     // Full breadcrumb (e.g. "Accesorios para Vehículos > ... > Tensores de Cadena")
   lastSyncAt DateTime @default(now())
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

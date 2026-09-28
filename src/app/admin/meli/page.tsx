@@ -339,6 +339,39 @@ export default function AdminMeliPage() {
         ),
       },
       {
+        title: 'Categoría MeLi',
+        key: 'meliCategory',
+        width: 190,
+        render: (_: unknown, row) => {
+          if (!row.meliItemId) return <Text type="secondary">—</Text>;
+          if (!row.meliCategoryName) {
+            return (
+              <Tooltip title="Pulsa «Actualizar estados» para consultar la categoría en MeLi">
+                <Text type="secondary" className="text-xs">
+                  Sin datos
+                </Text>
+              </Tooltip>
+            );
+          }
+          return (
+            <Tooltip title={row.meliCategoryPath ?? row.meliCategoryName}>
+              <Text
+                className="text-xs"
+                style={{
+                  display: 'block',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '170px',
+                }}
+              >
+                {row.meliCategoryName}
+              </Text>
+            </Tooltip>
+          );
+        },
+      },
+      {
         title: 'Precio base',
         dataIndex: 'basePrice',
         key: 'basePrice',

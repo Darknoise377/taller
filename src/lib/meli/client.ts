@@ -67,7 +67,7 @@ export const meliApi = {
   getItemsByIds: (itemIds: string[]) => {
     const ids = itemIds.join(',');
     const attrs =
-      'id,title,status,sub_status,tags,permalink,price,available_quantity,health';
+      'id,title,status,sub_status,tags,permalink,price,available_quantity,health,category_id';
     return meliRequest<MeliMultigetEntry[]>(
       'GET',
       `/items?ids=${ids}&attributes=${attrs}`,
@@ -158,6 +158,7 @@ export interface MeliItemDetail {
   tags?: string[];
   permalink?: string;
   health?: number | null;
+  category_id?: string;
 }
 
 type MeliMultigetEntry = {

@@ -7,7 +7,7 @@
  * - unpublishProduct: Close the listing on MeLi.
  */
 import { prisma } from '@/lib/prisma';
-import { meliApi, type MeliItemPayload, type MeliCategoryAttribute, type MeliCategoryPrediction } from './client';
+import { meliApi, type MeliItemPayload, type MeliCategoryAttribute } from './client';
 import { mapApiStatusToDb } from './listingStatus';
 import { calculateMeliPrice, getMeliConfig } from './pricing';
 import type { Product } from '@prisma/client';
@@ -118,7 +118,14 @@ async function buildAttributes(
     // Detectar y resolver atributos LINE y GTIN primero (los más problemáticos)
     const isLineAttr = attr.id === LINE || attr.id === 'LINE' || attr.name?.toLowerCase().includes('línea');
     const isGtinAttr = attr.id === GTIN;
-    
+
+    if (attr.id === 'VEHICLE_TYPE' && attr.value_type === 'list' && attr.values) {
+      // La tienda es 100% de motos: si la categoría ofrece una opción de moto/cuatriciclo, usarla siempre
+      const motoValue = attr.values.find((v) => /moto|cuatriciclo|cuatrimoto|atv/i.test(v.name));
+      if (motoValue) result.push({ id: 'VEHICLE_TYPE', value_name: motoValue.name });
+      continue;
+    }
+
     if (isLineAttr) {
       const brand = (product as Product & { brand?: string | null }).brand;
       const lineValue = brand || product.tags?.[0] || 'Genérico';
@@ -336,17 +343,43 @@ async function buildPayload(
   };
 }
 
-const MOTO_PATH_TERMS = ['moto', 'motocycle', 'motorcycle', 'motociclet'];
+const MOTO_TERMS = /moto|cuatriciclo|cuatrimoto|atv/i;
+// Términos de rubros que sabemos NO son motos, para descartar predicciones obviamente erróneas
+// (ej. "Repuestos Maquinaria Agrícola") cuando la categoría no declara VEHICLE_TYPE
+const NON_MOTO_DOMAIN_TERMS = /agr[ií]cola|agro|tractor|marin|n[aá]utic|aeron|industrial/i;
 
-// Revisa el árbol completo de categorías (no solo la hoja) porque nombres como
-// "Tensores de Cadena" o "Tensores Poly V" no delatan el rubro real (carros, agro, etc.)
-async function categoryPathIsMoto(categoryId: string): Promise<boolean> {
+/**
+ * MeLi comparte el mismo árbol de categorías ("Repuestos Carros y Camionetas") entre piezas de
+ * autos y de motos — el nombre del breadcrumb NO indica el rubro real. La fuente de verdad es el
+ * atributo "VEHICLE_TYPE" (o similar) de la categoría: si existe y solo permite valores de auto
+ * (Automóvil, Camioneta, SUV...) sin ninguna opción de moto, la categoría es exclusiva de carros.
+ * Si no existe ese atributo, no podemos afirmar que sea de carros solo por el nombre del breadcrumb.
+ */
+async function categoryAllowsMoto(categoryId: string): Promise<boolean> {
+  try {
+    const attrs = await meliApi.getCategoryAttributes(categoryId);
+    const vehicleTypeAttr = attrs.find(
+      (a) => a.id === 'VEHICLE_TYPE' || a.name?.toLowerCase().includes('tipo de vehículo'),
+    );
+    if (!vehicleTypeAttr?.values?.length) return true; // sin distinción explícita de vehículo, no bloquear
+    return vehicleTypeAttr.values.some((v) => MOTO_TERMS.test(v.name));
+  } catch {
+    return true; // si falla la consulta, no bloqueamos la predicción por esto
+  }
+}
+
+/** Nombre de hoja + breadcrumb legible de una categoría MeLi, para mostrar "dónde quedó publicado" en el admin. */
+async function getCategoryLabel(
+  categoryId: string,
+): Promise<{ name: string | null; path: string | null }> {
   try {
     const detail = await meliApi.getCategory(categoryId);
-    const pathText = detail.path_from_root.map((c) => c.name).join(' ').toLowerCase();
-    return MOTO_PATH_TERMS.some((t) => pathText.includes(t));
+    return {
+      name: detail.name ?? null,
+      path: detail.path_from_root?.map((c) => c.name).join(' > ') ?? null,
+    };
   } catch {
-    return false; // si falla la consulta, no la damos por válida — mejor pedir configuración manual
+    return { name: null, path: null }; // best-effort — no debe bloquear la publicación
   }
 }
 
@@ -357,11 +390,11 @@ async function resolveCategoryId(product: Product): Promise<string> {
 
   const mappedCategoryId = categoryMap[localCat];
   if (mappedCategoryId) {
-    // Validar el mapeo manual también: si quedó guardado apuntando a un rubro incorrecto
-    // (carros, agro, etc.), ignorarlo en vez de publicar mal una y otra vez
-    if (await categoryPathIsMoto(mappedCategoryId)) return mappedCategoryId;
+    // Validar el mapeo manual también: si el atributo VEHICLE_TYPE de esa categoría solo admite
+    // carros (sin opción de moto), ignorarlo en vez de publicar mal una y otra vez
+    if (await categoryAllowsMoto(mappedCategoryId)) return mappedCategoryId;
     console.warn(
-      `[meli/sync] El mapeo de categoría para "${localCat}" (${mappedCategoryId}) no pertenece al rubro de motos. Se ignora y se usa predicción automática. Corrige el mapeo en Ajustes > MeLi.`,
+      `[meli/sync] El mapeo de categoría para "${localCat}" (${mappedCategoryId}) es exclusivo de carros (VEHICLE_TYPE sin opción moto). Se ignora y se usa predicción automática. Corrige el mapeo en Ajustes > MeLi.`,
     );
   }
 
@@ -382,22 +415,25 @@ async function resolveCategoryId(product: Product): Promise<string> {
     const predictions = await meliApi.predictCategory(enrichedPredictionString);
     
     if (predictions.length > 0) {
-      // Estrategia de lista blanca (no negra): en vez de excluir marcas de rubros no-moto una por una
-      // (carros, agro, industrial, náutica...) exigimos que el árbol completo de categorías mencione
-      // explícitamente "moto". Así evitamos publicaciones erróneas en rubros que no anticipamos
-      // (ej. "Repuestos Maquinaria Agrícola > ... > Tensores Poly V").
-      const isMotoCategory = async (p: MeliCategoryPrediction): Promise<boolean> => {
-        const leafText = `${p.domain_id || ''} ${p.domain_name || ''} ${p.category_name || ''}`.toLowerCase();
-        if (MOTO_PATH_TERMS.some((t) => leafText.includes(t))) return true;
-        return categoryPathIsMoto(p.category_id);
-      };
+      // 1) Descartar rubros obviamente ajenos (agro, náutica, industrial...) por nombre de dominio/categoría
+      const domainCandidates = predictions.filter((p) => {
+        const leafText = `${p.domain_id || ''} ${p.domain_name || ''} ${p.category_name || ''}`;
+        return !NON_MOTO_DOMAIN_TERMS.test(leafText);
+      });
 
-      const motoFlags = await Promise.all(predictions.map(isMotoCategory));
-      const motoPredictions = predictions.filter((_, i) => motoFlags[i]);
+      if (domainCandidates.length === 0) {
+        throw new Error(
+          `Ninguna categoría predicha para "${product.name}" pertenece al rubro de motos (candidatas: ${predictions.map((p) => p.category_name).join(', ')}). Configura la categoría manualmente en Ajustes de MeLi.`,
+        );
+      }
+
+      // 2) Entre las candidatas plausibles, verificar contra la fuente de verdad: el atributo VEHICLE_TYPE
+      const motoFlags = await Promise.all(domainCandidates.map((p) => categoryAllowsMoto(p.category_id)));
+      const motoPredictions = domainCandidates.filter((_, i) => motoFlags[i]);
 
       if (motoPredictions.length === 0) {
         throw new Error(
-          `Ninguna categoría predicha para "${product.name}" pertenece al rubro de motos (candidatas: ${predictions.map((p) => p.category_name).join(', ')}). Configura la categoría manualmente en Ajustes de MeLi.`,
+          `Todas las categorías predichas para "${product.name}" son exclusivas de carros (VEHICLE_TYPE sin opción moto). Configura la categoría manualmente en Ajustes de MeLi.`,
         );
       }
 
@@ -408,6 +444,7 @@ async function resolveCategoryId(product: Product): Promise<string> {
   } catch (err) {
     // Preservar el error de categorización — es información accionable, no un fallo de red
     if (err instanceof Error && err.message.includes('rubro de motos')) throw err;
+    if (err instanceof Error && err.message.includes('exclusivas de carros')) throw err;
     // ignore — caller must configure category map
   }
 
@@ -432,6 +469,7 @@ export async function publishProduct(productId: string): Promise<{ meliItemId: s
   const { _meliPrice: meliPrice, ...meliPayload } = payload;
 
   const response = await meliApi.createItem(meliPayload as MeliItemPayload);
+  const categoryLabel = await getCategoryLabel(categoryId);
 
   await prisma.meliListing.create({
     data: {
@@ -442,6 +480,9 @@ export async function publishProduct(productId: string): Promise<{ meliItemId: s
       meliPrice,
       syncedProductPrice: product.price,
       syncedProductStock: product.stock,
+      meliCategoryId: categoryId,
+      meliCategoryName: categoryLabel.name,
+      meliCategoryPath: categoryLabel.path,
       lastSyncAt: new Date(),
     },
   });

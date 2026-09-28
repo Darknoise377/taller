@@ -20,6 +20,9 @@ export type AdminMeliListingRow = {
   resyncReasons: string[];
   meliVisitsTotal?: number | null;
   meliVisitsCheckedAt?: string | null;
+  meliCategoryId?: string | null;
+  meliCategoryName?: string | null;
+  meliCategoryPath?: string | null;
 };
 
 function visitsDateRange(days = 30): { from: string; to: string } {
@@ -33,6 +36,7 @@ function visitsDateRange(days = 30): { from: string; to: string } {
 
 async function fetchLiveItemsMap(meliItemIds: string[]) {
   const map = new Map<string, ReturnType<typeof parseMeliLiveStatus>>();
+  const categoryIdMap = new Map<string, string>();
 
   for (let i = 0; i < meliItemIds.length; i += 20) {
     const chunk = meliItemIds.slice(i, i + 20);
@@ -41,6 +45,7 @@ async function fetchLiveItemsMap(meliItemIds: string[]) {
       for (const entry of entries) {
         if (entry.code !== 200 || !entry.body) continue;
         map.set(entry.body.id, parseMeliLiveStatus(entry.body));
+        if (entry.body.category_id) categoryIdMap.set(entry.body.id, entry.body.category_id);
       }
     } catch (err) {
       console.warn('[meli/adminListings] multiget batch failed:', err);
@@ -50,7 +55,7 @@ async function fetchLiveItemsMap(meliItemIds: string[]) {
     }
   }
 
-  return map;
+  return { statusMap: map, categoryIdMap };
 }
 
 async function fetchVisitsMap(meliItemIds: string[]) {
@@ -137,6 +142,9 @@ const products = await prisma.product.findMany({
           meliVisitsTotal: true,
           meliVisitsCheckedAt: true,
           meliPermalink: true,
+          meliCategoryId: true,
+          meliCategoryName: true,
+          meliCategoryPath: true,
         },
       },
     },
@@ -149,12 +157,38 @@ const products = await prisma.product.findMany({
 
   let liveMap = new Map<string, ReturnType<typeof parseMeliLiveStatus>>();
   let visitsMap = new Map<string, number>();
+  let categoryIdMap = new Map<string, string>();
+  const categoryLabelMap = new Map<string, { name: string | null; path: string | null }>();
 
   if (options.refreshLive && meliItemIds.length > 0) {
-    [liveMap, visitsMap] = await Promise.all([
+    const [{ statusMap, categoryIdMap: liveCategoryIdMap }, visits] = await Promise.all([
       fetchLiveItemsMap(meliItemIds),
       fetchVisitsMap(meliItemIds),
     ]);
+    liveMap = statusMap;
+    visitsMap = visits;
+    categoryIdMap = liveCategoryIdMap;
+
+    // Descubrir el breadcrumb solo para category_ids nuevos o distintos a los ya guardados
+    const categoryIdsToLookup = new Set<string>();
+    for (const p of products) {
+      const itemId = p.meliListing?.meliItemId;
+      const liveCategoryId = itemId ? categoryIdMap.get(itemId) : undefined;
+      if (liveCategoryId && liveCategoryId !== p.meliListing?.meliCategoryId) {
+        categoryIdsToLookup.add(liveCategoryId);
+      }
+    }
+    for (const categoryId of categoryIdsToLookup) {
+      try {
+        const detail = await meliApi.getCategory(categoryId);
+        categoryLabelMap.set(categoryId, {
+          name: detail.name ?? null,
+          path: detail.path_from_root?.map((c) => c.name).join(' > ') ?? null,
+        });
+      } catch (err) {
+        console.warn(`[meli/adminListings] category lookup failed for ${categoryId}:`, err);
+      }
+    }
 
     const checkedAt = new Date();
 
@@ -165,6 +199,8 @@ const products = await prisma.product.findMany({
 
         const live = liveMap.get(itemId);
         const visits = visitsMap.get(itemId);
+        const liveCategoryId = categoryIdMap.get(itemId);
+        const categoryLabel = liveCategoryId ? categoryLabelMap.get(liveCategoryId) : undefined;
 
         await prisma.meliListing.update({
           where: { productId: p.id },
@@ -172,6 +208,13 @@ const products = await prisma.product.findMany({
             ...(live ? { status: live.dbStatus } : {}),
             ...(visits !== undefined
               ? { meliVisitsTotal: visits, meliVisitsCheckedAt: checkedAt }
+              : {}),
+            ...(liveCategoryId && liveCategoryId !== p.meliListing.meliCategoryId
+              ? {
+                  meliCategoryId: liveCategoryId,
+                  meliCategoryName: categoryLabel?.name ?? null,
+                  meliCategoryPath: categoryLabel?.path ?? null,
+                }
               : {}),
           },
         });
@@ -253,6 +296,18 @@ const products = await prisma.product.findMany({
         visitsFromRefresh !== undefined
           ? new Date().toISOString()
           : p.meliListing?.meliVisitsCheckedAt?.toISOString() ?? null,
+      meliCategoryId:
+        (meliItemId && categoryIdMap.get(meliItemId)) || p.meliListing?.meliCategoryId || null,
+      meliCategoryName:
+        (meliItemId &&
+          categoryLabelMap.get(categoryIdMap.get(meliItemId) ?? '')?.name) ||
+        p.meliListing?.meliCategoryName ||
+        null,
+      meliCategoryPath:
+        (meliItemId &&
+          categoryLabelMap.get(categoryIdMap.get(meliItemId) ?? '')?.path) ||
+        p.meliListing?.meliCategoryPath ||
+        null,
     });
   }
 

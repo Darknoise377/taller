@@ -28,6 +28,9 @@ export interface ListingRow {
   resyncReasons: string[];
   meliVisitsTotal?: number | null;
   meliVisitsCheckedAt?: string | null;
+  meliCategoryId?: string | null;
+  meliCategoryName?: string | null;
+  meliCategoryPath?: string | null;
   live?: {
     statusLabel: string;
     statusDetail: string | null;
