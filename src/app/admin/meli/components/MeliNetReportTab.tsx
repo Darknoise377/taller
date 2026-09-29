@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Card,
   Table,
@@ -12,6 +12,7 @@ import {
   Statistic,
   Row,
   Col,
+  message,
 } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -75,6 +76,86 @@ export default function MeliNetReportTab({
   const [selectedListingType, setSelectedListingType] = React.useState<string>(
     config?.defaultListingType ?? 'gold_special',
   );
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportExcel = async () => {
+    if (reportData.length === 0) {
+      message.warning('No hay datos para exportar.');
+      return;
+    }
+    setIsExporting(true);
+    try {
+      const ExcelJS = (await import('exceljs')).default;
+      const wb = new ExcelJS.Workbook();
+      wb.creator = 'TALLER DE MOTOS A&R Admin';
+      wb.created = new Date();
+      const ws = wb.addWorksheet('Reporte Neto MeLi');
+
+      ws.columns = [
+        { header: 'Orden ID', key: 'meliOrderId', width: 22 },
+        { header: 'Producto', key: 'productName', width: 50 },
+        { header: 'Estado', key: 'status', width: 20 },
+        { header: 'Vendido (Bruto)', key: 'grossAmount', width: 18 },
+        { header: 'Comisión MeLi', key: 'meliCommission', width: 18 },
+        { header: 'Envío', key: 'shippingCost', width: 16 },
+        { header: 'Margen extra', key: 'extraMargin', width: 16 },
+        { header: 'Neto (Liquidado)', key: 'netAmount', width: 18 },
+        { header: 'Fecha venta', key: 'saleDate', width: 16 },
+      ];
+
+      const headerRow = ws.getRow(1);
+      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0A2A66' } };
+      headerRow.alignment = { vertical: 'middle', horizontal: 'center' };
+      headerRow.height = 20;
+
+      reportData.forEach((row) => {
+        ws.addRow({
+          meliOrderId: row.meliOrderId,
+          productName: row.productName,
+          status: row.status,
+          grossAmount: row.grossAmount,
+          meliCommission: row.meliCommission,
+          shippingCost: row.shippingCost,
+          extraMargin: row.extraMargin,
+          netAmount: row.netAmount,
+          saleDate: row.saleDate,
+        });
+      });
+
+      const totalsRow = ws.addRow({
+        meliOrderId: 'TOTAL',
+        productName: '',
+        status: '',
+        grossAmount: totals.grossAmount,
+        meliCommission: totals.meliCommission,
+        shippingCost: totals.shippingCost,
+        extraMargin: totals.extraMargin,
+        netAmount: totals.netAmount,
+        saleDate: '',
+      });
+      totalsRow.font = { bold: true };
+
+      ws.autoFilter = { from: 'A1', to: 'I1' };
+
+      const buffer = await wb.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reporte_neto_meli_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      message.success(`${reportData.length} órdenes exportadas correctamente.`);
+    } catch (err) {
+      console.error('Error exportando reporte neto:', err);
+      message.error('Error al exportar a Excel.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const reportData: NetReportRow[] = useMemo(() => {
     const extraMargin = config?.extraMarginPercent ?? 0;
@@ -297,7 +378,12 @@ export default function MeliNetReportTab({
           </Space>
         }
         extra={
-          <Button icon={<DownloadOutlined />} size="small">
+          <Button
+            icon={<DownloadOutlined />}
+            size="small"
+            loading={isExporting}
+            onClick={handleExportExcel}
+          >
             Exportar
           </Button>
         }
