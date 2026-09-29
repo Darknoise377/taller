@@ -65,7 +65,10 @@ export default function MeliNetReportTab({
     const extraMargin = config?.extraMarginPercent ?? 0;
     const fallbackShippingCost = config?.fixedCostCOP ?? 3500;
 
-    return orders.map((order) => {
+    // Excluir órdenes canceladas: no generan ingresos netos efectivos
+    const activeOrders = orders.filter((o) => o.status !== 'cancelled');
+
+    return activeOrders.map((order) => {
       const grossAmount = order.rawPayload?.total_amount || 0;
 
       // Preferir datos REALES que MeLi ya calculó (payments[].marketplace_fee y
