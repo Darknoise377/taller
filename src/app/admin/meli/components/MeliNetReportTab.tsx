@@ -63,7 +63,7 @@ export default function MeliNetReportTab({
 
   const reportData: NetReportRow[] = useMemo(() => {
     const extraMargin = config?.extraMarginPercent ?? 0;
-    const fixedCost = config?.fixedCostCOP ?? 3500;
+    const fallbackShippingCost = config?.fixedCostCOP ?? 3500;
 
     return orders.map((order) => {
       const grossAmount = order.rawPayload?.total_amount || 0;
@@ -78,7 +78,7 @@ export default function MeliNetReportTab({
         : Math.round((grossAmount * commissionRate) / 100);
 
       const isShippingReal = order.realShippingCost != null;
-      const shippingCost = isShippingReal ? (order.realShippingCost as number) : fixedCost;
+      const shippingCost = isShippingReal ? (order.realShippingCost as number) : fallbackShippingCost;
 
       const extraMarginAmount = Math.round((grossAmount * extraMargin) / 100);
       const netAmount = grossAmount - meliCommission - shippingCost - extraMarginAmount;

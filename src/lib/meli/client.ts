@@ -91,8 +91,11 @@ export const meliApi = {
     ),
 
   // ─── Shipments ─────────────────────────────────────────────────────────────
-  getShipment: (shipmentId: string) =>
+   getShipment: (shipmentId: string) =>
     meliRequest<MeliShipmentResponse>('GET', `/shipments/${shipmentId}`),
+
+  getShipmentCosts: (shipmentId: string) =>
+    meliRequest<MeliShipmentCostsResponse>('GET', `/shipments/${shipmentId}/costs`),
 
   getShipmentLabel: (shipmentId: string) =>
     meliRequest<{ label_url: string }>('GET', `/shipment_labels?shipment_ids=${shipmentId}`),
@@ -201,7 +204,7 @@ export interface MeliOrderResponse {
 export interface MeliShipmentResponse {
   id: number;
   status: string;
-  order_cost?: number;   // Real shipping cost charged to the seller
+  order_cost?: number;   // NOTE: equals the order's total_amount, NOT the shipping cost. Use /shipments/{id}/costs.senders[].cost instead.
   base_cost?: number;    // Base cost before seller discounts
   tracking_number?: string;
   receiver_address?: {
@@ -213,6 +216,28 @@ export interface MeliShipmentResponse {
     receiver_name: string;
     receiver_phone: string;
   };
+}
+
+export interface MeliShipmentCostsResponse {
+  gross_amount?: number;
+  currency_id?: string;
+  base_exchange?: unknown;
+  receiver?: {
+    user_id?: number;
+    cost?: number;
+    compensation?: number;
+    save?: number;
+    cost_details?: unknown[];
+    discounts?: unknown[];
+  };
+  senders?: Array<{
+    user_id?: number;
+    cost?: number;
+    compensation?: number;
+    save?: number;
+    charges?: Record<string, number>;
+    discounts?: unknown[];
+  }>;
 }
 
 export interface MeliCategoryPrediction {

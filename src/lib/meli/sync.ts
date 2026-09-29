@@ -686,9 +686,15 @@ function computeRealCommission(order: import('./client').MeliOrderResponse): num
 /** Best-effort: real shipping cost charged to the seller for this order's shipment. */
 async function fetchRealShippingCost(order: import('./client').MeliOrderResponse): Promise<number | null> {
   if (!order.shipping?.id) return null;
+  const shipmentId = String(order.shipping.id);
   try {
-    const shipment = await meliApi.getShipment(String(order.shipping.id));
-    return typeof shipment.order_cost === 'number' ? shipment.order_cost : null;
+    // /shipments/{id}/costs is authoritative: receiver.cost is what the BUYER paid
+    // (0 = free shipping for the buyer) and senders[0].cost is what the SELLER pays.
+    // Do NOT use /shipments/{id}.order_cost: that field equals the order's total_amount,
+    // not the shipping cost — reading it makes the Envío column show the gross amount.
+    const costs = await meliApi.getShipmentCosts(shipmentId);
+    const sellerCost = costs?.senders?.[0]?.cost;
+    return typeof sellerCost === 'number' ? sellerCost : null;
   } catch (err) {
     console.warn(`[meli/order] Failed to fetch shipment cost for order ${order.id}:`, err);
     return null;

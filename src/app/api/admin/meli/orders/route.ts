@@ -43,7 +43,9 @@ export async function GET() {
     // reprocesarlas (idempotente) para calcular comisión/envío reales.
     // Se espera (no fire-and-forget) porque en serverless (Vercel) el proceso puede
     // terminar apenas se responde, matando cualquier promesa en segundo plano.
-    const pending = orders.filter((o) => o.realCommission == null).slice(0, 10);
+    const pending = orders.filter(
+      (o) => o.realCommission == null || o.realShippingCost == null,
+    ).slice(0, 10);
     if (pending.length > 0) {
       await Promise.all(
         pending.map((o) =>
