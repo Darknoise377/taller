@@ -24,6 +24,7 @@ const { Text } = Typography;
 interface NetReportRow {
   key: string;
   meliOrderId: string;
+  productName: string;
   status: string;
   grossAmount: number;
   commissionRate: number;
@@ -50,6 +51,20 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   partially_refunded: { label: 'Reembolso parcial', color: 'processing' },
   confirmed: { label: 'Confirmada', color: 'processing' },
 };
+
+function formatOrderProducts(payload: NonNullable<MeliOrderRow['rawPayload']> | null | undefined): string {
+  if (!payload?.order_items?.length) return 'Sin detalle de producto';
+
+  return payload.order_items
+    .map((orderItem) => {
+      const title = orderItem?.item?.title?.trim();
+      if (!title) return null;
+      const quantity = orderItem?.quantity ?? 1;
+      return quantity > 1 ? `${title} (x${quantity})` : title;
+    })
+    .filter(Boolean)
+    .join(', ');
+}
 
 export default function MeliNetReportTab({
   status,
@@ -92,6 +107,7 @@ export default function MeliNetReportTab({
       return {
         key: order.meliOrderId,
         meliOrderId: order.meliOrderId,
+        productName: formatOrderProducts(order.rawPayload),
         status: order.status,
         grossAmount,
         commissionRate,
@@ -130,8 +146,13 @@ export default function MeliNetReportTab({
       title: 'Orden',
       dataIndex: 'meliOrderId',
       key: 'meliOrderId',
-      width: 140,
-      render: (id: string) => `#${id.slice(-8)}`,
+      width: 180,
+      render: (id: string, row: NetReportRow) => (
+        <div>
+          <Text strong>#{id.slice(-8)}</Text>
+          <div className="text-xs text-slate-500 mt-0.5">{row.productName}</div>
+        </div>
+      ),
     },
     {
       title: 'Estado',
