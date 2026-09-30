@@ -127,7 +127,7 @@ export default function MeliNetReportTab({
       });
 
       const totalsMarginPercent = totals.grossAmount > 0
-        ? Number((((totals.netAmount / totals.grossAmount) - 1) * 100).toFixed(1))
+        ? Number((totals.netAmount / totals.grossAmount * 100).toFixed(1))
         : 0;
       const totalsRow = ws.addRow({
         meliOrderId: 'TOTAL',
@@ -189,7 +189,7 @@ export default function MeliNetReportTab({
       const extraMarginAmount = Math.round((grossAmount * extraMargin) / 100);
       const netAmount = grossAmount - meliCommission - shippingCost - extraMarginAmount;
       const marginPercent = grossAmount > 0
-        ? Number((((netAmount / grossAmount) - 1) * 100).toFixed(1))
+        ? Number((netAmount / grossAmount * 100).toFixed(1))
         : 0;
       const saleDate = new Date(
         order.rawPayload?.date_created ?? order.createdAt,
