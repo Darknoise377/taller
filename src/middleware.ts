@@ -239,7 +239,7 @@ export async function middleware(req: NextRequest) {
       res.cookies.set(COOKIE_NAME, "", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         maxAge: 0,
       });
@@ -292,7 +292,7 @@ export async function middleware(req: NextRequest) {
       response.cookies.set(COOKIE_NAME, refreshedToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         path: "/",
         maxAge: getJwtCookieMaxAgeSeconds(),
       });
@@ -303,7 +303,7 @@ export async function middleware(req: NextRequest) {
     response.cookies.set(COOKIE_NAME, "", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       path: "/",
       maxAge: 0,
     });
