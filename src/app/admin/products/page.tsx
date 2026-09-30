@@ -734,12 +734,43 @@ return (
     <div className={isIframe ? "" : "p-4 sm:p-6"}>
       {isIframe && (
         <style>{`
+          /* Ocultar el layout original para evitar scroll innecesario o espacios grises */
+          header, aside { display: none !important; }
+          .min-h-screen { min-height: 0 !important; display: block !important; }
+          main { padding: 0 !important; }
+          
+          /* Estilizar el modal para que parezca una página nativa limpia */
           .ant-modal-mask { display: none !important; }
-          .ant-modal-wrap { position: static !important; overflow: auto !important; display: block !important; }
-          .ant-modal { top: 0 !important; margin: 0 !important; max-width: 100% !important; width: 100% !important; padding: 0 !important; }
-          .ant-modal-content { box-shadow: none !important; border-radius: 0 !important; padding: 24px !important; }
+          .ant-modal-wrap { 
+            position: absolute !important; 
+            top: 0 !important; 
+            left: 0 !important; 
+            right: 0 !important; 
+            bottom: 0 !important; 
+            background: #ffffff !important; 
+            z-index: 99999 !important; 
+            overflow-y: auto !important; 
+            display: block !important; 
+          }
+          .ant-modal { 
+            top: 0 !important; 
+            margin: 0 auto !important; 
+            max-width: 900px !important; 
+            width: 100% !important; 
+            padding: 0 !important; 
+          }
+          .ant-modal-content { 
+            box-shadow: none !important; 
+            border-radius: 0 !important; 
+            padding: 24px 32px !important; 
+            background: transparent !important;
+          }
           .ant-modal-header { display: none !important; } 
           .ant-modal-close { display: none !important; } 
+          
+          /* Ocultar scrollbars del iframe padre */
+          ::-webkit-scrollbar { width: 8px; }
+          ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         `}</style>
       )}
 

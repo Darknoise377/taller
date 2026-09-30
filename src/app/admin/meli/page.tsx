@@ -14,11 +14,12 @@ import {
    Modal,
  } from 'antd';
  import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  ExclamationCircleOutlined,
-  SyncOutlined,
-} from '@ant-design/icons';
+   CheckCircleOutlined,
+   CloseCircleOutlined,
+   ExclamationCircleOutlined,
+   SyncOutlined,
+   EditOutlined,
+ } from '@ant-design/icons';
 import 'dayjs/locale/es';
 import esES from 'antd/locale/es_ES';
 import type { ColumnsType } from 'antd/es/table';
@@ -69,6 +70,7 @@ export default function AdminMeliPage() {
   const [syncingOrders, setSyncingOrders] = useState(false);
   const [activeTab, setActiveTab] = useState<MeliTabId>('products');
   const [editProductModalOpen, setEditProductModalOpen] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
   const [editProductId, setEditProductId] = useState<string | null>(null);
 
   const [form] = Form.useForm<Omit<MeliConfig, 'id' | 'categoryMap'>>();
@@ -734,22 +736,50 @@ export default function AdminMeliPage() {
         </Paragraph>
       </div>
       <Modal
-        title="Editar Producto"
+        title={
+          <div className="flex items-center gap-3 py-1">
+            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+              <EditOutlined className="text-blue-600 text-lg" />
+            </div>
+            <div>
+              <div className="text-lg font-bold text-slate-800">Editar Producto</div>
+              <div className="text-xs text-slate-500 font-normal">Actualiza el inventario, precio y detalles técnicos</div>
+            </div>
+          </div>
+        }
         open={editProductModalOpen}
         onCancel={() => {
           setEditProductModalOpen(false);
           setEditProductId(null);
+          setIframeLoaded(false);
         }}
         footer={null}
-        width="min(900px, 95vw)"
-        styles={{ body: { padding: 0, height: '75vh' } }}
+        width="min(950px, 95vw)"
+        styles={{ 
+          body: { padding: 0, height: '78vh', position: 'relative', background: '#f8fafc' },
+          header: { padding: '16px 24px', borderBottom: '1px solid #e2e8f0', margin: 0 }
+        }}
+        closeIcon={<CloseCircleOutlined className="text-xl text-slate-400 hover:text-red-500 transition-colors" />}
         destroyOnClose
       >
+        {!iframeLoaded && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/80 backdrop-blur-sm z-10">
+            <Spin size="large" />
+            <div className="mt-4 text-slate-500 font-medium">Cargando editor de producto...</div>
+          </div>
+        )}
         {editProductId && (
           <iframe
             src={`/admin/products?edit=${editProductId}&iframe=true`}
-            style={{ width: '100%', height: '100%', border: 'none' }}
+            style={{ 
+              width: '100%', 
+              height: '100%', 
+              border: 'none', 
+              opacity: iframeLoaded ? 1 : 0, 
+              transition: 'opacity 0.4s ease-in-out' 
+            }}
             title={`Editar ${editProductId}`}
+            onLoad={() => setIframeLoaded(true)}
           />
         )}
       </Modal>
