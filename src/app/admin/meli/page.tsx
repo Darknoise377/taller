@@ -577,7 +577,23 @@ export default function AdminMeliPage() {
       .finally(() => setLoading(false));
 
     const interval = setInterval(loadStatus, 60_000);
-    return () => clearInterval(interval);
+    
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data?.type === 'PRODUCT_SAVED') {
+        setEditProductModalOpen(false);
+        setEditProductId(null);
+        loadListings(false);
+      } else if (e.data?.type === 'PRODUCT_CANCELLED') {
+        setEditProductModalOpen(false);
+        setEditProductId(null);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('message', handleMessage);
+    };
   }, [loadStatus, loadConfig, loadListings, loadOrders]);
 
   if (loading) {
@@ -680,7 +696,7 @@ export default function AdminMeliPage() {
       >
         {editProductId && (
           <iframe
-            src={`/admin/products?edit=${editProductId}`}
+            src={`/admin/products?edit=${editProductId}&iframe=true`}
             style={{ width: '100%', height: '100%', border: 'none' }}
             title={`Editar ${editProductId}`}
           />

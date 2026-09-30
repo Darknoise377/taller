@@ -303,6 +303,9 @@ useEffect(() => {
 
       setModalOpen(false);
       fetchProducts();
+      if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('iframe') === 'true') {
+        window.parent.postMessage({ type: 'PRODUCT_SAVED' }, '*');
+      }
     } catch (error: unknown) {
       console.error('Error saving product:', error);
       if (!hasErrorFields(error)) {
@@ -723,13 +726,28 @@ useEffect(() => {
       },
     ], [handleDeleteProduct, openModal, fetchProducts]);
 
+  const isIframe = searchParams.get('iframe') === 'true';
+
   // --- Renderizado del Componente ---
 return (
-    <div className="p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <Typography.Title level={2} style={{ margin: 0 }}>
-          Gestión de Productos
-        </Typography.Title>
+    <div className={isIframe ? "" : "p-4 sm:p-6"}>
+      {isIframe && (
+        <style>{`
+          .ant-modal-mask { display: none !important; }
+          .ant-modal-wrap { position: static !important; overflow: auto !important; display: block !important; }
+          .ant-modal { top: 0 !important; margin: 0 !important; max-width: 100% !important; width: 100% !important; padding: 0 !important; }
+          .ant-modal-content { box-shadow: none !important; border-radius: 0 !important; padding: 24px !important; }
+          .ant-modal-header { display: none !important; } 
+          .ant-modal-close { display: none !important; } 
+        `}</style>
+      )}
+
+      {!isIframe && (
+        <>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <Typography.Title level={2} style={{ margin: 0 }}>
+              Gestión de Productos
+            </Typography.Title>
 
         <Space wrap>
           <Button
@@ -834,6 +852,8 @@ return (
         />
       </Spin>
     </Card>
+        </>
+      )}
 
 <Modal
        open={modalOpen}
@@ -843,7 +863,12 @@ return (
            <span>{editingProduct ? 'Editar Producto' : 'Crear Nuevo Producto'}</span>
          </Space>
        }
-       onCancel={() => setModalOpen(false)}
+       onCancel={() => {
+         setModalOpen(false);
+         if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('iframe') === 'true') {
+           window.parent.postMessage({ type: 'PRODUCT_CANCELLED' }, '*');
+         }
+       }}
        onOk={handleSaveProduct}
        confirmLoading={isSaving}
        okText={isSaving ? 'Guardando...' : 'Guardar producto'}
