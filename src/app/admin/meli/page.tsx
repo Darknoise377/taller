@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
 import {
   Form,
   message,
@@ -12,6 +11,7 @@ import {
   Tag,
   Tooltip,
   Button,
+  Modal,
 } from 'antd';
 import {
   CheckCircleOutlined,
@@ -50,7 +50,6 @@ function healthIcon(health?: string) {
 }
 
 export default function AdminMeliPage() {
-  const router = useRouter();
   const [status, setStatus] = useState<MeliStatus | null>(null);
   const [config, setConfig] = useState<MeliConfig | null>(null);
   const [listings, setListings] = useState<ListingRow[]>([]);
@@ -68,6 +67,8 @@ export default function AdminMeliPage() {
   const [syncingRow, setSyncingRow] = useState<string | null>(null);
   const [syncingOrders, setSyncingOrders] = useState(false);
   const [activeTab, setActiveTab] = useState<MeliTabId>('products');
+  const [editProductModalOpen, setEditProductModalOpen] = useState(false);
+  const [editProductId, setEditProductId] = useState<string | null>(null);
 
   const [form] = Form.useForm<Omit<MeliConfig, 'id' | 'categoryMap'>>();
 
@@ -631,9 +632,10 @@ export default function AdminMeliPage() {
             syncingAll={syncingAll}
             syncingPending={syncingPending}
             runBulkSync={runBulkSync}
-            onListingClick={(productId) =>
-              router.push(`/admin/products?edit=${productId}`)
-            }
+            onListingClick={(productId) => {
+              setEditProductId(productId);
+              setEditProductModalOpen(true);
+            }}
           />
         )}
 
@@ -664,6 +666,26 @@ export default function AdminMeliPage() {
           <code>MELI_REDIRECT_URI</code>
         </Paragraph>
       </div>
+      <Modal
+        title="Editar Producto"
+        open={editProductModalOpen}
+        onCancel={() => {
+          setEditProductModalOpen(false);
+          setEditProductId(null);
+        }}
+        footer={null}
+        width="min(900px, 95vw)"
+        styles={{ body: { padding: 0, height: '75vh' } }}
+        destroyOnClose
+      >
+        {editProductId && (
+          <iframe
+            src={`/admin/products?edit=${editProductId}`}
+            style={{ width: '100%', height: '100%', border: 'none' }}
+            title={`Editar ${editProductId}`}
+          />
+        )}
+      </Modal>
     </ConfigProvider>
   );
 }
