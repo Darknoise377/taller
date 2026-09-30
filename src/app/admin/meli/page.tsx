@@ -9,11 +9,11 @@ import {
   ConfigProvider,
   Divider,
   Tag,
-  Tooltip,
-  Button,
-  Modal,
-} from 'antd';
-import {
+   Tooltip,
+   Button,
+   Modal,
+ } from 'antd';
+ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   ExclamationCircleOutlined,
@@ -23,7 +23,7 @@ import 'dayjs/locale/es';
 import esES from 'antd/locale/es_ES';
 import type { ColumnsType } from 'antd/es/table';
 import { formatCurrency } from '@/utils/formatCurrency';
-import { previewPrices } from '@/lib/meli/pricing';
+import { previewPrices, MELI_COMMISSION_RATES } from '@/lib/meli/pricing';
 import type { MeliSyncFilter } from '@/lib/meli/listingStatus';
 
 import MeliTabBar from './components/MeliTabBar';
@@ -31,6 +31,7 @@ import type { MeliTabId } from './components/MeliTabBar';
 import MeliProductsTab from './components/MeliProductsTab';
 import MeliSalesTab from './components/MeliSalesTab';
 import MeliNetReportTab from './components/MeliNetReportTab';
+import MeliConfigTab from './components/MeliConfigTab';
 
 import type {
   MeliStatus,
@@ -317,7 +318,7 @@ export default function AdminMeliPage() {
                     <a
                       href={
                         row.live?.permalink ??
-                        `https://articulo.mercadolibre.com.co/${row.meliItemId}`
+                        `https://articulo.mercadolibre.com.co/${row.meliItemId?.replace(/^([A-Z]{3})(\d+)/, '$1-$2')}`
                       }
                       target="_blank"
                       rel="noopener noreferrer"
@@ -412,6 +413,50 @@ export default function AdminMeliPage() {
         },
         align: 'right',
         width: 110,
+      },
+      {
+        title: 'Margen Est.',
+        key: 'profit',
+        align: 'right',
+        width: 130,
+        render: (_: unknown, row) => {
+          if (!config) return <Text type="secondary">—</Text>;
+          let price = row.live?.livePrice || row.meliPrice;
+          if (!price) {
+            price = previewPrices(
+              [{ productPrice: row.basePrice, listingType: config.defaultListingType }],
+              config.extraMarginPercent,
+              config.fixedCostCOP,
+              config.defaultListingType,
+            )[0].meliPrice;
+          }
+
+          const comissionRate = MELI_COMMISSION_RATES[config.defaultListingType as keyof typeof MELI_COMMISSION_RATES] || 0;
+          const comission = Math.round(price * (comissionRate / 100));
+          const net = price - comission - config.fixedCostCOP;
+          const profit = net - row.basePrice;
+
+          return (
+            <Tooltip
+              title={
+                <div className="text-xs min-w-[150px]">
+                  <div className="flex justify-between"><span>Venta:</span> <span>{formatCurrency(price)}</span></div>
+                  <div className="flex justify-between text-red-300"><span>Comisión ({comissionRate}%):</span> <span>-{formatCurrency(comission)}</span></div>
+                  <div className="flex justify-between text-red-300"><span>Costo fijo:</span> <span>-{formatCurrency(config.fixedCostCOP)}</span></div>
+                  <Divider style={{ margin: '4px 0', borderColor: '#475569' }} />
+                  <div className="flex justify-between text-blue-300"><span>Liquidación:</span> <span>{formatCurrency(net)}</span></div>
+                  <div className="flex justify-between text-slate-300"><span>Costo Base:</span> <span>-{formatCurrency(row.basePrice)}</span></div>
+                  <Divider style={{ margin: '4px 0', borderColor: '#475569' }} />
+                  <div className="flex justify-between text-green-300 font-bold"><span>Ganancia:</span> <span>{formatCurrency(profit)}</span></div>
+                </div>
+              }
+            >
+              <Tag className={profit >= 0 ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'} style={{ margin: 0 }}>
+                {formatCurrency(profit)}
+              </Tag>
+            </Tooltip>
+          );
+        }
       },
       {
         title: 'Sync',
@@ -629,15 +674,8 @@ export default function AdminMeliPage() {
         {activeTab === 'products' && (
           <MeliProductsTab
             status={status}
-            config={config}
-            form={form}
-            configLoading={configLoading}
-            handleConnect={handleConnect}
-            handleDisconnect={handleDisconnect}
-            handleSaveConfig={handleSaveConfig}
             handleRefreshLiveStatus={handleRefreshLiveStatus}
             refreshingStatus={refreshingStatus}
-            loadStatus={loadStatus}
             summary={summary}
             outOfSyncCount={outOfSyncCount}
             filteredListings={filteredListings}
@@ -673,6 +711,19 @@ export default function AdminMeliPage() {
             orders={orders}
             config={config}
             loading={ordersLoading}
+          />
+        )}
+
+        {activeTab === 'config' && (
+          <MeliConfigTab
+            status={status}
+            config={config}
+            form={form}
+            configLoading={configLoading}
+            handleConnect={handleConnect}
+            handleDisconnect={handleDisconnect}
+            handleSaveConfig={handleSaveConfig}
+            loadStatus={loadStatus}
           />
         )}
 

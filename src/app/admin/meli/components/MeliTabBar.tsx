@@ -3,7 +3,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-export type MeliTabId = 'products' | 'sales' | 'net';
+export type MeliTabId = 'products' | 'sales' | 'net' | 'config';
 
 export interface MeliTabItem {
   id: MeliTabId;
@@ -21,6 +21,7 @@ const MELI_TABS: MeliTabItem[] = [
   { id: 'products', label: 'Productos' },
   { id: 'sales', label: 'Ventas y productos vendidos' },
   { id: 'net', label: 'Vendido vs Liquidado (Neto)' },
+  { id: 'config', label: 'Configuración de Precios' },
 ];
 
 export const MELI_TAB_ITEMS = MELI_TABS;

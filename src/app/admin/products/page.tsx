@@ -645,7 +645,7 @@ useEffect(() => {
         responsive: ['md'],
         render: (_, record) => {
           const hasMelItem = record.meliItemId && record.meliItemId.trim() !== '';
-          const meliUrl = record.meliPermalink || (hasMelItem ? `https://articulo.mercadolibre.com.co/${record.meliItemId}` : null);
+          const meliUrl = record.meliPermalink || (hasMelItem ? `https://articulo.mercadolibre.com.co/${record.meliItemId?.replace(/^([A-Z]{3})(\d+)/, '$1-$2')}` : null);
           
           return (
             <Space size="small">

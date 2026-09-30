@@ -4,38 +4,29 @@ import React from 'react';
 import {
   Button,
   Card,
-  Form,
-  InputNumber,
-  Popconfirm,
   Row,
   Col,
-  Select,
   Table,
-  Tag,
   Typography,
   Input,
   Segmented,
 } from 'antd';
-import type { FormInstance } from 'antd';
 import {
   ApiOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
-  DisconnectOutlined,
   ReloadOutlined,
   SyncOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
-import { MELI_COMMISSION_RATES } from '@/lib/meli/pricing';
 import type { MeliSyncFilter } from '@/lib/meli/listingStatus';
 import type {
   MeliStatus,
-  MeliConfig,
   ListingRow,
   ListingsSummary,
 } from '../types';
 
-const { Text, Paragraph } = Typography;
+const { Paragraph } = Typography;
 
 const FILTER_OPTIONS: { value: MeliSyncFilter; label: string }[] = [
   { value: 'all', label: 'Todos' },
@@ -47,15 +38,8 @@ const FILTER_OPTIONS: { value: MeliSyncFilter; label: string }[] = [
 
 interface MeliProductsTabProps {
   status: MeliStatus | null;
-  config: MeliConfig | null;
-  form: FormInstance;
-  configLoading: boolean;
-  handleConnect: () => void;
-  handleDisconnect: () => void;
-  handleSaveConfig: () => Promise<void>;
   handleRefreshLiveStatus: () => Promise<void>;
   refreshingStatus: boolean;
-  loadStatus: () => Promise<void>;
   summary: ListingsSummary | null;
   outOfSyncCount: number;
   filteredListings: ListingRow[];
@@ -71,15 +55,8 @@ interface MeliProductsTabProps {
 
 export default function MeliProductsTab({
   status,
-  config,
-  form,
-  configLoading,
-  handleConnect,
-  handleDisconnect,
-  handleSaveConfig,
   handleRefreshLiveStatus,
   refreshingStatus,
-  loadStatus,
   summary,
   outOfSyncCount,
   filteredListings,
@@ -94,123 +71,58 @@ export default function MeliProductsTab({
 }: MeliProductsTabProps) {
   return (
     <div className="space-y-6">
-      {/* ── Connection Status ── */}
-      <Card
-        title={
-          <span className="flex items-center gap-2">
-            <ApiOutlined />
-            Conexión con Mercado Libre
-          </span>
-        }
-      >
-        {status?.connected ? (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex items-center gap-2 text-green-600">
-              <CheckCircleOutlined />
-              <Text strong>Conectado</Text>
-            </div>
-            <div>
-              {status.nickname && (
-                <Text>
-                  Cuenta: <strong>{status.nickname}</strong>
-                </Text>
-              )}
-              {status.expiresAt && (
-                <Text type="secondary" className="ml-3 text-xs">
-                  Token expira: {new Date(status.expiresAt).toLocaleString('es-CO')}
-                </Text>
-              )}
-            </div>
-            <div className="ml-auto flex gap-2">
-              <Button icon={<ReloadOutlined />} onClick={loadStatus}>Verificar</Button>
-              <Popconfirm
-                title="¿Desconectar cuenta de MeLi?"
-                description="Se eliminarán los tokens guardados."
-                onConfirm={handleDisconnect}
-                okText="Sí, desconectar"
-                cancelText="Cancelar"
-              >
-                <Button danger icon={<DisconnectOutlined />}>Desconectar</Button>
-              </Popconfirm>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex items-center gap-2 text-red-500">
-              <CloseCircleOutlined />
-              <Text type="danger">No conectado</Text>
-            </div>
-            <Text type="secondary">
-              Conecta tu cuenta para sincronizar productos con MeLi Colombia.
-            </Text>
-            <Button
-              type="primary"
-              className="ml-auto"
-              icon={<ApiOutlined />}
-              onClick={handleConnect}
-            >
-              Conectar con Mercado Libre
-            </Button>
-          </div>
-        )}
-      </Card>
-
-      {/* ── Configuración de precios y publicación ── */}
-      <Card title="Configuración de precios y publicación">
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{
-            extraMarginPercent: config?.extraMarginPercent ?? 0,
-            fixedCostCOP: config?.fixedCostCOP ?? 3500,
-            defaultListingType: config?.defaultListingType ?? 'gold_special',
-            freeInstallments: config?.freeInstallments ?? 3,
-          }}
-        >
-          <Row gutter={16}>
-            <Col xs={24} sm={6}>
-              <Form.Item name="defaultListingType" label="Tipo de publicación">
-                <Select>
-                  <Select.Option value="gold_special">
-                    Clásica — {MELI_COMMISSION_RATES['gold_special']}%
-                  </Select.Option>
-                  <Select.Option value="gold_premium">
-                    Premium — {MELI_COMMISSION_RATES['gold_premium']}%
-                  </Select.Option>
-                  <Select.Option value="free">
-                    Gratuita — {MELI_COMMISSION_RATES['free']}%
-                  </Select.Option>
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={6}>
-              <Form.Item name="freeInstallments" label="Cuotas sin interés" rules={[{ required: true }]}>
-                <Select>
-                  <Select.Option value={3}>3 cuotas</Select.Option>
-                  <Select.Option value={6}>6 cuotas (Cuotas Extra)</Select.Option>
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={6}>
-              <Form.Item name="extraMarginPercent" label="Margen adicional (%)" rules={[{ required: true }]}>
-                <InputNumber min={0} max={79} step={0.5} suffix="%" className="w-full" />
-              </Form.Item>
-            </Col>
-            <Col xs={24} sm={6}>
-              <Form.Item name="fixedCostCOP" label="Costo fijo (COP)" rules={[{ required: true }]}>
-                <InputNumber min={0} step={500} prefix="$" className="w-full" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Button type="primary" loading={configLoading} onClick={handleSaveConfig}>
-            Guardar configuración
-          </Button>
-        </Form>
-      </Card>
+      {/* ── Estadísticas Premium ── */}
+      {summary && (
+        <Row gutter={[16, 16]}>
+          <Col xs={12} sm={8} lg={4}>
+            <Card size="small" className="shadow-sm border-slate-200">
+              <Typography.Text type="secondary" className="text-xs uppercase font-semibold">Total</Typography.Text>
+              <div className="text-2xl font-bold text-slate-800">{summary.total}</div>
+            </Card>
+          </Col>
+          <Col xs={12} sm={8} lg={5}>
+            <Card size="small" className="shadow-sm border-green-200 bg-green-50/30">
+              <Typography.Text type="secondary" className="text-xs uppercase font-semibold text-green-700">Sincronizados</Typography.Text>
+              <div className="text-2xl font-bold text-green-600 flex items-center gap-2">
+                <CheckCircleOutlined className="text-xl" />
+                {summary.synced}
+              </div>
+            </Card>
+          </Col>
+          <Col xs={12} sm={8} lg={5}>
+            <Card size="small" className="shadow-sm border-orange-200 bg-orange-50/30">
+              <Typography.Text type="secondary" className="text-xs uppercase font-semibold text-orange-700">Pendientes</Typography.Text>
+              <div className="text-2xl font-bold text-orange-600 flex items-center gap-2">
+                <SyncOutlined className="text-xl" />
+                {summary.pending}
+              </div>
+            </Card>
+          </Col>
+          <Col xs={12} sm={12} lg={5}>
+            <Card size="small" className="shadow-sm border-yellow-300 bg-yellow-50/50">
+              <Typography.Text type="secondary" className="text-xs uppercase font-semibold text-yellow-700">Cambios Locales</Typography.Text>
+              <div className="text-2xl font-bold text-yellow-600 flex items-center gap-2">
+                <ApiOutlined className="text-xl" />
+                {summary.outOfSync}
+              </div>
+            </Card>
+          </Col>
+          <Col xs={12} sm={12} lg={5}>
+            <Card size="small" className="shadow-sm border-red-200 bg-red-50/30">
+              <Typography.Text type="secondary" className="text-xs uppercase font-semibold text-red-700">Con Alertas</Typography.Text>
+              <div className="text-2xl font-bold text-red-600 flex items-center gap-2">
+                <CloseCircleOutlined className="text-xl" />
+                {summary.issues}
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      )}
 
       {/* ── Catálogo de productos ── */}
       <Card
-        title="Catálogo de productos"
+        className="shadow-sm border-slate-200"
+        title={<span className="text-lg">Catálogo Sincronizado</span>}
         extra={
           <div className="flex flex-wrap gap-2 justify-end">
             <Button
@@ -218,8 +130,9 @@ export default function MeliProductsTab({
               loading={refreshingStatus}
               disabled={!status?.connected}
               onClick={handleRefreshLiveStatus}
+              className="hidden sm:inline-flex"
             >
-              Actualizar estados
+              Consultar MeLi
             </Button>
             <Button
               icon={<SyncOutlined spin={syncingPending} />}
@@ -235,6 +148,7 @@ export default function MeliProductsTab({
               loading={syncingAll}
               disabled={!status?.connected || syncingPending}
               onClick={() => runBulkSync(false)}
+              className="bg-blue-600 hover:bg-blue-700"
             >
               Sincronizar todos
             </Button>
@@ -242,18 +156,9 @@ export default function MeliProductsTab({
         }
       >
         {!status?.connected && (
-          <Paragraph type="warning" className="!mb-3">
-            Conecta tu cuenta de MeLi para publicar y consultar estados en vivo.
-          </Paragraph>
-        )}
-
-        {summary && (
-          <div className="flex flex-wrap gap-3 mb-4 text-sm">
-            <Tag>{summary.total} productos</Tag>
-            <Tag color="green">{summary.synced} sincronizados</Tag>
-            <Tag color="orange">{summary.pending} pendientes</Tag>
-            <Tag color="volcano">{summary.outOfSync} con cambios locales</Tag>
-            <Tag color="red">{summary.issues} con alertas</Tag>
+          <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg border border-red-100 flex items-center gap-2">
+            <ApiOutlined />
+            <span>Debes configurar y conectar tu cuenta en la pestaña <strong>Configuración de Precios</strong> para sincronizar.</span>
           </div>
         )}
 
