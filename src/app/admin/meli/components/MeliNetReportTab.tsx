@@ -35,6 +35,7 @@ interface NetReportRow {
   isShippingReal: boolean;
   extraMargin: number;
   netAmount: number;
+  marginPercent: number;
   saleDate: string;
 }
 
@@ -100,6 +101,7 @@ export default function MeliNetReportTab({
         { header: 'Envío', key: 'shippingCost', width: 16 },
         { header: 'Margen extra', key: 'extraMargin', width: 16 },
         { header: 'Neto (Liquidado)', key: 'netAmount', width: 18 },
+        { header: 'Margen %', key: 'marginPercent', width: 14 },
         { header: 'Fecha venta', key: 'saleDate', width: 16 },
       ];
 
@@ -119,10 +121,14 @@ export default function MeliNetReportTab({
           shippingCost: row.shippingCost,
           extraMargin: row.extraMargin,
           netAmount: row.netAmount,
+          marginPercent: row.marginPercent,
           saleDate: row.saleDate,
         });
       });
 
+      const totalsMarginPercent = totals.grossAmount > 0
+        ? Number((((totals.netAmount / totals.grossAmount) - 1) * 100).toFixed(1))
+        : 0;
       const totalsRow = ws.addRow({
         meliOrderId: 'TOTAL',
         productName: '',
@@ -132,11 +138,12 @@ export default function MeliNetReportTab({
         shippingCost: totals.shippingCost,
         extraMargin: totals.extraMargin,
         netAmount: totals.netAmount,
+        marginPercent: totalsMarginPercent,
         saleDate: '',
       });
       totalsRow.font = { bold: true };
 
-      ws.autoFilter = { from: 'A1', to: 'I1' };
+      ws.autoFilter = { from: 'A1', to: 'J1' };
 
       const buffer = await wb.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
@@ -181,6 +188,9 @@ export default function MeliNetReportTab({
 
       const extraMarginAmount = Math.round((grossAmount * extraMargin) / 100);
       const netAmount = grossAmount - meliCommission - shippingCost - extraMarginAmount;
+      const marginPercent = grossAmount > 0
+        ? Number((((netAmount / grossAmount) - 1) * 100).toFixed(1))
+        : 0;
       const saleDate = new Date(
         order.rawPayload?.date_created ?? order.createdAt,
       ).toLocaleDateString('es-CO');
@@ -198,6 +208,7 @@ export default function MeliNetReportTab({
         isShippingReal,
         extraMargin: extraMarginAmount,
         netAmount,
+        marginPercent,
         saleDate,
       };
     });
@@ -294,6 +305,17 @@ export default function MeliNetReportTab({
           {formatCurrency(v)}
         </Text>
       ),
+    },
+    {
+      title: 'Margen %',
+      dataIndex: 'marginPercent',
+      key: 'marginPercent',
+      width: 110,
+      align: 'right',
+      render: (v: number) => {
+        const color = v >= 0 ? '#389e0d' : '#cf1322';
+        return <Text style={{ color, fontWeight: 600 }}>{v}%</Text>;
+      },
     },
     {
       title: 'Fecha venta',
