@@ -289,6 +289,63 @@ function sanitizeTitle(raw: string): string {
 }
 
 // ─── Build a MeLi item payload from a local product ─────────────────────────
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function buildMeliDescription(product: Product): { plain_text: string; html: string } {
+  const plainText = product.description?.slice(0, 50000) ?? '';
+
+  const parts: string[] = [];
+
+  // Descripción principal
+  if (plainText) {
+    parts.push(`<p>${escapeHtml(plainText)}</p>`);
+  }
+
+  // Información clave del producto en tabla
+  const rows: { label: string; value: string }[] = [
+    { label: 'Producto', value: product.name },
+  ];
+  if (product.brand) rows.push({ label: 'Marca', value: product.brand });
+  if (product.sku) rows.push({ label: 'SKU', value: product.sku });
+  if (product.diagramNumber) rows.push({ label: 'Número de diagrama', value: product.diagramNumber });
+  if (product.cost) rows.push({ label: 'Costo base', value: `$${Math.round(product.cost)} COP` });
+
+  if (rows.length > 1) {
+    const tableRows = rows.map((r) => `<tr><td style="padding:4px 8px;border:1px solid #ddd;font-weight:bold;width:120px;">${escapeHtml(r.label)}</td><td style="padding:4px 8px;border:1px solid #ddd;">${escapeHtml(r.value)}</td></tr>`).join('');
+    parts.push(`<table style="border-collapse:collapse;margin:10px 0;">${tableRows}</table>`);
+  }
+
+  // Especificaciones técnicas de la categoría
+  if (product.tags && product.tags.length > 0) {
+    parts.push(`<p><strong>Etiquetas:</strong> ${escapeHtml(product.tags.join(', '))}</p>`);
+  }
+  if (product.sizes && product.sizes.length > 0) {
+    parts.push(`<p><strong>Tamaños/Disponibles:</strong> ${escapeHtml(product.sizes.join(', '))}</p>`);
+  }
+  if (product.colors && product.colors.length > 0) {
+    parts.push(`<p><strong>Colores:</strong> ${escapeHtml(product.colors.join(', '))}</p>`);
+  }
+
+  // Garantía y confiabilidad
+  parts.push(
+    '<hr style="border:none;border-top:1px solid #ccc;margin:15px 0;">' +
+    '<p><strong> ✓ Garantía de 90 días en todos nuestros repuestos </strong></p>' +
+    '<p><strong> ✓ Envíos a todo Colombia </strong></p>' +
+    '<p><strong> ✓ Producto verificado y original </strong></p>',
+  );
+
+  return {
+    plain_text: plainText,
+    html: parts.join('\n'),
+  };
+}
+
 async function buildPayload(
   product: Product,
   categoryId: string,
@@ -325,7 +382,7 @@ async function buildPayload(
     condition: 'new',
     listing_type_id: listingType,
     // Evitar null en plain_text
-    description: { plain_text: product.description?.slice(0, 50000) ?? '' },
+    description: buildMeliDescription(product),
     pictures,
     ...(attributes.length > 0 && { attributes }),
     // Garantía estándar para repuestos

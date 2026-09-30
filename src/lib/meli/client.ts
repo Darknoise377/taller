@@ -130,7 +130,7 @@ export interface MeliItemPayload {
   buying_mode: string;          // 'buy_it_now'
   condition: string;            // 'new'
   listing_type_id: string;      // 'gold_special' | 'gold_pro'
-  description?: { plain_text: string };
+  description?: { plain_text?: string; html?: string };
   pictures?: { source: string }[];
   attributes?: { id: string; value_name: string }[];
   sale_terms?: { id: string; value_name: string }[];
