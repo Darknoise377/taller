@@ -558,6 +558,14 @@ export async function updateStockAndPrice(productId: string): Promise<void> {
 
   const { meliPrice } = await calculateMeliPrice(product.price);
 
+  // Actualizar descripción HTML enriquecida en MeLi (PUT /items/{id}/description)
+  try {
+    const desc = buildMeliDescription(product);
+    await meliApi.updateItemDescription(listing.meliItemId, desc);
+  } catch (err) {
+    console.warn(`[meli/sync] No se pudo actualizar descripción para ${listing.meliItemId}:`, err);
+  }
+
   // Verificar estado ANTES de updateItem para incluir reactivación si hace falta
   let currentMeliStatus: string | undefined;
   let shouldReactivate = false;

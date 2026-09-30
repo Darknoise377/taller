@@ -54,6 +54,9 @@ export const meliApi = {
   getItem: (itemId: string) =>
     meliRequest<MeliItemDetail>('GET', `/items/${itemId}`),
 
+  updateItemDescription: (itemId: string, description: { plain_text?: string; html?: string }) =>
+    meliRequest<{ id: string; code: string } | void>('PUT', `/items/${itemId}/description`, description),
+
   /** Total visits per item in a date range (multi-get, up to ~50 ids) */
   getItemsVisits: (itemIds: string[], dateFrom: string, dateTo: string) => {
     const ids = itemIds.join(',');
