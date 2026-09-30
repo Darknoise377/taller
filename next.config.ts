@@ -88,6 +88,31 @@ const nextConfig: NextConfig = {
 
     return [
       {
+        source: '/admin/(.*)',
+        headers: [
+          ...securityHeaders,
+          { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https://res.cloudinary.com https://placehold.co https://picsum.photos https://images.unsplash.com",
+              "media-src 'self' https://res.cloudinary.com",
+              "font-src 'self' data:",
+              "connect-src 'self' https://res.cloudinary.com https://api.cloudinary.com",
+              "frame-src 'self' https://checkout.payulatam.com https://sandbox.checkout.payulatam.com",
+              "frame-ancestors 'self'",
+              "form-action 'self' https://checkout.payulatam.com https://sandbox.checkout.payulatam.com",
+              "base-uri 'self'",
+              "object-src 'none'",
+            ].join('; '),
+          },
+        ],
+      },
+      {
         source: '/(.*)',
         headers: [
           ...securityHeaders,

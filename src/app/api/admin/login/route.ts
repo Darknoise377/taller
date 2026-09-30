@@ -68,8 +68,9 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === "production",
       path: "/",
       maxAge: maxAgeSeconds,
-      // Admin session: preferimos strict para reducir CSRF al mínimo.
-      sameSite: "strict",
+      // Admin session: usar Lax para permitir cookies dentro de iframes
+      // (SameSite=Strict bloquea cookies en contextos de iframe, incluso mismo origen)
+      sameSite: "lax",
     });
 
     // 5️⃣ Devolver respuesta exitosa
