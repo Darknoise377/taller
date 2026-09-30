@@ -56,6 +56,7 @@ export interface ListingsSummary {
 export interface MeliOrderRow {
   meliOrderId: string;
   status: string;
+  basePrice: number;
   rawPayload?: {
     total_amount?: number;
     date_created?: string;

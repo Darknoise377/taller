@@ -28,6 +28,7 @@ interface NetReportRow {
   productName: string;
   status: string;
   grossAmount: number;
+  basePrice: number;
   commissionRate: number;
   meliCommission: number;
   isCommissionReal: boolean;
@@ -96,6 +97,7 @@ export default function MeliNetReportTab({
         { header: 'Orden ID', key: 'meliOrderId', width: 22 },
         { header: 'Producto', key: 'productName', width: 50 },
         { header: 'Estado', key: 'status', width: 20 },
+        { header: 'Precio Base', key: 'basePrice', width: 16 },
         { header: 'Vendido (Bruto)', key: 'grossAmount', width: 18 },
         { header: 'Comisión MeLi', key: 'meliCommission', width: 18 },
         { header: 'Envío', key: 'shippingCost', width: 16 },
@@ -116,6 +118,7 @@ export default function MeliNetReportTab({
           meliOrderId: row.meliOrderId,
           productName: row.productName,
           status: row.status,
+          basePrice: row.basePrice,
           grossAmount: row.grossAmount,
           meliCommission: row.meliCommission,
           shippingCost: row.shippingCost,
@@ -126,13 +129,15 @@ export default function MeliNetReportTab({
         });
       });
 
-      const totalsMarginPercent = totals.grossAmount > 0
-        ? Number((totals.netAmount / totals.grossAmount * 100).toFixed(1))
+      const totalBasePrice = reportData.reduce((sum, row) => sum + row.basePrice, 0);
+      const totalsMarginPercent = totalBasePrice > 0
+        ? Number(((totals.netAmount - totalBasePrice) / totalBasePrice * 100).toFixed(1))
         : 0;
       const totalsRow = ws.addRow({
         meliOrderId: 'TOTAL',
         productName: '',
         status: '',
+        basePrice: totalBasePrice,
         grossAmount: totals.grossAmount,
         meliCommission: totals.meliCommission,
         shippingCost: totals.shippingCost,
@@ -143,7 +148,7 @@ export default function MeliNetReportTab({
       });
       totalsRow.font = { bold: true };
 
-      ws.autoFilter = { from: 'A1', to: 'J1' };
+      ws.autoFilter = { from: 'A1', to: 'K1' };
 
       const buffer = await wb.xlsx.writeBuffer();
       const blob = new Blob([buffer], {
@@ -188,8 +193,9 @@ export default function MeliNetReportTab({
 
       const extraMarginAmount = Math.round((grossAmount * extraMargin) / 100);
       const netAmount = grossAmount - meliCommission - shippingCost - extraMarginAmount;
-      const marginPercent = grossAmount > 0
-        ? Number((netAmount / grossAmount * 100).toFixed(1))
+      const basePrice = order.basePrice || grossAmount;
+      const marginPercent = basePrice > 0
+        ? Number(((netAmount - basePrice) / basePrice * 100).toFixed(1))
         : 0;
       const saleDate = new Date(
         order.rawPayload?.date_created ?? order.createdAt,
@@ -201,6 +207,7 @@ export default function MeliNetReportTab({
         productName: formatOrderProducts(order.rawPayload),
         status: order.status,
         grossAmount,
+        basePrice,
         commissionRate,
         meliCommission,
         isCommissionReal,
@@ -265,6 +272,14 @@ export default function MeliNetReportTab({
       dataIndex: 'grossAmount',
       key: 'grossAmount',
       width: 140,
+      align: 'right',
+      render: (v: number) => formatCurrency(v),
+    },
+    {
+      title: 'Precio Base',
+      dataIndex: 'basePrice',
+      key: 'basePrice',
+      width: 130,
       align: 'right',
       render: (v: number) => formatCurrency(v),
     },

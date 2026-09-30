@@ -24,7 +24,6 @@ export async function GET() {
   }
 
   try {
-    // Obtenemos las últimas 50 órdenes de MeLi ordenadas por creación
     const orders = await prisma.meliOrder.findMany({
       orderBy: { createdAt: 'desc' },
       take: 50,
@@ -39,11 +38,51 @@ export async function GET() {
       },
     });
 
+    // Map meliItemId -> product.basePrice for each order's items
+    const meliItemIds = new Set<string>();
+    for (const o of orders) {
+      const payload = o.rawPayload as Record<string, unknown> | null;
+      const items = payload?.order_items as Array<{ item?: { id?: string } }> | undefined;
+      if (items) {
+        for (const item of items) {
+          if (item?.item?.id) meliItemIds.add(String(item.item.id));
+        }
+      }
+    }
+
+    const basePriceMap = new Map<string, number>();
+    if (meliItemIds.size > 0) {
+      const listings = await prisma.meliListing.findMany({
+        where: { meliItemId: { in: [...meliItemIds] } },
+        select: { meliItemId: true, product: { select: { price: true } } },
+      });
+      for (const l of listings) {
+        basePriceMap.set(l.meliItemId, l.product.price);
+      }
+    }
+
+    // Attach basePrice for each order (taking first item's price if multiple)
+    const ordersWithBasePrice = orders.map((o) => {
+      const payload = o.rawPayload as Record<string, unknown> | null;
+      const items = payload?.order_items as Array<{ item?: { id?: string } }> | undefined;
+      let basePrice = 0;
+      if (items) {
+        for (const item of items) {
+          const price = item?.item?.id ? basePriceMap.get(String(item.item.id)) : undefined;
+          if (price) {
+            basePrice = price;
+            break;
+          }
+        }
+      }
+      return { ...o, basePrice };
+    });
+
     // Backfill acotado: para órdenes ya guardadas antes de trackear costos reales,
     // reprocesarlas (idempotente) para calcular comisión/envío reales.
     // Se espera (no fire-and-forget) porque en serverless (Vercel) el proceso puede
     // terminar apenas se responde, matando cualquier promesa en segundo plano.
-    const pending = orders.filter(
+    const pending = ordersWithBasePrice.filter(
       (o) => o.realCommission == null || o.realShippingCost == null,
     ).slice(0, 10);
     if (pending.length > 0) {
@@ -60,7 +99,7 @@ export async function GET() {
         select: { meliOrderId: true, realCommission: true, realShippingCost: true },
       });
       const refreshedMap = new Map(refreshed.map((r) => [r.meliOrderId, r]));
-      for (const o of orders) {
+      for (const o of ordersWithBasePrice) {
         const fresh = refreshedMap.get(o.meliOrderId);
         if (fresh) {
           o.realCommission = fresh.realCommission;
@@ -69,7 +108,7 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({ orders });
+    return NextResponse.json({ orders: ordersWithBasePrice });
   } catch (err) {
     console.error('[meli/orders]', err);
     return NextResponse.json({ error: 'Error al cargar órdenes' }, { status: 500 });
