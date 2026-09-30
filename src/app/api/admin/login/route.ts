@@ -68,9 +68,9 @@ export async function POST(req: Request) {
       secure: process.env.NODE_ENV === "production",
       path: "/",
       maxAge: maxAgeSeconds,
-      // Admin session: usar Lax para permitir cookies dentro de iframes
-      // (SameSite=Strict bloquea cookies en contextos de iframe, incluso mismo origen)
-      sameSite: "lax",
+      // SameSite=None para permitir cookies dentro de iframes (editor de productos).
+      // Requiere HTTPS en prod (secure=true). En dev (HTTP) usamos Lax como fallback.
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
     // 5️⃣ Devolver respuesta exitosa

@@ -90,7 +90,7 @@ const nextConfig: NextConfig = {
       {
         source: '/admin/(.*)',
         headers: [
-          ...securityHeaders,
+          ...securityHeaders.filter((h) => h.key !== 'X-Frame-Options'),
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           {
