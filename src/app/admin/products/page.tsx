@@ -448,7 +448,8 @@ useEffect(() => {
     const product = products.find((p) => p.id === editId);
     if (product) {
       openModal(product);
-      router.replace('/admin/products');
+      const isIframeParam = searchParams.get('iframe') === 'true';
+      router.replace(isIframeParam ? '/admin/products?iframe=true' : '/admin/products');
     }
   }, [loading, products, searchParams, router, openModal]);
 
