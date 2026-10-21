@@ -25,9 +25,9 @@ import {
   CheckCircle2,
   Store,
   ChevronRight,
-  ShieldCheck,
-  Percent,
   Zap,
+  AlertTriangle,
+  Calculator,
 } from 'lucide-react';
 import { message } from 'antd';
 import type { Product } from '@/types/product';
@@ -281,7 +281,40 @@ export default function ProductFormModal({
     return Math.ceil(totalCost / (1 - calcMargin / 100) / 100) * 100;
   }, [cost, calcMargin, calcAbsorbShipping, calcAbsorbContraentrega, avgShippingRate, contraentregaUnit]);
 
-  // Estimated Gross Margin
+  /** Ratio del envío sobre el precio sugerido, en % */
+  const shippingRatioOfPrice = useMemo(() => {
+    if (!calcAbsorbShipping || suggestedPrice <= 0 || avgShippingRate <= 0) return 0;
+    return Math.round((avgShippingRate / suggestedPrice) * 100);
+  }, [calcAbsorbShipping, suggestedPrice, avgShippingRate]);
+
+  /** Recomendación automática basada en la relación costo/envío */
+  const calcRecommendation = useMemo((): { type: 'ok' | 'warn' | 'danger'; text: string } | null => {
+    if (cost <= 0 || suggestedPrice <= 0) return null;
+    if (!calcAbsorbShipping) return null;
+    if (shippingRatioOfPrice >= 30) {
+      return {
+        type: 'danger',
+        text: `El envío representa el ${shippingRatioOfPrice}% del precio final. Para productos económicos conviene NO absorber el envío — el cliente lo paga al checkout, igual que en MercadoLibre. Desmarca "Absorber flete" para obtener un precio más competitivo.`,
+      };
+    }
+    if (shippingRatioOfPrice >= 20) {
+      return {
+        type: 'warn',
+        text: `El envío representa el ${shippingRatioOfPrice}% del precio. Considera si vale la pena ofrecerlo gratis o cobrar envío por separado para mantener un precio más atractivo en la tarjeta.`,
+      };
+    }
+    return null;
+  }, [calcAbsorbShipping, shippingRatioOfPrice, cost, suggestedPrice]);
+
+  /** Ganancia neta esperada vendiendo al precio sugerido */
+  const estimatedNetProfit = useMemo(() => {
+    if (suggestedPrice <= 0 || cost <= 0) return 0;
+    const shippingCost = calcAbsorbShipping ? avgShippingRate : 0;
+    const contraentregaCost = calcAbsorbContraentrega ? contraentregaUnit : 0;
+    return Math.max(0, suggestedPrice - (cost + shippingCost + contraentregaCost));
+  }, [suggestedPrice, cost, calcAbsorbShipping, calcAbsorbContraentrega, avgShippingRate, contraentregaUnit]);
+
+  // Estimated Gross Margin on Current Price
   const currentMarginAmount = Math.max(0, price - cost);
   const currentMarginPercent = price > 0 ? Math.round((currentMarginAmount / price) * 100) : 0;
 
@@ -554,6 +587,318 @@ export default function ProductFormModal({
       window.parent.postMessage({ type: 'PRODUCT_CANCELLED' }, '*');
     }
   };
+
+  // ══════════════════════════════════════════════════════════════════════════════
+  // RENDER: CALCULADORA INTELIGENTE & AVANZADA DE PRECIOS
+  // ══════════════════════════════════════════════════════════════════════════════
+  const renderPricingCalculator = () => (
+    <div className="mt-3 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-sky-500/40 shadow-2xl space-y-4 text-xs">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 p-0.5 shadow-md shadow-sky-500/20">
+            <div className="w-full h-full rounded-[10px] bg-slate-950 flex items-center justify-center">
+              <Calculator className="w-4 h-4 text-sky-400" />
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h4 className="font-extrabold text-white text-sm">
+                Calculadora Inteligente de Margen & Flete Sugerido
+              </h4>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                PRO INTEL
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              Determina el precio ideal considerando costos reales, flete promedio, recargo contraentrega y rentabilidad neta.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowCalc(false)}
+          className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+          title="Ocultar calculadora"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Row 1: Parameters Inputs */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Costo del producto */}
+        <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-slate-300">
+              Costo del Producto (COP)
+            </label>
+            <span className="text-[10px] text-slate-500">Sin flete</span>
+          </div>
+          <input
+            type="number"
+            min="0"
+            step="1000"
+            value={cost}
+            onChange={(e) => setCost(Number(e.target.value))}
+            className="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:ring-2 focus:ring-sky-500/50"
+            placeholder="Ej: 25000"
+          />
+          <div className="flex items-center gap-1 mt-1.5">
+            <button
+              type="button"
+              onClick={() => setCost((c) => c + 5000)}
+              className="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono"
+            >
+              +$5k
+            </button>
+            <button
+              type="button"
+              onClick={() => setCost((c) => c + 10000)}
+              className="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono"
+            >
+              +$10k
+            </button>
+            <button
+              type="button"
+              onClick={() => setCost((c) => c + 20000)}
+              className="text-[10px] px-2 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono"
+            >
+              +$20k
+            </button>
+          </div>
+        </div>
+
+        {/* Margen deseado */}
+        <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-slate-300">
+              Margen Neto Deseado (%)
+            </label>
+            <span className="text-[10px] font-bold text-sky-400 font-mono">{calcMargin}%</span>
+          </div>
+          <input
+            type="number"
+            min="1"
+            max="99"
+            value={calcMargin}
+            onChange={(e) => setCalcMargin(Math.max(1, Math.min(99, Number(e.target.value))))}
+            className="w-full px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:ring-2 focus:ring-sky-500/50"
+          />
+          <div className="flex items-center gap-1 mt-1.5 flex-wrap">
+            {[20, 25, 30, 35, 40, 50].map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setCalcMargin(m)}
+                className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-bold transition-all ${
+                  calcMargin === m
+                    ? 'bg-sky-500 text-white'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-400'
+                }`}
+              >
+                {m}%
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Contraentrega */}
+        <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+          <div className="flex items-center justify-between mb-1">
+            <label className="text-[11px] font-semibold text-slate-300">
+              % Pedidos Contraentrega
+            </label>
+            <span className="text-[10px] font-bold text-amber-400 font-mono">
+              {calcContraentregaPct}%
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="5"
+            value={calcContraentregaPct}
+            onChange={(e) => setCalcContraentregaPct(Number(e.target.value))}
+            className="w-full accent-sky-500 cursor-pointer mt-1.5"
+          />
+          <span className="text-[10px] text-slate-400 block mt-1">
+            Ponderado:{' '}
+            <strong className="text-amber-300 font-mono">
+              {formatCurrency(contraentregaUnit, 'COP')}
+            </strong>{' '}
+            por venta
+          </span>
+        </div>
+      </div>
+
+      {/* Row 2: Checkboxes de absorción */}
+      <div className="p-3 rounded-xl bg-slate-950/90 border border-slate-800 flex items-center gap-5 flex-wrap">
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={calcAbsorbShipping}
+            onChange={(e) => setCalcAbsorbShipping(e.target.checked)}
+            className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500 bg-slate-900 border-slate-700"
+          />
+          <span className="text-xs text-slate-200">
+            Absorber Envío Nacional
+            <strong className="text-sky-300 font-mono ml-1">
+              ({formatCurrency(avgShippingRate, 'COP')} promedio)
+            </strong>
+          </span>
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={calcAbsorbContraentrega}
+            onChange={(e) => setCalcAbsorbContraentrega(e.target.checked)}
+            className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500 bg-slate-900 border-slate-700"
+          />
+          <span className="text-xs text-slate-200">
+            Absorber Recargo Contraentrega
+            <strong className="text-amber-300 font-mono ml-1">
+              ({formatCurrency(contraentregaUnit, 'COP')} ponderado)
+            </strong>
+          </span>
+        </label>
+      </div>
+
+      {/* Row 3: Alerta de Recomendación Inteligente (calcRecommendation) */}
+      {calcRecommendation && (
+        <div
+          className={`p-3.5 rounded-xl border flex items-start gap-3 text-xs ${
+            calcRecommendation.type === 'danger'
+              ? 'bg-rose-950/50 border-rose-500/50 text-rose-200'
+              : 'bg-amber-950/50 border-amber-500/50 text-amber-200'
+          }`}
+        >
+          <AlertTriangle
+            className={`w-4 h-4 shrink-0 mt-0.5 ${
+              calcRecommendation.type === 'danger' ? 'text-rose-400' : 'text-amber-400'
+            }`}
+          />
+          <div className="flex-1">
+            <span className="font-bold block mb-0.5">
+              {calcRecommendation.type === 'danger'
+                ? '⚠️ Recomendación Crítica de Precios:'
+                : '💡 Sugerencia de Competitividad:'}
+            </span>
+            <p className="leading-relaxed text-[11px]">{calcRecommendation.text}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Row 4: Umbral de Envío Gratis */}
+      {suggestedPrice > 0 && (
+        <div
+          className={`p-2.5 rounded-xl border text-xs flex items-center gap-2 ${
+            suggestedPrice >= shippingConfig.freeShippingThreshold
+              ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-300'
+              : 'bg-slate-950/70 border-slate-800 text-slate-300'
+          }`}
+        >
+          <Truck
+            className={`w-4 h-4 shrink-0 ${
+              suggestedPrice >= shippingConfig.freeShippingThreshold
+                ? 'text-emerald-400'
+                : 'text-slate-400'
+            }`}
+          />
+          {suggestedPrice >= shippingConfig.freeShippingThreshold ? (
+            <span>
+              ✓ A este precio el comprador califica para <strong>Envío Gratis Automático</strong> en
+              la tienda (&ge; {formatCurrency(shippingConfig.freeShippingThreshold, 'COP')}).
+            </span>
+          ) : (
+            <span>
+              ℹ️ Precio bajo el umbral de envío gratis (
+              {formatCurrency(shippingConfig.freeShippingThreshold, 'COP')}) — el comprador paga el
+              flete al checkout.
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Row 5: Desglose Contable */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px]">
+        <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+          <span className="text-slate-500 block">Costo Base:</span>
+          <strong className="text-white font-mono text-xs">
+            {formatCurrency(cost, 'COP')}
+          </strong>
+        </div>
+
+        <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+          <span className="text-slate-500 block">+ Envío:</span>
+          {calcAbsorbShipping ? (
+            <strong className="text-sky-300 font-mono text-xs">
+              +{formatCurrency(avgShippingRate, 'COP')}{' '}
+              {shippingRatioOfPrice > 0 && (
+                <span className="text-[10px] text-slate-400">({shippingRatioOfPrice}%)</span>
+              )}
+            </strong>
+          ) : (
+            <span className="text-emerald-400 font-semibold">Cliente paga</span>
+          )}
+        </div>
+
+        <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+          <span className="text-slate-500 block">+ Contraentrega:</span>
+          {calcAbsorbContraentrega ? (
+            <strong className="text-amber-300 font-mono text-xs">
+              +{formatCurrency(contraentregaUnit, 'COP')}
+            </strong>
+          ) : (
+            <span className="text-emerald-400 font-semibold">Cliente paga</span>
+          )}
+        </div>
+
+        <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+          <span className="text-slate-500 block">Ganancia Neta:</span>
+          <strong className="text-emerald-400 font-mono text-xs">
+            +{formatCurrency(estimatedNetProfit, 'COP')}
+          </strong>
+        </div>
+      </div>
+
+      {/* Row 6: Suggested Price Display & CTA */}
+      <div className="pt-3 border-t border-slate-800 flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <span className="text-[11px] text-slate-400 block font-medium">
+            Precio Mínimo Sugerido:
+          </span>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl sm:text-3xl font-black text-sky-400 font-mono tracking-tight">
+              {suggestedPrice > 0 ? formatCurrency(suggestedPrice, 'COP') : '—'}
+            </span>
+            {suggestedPrice > 0 && (
+              <span className="text-xs text-slate-400 font-semibold">
+                (Margen neto: {calcMargin}%)
+              </span>
+            )}
+          </div>
+        </div>
+
+        {suggestedPrice > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              setPrice(suggestedPrice);
+              setShowCalc(false);
+              message.success(`Precio sugerido aplicado: ${formatCurrency(suggestedPrice, 'COP')} ✨`);
+            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-black text-xs shadow-lg shadow-sky-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Check className="w-4 h-4" />
+            <span>Usar este precio ({formatCurrency(suggestedPrice, 'COP')})</span>
+          </button>
+        )}
+      </div>
+    </div>
+  );
 
   if (!open) return null;
 
@@ -828,8 +1173,24 @@ export default function ProductFormModal({
                   </div>
                 </div>
 
-                {/* 2. Precios & Stock */}
+                {/* 2. Precios & Stock con Acceso Directo a la Calculadora */}
                 <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800/90 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                      <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+                      Precios & Stock
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowCalc(!showCalc)}
+                      className="flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 font-bold bg-sky-500/10 hover:bg-sky-500/20 px-2.5 py-1 rounded-lg border border-sky-500/30 transition-all"
+                    >
+                      <Calculator className="w-3.5 h-3.5 text-sky-400" />
+                      <span>{showCalc ? 'Ocultar Calculadora' : 'Calculadora Inteligente'}</span>
+                    </button>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block text-xs font-semibold text-slate-300 mb-1">
@@ -847,7 +1208,7 @@ export default function ProductFormModal({
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Costo Proveedor (Opcional)
+                        Costo Proveedor (COP)
                       </label>
                       <input
                         type="number"
@@ -904,10 +1265,10 @@ export default function ProductFormModal({
                     </div>
                   </div>
 
-                  {cost > 0 && price > 0 && (
+                  {cost > 0 && price > 0 && !showCalc && (
                     <div className="text-[11px] text-slate-400 flex items-center justify-between pt-1">
                       <span>
-                        Ganancia estimada:{' '}
+                        Ganancia bruta actual:{' '}
                         <strong className="text-emerald-400 font-mono">
                           {formatCurrency(currentMarginAmount, 'COP')}
                         </strong>
@@ -917,6 +1278,9 @@ export default function ProductFormModal({
                       </span>
                     </div>
                   )}
+
+                  {/* Render de la Calculadora Inteligente en Vista Esencial */}
+                  {showCalc && renderPricingCalculator()}
                 </div>
 
                 {/* 3. Fotos del Producto */}
@@ -1004,9 +1368,9 @@ export default function ProductFormModal({
                       className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 text-[11px] font-semibold transition-all disabled:opacity-50"
                     >
                       {isGeneratingDesc ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
-                        <Wand2 className="w-3 h-3" />
+                        <Wand2 className="w-3.5 h-3.5" />
                       )}
                       <span>{isGeneratingDesc ? 'Redactando...' : '✨ Redactar con IA'}</span>
                     </button>
@@ -1076,18 +1440,6 @@ export default function ProductFormModal({
                       </span>
                     </label>
                   </div>
-                </div>
-
-                {/* Subtitle helper to switch to Pro */}
-                <div className="text-center pt-1">
-                  <button
-                    type="button"
-                    onClick={() => handleModeChange('pro')}
-                    className="text-[11px] text-slate-500 hover:text-sky-400 transition-colors inline-flex items-center gap-1"
-                  >
-                    <span>¿Necesitas subir video MP4 o calcular fletes automáticos?</span>
-                    <strong className="text-sky-400 underline">Abrir Modo Pro</strong>
-                  </button>
                 </div>
               </div>
             )}
@@ -1324,10 +1676,10 @@ export default function ProductFormModal({
                         <button
                           type="button"
                           onClick={() => setShowCalc(!showCalc)}
-                          className="flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 font-semibold"
+                          className="flex items-center gap-1.5 text-xs text-sky-400 hover:text-sky-300 font-bold bg-sky-500/10 hover:bg-sky-500/20 px-2.5 py-1 rounded-lg border border-sky-500/30 transition-all"
                         >
-                          <Percent className="w-3.5 h-3.5" />
-                          <span>{showCalc ? 'Ocultar Calculadora' : 'Calculadora de Flete y Margen'}</span>
+                          <Calculator className="w-3.5 h-3.5 text-sky-400" />
+                          <span>{showCalc ? 'Ocultar Calculadora' : 'Calculadora Inteligente'}</span>
                         </button>
                       </div>
 
@@ -1374,71 +1726,8 @@ export default function ProductFormModal({
                         </div>
                       </div>
 
-                      {/* Simulador */}
-                      {showCalc && (
-                        <div className="p-4 rounded-xl bg-slate-900/90 border border-sky-500/30 space-y-3.5 text-xs">
-                          <span className="font-bold text-white flex items-center gap-1.5">
-                            <Percent className="w-4 h-4 text-sky-400" />
-                            Simulador de Margen y Fletes
-                          </span>
-
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-[11px] text-slate-400 mb-1 block">
-                                Margen Neto Deseado (%)
-                              </label>
-                              <input
-                                type="number"
-                                min="5"
-                                max="90"
-                                value={calcMargin}
-                                onChange={(e) => setCalcMargin(Number(e.target.value))}
-                                className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-white font-mono"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="text-[11px] text-slate-400 mb-1 block">
-                                % Pedidos Contraentrega ({calcContraentregaPct}%)
-                              </label>
-                              <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                step="5"
-                                value={calcContraentregaPct}
-                                onChange={(e) => setCalcContraentregaPct(Number(e.target.value))}
-                                className="w-full accent-sky-500 cursor-pointer"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
-                            <div>
-                              <span className="text-slate-400 text-[11px] block">
-                                Precio Sugerido Calculado:
-                              </span>
-                              <span className="text-xl font-black text-sky-400 font-mono">
-                                {suggestedPrice > 0 ? formatCurrency(suggestedPrice, 'COP') : '—'}
-                              </span>
-                            </div>
-
-                            {suggestedPrice > 0 && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setPrice(suggestedPrice);
-                                  setShowCalc(false);
-                                  message.success('Precio sugerido aplicado');
-                                }}
-                                className="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow transition-all"
-                              >
-                                Usar este precio
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                      {/* Render de la Calculadora Inteligente en Modo Pro */}
+                      {showCalc && renderPricingCalculator()}
                     </div>
                   </div>
                 )}
@@ -1687,6 +1976,51 @@ export default function ProductFormModal({
                             <button
                               type="button"
                               onClick={() => setColors((prev) => prev.filter((_, i) => i !== idx))}
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 space-y-3">
+                      <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                        <Tag className="w-4 h-4 text-emerald-400" />
+                        Etiquetas & Palabras Clave (SEO)
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={newTag}
+                          onChange={(e) => setNewTag(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddTag();
+                            }
+                          }}
+                          placeholder="Ej: repuesto original, bajaj, alto rendimiento..."
+                          className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-white text-xs"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddTag}
+                          className="px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold"
+                        >
+                          Añadir
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {tags.map((t, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-950/80 border border-emerald-800/60 text-emerald-300"
+                          >
+                            <span>{t}</span>
+                            <button
+                              type="button"
+                              onClick={() => setTags((prev) => prev.filter((_, i) => i !== idx))}
                             >
                               ×
                             </button>
