@@ -45,9 +45,11 @@ import {
   VideoCameraOutlined,
   EyeOutlined,
   ShoppingCartOutlined,
+  DollarCircleOutlined,
 } from '@ant-design/icons';
 import type { SkuLookupResult } from '@/app/api/admin/products/lookup-sku/route';
 import type { UploadFile } from 'antd/es/upload/interface';
+import { PaymentLinkModal } from './components/PaymentLinkModal';
 import type { ColumnsType } from 'antd/es/table';
 import { productService, uploadImage } from '@/services/productService';
 import { PRODUCT_CATEGORY_OPTIONS, getProductCategoryLabel } from '@/constants/productCategories';
@@ -69,6 +71,13 @@ function AdminProductsContent() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [selectedProductForPayment, setSelectedProductForPayment] = useState<Product | null>(null);
+
+  const handleOpenPaymentLink = useCallback((prod: Product) => {
+    setSelectedProductForPayment(prod);
+    setPaymentModalOpen(true);
+  }, []);
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
@@ -700,6 +709,16 @@ useEffect(() => {
         align: 'center',
         render: (_, record) => (
           <Space size="small">
+            <Tooltip title="Generar link de pago (WhatsApp / Agotado)">
+              <Button
+                type="text"
+                icon={<DollarCircleOutlined style={{ color: '#16a34a', fontSize: 17 }} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenPaymentLink(record);
+                }}
+              />
+            </Tooltip>
             <Button
               type="text"
               icon={<EditOutlined style={{ color: '#0A2A66' }} />}
@@ -725,7 +744,7 @@ useEffect(() => {
           </Space>
         ),
       },
-    ], [handleDeleteProduct, openModal, fetchProducts]);
+    ], [handleDeleteProduct, openModal, fetchProducts, handleOpenPaymentLink]);
 
   const isIframe = searchParams.get('iframe') === 'true';
 
@@ -1531,6 +1550,16 @@ return (
         </div>
       </Form>
     </Modal>
+
+    {/* Modal para generar link de pago Wompi / WhatsApp */}
+    <PaymentLinkModal
+      open={paymentModalOpen}
+      product={selectedProductForPayment}
+      onClose={() => {
+        setPaymentModalOpen(false);
+        setSelectedProductForPayment(null);
+      }}
+    />
   </div>
 );
 }
