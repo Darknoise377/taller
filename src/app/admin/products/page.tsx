@@ -46,6 +46,12 @@ import {
   EyeOutlined,
   ShoppingCartOutlined,
   DollarCircleOutlined,
+  ReloadOutlined,
+  FireOutlined,
+  WarningOutlined,
+  StopOutlined,
+  GlobalOutlined,
+  ShopOutlined,
 } from '@ant-design/icons';
 import type { SkuLookupResult } from '@/app/api/admin/products/lookup-sku/route';
 import type { UploadFile } from 'antd/es/upload/interface';
@@ -96,6 +102,8 @@ function AdminProductsContent() {
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [brandFilter, setBrandFilter] = useState('');
+  const [quickFilter, setQuickFilter] = useState<'ALL' | 'LOW_STOCK' | 'OUT_OF_STOCK' | 'IN_STOCK' | 'MELI' | 'BEST_SELLERS'>('ALL');
 
   // --- Generador de imágenes IA ---
   const [aiImgOpen, setAiImgOpen] = useState(false);
@@ -193,13 +201,80 @@ function AdminProductsContent() {
     return null;
   }, [calcAbsorbShipping, shippingRatioOfPrice, calcCost, suggestedPrice]);
 
-  const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      const matchesName = !searchText || p.name.toLowerCase().includes(searchText.toLowerCase());
-      const matchesCategory = !categoryFilter || p.category === categoryFilter;
-      return matchesName && matchesCategory;
+  const availableBrands = useMemo(() => {
+    const brands = new Set<string>();
+    products.forEach((p) => {
+      if (p.brand && p.brand.trim()) {
+        brands.add(p.brand.trim());
+      }
     });
-  }, [products, searchText, categoryFilter]);
+    return Array.from(brands).sort().map((b) => ({ label: b, value: b }));
+  }, [products]);
+
+  const productStats = useMemo(() => {
+    const total = products.length;
+    const totalSales = products.reduce((sum, p) => sum + (p.soldCount ?? 0), 0);
+    const lowStock = products.filter((p) => (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5).length;
+    const outOfStock = products.filter((p) => (p.stock ?? 0) === 0).length;
+    const inStock = products.filter((p) => (p.stock ?? 0) > 5).length;
+    const meliCount = products.filter((p) => Boolean(p.meliExport)).length;
+    const bestSellersCount = products.filter((p) => (p.soldCount ?? 0) > 0).length;
+    const totalCatalogValue = products.reduce((sum, p) => sum + (Number(p.price) || 0) * (p.stock ?? 0), 0);
+
+    return {
+      total,
+      totalSales,
+      lowStock,
+      outOfStock,
+      inStock,
+      meliCount,
+      bestSellersCount,
+      totalCatalogValue,
+    };
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    let data = [...products];
+
+    // Quick filter
+    if (quickFilter === 'OUT_OF_STOCK') {
+      data = data.filter((p) => (p.stock ?? 0) === 0);
+    } else if (quickFilter === 'LOW_STOCK') {
+      data = data.filter((p) => (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5);
+    } else if (quickFilter === 'IN_STOCK') {
+      data = data.filter((p) => (p.stock ?? 0) > 5);
+    } else if (quickFilter === 'MELI') {
+      data = data.filter((p) => Boolean(p.meliExport));
+    } else if (quickFilter === 'BEST_SELLERS') {
+      data = data.filter((p) => (p.soldCount ?? 0) > 0);
+      data.sort((a, b) => (b.soldCount ?? 0) - (a.soldCount ?? 0));
+    }
+
+    // Text search: name, sku, brand, tags
+    if (searchText) {
+      const term = searchText.toLowerCase().trim();
+      data = data.filter((p) => {
+        return (
+          p.name.toLowerCase().includes(term) ||
+          p.sku?.toLowerCase().includes(term) ||
+          p.brand?.toLowerCase().includes(term) ||
+          p.tags?.some((t) => t.toLowerCase().includes(term))
+        );
+      });
+    }
+
+    // Category
+    if (categoryFilter) {
+      data = data.filter((p) => p.category === categoryFilter);
+    }
+
+    // Brand
+    if (brandFilter) {
+      data = data.filter((p) => p.brand === brandFilter);
+    }
+
+    return data;
+  }, [products, searchText, categoryFilter, brandFilter, quickFilter]);
 
   const getErrorMessage = (err: unknown): string => {
     if (err instanceof Error) return err.message;
@@ -566,40 +641,43 @@ useEffect(() => {
         sorter: (a, b) => a.name.localeCompare(b.name),
         render: (_, record) => (
           <div 
-            style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer', maxWidth: '400px' }} 
+            style={{ display: 'flex', gap: '12px', alignItems: 'center', cursor: 'pointer', maxWidth: '380px' }} 
             onClick={() => openModal(record)}
             title="Haga clic para editar"
             className="hover:bg-slate-50 transition-colors p-1 -m-1 rounded-lg"
           >
             <div style={{ flexShrink: 0, position: 'relative' }}>
               <Image
-                width={56}
-                height={56}
+                width={48}
+                height={48}
                 src={record.imageUrl || record.images?.[0]}
                 alt={record.name}
-                style={{ objectFit: 'cover', borderRadius: '8px', border: '1px solid #f0f0f0' }}
+                style={{ objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }}
                 fallback="/placeholder.png" 
                 preview={false}
               />
               {record.videoUrl && (
-                <div style={{ position: 'absolute', top: -4, right: -4, background: '#1890ff', color: 'white', borderRadius: '50%', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                <div style={{ position: 'absolute', top: -3, right: -3, background: '#1890ff', color: 'white', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
                   ▶
                 </div>
               )}
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontWeight: 600, color: '#0A2A66', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <div style={{ fontWeight: 600, color: '#0A2A66', fontSize: '13px', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                 {record.name}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
-                <Tag color="blue" style={{ margin: 0, fontSize: '10px', lineHeight: '18px', padding: '0 6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px', flexWrap: 'wrap' }}>
+                <Tag color="blue" style={{ margin: 0, fontSize: '10px', lineHeight: '16px', padding: '0 5px', borderRadius: 4 }}>
                   {getProductCategoryLabel(record.category)}
                 </Tag>
-                {(record.sku || record.brand) && (
-                  <span style={{ fontSize: '11px', color: '#8c8c8c', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {record.brand ? <strong style={{color: '#595959'}}>{record.brand}</strong> : ''}
-                    {record.brand && record.sku ? ' · ' : ''}
-                    {record.sku ? <span style={{fontFamily: 'monospace'}}>{record.sku}</span> : ''}
+                {record.brand && (
+                  <span style={{ fontSize: '11px', color: '#475569', fontWeight: 600 }}>
+                    {record.brand}
+                  </span>
+                )}
+                {record.sku && (
+                  <span style={{ fontSize: '11px', color: '#64748b', fontFamily: 'monospace', background: '#f1f5f9', padding: '0 4px', borderRadius: 3 }}>
+                    {record.sku}
                   </span>
                 )}
               </div>
@@ -612,11 +690,22 @@ useEffect(() => {
         dataIndex: 'price',
         key: 'price',
         sorter: (a, b) => a.price - b.price,
-        render: (price: number, record) => (
-          <span style={{ fontWeight: 600, color: '#262626' }}>
-            {formatCurrency(price, record.currency ?? 'COP')}
-          </span>
-        ),
+        render: (price: number, record) => {
+          const cost = record.cost && record.cost > 0 ? record.cost : null;
+          const margin = cost ? Math.round(((price - cost) / price) * 100) : null;
+          return (
+            <div>
+              <span style={{ fontWeight: 700, color: '#0f172a', fontSize: '13px' }}>
+                {formatCurrency(price, record.currency ?? 'COP')}
+              </span>
+              {cost && margin !== null ? (
+                <div style={{ fontSize: 10, color: margin >= 30 ? '#16a34a' : '#d97706', marginTop: 2 }}>
+                  Margen: {margin}%
+                </div>
+              ) : null}
+            </div>
+          );
+        },
       },
       {
         title: 'Stock',
@@ -625,23 +714,34 @@ useEffect(() => {
         sorter: (a, b) => (a.stock ?? 0) - (b.stock ?? 0),
         render: (stock: number) => {
           const s = stock ?? 0;
-          const color = s === 0 ? '#cf1322' : s <= 5 ? '#d46b08' : '#389e0d';
-          const bg    = s === 0 ? '#fff1f0' : s <= 5 ? '#fff7e6' : '#f6ffed';
-          const border = s === 0 ? '#ffa39e' : s <= 5 ? '#ffd591' : '#b7eb8f';
+          if (s === 0) {
+            return (
+              <Tag color="error" style={{ borderRadius: 6, fontWeight: 600, fontSize: 11, margin: 0, padding: '2px 8px' }}>
+                ⛔ Agotado
+              </Tag>
+            );
+          }
+          if (s <= 5) {
+            return (
+              <Tag color="warning" style={{ borderRadius: 6, fontWeight: 600, fontSize: 11, margin: 0, padding: '2px 8px' }}>
+                ⚠️ Solo {s}
+              </Tag>
+            );
+          }
           return (
-            <span style={{ background: bg, color, border: `1px solid ${border}`, borderRadius: 12, padding: '2px 10px', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>
-              {s === 0 ? 'Agotado' : s}
-            </span>
+            <Tag color="success" style={{ borderRadius: 6, fontWeight: 500, fontSize: 11, margin: 0, padding: '2px 8px' }}>
+              ✓ {s} un.
+            </Tag>
           );
         },
       },
       {
-        title: 'Compatibilidad & Etiquetas',
+        title: 'Compatibilidad & Tags',
         key: 'tags_sizes',
-        responsive: ['lg'], // Oculto en tablets/celulares
-        width: '25%',
+        responsive: ['lg'],
+        width: 220,
         render: (_, record) => (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
             {renderTags(record.sizes, 'processing')}
             {renderTags(record.tags, 'default')}
           </div>
@@ -652,22 +752,23 @@ useEffect(() => {
         key: 'meliExport',
         align: 'center',
         responsive: ['md'],
+        width: 90,
         render: (_, record) => {
           const hasMelItem = record.meliItemId && record.meliItemId.trim() !== '';
-          const meliUrl = record.meliPermalink || (hasMelItem ? `https://articulo.mercadolibre.com.co/${record.meliItemId?.replace(/^([A-Z]{3})(\d+)/, '$1-$2')}` : null);
+          const meliUrl = record.meliPermalink || (hasMelItem ? `https://articulo.mercadolibre.com.co/${record.meliItemId?.replace(/^([A-Z]{3})(d+)/, '$1-$2')}` : null);
           
           return (
-            <Space size="small">
-              <Tooltip title={record.meliExport ? 'Exportar a MeLi: ON' : 'Exportar a MeLi: OFF'}>
+            <Space size={4}>
+              <Tooltip title={record.meliExport ? 'Publicado en Mercado Libre (clic para desactivar)' : 'No publicado (clic para activar)'}>
                 <Tag
                   color={record.meliExport ? 'green' : 'default'}
-                  style={{ cursor: 'pointer', margin: 0, padding: '2px 8px' }}
+                  style={{ cursor: 'pointer', margin: 0, padding: '1px 6px', fontSize: 11, borderRadius: 4 }}
                   onClick={async (e) => {
                     e.stopPropagation();
                     try {
                       await productService.updateProduct(record.id, { meliExport: !record.meliExport });
                       await fetchProducts();
-                      message.success(`MercadoLibre ${!record.meliExport ? 'activado' : 'desactivado'} para ${record.name}`);
+                      message.success(`MercadoLibre ${!record.meliExport ? 'activado' : 'desactivado'}`);
                     } catch { message.error('Error al actualizar'); }
                   }}
                 >
@@ -675,11 +776,11 @@ useEffect(() => {
                 </Tag>
               </Tooltip>
               {meliUrl && (
-                <Tooltip title="Ver detalles en Mercado Libre">
+                <Tooltip title="Ver en Mercado Libre">
                   <Button
                     type="text"
                     size="small"
-                    icon={<EyeOutlined style={{ color: '#1890ff' }} />}
+                    icon={<EyeOutlined style={{ color: '#1890ff', fontSize: 13 }} />}
                     onClick={(e) => {
                       e.stopPropagation();
                       window.open(meliUrl, '_blank', 'noopener,noreferrer');
@@ -696,35 +797,56 @@ useEffect(() => {
         dataIndex: 'soldCount',
         key: 'sales',
         align: 'center',
+        width: 90,
         sorter: (a, b) => (a.soldCount ?? 0) - (b.soldCount ?? 0),
         render: (soldCount: number) => (
-          <span style={{ fontWeight: 600, color: soldCount > 0 ? '#52c41a' : '#8c8c8c' }}>
-            {soldCount ?? 0}
-          </span>
+          soldCount > 0 ? (
+            <span style={{ fontWeight: 600, color: '#16a34a', fontSize: 12 }}>
+              🔥 {soldCount}
+            </span>
+          ) : (
+            <span style={{ color: '#94a3b8', fontSize: 12 }}>—</span>
+          )
         ),
       },
       {
         title: 'Acciones',
         key: 'actions',
         align: 'center',
+        width: 140,
         render: (_, record) => (
-          <Space size="small">
+          <Space size={4}>
             <Tooltip title="Generar link de pago (WhatsApp / Agotado)">
               <Button
                 type="text"
-                icon={<DollarCircleOutlined style={{ color: '#16a34a', fontSize: 17 }} />}
+                size="small"
+                icon={<DollarCircleOutlined style={{ color: '#16a34a', fontSize: 16 }} />}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleOpenPaymentLink(record);
                 }}
               />
             </Tooltip>
-            <Button
-              type="text"
-              icon={<EditOutlined style={{ color: '#0A2A66' }} />}
-              onClick={() => openModal(record)}
-              title="Editar producto"
-            />
+            <Tooltip title="Editar producto">
+              <Button
+                type="text"
+                size="small"
+                icon={<EditOutlined style={{ color: '#0A2A66', fontSize: 15 }} />}
+                onClick={() => openModal(record)}
+              />
+            </Tooltip>
+            <Tooltip title="Ver en la tienda">
+              <Button
+                type="text"
+                size="small"
+                icon={<ShopOutlined style={{ color: '#0284c7', fontSize: 15 }} />}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const targetUrl = record.slug ? `/producto/${record.slug}` : `/search?q=${encodeURIComponent(record.name)}`;
+                  window.open(targetUrl, '_blank', 'noopener,noreferrer');
+                }}
+              />
+            </Tooltip>
             <Popconfirm
               title="¿Eliminar producto?"
               description="Esta acción no se puede deshacer."
@@ -736,7 +858,8 @@ useEffect(() => {
               <Button 
                  type="text" 
                  danger 
-                 icon={<DeleteOutlined />} 
+                 size="small"
+                 icon={<DeleteOutlined style={{ fontSize: 15 }} />} 
                  onClick={(e) => e.stopPropagation()} 
                  title="Eliminar producto"
               />
@@ -795,114 +918,370 @@ return (
 
       {!isIframe && (
         <>
+          {/* Encabezado Principal */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <Typography.Title level={2} style={{ margin: 0 }}>
-              Gestión de Productos
-            </Typography.Title>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <Typography.Title level={2} style={{ margin: 0, color: '#0A2A66', fontSize: 24 }}>
+                  Gestión de Productos
+                </Typography.Title>
+                <Tag color="blue" style={{ fontSize: 13, borderRadius: 12, padding: '2px 10px' }}>
+                  {products.length} productos
+                </Tag>
+              </div>
+              <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+                Catálogo de repuestos, inventario, precios, links de pago y sincronización con Mercado Libre
+              </Typography.Text>
+            </div>
 
-        <Space wrap>
-          <Button
-            icon={<DownloadOutlined />}
-            onClick={handleExportExcel}
-            loading={isExporting}
+            <Space wrap>
+              <Button icon={<ReloadOutlined />} onClick={fetchProducts} loading={loading}>
+                Actualizar
+              </Button>
+              <Button
+                icon={<CalculatorOutlined style={{ color: '#d97706' }} />}
+                onClick={() => setCalcOpen(true)}
+              >
+                Calculadora
+              </Button>
+              <Button
+                icon={<DownloadOutlined />}
+                onClick={handleExportExcel}
+                loading={isExporting}
+              >
+                Exportar Excel
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => openModal()}
+                style={{ background: '#0A2A66', borderColor: '#0A2A66', fontWeight: 600 }}
+              >
+                Añadir Producto
+              </Button>
+            </Space>
+          </div>
+
+          {/* Tarjetas KPI Modernas estilo Senior */}
+          <Row gutter={[14, 14]} style={{ marginBottom: 20 }}>
+            {/* Total Productos */}
+            <Col xs={24} sm={12} lg={6}>
+              <Card
+                size="small"
+                bordered
+                hoverable
+                onClick={() => setQuickFilter('ALL')}
+                style={{
+                  borderRadius: 12,
+                  borderColor: quickFilter === 'ALL' ? '#0A2A66' : '#e2e8f0',
+                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+                  cursor: 'pointer',
+                  background: quickFilter === 'ALL' ? '#f0f5ff' : '#ffffff',
+                }}
+                styles={{ body: { padding: '14px 16px' } }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>Total Productos</span>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f0f5ff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <ShopOutlined style={{ color: '#0A2A66', fontSize: 17 }} />
+                  </div>
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: '#0A2A66', lineHeight: 1.2 }}>
+                  {productStats.total}
+                </div>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                  Valor inv: {formatCurrency(productStats.totalCatalogValue)}
+                </div>
+              </Card>
+            </Col>
+
+            {/* Ventas Totales */}
+            <Col xs={24} sm={12} lg={6}>
+              <Card
+                size="small"
+                bordered
+                hoverable
+                onClick={() => setQuickFilter('BEST_SELLERS')}
+                style={{
+                  borderRadius: 12,
+                  borderColor: quickFilter === 'BEST_SELLERS' ? '#16a34a' : '#e2e8f0',
+                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+                  cursor: 'pointer',
+                  background: quickFilter === 'BEST_SELLERS' ? '#f0fdf4' : '#ffffff',
+                }}
+                styles={{ body: { padding: '14px 16px' } }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>Ventas Totales</span>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <FireOutlined style={{ color: '#16a34a', fontSize: 17 }} />
+                  </div>
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: '#16a34a', lineHeight: 1.2 }}>
+                  {productStats.totalSales} <span style={{ fontSize: 13, fontWeight: 500, color: '#64748b' }}>unidades</span>
+                </div>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                  {productStats.bestSellersCount} productos con ventas
+                </div>
+              </Card>
+            </Col>
+
+            {/* Stock Bajo */}
+            <Col xs={24} sm={12} lg={6}>
+              <Card
+                size="small"
+                bordered
+                hoverable
+                onClick={() => setQuickFilter('LOW_STOCK')}
+                style={{
+                  borderRadius: 12,
+                  borderColor: quickFilter === 'LOW_STOCK' ? '#d97706' : '#e2e8f0',
+                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+                  cursor: 'pointer',
+                  background: quickFilter === 'LOW_STOCK' ? '#fffbeb' : '#ffffff',
+                }}
+                styles={{ body: { padding: '14px 16px' } }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>Stock Bajo (≤ 5)</span>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: '#fffbeb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <WarningOutlined style={{ color: '#d97706', fontSize: 17 }} />
+                  </div>
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: '#d97706', lineHeight: 1.2 }}>
+                  {productStats.lowStock}
+                </div>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                  Reabastecer con proveedor
+                </div>
+              </Card>
+            </Col>
+
+            {/* Sin Stock */}
+            <Col xs={24} sm={12} lg={6}>
+              <Card
+                size="small"
+                bordered
+                hoverable
+                onClick={() => setQuickFilter('OUT_OF_STOCK')}
+                style={{
+                  borderRadius: 12,
+                  borderColor: quickFilter === 'OUT_OF_STOCK' ? '#dc2626' : '#e2e8f0',
+                  boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+                  cursor: 'pointer',
+                  background: quickFilter === 'OUT_OF_STOCK' ? '#fef2f2' : '#ffffff',
+                }}
+                styles={{ body: { padding: '14px 16px' } }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>Sin Stock (Agotados)</span>
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <StopOutlined style={{ color: '#dc2626', fontSize: 17 }} />
+                  </div>
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 700, color: '#dc2626', lineHeight: 1.2 }}>
+                  {productStats.outOfStock}
+                </div>
+                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>
+                  Generar link bajo pedido / WhatsApp
+                </div>
+              </Card>
+            </Col>
+          </Row>
+
+          {/* Card Principal con Barra de Filtros y Tabla */}
+          <Card
+            bordered
+            style={{
+              borderRadius: 12,
+              borderColor: '#e2e8f0',
+              boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+            }}
+            styles={{ body: { padding: '16px 20px' } }}
           >
-            Exportar Excel
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => openModal()}
-          >
-            Añadir Producto
-          </Button>
-        </Space>
-      </div>
+            {/* 1. Barra de Accesos Rápidos (Quick Pills) */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                overflowX: 'auto',
+                paddingBottom: 10,
+                marginBottom: 14,
+                borderBottom: '1px solid #f1f5f9',
+              }}
+            >
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap' }}>
+                Vista rápida:
+              </span>
 
-      {/* --- Stats row --- */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 20 }}>
-        <Col xs={24} sm={6}>
-          <Card size="small" style={{ borderRadius: 10, background: '#f0f5ff', border: '1px solid #adc6ff' }}>
-            <Statistic
-              title="Total productos"
-              value={products.length}
-              valueStyle={{ color: '#0A2A66', fontWeight: 700 }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={6}>
-          <Card size="small" style={{ borderRadius: 10, background: '#e6f7ff', border: '1px solid #91d5ff' }}>
-            <Statistic
-              title="Ventas totales"
-              value={products.reduce((sum, p) => sum + (p.soldCount ?? 0), 0)}
-              valueStyle={{ color: '#1890ff', fontWeight: 700 }}
-              prefix={<ShoppingCartOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={6}>
-          <Card size="small" style={{ borderRadius: 10, background: '#fff7e6', border: '1px solid #ffd591' }}>
-            <Statistic
-              title="Stock bajo (≤ 5)"
-              value={products.filter(p => (p.stock ?? 0) > 0 && (p.stock ?? 0) <= 5).length}
-              valueStyle={{ color: '#d46b08', fontWeight: 700 }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={6}>
-          <Card size="small" style={{ borderRadius: 10, background: '#fff1f0', border: '1px solid #ffa39e' }}>
-            <Statistic
-              title="Sin stock"
-              value={products.filter(p => (p.stock ?? 0) === 0).length}
-              valueStyle={{ color: '#cf1322', fontWeight: 700 }}
-            />
-          </Card>
-        </Col>
-      </Row>
+              <Button
+                size="small"
+                type={quickFilter === 'ALL' ? 'primary' : 'default'}
+                onClick={() => setQuickFilter('ALL')}
+                style={{
+                  borderRadius: 20,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: quickFilter === 'ALL' ? '#0A2A66' : undefined,
+                  borderColor: quickFilter === 'ALL' ? '#0A2A66' : undefined,
+                }}
+              >
+                Todos ({productStats.total})
+              </Button>
 
-    <Card>
-      {/* --- Search & filter toolbar --- */}
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-        <Input
-          allowClear
-          prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
-          placeholder="Buscar por nombre..."
-          value={searchText}
-          onChange={e => setSearchText(e.target.value)}
-          style={{ width: 260 }}
-        />
-        <Select
-          allowClear
-          placeholder="Filtrar por categoría"
-          style={{ width: 210 }}
-          value={categoryFilter || undefined}
-          onChange={(v: string | undefined) => setCategoryFilter(v ?? '')}
-          options={CATEGORY_OPTIONS}
-        />
-        {(searchText || categoryFilter) && (
-          <Button
-            icon={<ClearOutlined />}
-            onClick={() => { setSearchText(''); setCategoryFilter(''); }}
-          >
-            Limpiar filtros
-          </Button>
-        )}
-        <Typography.Text type="secondary" style={{ marginLeft: 'auto', fontSize: 13 }}>
-          {filteredProducts.length === products.length
-            ? `${products.length} productos`
-            : `${filteredProducts.length} de ${products.length} productos`}
-        </Typography.Text>
-      </div>
+              <Button
+                size="small"
+                type={quickFilter === 'LOW_STOCK' ? 'primary' : 'default'}
+                icon={<WarningOutlined style={{ color: quickFilter === 'LOW_STOCK' ? '#ffffff' : '#d97706' }} />}
+                onClick={() => setQuickFilter('LOW_STOCK')}
+                style={{
+                  borderRadius: 20,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: quickFilter === 'LOW_STOCK' ? '#d97706' : undefined,
+                  borderColor: quickFilter === 'LOW_STOCK' ? '#d97706' : undefined,
+                }}
+              >
+                Stock Bajo ({productStats.lowStock})
+              </Button>
 
-      <Spin spinning={loading}>
-        <Table
-          dataSource={filteredProducts}
-          columns={columns}
-          rowKey="id"
-          scroll={{ x: 'max-content' }}
-          pagination={{ pageSize: 10, showSizeChanger: true, responsive: true, showTotal: (total) => `${total} productos` }}
-        />
-      </Spin>
-    </Card>
+              <Button
+                size="small"
+                type={quickFilter === 'OUT_OF_STOCK' ? 'primary' : 'default'}
+                icon={<StopOutlined style={{ color: quickFilter === 'OUT_OF_STOCK' ? '#ffffff' : '#dc2626' }} />}
+                onClick={() => setQuickFilter('OUT_OF_STOCK')}
+                style={{
+                  borderRadius: 20,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: quickFilter === 'OUT_OF_STOCK' ? '#dc2626' : undefined,
+                  borderColor: quickFilter === 'OUT_OF_STOCK' ? '#dc2626' : undefined,
+                }}
+              >
+                Agotados ({productStats.outOfStock})
+              </Button>
+
+              <Button
+                size="small"
+                type={quickFilter === 'IN_STOCK' ? 'primary' : 'default'}
+                icon={<CheckCircleOutlined style={{ color: quickFilter === 'IN_STOCK' ? '#ffffff' : '#16a34a' }} />}
+                onClick={() => setQuickFilter('IN_STOCK')}
+                style={{
+                  borderRadius: 20,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: quickFilter === 'IN_STOCK' ? '#16a34a' : undefined,
+                  borderColor: quickFilter === 'IN_STOCK' ? '#16a34a' : undefined,
+                }}
+              >
+                Con Stock ({productStats.inStock})
+              </Button>
+
+              <Button
+                size="small"
+                type={quickFilter === 'BEST_SELLERS' ? 'primary' : 'default'}
+                icon={<FireOutlined style={{ color: quickFilter === 'BEST_SELLERS' ? '#ffffff' : '#ea580c' }} />}
+                onClick={() => setQuickFilter('BEST_SELLERS')}
+                style={{
+                  borderRadius: 20,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: quickFilter === 'BEST_SELLERS' ? '#ea580c' : undefined,
+                  borderColor: quickFilter === 'BEST_SELLERS' ? '#ea580c' : undefined,
+                }}
+              >
+                Más Vendidos ({productStats.bestSellersCount})
+              </Button>
+
+              <Button
+                size="small"
+                type={quickFilter === 'MELI' ? 'primary' : 'default'}
+                onClick={() => setQuickFilter('MELI')}
+                style={{
+                  borderRadius: 20,
+                  fontSize: 12,
+                  fontWeight: 500,
+                  background: quickFilter === 'MELI' ? '#0A2A66' : undefined,
+                  borderColor: quickFilter === 'MELI' ? '#0A2A66' : undefined,
+                }}
+              >
+                Mercado Libre ({productStats.meliCount})
+              </Button>
+
+              <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+                <Typography.Text type="secondary" style={{ fontSize: 12, whiteSpace: 'nowrap' }}>
+                  {filteredProducts.length === products.length
+                    ? `${products.length} productos`
+                    : `${filteredProducts.length} de ${products.length} productos`}
+                </Typography.Text>
+              </div>
+            </div>
+
+            {/* 2. Barra de Búsqueda y Filtros */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
+              <Input
+                allowClear
+                prefix={<SearchOutlined style={{ color: '#94a3b8' }} />}
+                placeholder="Buscar por nombre, SKU, marca o etiqueta..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                style={{ width: 300, borderRadius: 8 }}
+              />
+              <Select
+                allowClear
+                placeholder="Categoría"
+                style={{ width: 190 }}
+                value={categoryFilter || undefined}
+                onChange={(v: string | undefined) => setCategoryFilter(v ?? '')}
+                options={CATEGORY_OPTIONS}
+              />
+              {availableBrands.length > 0 && (
+                <Select
+                  allowClear
+                  showSearch
+                  placeholder="Marca"
+                  style={{ width: 160 }}
+                  value={brandFilter || undefined}
+                  onChange={(v: string | undefined) => setBrandFilter(v ?? '')}
+                  options={availableBrands}
+                />
+              )}
+              {(searchText || categoryFilter || brandFilter || quickFilter !== 'ALL') && (
+                <Button
+                  icon={<ClearOutlined />}
+                  onClick={() => {
+                    setSearchText('');
+                    setCategoryFilter('');
+                    setBrandFilter('');
+                    setQuickFilter('ALL');
+                  }}
+                  danger
+                  style={{ borderRadius: 8 }}
+                >
+                  Limpiar filtros
+                </Button>
+              )}
+            </div>
+
+            {/* Tabla de Productos Compacta */}
+            <Spin spinning={loading}>
+              <Table
+                dataSource={filteredProducts}
+                columns={columns}
+                rowKey="id"
+                scroll={{ x: 'max-content' }}
+                size="middle"
+                pagination={{
+                  pageSize: 15,
+                  showSizeChanger: true,
+                  pageSizeOptions: ['15', '30', '50', '100'],
+                  responsive: true,
+                  showTotal: (total, range) => `${range[0]}-${range[1]} de ${total} productos`,
+                }}
+              />
+            </Spin>
+          </Card>
         </>
       )}
 
