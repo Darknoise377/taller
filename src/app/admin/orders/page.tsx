@@ -1,7 +1,7 @@
 'use client';
 
 // --- Importaciones de Librerías ---
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import dayjs, { Dayjs } from 'dayjs';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
@@ -24,36 +24,41 @@ import {
   Avatar,
   Badge,
   Typography,
-  Row, // <-- Añadido para la maquetación
-  Col, // <-- Añadido para la maquetación
+  Row,
+  Col,
 } from 'antd';
 import {
   DeleteOutlined,
   PercentageOutlined,
   UserSwitchOutlined,
-  FilePdfOutlined, // <-- Añadido para el botón de exportación
-  FileExcelOutlined, // <-- Añadido para el botón de exportación
+  FilePdfOutlined,
+  FileExcelOutlined,
   SyncOutlined,
+  CreditCardOutlined,
+  CarOutlined,
+  ShoppingOutlined,
+  EyeOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
 
 // --- Importaciones de Servicios y Tipos ---
 import { orderService } from '@/services/orderService';
-import { Order, OrderStatus } from '@/types/order';
+import { Order, OrderStatus, PaymentMethod } from '@/types/order';
 import type { TableProps } from 'antd';
 import { useOrderExporter } from '@/hooks/useOrderExporter';
 import { formatCurrency } from '@/utils/formatCurrency';
 
 // --- Importaciones de Componentes Modulares ---
-const OrdersFilters = dynamic(() => import('./components/OrdersFilters'));
-const OrdersStats = dynamic(() => import('./components/OrdersStats'));
-const OrdersTable = dynamic(() => import('./components/OrdersTable'));
+const OrdersFilters = dynamic(() => import('./components/OrdersFilters'), { ssr: false });
+const OrdersStats = dynamic(() => import('./components/OrdersStats'), { ssr: false });
+const OrdersTable = dynamic(() => import('./components/OrdersTable'), { ssr: false });
 
 // --- Configuración de Dayjs ---
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 dayjs.locale('es');
 
-const { Text, Title } = Typography; // <-- Se añade Title
+const { Text, Title } = Typography;
 
 // --- Tipos y Constantes ---
 type Filters = {
@@ -65,67 +70,76 @@ type Filters = {
   searchTerm?: string;
 };
 
-const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string }> = {
-  PENDING: { label: 'Pendiente', color: 'gold' },
-  APPROVED: { label: 'Pagado', color: 'green' },
-  SHIPPED: { label: 'Completada (Enviada)', color: 'blue' },
-  CANCELLED: { label: 'Cancelado', color: 'red' },
-  DECLINED: { label: 'Rechazado', color: 'volcano' },
+const STATUS_CONFIG: Record<
+  OrderStatus,
+  { label: string; color: string; bg: string; border: string }
+> = {
+  PENDING: { label: 'Pendiente', color: '#b45309', bg: '#fef3c7', border: '#fde68a' },
+  APPROVED: { label: 'Pagado', color: '#15803d', bg: '#dcfce7', border: '#bbf7d0' },
+  SHIPPED: { label: 'Enviado', color: '#1d4ed8', bg: '#dbeafe', border: '#bfdbfe' },
+  CANCELLED: { label: 'Cancelado', color: '#b91c1c', bg: '#fee2e2', border: '#fecaca' },
+  DECLINED: { label: 'Rechazado', color: '#c2410c', bg: '#ffedd5', border: '#fed7aa' },
 };
 
-// --- Componente Principal de la Página de Órdenes ---
+const PAYMENT_METHOD_OPTIONS = [
+  { value: 'WOMPI', text: '💳 Wompi (Online)' },
+  { value: 'CONTRAENTREGA', text: '🚚 Contraentrega (Destino)' },
+  { value: 'MERCADO_LIBRE', text: '📦 Mercado Libre' },
+  { value: 'PAYU', text: '🏦 PayU' },
+];
+
 export default function OrdersPage() {
   // --- Estados ---
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<number | null>(null);
-  
+
   // Estados de filtros
   const [filters, setFilters] = useState<Filters>({});
+  const [quickFilter, setQuickFilter] = useState<string>('ALL');
   const [dateRangeValue, setDateRangeValue] = useState<[Dayjs | null, Dayjs | null] | null>(null);
   const [rawSearchTerm, setRawSearchTerm] = useState('');
   const [debouncedSearchTerm] = useDebounce(rawSearchTerm, 300);
-  
+
   const [expandedRowKeys, setExpandedRowKeys] = useState<React.Key[]>([]);
 
   const { isDownloading, downloadReport } = useOrderExporter();
 
   // --- Carga de Datos ---
-  useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true);
-      try {
-        const data = await orderService.getOrders();
-        setOrders(data);
-      } catch (error) {
-        console.error('❌ Error al cargar órdenes:', error);
-        message.error('Hubo un error al cargar las órdenes.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrders();
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await orderService.getOrders();
+      setOrders(data);
+    } catch (error) {
+      console.error('❌ Error al cargar órdenes:', error);
+      message.error('Hubo un error al cargar las órdenes.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // --- Efecto para actualizar filtros con el término buscado ---
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  // Actualizar término de búsqueda con debounce
   useEffect(() => {
     setFilters((prev) => ({ ...prev, searchTerm: debouncedSearchTerm || undefined }));
   }, [debouncedSearchTerm]);
-
 
   // --- Opciones de filtro para los Selects ---
   const statusOptions = useMemo(() => {
     return Object.entries(STATUS_CONFIG).map(([value, { label }]) => ({
       text: label,
-      value: value as string,
+      value,
     }));
   }, []);
 
   const sellerFilters = useMemo(() => {
     const sellers = new Map<string, string>();
-    orders.forEach(o => {
+    orders.forEach((o) => {
       if (o.seller && o.sellerId) {
-        // Mejoramos la presentación si el nombre no está disponible
         sellers.set(o.sellerId, o.seller.name || `Cód. ${o.seller.code || o.sellerId.substring(0, 4)}`);
       }
     });
@@ -134,37 +148,66 @@ export default function OrdersPage() {
 
   const promoFilters = useMemo(() => {
     const promos = new Set<string>();
-    orders.forEach(o => {
+    orders.forEach((o) => {
       if (o.promoCodeApplied) {
         promos.add(o.promoCodeApplied);
       }
     });
-    return Array.from(promos).map(code => ({ text: code, value: code }));
+    return Array.from(promos).map((code) => ({ text: code, value: code }));
   }, [orders]);
 
-  // --- Memorización de Órdenes Filtradas (Lógica de filtrado) ---
+  // --- Filtrado Inteligente de Órdenes ---
   const filteredOrders = useMemo(() => {
     let data = [...orders];
 
+    // Quick filter de botones superiores
+    if (quickFilter === 'WOMPI') {
+      data = data.filter((o) => o.paymentMethod === 'WOMPI');
+    } else if (quickFilter === 'CONTRAENTREGA') {
+      data = data.filter((o) => o.paymentMethod === 'CONTRAENTREGA');
+    } else if (quickFilter === 'PENDING') {
+      data = data.filter((o) => o.status === 'PENDING');
+    } else if (quickFilter === 'APPROVED') {
+      data = data.filter((o) => o.status === 'APPROVED');
+    } else if (quickFilter === 'SHIPPED') {
+      data = data.filter((o) => o.status === 'SHIPPED');
+    }
+
+    // Búsqueda textual: cliente, ID, refCode, teléfono o email
     if (filters.searchTerm) {
       const term = filters.searchTerm.toLowerCase().trim();
-      data = data.filter((o) =>
-        o.customerName.toLowerCase().includes(term) ||
-        o.id.toString().includes(term)
-      );
+      data = data.filter((o) => {
+        return (
+          o.customerName?.toLowerCase().includes(term) ||
+          o.id.toString().includes(term) ||
+          o.referenceCode?.toLowerCase().includes(term) ||
+          o.phone?.includes(term) ||
+          o.customerEmail?.toLowerCase().includes(term)
+        );
+      });
     }
-    // Lógica para los filtros de Selects
+
+    // Filtro por Estado
     if (filters.status?.length) {
       data = data.filter((o) => filters.status!.includes(o.status));
     }
+
+    // Filtro por Método de Pago
+    if (filters.paymentMethod?.length) {
+      data = data.filter((o) => filters.paymentMethod!.includes(o.paymentMethod));
+    }
+
+    // Filtro por Vendedor
     if (filters.sellerId?.length) {
       data = data.filter((o) => o.sellerId && filters.sellerId!.includes(o.sellerId));
     }
+
+    // Filtro por Código Promocional
     if (filters.promoCodeApplied?.length) {
       data = data.filter((o) => o.promoCodeApplied && filters.promoCodeApplied!.includes(o.promoCodeApplied));
     }
-    
-    // Lógica para el filtro de fechas
+
+    // Filtro por Fechas
     if (filters.dateRange?.[0] && filters.dateRange?.[1]) {
       const [start, end] = filters.dateRange;
       data = data.filter((o) => {
@@ -172,24 +215,43 @@ export default function OrdersPage() {
         return date.isSameOrAfter(start, 'day') && date.isSameOrBefore(end, 'day');
       });
     }
-    // El filtro de paymentMethod sigue disponible si lo necesitas, pero se omite aquí por brevedad.
-    // if (filters.paymentMethod?.length) { ... } 
 
     return data;
-  }, [filters, orders]);
+  }, [filters, orders, quickFilter]);
 
-  // --- Estadísticas calculadas ---
+  // --- Estadísticas Calculadas (Con Wompi & Contraentrega) ---
   const stats = useMemo(() => {
-    const totalGeneral = filteredOrders.reduce((sum, o) => sum + o.total, 0);
+    const totalGeneral = filteredOrders.reduce((sum, o) => sum + (o.total ?? 0), 0);
     const orderCount = filteredOrders.length;
     const avgTicket = orderCount > 0 ? totalGeneral / orderCount : 0;
-    return { totalGeneral, orderCount, avgTicket };
+
+    const wompiOrders = filteredOrders.filter((o) => o.paymentMethod === 'WOMPI');
+    const wompiTotal = wompiOrders.reduce((sum, o) => sum + (o.total ?? 0), 0);
+
+    const contraentregaOrders = filteredOrders.filter((o) => o.paymentMethod === 'CONTRAENTREGA');
+    const contraentregaTotal = contraentregaOrders.reduce((sum, o) => sum + (o.total ?? 0), 0);
+
+    return {
+      totalGeneral,
+      orderCount,
+      avgTicket,
+      wompiCount: wompiOrders.length,
+      wompiTotal,
+      contraentregaCount: contraentregaOrders.length,
+      contraentregaTotal,
+    };
   }, [filteredOrders]);
 
+  // Conteos globales para los tabs
+  const globalCounts = useMemo(() => {
+    return {
+      wompi: orders.filter((o) => o.paymentMethod === 'WOMPI').length,
+      contraentrega: orders.filter((o) => o.paymentMethod === 'CONTRAENTREGA').length,
+      pending: orders.filter((o) => o.status === 'PENDING').length,
+    };
+  }, [orders]);
 
-  // --- Manejadores de Eventos (Handlers) ---
-  
-  // (handleStatusChange y handleDelete sin cambios)
+  // --- Handlers ---
   const handleStatusChange = async (id: number, status: OrderStatus) => {
     setUpdating(id);
     try {
@@ -215,22 +277,14 @@ export default function OrdersPage() {
     }
   };
 
-  // --- ⚠️ MODIFICADO: Maneja cambios en Selects (Estado, Vendedor, Promoción) ---
   const handleSelectFilterChange = (
-    key: 'status' | 'sellerId' | 'promoCodeApplied', // Se omite paymentMethod para simplificar
+    key: 'status' | 'paymentMethod' | 'sellerId' | 'promoCodeApplied',
     value: string[]
   ) => {
     setFilters((prev) => ({
       ...prev,
-      [key]: value.length > 0 ? value : undefined, // Si está vacío, quita el filtro
+      [key]: value.length > 0 ? value : undefined,
     }));
-  };
-
-  // --- ⚠️ MODIFICADO: handleTableChange ahora solo se ocupa de la ordenación si es necesario ---
-  const handleTableChange: TableProps<Order>['onChange'] = () => {
-    // Ya NO usamos tableFilters para actualizar el estado de filtros.
-    // Aquí puedes implementar la lógica de ordenación si tus columnas tienen `sorter`.
-    // console.log('Cambio de tabla (paginación/ordenación):', pagination, sorter);
   };
 
   const handleDateFilter = (dates: [Dayjs | null, Dayjs | null] | null) => {
@@ -238,244 +292,402 @@ export default function OrdersPage() {
     setFilters((prev) => ({ ...prev, dateRange: dates || undefined }));
   };
 
-  // --- ⚠️ MODIFICADO: Limpia la UI y la lógica de filtros ---
   const clearFilters = () => {
-    setFilters({}); // Limpia la lógica (Status, Seller, Promo, DateRange)
-    setDateRangeValue(null); // Limpia la UI de fecha
-    setRawSearchTerm(''); // Limpia la UI de búsqueda
-    message.info('Filtros limpiados');
+    setFilters({});
+    setQuickFilter('ALL');
+    setDateRangeValue(null);
+    setRawSearchTerm('');
+    message.info('Filtros restablecidos');
   };
 
-  // (handleRowClick, handleExpand, handleExport sin cambios)
   const handleRowClick = (record: Order) => {
-    setExpandedRowKeys((prev) =>
-      prev.includes(record.id) ? [] : [record.id]
-    );
+    setExpandedRowKeys((prev) => (prev.includes(record.id) ? [] : [record.id]));
   };
-  
+
   const handleExpand = (expanded: boolean, record: Order) => {
     setExpandedRowKeys(expanded ? [record.id] : []);
   };
-  
+
   const handleExport = (format: 'pdf' | 'excel') => {
     if (format === 'excel') {
-      // Por defecto, no exportamos órdenes completadas (SHIPPED)
       const pendingExport = filteredOrders.filter((o) => o.status !== 'SHIPPED');
       downloadReport(format, pendingExport);
       return;
     }
-
     downloadReport(format, filteredOrders);
   };
 
-  // --- ⚠️ MODIFICADO: Definición de Columnas - Se eliminan los `filters` ---
-  const columns: TableProps<Order>['columns'] = [
-    {
-      title: 'ID Orden',
-      dataIndex: 'id',
-      key: 'id',
-      width: 100,
-      sorter: (a, b) => a.id - b.id,
-      render: (id) => <Text strong>#{id}</Text>
-    },
-    {
-      title: 'Cliente',
-      key: 'customerName',
-      width: 200,
-      // ... (renderizado sin cambios)
-      render: (_, record) => (
-        <div>
-          <Text>{record.customerName}</Text><br/>
-          <Text type="secondary" style={{ fontSize: '12px' }}>{dayjs(record.createdAt).format('DD MMM YYYY, h:mm a')}</Text>
-        </div>
-      ),
-    },
-    {
-      title: 'Vendedor',
-      dataIndex: ['seller', 'name'],
-      key: 'sellerId',
-      width: 150,
-      // ❌ REMOVIDO: filters: sellerFilters,
-      render: (name: string, record: Order) => (
-        record.seller ? (
-          <Tooltip title={`Código: ${record.seller.code}`}>
-            <span><UserSwitchOutlined style={{ marginRight: 4 }} /> {name || 'N/A'}</span>
-          </Tooltip>
-        ) : (
-          <Text type="secondary">-</Text>
-        )
-      ),
-    },
-    {
-      title: 'Promoción',
-      dataIndex: 'promoCodeApplied',
-      key: 'promoCodeApplied',
-      width: 120,
-      // ❌ REMOVIDO: filters: promoFilters,
-      render: (code: string) => (
-        code ? <Tag color="purple" icon={<PercentageOutlined />}>{code}</Tag> : <Text type="secondary">-</Text>
-      ),
-    },
-    {
-      title: 'Productos',
-      key: 'products',
-      width: 180,
-      // ... (renderizado sin cambios)
-      render: (_, record) => (
-        record.products?.length > 0 ? (
-          <Tooltip title={record.products.map(p => `${p.product?.name} × ${p.quantity}`).join(', ')}>
-            <Avatar.Group max={{ count: 3 }}>
-              {record.products.map((p) => (
-                <Avatar key={p.id} src={p.product?.imageUrl || '/placeholder.png'} />
-              ))}
-            </Avatar.Group>
-          </Tooltip>
-        ) : <Text type="secondary">Sin productos</Text>
-      ),
-    },
-    {
-      title: 'Total',
-      dataIndex: 'total',
-      key: 'total',
-      width: 140,
-      sorter: (a, b) => a.total - b.total,
-      render: (total: number) => <Text strong>{formatCurrency(total)}</Text>,
-    },
-    {
-      title: 'Estado',
-      dataIndex: 'status',
-      key: 'status',
-      width: 160,
-      // ❌ REMOVIDO: filters: Object.entries(STATUS_CONFIG).map(...)
-      render: (status: OrderStatus, record: Order) => (
-        <Select<OrderStatus>
-          value={status}
-          onChange={(value) => handleStatusChange(record.id, value)}
-          loading={updating === record.id}
-          style={{ width: '100%' }}
-        >
-          {Object.entries(STATUS_CONFIG).map(([value, { label, color }]) => (
-            <Select.Option key={value} value={value as OrderStatus}>
-              <Badge color={color} text={label} />
-            </Select.Option>
-          ))}
-        </Select>
-      ),
-    },
-    {
-      title: 'Acciones',
-      key: 'actions',
-      align: 'center',
-      width: 80,
-      // ... (renderizado sin cambios)
-      render: (_, record) => (
-        <Popconfirm
-          title="¿Eliminar esta orden?"
-          onConfirm={(e) => {
-              e?.stopPropagation(); 
-              handleDelete(record.id);
-          }}
-          onCancel={(e) => e?.stopPropagation()}
-          okText="Sí, eliminar"
-          cancelText="No"
-        >
-          <Button type="text" danger icon={<DeleteOutlined />} onClick={(e) => e.stopPropagation()} />
-        </Popconfirm>
-      ),
-    },
-  ];
+  // --- Columnas Compactas, Responsivas y Profesionales ---
+  const columns: TableProps<Order>['columns'] = useMemo(
+    () => [
+      {
+        title: 'Orden',
+        key: 'orderId',
+        width: 140,
+        sorter: (a, b) => a.id - b.id,
+        render: (_, record) => (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span
+                style={{
+                  fontWeight: 700,
+                  fontSize: 13,
+                  color: '#0A2A66',
+                  background: '#f0f5ff',
+                  padding: '1px 6px',
+                  borderRadius: 4,
+                  border: '1px solid #d6e4ff',
+                }}
+              >
+                #{record.id}
+              </span>
+            </div>
+            <span
+              style={{
+                fontSize: 11,
+                fontFamily: 'monospace',
+                color: '#64748b',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: 120,
+              }}
+              title={record.referenceCode}
+            >
+              {record.referenceCode}
+            </span>
+            <span style={{ fontSize: 11, color: '#94a3b8' }}>
+              {dayjs(record.createdAt).format('DD MMM, h:mm a')}
+            </span>
+          </div>
+        ),
+      },
+      {
+        title: 'Cliente & Destino',
+        key: 'customer',
+        width: 190,
+        render: (_, record) => (
+          <div>
+            <div style={{ fontWeight: 600, color: '#0f172a', fontSize: 13 }}>
+              {record.customerName}
+            </div>
+            <div style={{ fontSize: 12, color: '#475569', marginTop: 1 }}>
+              {record.city ? `${record.city}${record.department ? `, ${record.department}` : ''}` : 'Sin ciudad'}
+            </div>
+            {record.phone && (
+              <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1 }}>
+                Tel: {record.phone}
+              </div>
+            )}
+          </div>
+        ),
+      },
+      {
+        title: 'Método de Pago',
+        dataIndex: 'paymentMethod',
+        key: 'paymentMethod',
+        width: 160,
+        render: (method: PaymentMethod, record: Order) => {
+          const isWompi = method === 'WOMPI';
+          const isContra = method === 'CONTRAENTREGA';
+          const isMeli = method === 'MERCADO_LIBRE';
 
-  // --- Renderizado del Componente ---
+          return (
+            <div>
+              {isWompi ? (
+                <Tag
+                  color="blue"
+                  icon={<CreditCardOutlined />}
+                  style={{ fontWeight: 600, borderRadius: 6, margin: 0, padding: '2px 8px' }}
+                >
+                  Wompi
+                </Tag>
+              ) : isContra ? (
+                <Tag
+                  color="orange"
+                  icon={<CarOutlined />}
+                  style={{ fontWeight: 600, borderRadius: 6, margin: 0, padding: '2px 8px' }}
+                >
+                  Contraentrega
+                </Tag>
+              ) : isMeli ? (
+                <Tag
+                  color="gold"
+                  icon={<ShoppingOutlined />}
+                  style={{ fontWeight: 600, borderRadius: 6, margin: 0, padding: '2px 8px' }}
+                >
+                  Mercado Libre
+                </Tag>
+              ) : (
+                <Tag color="purple" style={{ borderRadius: 6, margin: 0, padding: '2px 8px' }}>
+                  {method || 'Otro'}
+                </Tag>
+              )}
+
+              {record.shippingCost && record.shippingCost > 0 ? (
+                <div style={{ fontSize: 10, color: '#059669', marginTop: 3, fontWeight: 500 }}>
+                  + {formatCurrency(record.shippingCost)} envío
+                </div>
+              ) : (
+                <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 3 }}>
+                  Envío incluido / gratis
+                </div>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        title: 'Productos',
+        key: 'products',
+        width: 140,
+        render: (_, record) => {
+          const count = record.products?.length ?? 0;
+          if (count === 0) return <Text type="secondary" style={{ fontSize: 12 }}>Sin productos</Text>;
+
+          const tooltipContent = record.products
+            .map((p) => `${p.product?.name || 'Producto'} × ${p.quantity}`)
+            .join(', ');
+
+          return (
+            <Tooltip title={tooltipContent}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Avatar.Group max={{ count: 2 }} size="small">
+                  {record.products.map((p) => (
+                    <Avatar
+                      key={p.id}
+                      src={p.product?.imageUrl || '/placeholder.png'}
+                      size="small"
+                      style={{ border: '1px solid #e2e8f0' }}
+                    />
+                  ))}
+                </Avatar.Group>
+                <Tag style={{ margin: 0, fontSize: 11, borderRadius: 4 }}>
+                  {count} {count === 1 ? 'ítem' : 'ítems'}
+                </Tag>
+              </div>
+            </Tooltip>
+          );
+        },
+      },
+      {
+        title: 'Total',
+        dataIndex: 'total',
+        key: 'total',
+        width: 140,
+        sorter: (a, b) => a.total - b.total,
+        render: (total: number, record: Order) => (
+          <div>
+            <span style={{ fontWeight: 700, fontSize: 14, color: '#0A2A66' }}>
+              {formatCurrency(total)}
+            </span>
+            <div style={{ display: 'flex', gap: 4, marginTop: 2, flexWrap: 'wrap' }}>
+              {record.promoCodeApplied && (
+                <Tag color="purple" style={{ margin: 0, fontSize: 10, padding: '0 4px' }}>
+                  <PercentageOutlined style={{ marginRight: 2 }} />
+                  {record.promoCodeApplied}
+                </Tag>
+              )}
+              {record.seller && (
+                <Tag color="cyan" style={{ margin: 0, fontSize: 10, padding: '0 4px' }}>
+                  <UserSwitchOutlined style={{ marginRight: 2 }} />
+                  {record.seller.code || 'Vendedor'}
+                </Tag>
+              )}
+            </div>
+          </div>
+        ),
+      },
+      {
+        title: 'Estado',
+        dataIndex: 'status',
+        key: 'status',
+        width: 160,
+        render: (status: OrderStatus, record: Order) => {
+          const cfg = STATUS_CONFIG[status] || {
+            label: status,
+            color: '#64748b',
+            bg: '#f1f5f9',
+            border: '#e2e8f0',
+          };
+
+          return (
+            <div onClick={(e) => e.stopPropagation()}>
+              <Select<OrderStatus>
+                value={status}
+                onChange={(value) => handleStatusChange(record.id, value)}
+                loading={updating === record.id}
+                size="small"
+                style={{ width: '100%' }}
+                popupMatchSelectWidth={false}
+              >
+                {Object.entries(STATUS_CONFIG).map(([value, item]) => (
+                  <Select.Option key={value} value={value as OrderStatus}>
+                    <Badge color={item.color} text={item.label} />
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
+          );
+        },
+      },
+      {
+        title: 'Acciones',
+        key: 'actions',
+        align: 'center',
+        width: 80,
+        render: (_, record) => {
+          const isExpanded = expandedRowKeys.includes(record.id);
+
+          return (
+            <Space size={4}>
+              <Tooltip title={isExpanded ? 'Ocultar detalle' : 'Ver detalle'}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<EyeOutlined style={{ color: isExpanded ? '#0A2A66' : '#64748b' }} />}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRowClick(record);
+                  }}
+                />
+              </Tooltip>
+              <Popconfirm
+                title="¿Eliminar orden?"
+                description="Esta acción no se puede deshacer."
+                onConfirm={(e) => {
+                  e?.stopPropagation();
+                  handleDelete(record.id);
+                }}
+                onCancel={(e) => e?.stopPropagation()}
+                okText="Sí, eliminar"
+                cancelText="No"
+              >
+                <Button
+                  type="text"
+                  danger
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </Popconfirm>
+            </Space>
+          );
+        },
+      },
+    ],
+    [expandedRowKeys, updating]
+  );
+
   return (
     <ConfigProvider locale={esES}>
-      <div className="p-4 sm:p-6" style={{ background: '#f0f2f5' }}>
-        
-        {/* --- CARD SUPERIOR: TÍTULO, BOTONES Y STATS --- */}
-        <Card>
-          <Row gutter={[16, 16]} justify="space-between" align="middle" style={{ marginBottom: 16 }}>
-            <Col>
-              <Title level={3} style={{ margin: 0 }}>
+      <div className="p-4 sm:p-6" style={{ background: '#f8fafc', minHeight: '100vh' }}>
+        {/* Cabecera Principal */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 12,
+            marginBottom: 20,
+          }}
+        >
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <Title level={2} style={{ margin: 0, color: '#0A2A66', fontSize: 24 }}>
                 Gestión de Órdenes
               </Title>
-            </Col>
-            <Col xs={24} md="auto">
-              <Space wrap style={{ width: '100%' }}>
-                {/* ⚠️ Botones de Exportar se mantienen aquí, el de Limpiar va en OrdersFilters */}
-                <Button
-                  icon={<FilePdfOutlined />}
-                  onClick={() => handleExport('pdf')}
-                  loading={isDownloading}
-                >
-                  PDF
-                </Button>
-                <Button
-                  icon={<FileExcelOutlined />}
-                  onClick={() => handleExport('excel')}
-                  loading={isDownloading}
-                >
-                  Excel
-                </Button>
-                <Popconfirm
-                  title={"¿Procesar la cola de emails para todas las órdenes? Esto puede enviar muchos correos."}
-                  onConfirm={async () => {
-                    try {
-                      message.loading({ content: 'Procesando colas...', key: 'flushAll' });
-                      const res = await fetch('/api/admin/emails/flush-all', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        credentials: 'include',
-                      });
-                      const payload = await res.json().catch(() => ({}));
-                      if (!res.ok) {
-                        message.error({ content: payload?.error || 'Error procesando colas', key: 'flushAll' });
-                      } else {
-                        message.success({ content: `Hecho — procesadas: ${payload.processed ?? 'n/a'}`, key: 'flushAll' });
-                      }
-                    } catch (err) {
-                      console.error(err);
-                      message.error({ content: 'Error procesando colas', key: 'flushAll' });
-                    }
-                  }}
-                  okText="Sí, procesar"
-                  cancelText="Cancelar"
-                >
-                  <Button icon={<SyncOutlined />} danger>
-                    Procesar colas
-                  </Button>
-                </Popconfirm>
-              </Space>
-            </Col>
-          </Row>
-          
-          <OrdersStats stats={stats} loading={loading} />
-        </Card>
+              <Tag color="blue" style={{ fontSize: 13, borderRadius: 12, padding: '2px 10px' }}>
+                {orders.length} totales
+              </Tag>
+            </div>
+            <Text type="secondary" style={{ fontSize: 13 }}>
+              Supervisa pagos online Wompi, despachos contraentrega y rastreo de envíos
+            </Text>
+          </div>
 
-        {/* --- CARD INFERIOR: FILTROS Y TABLA (La sección que querías mover) --- */}
-        <Card style={{ marginTop: 24 }}>
-          {/* 👇 La nueva barra de filtros se posiciona aquí, justo encima de la tabla. 👇 */}
-          <OrdersFilters
-            rawSearchTerm={rawSearchTerm}
-            dateRangeValue={dateRangeValue}
-            
-            // Valores de filtros de Select
-            statusFilter={filters.status}
-            sellerFilter={filters.sellerId}
-            promoFilter={filters.promoCodeApplied}
-            
-            // Opciones de Select
-            statusOptions={statusOptions}
-            sellerOptions={sellerFilters}
-            promoOptions={promoFilters}
-            
-            // Handlers
-            onSearchChange={setRawSearchTerm}
-            onDateChange={handleDateFilter}
-            onFilterChange={handleSelectFilterChange} // Nuevo handler para Selects
-            onClearFilters={clearFilters}
-            
-            // Props de exportación eliminadas de este componente ya que se movieron arriba
-          />
-          
+          <Space wrap>
+            <Button icon={<ReloadOutlined />} onClick={fetchOrders} loading={loading}>
+              Actualizar
+            </Button>
+            <Button icon={<FileExcelOutlined />} onClick={() => handleExport('excel')} loading={isDownloading}>
+              Excel
+            </Button>
+            <Button icon={<FilePdfOutlined />} onClick={() => handleExport('pdf')} loading={isDownloading}>
+              PDF
+            </Button>
+            <Popconfirm
+              title="¿Procesar la cola de emails para todas las órdenes pendientes?"
+              onConfirm={async () => {
+                try {
+                  message.loading({ content: 'Procesando colas...', key: 'flushAll' });
+                  const res = await fetch('/api/admin/emails/flush-all', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                  });
+                  const payload = await res.json().catch(() => ({}));
+                  if (!res.ok) {
+                    message.error({ content: payload?.error || 'Error procesando colas', key: 'flushAll' });
+                  } else {
+                    message.success({
+                      content: `Proceso completado: ${payload.processed ?? 0} correos`,
+                      key: 'flushAll',
+                    });
+                  }
+                } catch (err) {
+                  console.error(err);
+                  message.error({ content: 'Error procesando colas', key: 'flushAll' });
+                }
+              }}
+              okText="Sí, procesar"
+              cancelText="Cancelar"
+            >
+              <Button icon={<SyncOutlined />} danger>
+                Procesar emails
+              </Button>
+            </Popconfirm>
+          </Space>
+        </div>
+
+        {/* Tarjetas de Estadísticas Senior */}
+        <OrdersStats stats={stats} loading={loading} />
+
+        {/* Sección de Filtros y Tabla */}
+        <OrdersFilters
+          rawSearchTerm={rawSearchTerm}
+          dateRangeValue={dateRangeValue}
+          statusFilter={filters.status}
+          paymentMethodFilter={filters.paymentMethod}
+          sellerFilter={filters.sellerId}
+          promoFilter={filters.promoCodeApplied}
+          quickFilter={quickFilter}
+          statusOptions={statusOptions}
+          paymentMethodOptions={PAYMENT_METHOD_OPTIONS}
+          sellerOptions={sellerFilters}
+          promoOptions={promoFilters}
+          filteredCount={filteredOrders.length}
+          totalCount={orders.length}
+          wompiCount={globalCounts.wompi}
+          contraentregaCount={globalCounts.contraentrega}
+          pendingCount={globalCounts.pending}
+          onSearchChange={setRawSearchTerm}
+          onDateChange={handleDateFilter}
+          onFilterChange={handleSelectFilterChange}
+          onQuickFilterChange={setQuickFilter}
+          onClearFilters={clearFilters}
+        />
+
+        <Card
+          bordered
+          style={{
+            borderRadius: 12,
+            borderColor: '#e2e8f0',
+            boxShadow: '0 1px 3px rgba(15, 23, 42, 0.04)',
+          }}
+          styles={{ body: { padding: '8px 12px' } }}
+        >
           <OrdersTable
             orders={filteredOrders}
             columns={columns}
@@ -483,7 +695,7 @@ export default function OrdersPage() {
             expandedRowKeys={expandedRowKeys}
             totalSummary={stats.totalGeneral}
             hasData={orders.length > 0}
-            onTableChange={handleTableChange}
+            onTableChange={() => {}}
             onRowClick={handleRowClick}
             onExpand={handleExpand}
           />
