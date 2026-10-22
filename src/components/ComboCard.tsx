@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ShoppingCartIcon, GiftIcon, FireIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { ShoppingCartIcon, GiftIcon, FireIcon, CheckIcon, ShareIcon } from "@heroicons/react/24/outline";
+import { toast } from "sonner";
 import { SparklesIcon } from "@heroicons/react/24/solid";
 import type { Combo } from "@/types/combo";
 import { useCart } from "@/hooks/useCart";
@@ -50,6 +51,28 @@ export default function ComboCard({ combo, idx = 0, showDescription = false }: C
       transition={{ duration: 0.4, delay: idx * 0.05, ease: "easeOut" }}
       className="group relative flex flex-col bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300"
     >
+      {/* Share button */}
+      <button
+        type="button"
+        aria-label="Compartir combo"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const origin = typeof window !== "undefined" ? window.location.origin : "";
+          const url = `${origin}/combos/${combo.slug}`;
+          if (typeof navigator !== "undefined" && navigator.share) {
+            navigator.share({ title: combo.name, text: `¡Mira este combo especial: ${combo.name}!`, url });
+          } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+            navigator.clipboard.writeText(url);
+            toast.success("Enlace del combo copiado");
+          }
+        }}
+        className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 shadow border border-slate-200/80 dark:border-slate-700 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-10 text-slate-500 hover:text-slate-800 dark:hover:text-white"
+        title="Compartir combo"
+      >
+        <ShareIcon className="w-4 h-4" />
+      </button>
+
       {/* Badges */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
         {combo.badge && (
