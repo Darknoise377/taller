@@ -34,12 +34,17 @@ export default function AdminCombosPage() {
   const [comboToDelete, setComboToDelete] = useState<AdminCombo | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Load view mode preference from localStorage
+  // Load view mode preference and URL filters
   useEffect(() => {
     try {
       const saved = localStorage.getItem('admin_combos_view_mode') as ViewMode | null;
       if (saved === 'grid' || saved === 'table') {
         setViewMode(saved);
+      }
+      const params = new URLSearchParams(window.location.search);
+      const f = params.get('filter') as FilterStatus;
+      if (f && ['all', 'active', 'inactive', 'featured', 'expired', 'gift', 'low_stock', 'meli'].includes(f)) {
+        setStatus(f);
       }
     } catch {}
   }, []);
@@ -259,6 +264,8 @@ export default function AdminCombosPage() {
       result = result.filter((c) => c.stock <= 3);
     } else if (status === 'expired') {
       result = result.filter((c) => !!c.expiresAt && new Date(c.expiresAt) <= now);
+    } else if (status === 'meli') {
+      result = result.filter((c) => Boolean(c.meliExport) || Boolean(c.meliListing?.meliItemId));
     }
 
     // Sort

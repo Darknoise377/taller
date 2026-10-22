@@ -106,7 +106,7 @@ export default function ComboTable({
                               {combo.badge}
                             </span>
                           )}
-                          {combo.meliExport && (
+                          {(combo.meliExport || combo.meliListing?.meliItemId) && (
                             <span
                               className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30"
                               title={combo.meliListing?.meliItemId ? `Sincronizado con MeLi (${combo.meliListing.meliItemId})` : 'Publicado en Mercado Libre'}

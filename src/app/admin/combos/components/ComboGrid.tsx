@@ -124,7 +124,7 @@ export default function ComboGrid({
                     +{combo.images.length} fotos
                   </span>
                 )}
-                {combo.meliExport && (
+                {(combo.meliExport || combo.meliListing?.meliItemId) && (
                   <span
                     className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold backdrop-blur-md shadow-md bg-amber-500/20 text-amber-300 border border-amber-500/40"
                     title={combo.meliListing?.meliItemId ? `Sincronizado con MeLi (${combo.meliListing.meliItemId})` : 'Publicación en MeLi activa'}

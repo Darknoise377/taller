@@ -30,6 +30,7 @@ import type { MeliSyncFilter } from '@/lib/meli/listingStatus';
 import MeliTabBar from './components/MeliTabBar';
 import type { MeliTabId } from './components/MeliTabBar';
 import MeliProductsTab from './components/MeliProductsTab';
+import MeliCombosTab from './components/MeliCombosTab';
 import MeliSalesTab from './components/MeliSalesTab';
 import MeliNetReportTab from './components/MeliNetReportTab';
 import MeliConfigTab from './components/MeliConfigTab';
@@ -693,6 +694,10 @@ export default function AdminMeliPage() {
               setEditProductModalOpen(true);
             }}
           />
+        )}
+
+        {activeTab === 'combos' && (
+          <MeliCombosTab status={status} />
         )}
 
         {activeTab === 'sales' && (

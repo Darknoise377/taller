@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Clock,
   ArrowUpDown,
+  ShoppingBag,
 } from 'lucide-react';
 import { AdminCombo, FilterStatus, SortOption } from '../types';
 
@@ -45,10 +46,12 @@ export default function ComboFilters({
     inactive: combos.filter((c) => !c.isActive).length,
     low_stock: combos.filter((c) => c.stock <= 3).length,
     expired: combos.filter((c) => !!c.isExpired).length,
+    meli: combos.filter((c) => Boolean(c.meliExport) || Boolean(c.meliListing?.meliItemId)).length,
   };
 
   const tabs = [
     { id: 'all' as FilterStatus, label: 'Todos', count: counts.all, icon: SlidersHorizontal },
+    { id: 'meli' as FilterStatus, label: 'Mercado Libre', count: counts.meli, icon: ShoppingBag },
     { id: 'active' as FilterStatus, label: 'Activos', count: counts.active, icon: CheckCircle },
     { id: 'featured' as FilterStatus, label: 'Destacados', count: counts.featured, icon: Sparkles },
     { id: 'gift' as FilterStatus, label: 'Con Regalo', count: counts.gift, icon: Gift },

@@ -81,7 +81,8 @@ export type FilterStatus =
   | 'featured'
   | 'expired'
   | 'gift'
-  | 'low_stock';
+  | 'low_stock'
+  | 'meli';
 
 export type SortOption =
   | 'recent'
