@@ -1,4 +1,4 @@
-﻿// src/app/products/[id]/page.tsx
+// src/app/products/[id]/page.tsx
 import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { notFound, permanentRedirect } from "next/navigation";
@@ -18,18 +18,9 @@ interface ProductPageProps {
 
 export const revalidate = 60;
 
-/** Pre-generate top 100 products (by stock) at build time */
+/** Generación dinámica bajo demanda (ISR) para no saturar el pool de conexiones en el build */
 export async function generateStaticParams() {
-  try {
-    const products = await prisma.product.findMany({
-      select: { id: true, slug: true },
-      orderBy: { stock: 'desc' },
-      take: 100,
-    });
-    return products.map((p) => ({ id: p.slug ?? p.id }));
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 const productSelect = {

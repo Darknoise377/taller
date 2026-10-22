@@ -4,7 +4,8 @@ import { getBaseUrl } from '@/lib/site';
 import { getComboSlugsForSitemap } from '@/lib/seo/queries';
 import { PRODUCT_CATEGORIES } from '@/constants/productCategories';
 
-export const revalidate = 3600; // regenerar cada hora
+export const dynamic = 'force-dynamic';
+export const revalidate = 3600; // regenerar cada hora en runtime
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getBaseUrl();

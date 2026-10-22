@@ -12,5 +12,5 @@ export const prisma =
     log: ['error', 'warn'], // puedes usar ['query'] si quieres depurar
   })
 
-// En desarrollo, guardamos la instancia globalmente
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+// Guardamos la instancia globalmente para reutilizar conexiones y evitar saturar el pool de Supabase
+globalForPrisma.prisma = prisma

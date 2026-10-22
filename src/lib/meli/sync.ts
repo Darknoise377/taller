@@ -10,7 +10,7 @@ import { prisma } from '@/lib/prisma';
 import { meliApi, type MeliItemPayload, type MeliCategoryAttribute } from './client';
 import { mapApiStatusToDb } from './listingStatus';
 import { calculateMeliPrice, getMeliConfig } from './pricing';
-import type { Product, Combo } from '@prisma/client';
+import type { Product } from '@prisma/client';
 
 // Known attribute IDs that we can map from local product fields.
 const SELLER_SKU  = 'SELLER_SKU';
@@ -912,11 +912,9 @@ export async function updateComboStockAndPrice(comboId: string): Promise<void> {
     console.warn(`[meli/sync] No se pudo actualizar descripción para combo ${listing.meliItemId}:`, err);
   }
 
-  let currentMeliStatus: string | undefined;
   let shouldReactivate = false;
   try {
     const meliItem = await meliApi.getItem(listing.meliItemId);
-    currentMeliStatus = meliItem.status;
     shouldReactivate = meliItem.status === 'paused' && availableStock > 0 && combo.isActive;
   } catch {}
 
