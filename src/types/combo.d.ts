@@ -43,6 +43,17 @@ export interface Combo {
   soldCount: number;
   badge?: string | null;
   expiresAt?: string | null; // ISO string
+  meliExport?: boolean;
+  meliTitle?: string | null;
+  meliListingType?: string;
+  meliListing?: {
+    id?: number;
+    meliItemId: string;
+    meliPermalink?: string | null;
+    status: string;
+    meliPrice: number;
+    lastSyncAt?: string;
+  } | null;
   items: ComboItem[];
   surpriseGift?: Omit<SurpriseGift, 'giftName'> | null; // giftName is hidden
   createdAt: string;

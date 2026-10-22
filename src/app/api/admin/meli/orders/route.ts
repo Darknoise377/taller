@@ -54,10 +54,15 @@ export async function GET() {
     if (meliItemIds.size > 0) {
       const listings = await prisma.meliListing.findMany({
         where: { meliItemId: { in: [...meliItemIds] } },
-        select: { meliItemId: true, product: { select: { price: true } } },
+        select: {
+          meliItemId: true,
+          product: { select: { price: true } },
+          combo: { select: { price: true } },
+        },
       });
       for (const l of listings) {
-        basePriceMap.set(l.meliItemId, l.product.price);
+        const price = l.product?.price ?? l.combo?.price ?? 0;
+        basePriceMap.set(l.meliItemId, price);
       }
     }
 

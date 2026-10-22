@@ -25,6 +25,8 @@ export interface MeliPriceResult {
   meliCommissionAmount: number; // COP amount MeLi keeps
   extraMarginRate: number;      // Additional % seller adds on top
   fixedCostCOP: number;         // Fixed cost per sale (packaging, etc.)
+  shippingCost: number;         // Mercado Envíos shipping cost deducted by MeLi (when >= freeShippingThresholdCOP)
+  hasFreeShipping: boolean;     // Whether MeLi forces free shipping for buyer
   netToSeller: number;          // COP the seller effectively receives after all deductions
 }
 
@@ -36,6 +38,8 @@ export async function getMeliConfig() {
     fixedCostCOP: config?.fixedCostCOP ?? 3500,
     defaultListingType: config?.defaultListingType ?? 'gold_special',
     freeInstallments: config?.freeInstallments ?? 3,
+    meliShippingCostCOP: config?.meliShippingCostCOP ?? 10000,
+    freeShippingThresholdCOP: config?.freeShippingThresholdCOP ?? 60000,
     categoryMap: (config?.categoryMap ?? {}) as Record<string, string>,
   };
 }
@@ -47,10 +51,19 @@ export async function getMeliConfig() {
 export async function calculateMeliPrice(
   productPrice: number,
   listingType?: string,
+  forceShipping?: boolean,
 ): Promise<MeliPriceResult> {
   const config = await getMeliConfig();
   const lt = listingType ?? config.defaultListingType;
-  return calculateMeliPriceSync(productPrice, lt, config.extraMarginPercent, config.fixedCostCOP);
+  return calculateMeliPriceSync(
+    productPrice,
+    lt,
+    config.extraMarginPercent,
+    config.fixedCostCOP,
+    config.meliShippingCostCOP,
+    config.freeShippingThresholdCOP,
+    forceShipping,
+  );
 }
 
 /** Synchronous version when config values are already loaded. */
@@ -59,17 +72,29 @@ export function calculateMeliPriceSync(
   listingType: string,
   extraMarginPercent: number,
   fixedCostCOP: number,
+  meliShippingCostCOP = 10000,
+  freeShippingThresholdCOP = 60000,
+  forceShipping?: boolean,
 ): MeliPriceResult {
   const meliCommissionRate = MELI_COMMISSION_RATES[listingType] ?? 16.5;
   const totalRate = meliCommissionRate + extraMarginPercent;
   if (totalRate >= 100) throw new Error('totalRate must be < 100');
 
-  // Gross up: seller receives productPrice; MeLi keeps totalRate% of final price
-  const rawPrice = (productPrice + fixedCostCOP) / (1 - totalRate / 100);
+  // Evaluar si califica para Envío Gratis obligatorio en Mercado Libre Colombia (>= $60.000 COP)
+  const rawBase = (productPrice + fixedCostCOP) / (1 - totalRate / 100);
+  const needsFreeShipping =
+    forceShipping !== undefined
+      ? forceShipping
+      : rawBase >= freeShippingThresholdCOP || productPrice >= freeShippingThresholdCOP;
+
+  const shippingCost = needsFreeShipping ? meliShippingCostCOP : 0;
+
+  // Gross up: el vendedor recibe productPrice; MeLi retiene totalRate% + flete obligatorio + costo fijo
+  const rawPrice = (productPrice + fixedCostCOP + shippingCost) / (1 - totalRate / 100);
   const meliPrice = Math.ceil(rawPrice / 100) * 100;
 
-  const meliCommissionAmount = Math.round(meliPrice * meliCommissionRate / 100);
-  const netToSeller = meliPrice - meliCommissionAmount - fixedCostCOP;
+  const meliCommissionAmount = Math.round((meliPrice * meliCommissionRate) / 100);
+  const netToSeller = meliPrice - meliCommissionAmount - fixedCostCOP - shippingCost;
 
   return {
     meliPrice,
@@ -79,6 +104,8 @@ export function calculateMeliPriceSync(
     meliCommissionAmount,
     extraMarginRate: extraMarginPercent,
     fixedCostCOP,
+    shippingCost,
+    hasFreeShipping: needsFreeShipping,
     netToSeller,
   };
 }

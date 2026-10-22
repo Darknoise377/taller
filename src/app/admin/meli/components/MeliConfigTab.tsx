@@ -120,6 +120,8 @@ export default function MeliConfigTab({
             fixedCostCOP: config?.fixedCostCOP ?? 3500,
             defaultListingType: config?.defaultListingType ?? 'gold_special',
             freeInstallments: config?.freeInstallments ?? 3,
+            meliShippingCostCOP: config?.meliShippingCostCOP ?? 10000,
+            freeShippingThresholdCOP: config?.freeShippingThresholdCOP ?? 60000,
           }}
         >
           <Row gutter={[24, 16]}>
@@ -152,8 +154,18 @@ export default function MeliConfigTab({
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item name="fixedCostCOP" label="Costo fijo por venta (COP)" tooltip="Tarifa fija que cobra Mercado Libre por ventas de monto bajo." rules={[{ required: true }]}>
+              <Form.Item name="fixedCostCOP" label="Costo fijo por venta (COP)" tooltip="Tarifa fija que cobra Mercado Libre por empaque o ventas de monto bajo." rules={[{ required: true }]}>
                 <InputNumber size="large" min={0} step={500} prefix="$" className="w-full" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item name="meliShippingCostCOP" label="Costo Envío Mercado Envíos (COP)" tooltip="Costo promedio que MeLi descuenta de tu liquidación por la guía de envío cuando el precio supera el umbral de Envío Gratis." rules={[{ required: true }]}>
+                <InputNumber size="large" min={0} step={500} prefix="$" className="w-full" />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item name="freeShippingThresholdCOP" label="Umbral Envío Gratis MeLi (COP)" tooltip="Precio a partir del cual Mercado Libre Colombia exige Envío Gratis obligatorio (actualmente $60.000 COP)." rules={[{ required: true }]}>
+                <InputNumber size="large" min={0} step={5000} prefix="$" className="w-full" />
               </Form.Item>
             </Col>
           </Row>

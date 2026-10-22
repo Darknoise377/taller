@@ -42,6 +42,17 @@ export interface AdminCombo {
   badge?: string | null;
   expiresAt?: string | null;
   isExpired?: boolean;
+  meliExport?: boolean;
+  meliTitle?: string | null;
+  meliListingType?: string;
+  meliListing?: {
+    id?: number;
+    meliItemId: string;
+    meliPermalink?: string | null;
+    status: string;
+    meliPrice: number;
+    lastSyncAt?: string;
+  } | null;
   savings?: number;
   savingsPercent?: number;
   items: AdminComboItem[];

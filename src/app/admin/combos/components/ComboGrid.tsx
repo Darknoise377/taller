@@ -124,6 +124,15 @@ export default function ComboGrid({
                     +{combo.images.length} fotos
                   </span>
                 )}
+                {combo.meliExport && (
+                  <span
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold backdrop-blur-md shadow-md bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                    title={combo.meliListing?.meliItemId ? `Sincronizado con MeLi (${combo.meliListing.meliItemId})` : 'Publicación en MeLi activa'}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                    MeLi
+                  </span>
+                )}
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold backdrop-blur-md shadow-md ${
                     combo.isActive && !isExpired

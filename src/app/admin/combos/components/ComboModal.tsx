@@ -23,7 +23,13 @@ import {
   Clock,
   ArrowRight,
   Info,
+  ExternalLink,
+  RefreshCw,
+  Truck,
+  Store,
 } from 'lucide-react';
+import { message } from 'antd';
+import { sanitizeComboTitle, hasForbiddenWords } from '@/utils/meliSanitizer';
 import { AdminCombo, ProductOption } from '../types';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { uploadImage } from '@/services/productService';
@@ -97,6 +103,12 @@ export default function ComboModal({
   const [giftHint, setGiftHint] = useState('');
   const [giftValue, setGiftValue] = useState<number>(0);
 
+  // Mercado Libre states
+  const [meliExport, setMeliExport] = useState(false);
+  const [meliTitle, setMeliTitle] = useState('');
+  const [meliListingType, setMeliListingType] = useState('gold_special');
+  const [isSyncingMeli, setIsSyncingMeli] = useState(false);
+
   // AI states
   const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
@@ -138,6 +150,10 @@ export default function ComboModal({
         })) || []
       );
 
+      setMeliExport(Boolean(combo.meliExport));
+      setMeliTitle(combo.meliTitle || sanitizeComboTitle(combo.name || ''));
+      setMeliListingType(combo.meliListingType || 'gold_special');
+
       if (combo.surpriseGift) {
         setHasGift(true);
         setGiftName(combo.surpriseGift.giftName || '');
@@ -170,15 +186,22 @@ export default function ComboModal({
       setGiftName('');
       setGiftHint('');
       setGiftValue(0);
+      setMeliExport(false);
+      setMeliTitle('');
+      setMeliListingType('gold_special');
     }
     setFormError('');
   }, [isOpen, combo]);
 
-  // Handle Name Change & Auto-Slug
+  // Handle Name Change & Auto-Slug & Auto-MeLi-Title
   const handleNameChange = (val: string) => {
     setName(val);
     if (!isManualSlug) {
       setSlug(slugify(val));
+    }
+    // Si aún no se ha personalizado el título de MeLi manualmente, sincronizarlo con el formato de MeLi
+    if (!combo || !combo.meliTitle) {
+      setMeliTitle(sanitizeComboTitle(val));
     }
   };
 
@@ -369,6 +392,35 @@ export default function ComboModal({
     }
   };
 
+  // Mercado Libre Financial Simulation
+  const meliCommissionRate = meliListingType === 'gold_premium' ? 18.5 : 16.5;
+  const meliFixedCost = 3500;
+  const meliShippingCost = 10000;
+  // En Mercado Libre Colombia precios >= $60.000 COP tienen envío gratis obligatorio para el comprador
+  const rawBaseEstimate = price > 0 ? (price + meliFixedCost) / (1 - meliCommissionRate / 100) : 0;
+  const hasMeliFreeShipping = rawBaseEstimate >= 60000 || price >= 60000;
+  const appliedShippingCost = hasMeliFreeShipping ? meliShippingCost : 0;
+  const simulatedMeliPrice = price > 0
+    ? Math.ceil((price + meliFixedCost + appliedShippingCost) / (1 - meliCommissionRate / 100) / 100) * 100
+    : 0;
+  const simulatedMeliCommission = Math.round((simulatedMeliPrice * meliCommissionRate) / 100);
+  const simulatedNetToSeller = simulatedMeliPrice - simulatedMeliCommission - meliFixedCost - appliedShippingCost;
+
+  const handleSyncMeliNow = async () => {
+    if (!combo?.id) return;
+    setIsSyncingMeli(true);
+    try {
+      const res = await fetch(`/api/meli/sync/combo/${combo.id}`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al sincronizar con Mercado Libre');
+      message.success('¡Combo sincronizado con éxito en Mercado Libre! 🚀');
+    } catch (err) {
+      message.error((err as Error).message || 'Error al sincronizar');
+    } finally {
+      setIsSyncingMeli(false);
+    }
+  };
+
   // Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -413,6 +465,9 @@ export default function ComboModal({
       isActive,
       isFeatured,
       expiresAt: expiresAt ? new Date(expiresAt).toISOString() : null,
+      meliExport,
+      meliTitle: meliTitle.trim() || null,
+      meliListingType,
       items,
       surpriseGift: hasGift
         ? {
@@ -1016,6 +1071,216 @@ export default function ComboModal({
                   Destacar en Inicio (Hero & Vitrina)
                 </span>
               </label>
+            </div>
+
+            {/* Section 8: Sincronización con Mercado Libre */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-amber-500/30 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 p-0.5 shadow-md shadow-amber-500/20">
+                    <div className="w-full h-full rounded-[10px] bg-slate-950 flex items-center justify-center">
+                      <Store className="w-4 h-4 text-amber-400" />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-bold text-white">
+                        Sincronización con Mercado Libre
+                      </h4>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        MELI SYNC
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Publica este combo en Mercado Libre blindando tus márgenes (comisión + flete) y con stock compuesto.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Switch Toggle */}
+                <button
+                  type="button"
+                  onClick={() => setMeliExport(!meliExport)}
+                  className={`w-12 h-6 rounded-full transition-colors relative p-0.5 ${
+                    meliExport ? 'bg-amber-500 shadow-md shadow-amber-500/30' : 'bg-slate-800'
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-full bg-slate-950 transition-transform ${
+                      meliExport ? 'translate-x-6' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {meliExport && (
+                <div className="space-y-4 pt-2 border-t border-slate-800/80">
+                  {/* Título en MeLi */}
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs font-semibold text-amber-200">
+                        Título en Mercado Libre <span className="text-rose-400">*</span>
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setMeliTitle(sanitizeComboTitle(name))}
+                          className="text-[10px] text-amber-400 hover:text-amber-300 font-semibold"
+                        >
+                          ✨ Sugerir título conforme MeLi
+                        </button>
+                        <span
+                          className={`text-[10px] font-mono font-bold ${
+                            meliTitle.length > 60 ? 'text-rose-400' : 'text-slate-400'
+                          }`}
+                        >
+                          {meliTitle.length}/60
+                        </span>
+                      </div>
+                    </div>
+
+                    <input
+                      type="text"
+                      maxLength={60}
+                      value={meliTitle}
+                      onChange={(e) => setMeliTitle(e.target.value)}
+                      placeholder="Ej: Kit Mantenimiento Bajaj Pulsar 200 Ns Filtro Y Bujias"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                    />
+
+                    {hasForbiddenWords(meliTitle) && (
+                      <div className="mt-2 p-2.5 rounded-xl bg-rose-950/50 border border-rose-500/40 text-rose-300 text-[11px] flex items-center gap-2">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>
+                          Mercado Libre prohíbe palabras promocionales como &quot;oferta&quot;, &quot;descuento&quot;, &quot;promo&quot; o &quot;gratis&quot; en el título.
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Tipo de Publicación */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Tipo de Publicación
+                      </label>
+                      <select
+                        value={meliListingType}
+                        onChange={(e) => setMeliListingType(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                      >
+                        <option value="gold_special">Clásica (16.5% comisión — Alta exposición)</option>
+                        <option value="gold_premium">Premium (18.5% comisión — Cuotas sin interés)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Stock Compuesto para MeLi
+                      </label>
+                      <div className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs flex items-center justify-between">
+                        <span>Límite por repuestos:</span>
+                        <strong className="text-amber-400 font-mono">
+                          {Math.min(stock, suggestedStock || stock)} unidades
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Simulador Financiero Mercado Libre */}
+                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                        <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
+                        Desglose Financiero Blindado (Precio MeLi)
+                      </span>
+                      {hasMeliFreeShipping && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                          <Truck className="w-3 h-3" />
+                          Envío Gratis Comprador
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                      <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block">Precio Combo Web:</span>
+                        <strong className="text-white font-mono">{formatCurrency(price, 'COP')}</strong>
+                      </div>
+
+                      <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block">+ Flete MeLi (10k):</span>
+                        <strong className="text-amber-400 font-mono">
+                          {hasMeliFreeShipping ? `+${formatCurrency(meliShippingCost, 'COP')}` : 'Sin flete obligatorio'}
+                        </strong>
+                      </div>
+
+                      <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block">+ Costo Fijo / Empaque:</span>
+                        <strong className="text-slate-300 font-mono">+{formatCurrency(meliFixedCost, 'COP')}</strong>
+                      </div>
+
+                      <div className="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                        <span className="text-slate-500 block">+ Comisión ({meliCommissionRate}%):</span>
+                        <strong className="text-amber-300 font-mono">+{formatCurrency(simulatedMeliCommission, 'COP')}</strong>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between flex-wrap gap-2">
+                      <div>
+                        <span className="text-[11px] text-slate-400 block">PVP Publicado en Mercado Libre:</span>
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-xl sm:text-2xl font-black text-amber-400 font-mono">
+                            {formatCurrency(simulatedMeliPrice, 'COP')}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            (Neto para ti: <strong className="text-emerald-400 font-mono">{formatCurrency(simulatedNetToSeller, 'COP')}</strong>)
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-[10px] text-slate-400 max-w-xs text-right">
+                        ✓ Recibes el 100% de los <strong>{formatCurrency(price, 'COP')}</strong> del combo limpios.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Publicación activa en MeLi */}
+                  {combo?.meliListing && (
+                    <div className="p-3.5 rounded-xl bg-slate-900 border border-amber-500/20 flex items-center justify-between gap-3 flex-wrap">
+                      <div className="flex items-center gap-3">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300">
+                          {combo.meliListing.meliItemId}
+                        </span>
+                        <span className="text-xs text-slate-300 font-medium">
+                          Estado: <strong className="text-emerald-400">{combo.meliListing.status}</strong>
+                        </span>
+                        {combo.meliListing.meliPermalink && (
+                          <a
+                            href={combo.meliListing.meliPermalink}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-amber-400 hover:underline font-semibold"
+                          >
+                            <span>Ver publicación</span>
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleSyncMeliNow}
+                        disabled={isSyncingMeli}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-all disabled:opacity-50"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${isSyncingMeli ? 'animate-spin' : ''}`} />
+                        <span>{isSyncingMeli ? 'Sincronizando...' : 'Sincronizar ahora'}</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Submit Action in Form Footer */}

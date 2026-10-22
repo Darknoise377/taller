@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { verifyAdminToken } from '@/lib/auth';
 import { COOKIE_NAME } from '@/config/admin';
+import { syncCombo, unpublishCombo } from '@/lib/meli/sync';
 
 async function requireAdmin() {
   const cookieStore = await cookies();
@@ -77,6 +78,16 @@ export async function GET(
           },
         },
         surpriseGift: true,
+        meliListing: {
+          select: {
+            id: true,
+            meliItemId: true,
+            meliPermalink: true,
+            status: true,
+            meliPrice: true,
+            lastSyncAt: true,
+          },
+        },
         _count: {
           select: { orderCombos: true },
         },
@@ -131,6 +142,16 @@ export async function PATCH(
           },
         },
         surpriseGift: true,
+        meliListing: {
+          select: {
+            id: true,
+            meliItemId: true,
+            meliPermalink: true,
+            status: true,
+            meliPrice: true,
+            lastSyncAt: true,
+          },
+        },
         _count: {
           select: { orderCombos: true },
         },
@@ -173,6 +194,9 @@ export async function PUT(
       stock?: number;
       badge?: string | null;
       expiresAt?: string | null;
+      meliExport?: boolean;
+      meliTitle?: string | null;
+      meliListingType?: string;
       items?: Array<{ productId: string; quantity: number }>;
       surpriseGift?: { hint?: string | null; giftName: string; giftValue?: number | null } | null;
     };
@@ -221,6 +245,9 @@ export async function PUT(
           ...(body.expiresAt !== undefined
             ? { expiresAt: body.expiresAt ? new Date(body.expiresAt) : null }
             : {}),
+          ...(body.meliExport !== undefined ? { meliExport: Boolean(body.meliExport) } : {}),
+          ...(body.meliTitle !== undefined ? { meliTitle: body.meliTitle?.trim() || null } : {}),
+          ...(body.meliListingType !== undefined ? { meliListingType: body.meliListingType } : {}),
           ...(body.items !== undefined
             ? {
                 items: {
@@ -265,6 +292,17 @@ export async function PUT(
       revalidatePath(`/combos/${combo.slug}`);
     }
     revalidatePath('/');
+
+    // Sincronización inteligente con Mercado Libre
+    if (combo.meliExport) {
+      syncCombo(combo.id).catch((err) => {
+        console.error(`[PUT /api/admin/combos/[id]] Error al sincronizar con MeLi:`, err);
+      });
+    } else if (existing.meliExport && !combo.meliExport) {
+      unpublishCombo(combo.id).catch((err) => {
+        console.error(`[PUT /api/admin/combos/[id]] Error al despublicar de MeLi:`, err);
+      });
+    }
 
     return NextResponse.json(combo);
   } catch (err) {

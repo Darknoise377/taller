@@ -11,6 +11,8 @@ export interface MeliConfig {
   fixedCostCOP: number;
   defaultListingType: string;
   freeInstallments: number;
+  meliShippingCostCOP?: number;
+  freeShippingThresholdCOP?: number;
   categoryMap: Record<string, string>;
 }
 

@@ -10,7 +10,7 @@ import { prisma } from '@/lib/prisma';
 import { meliApi, type MeliItemPayload, type MeliCategoryAttribute } from './client';
 import { mapApiStatusToDb } from './listingStatus';
 import { calculateMeliPrice, getMeliConfig } from './pricing';
-import type { Product } from '@prisma/client';
+import type { Product, Combo } from '@prisma/client';
 
 // Known attribute IDs that we can map from local product fields.
 const SELLER_SKU  = 'SELLER_SKU';
@@ -273,9 +273,9 @@ async function buildAttributes(
 }
 
 // ─── Título saneado para cumplir reglas de MeLi ──────────────────────────────
-const MELI_FORBIDDEN_TITLE_WORDS = /\b(oferta|descuento|gratis|promo|rebaja|sale|%off|envio gratis)\b/gi;
+export const MELI_FORBIDDEN_TITLE_WORDS = /\b(oferta|descuento|gratis|promo|rebaja|sale|%off|envio gratis)\b/gi;
 
-function sanitizeTitle(raw: string): string {
+export function sanitizeTitle(raw: string): string {
   return raw
     .replace(/https?:\/\/\S+/gi, '')           // quitar URLs
     .replace(/\S+@\S+\.\S+/g, '')              // quitar emails
@@ -286,6 +286,16 @@ function sanitizeTitle(raw: string): string {
     .trim()
     .slice(0, 60)
     .trimEnd();
+}
+
+/** Título especializado para Combos/Kits en Mercado Libre (empieza con Kit/Combo, sin palabras prohibidas, max 60 chars) */
+export function sanitizeComboTitle(raw: string): string {
+  let cleaned = sanitizeTitle(raw);
+  // Si no empieza con Kit ni Combo, anteponer "Kit "
+  if (!/^kit\b/i.test(cleaned) && !/^combo\b/i.test(cleaned)) {
+    cleaned = `Kit ${cleaned}`;
+  }
+  return cleaned.slice(0, 60).trim();
 }
 
 // ─── Build a MeLi item payload from a local product ─────────────────────────
@@ -733,6 +743,263 @@ export async function unpublishProduct(productId: string): Promise<void> {
   });
 }
 
+// ─── COMBO SYNC & PUBLISHING ──────────────────────────────────────────────────
+
+export function computeCompoundStock(
+  comboStock: number,
+  items: Array<{ quantity: number; product?: { stock: number } | null }>,
+): number {
+  if (!items || items.length === 0) return 0;
+  const itemCaps = items.map((i) => {
+    const pStock = i.product?.stock ?? 0;
+    const reqQty = Math.max(1, i.quantity || 1);
+    return Math.floor(pStock / reqQty);
+  });
+  return Math.max(0, Math.min(comboStock, ...itemCaps));
+}
+
+function buildMeliComboDescription(
+  combo: { name: string; description?: string | null },
+  items: Array<{ quantity: number; product: { name: string; brand?: string | null; sku?: string | null } }>,
+): { plain_text: string; html: string } {
+  const parts: string[] = [];
+
+  parts.push(`<h3>KIT / COMBO: ${escapeHtml(combo.name)}</h3>`);
+  if (combo.description) {
+    parts.push(`<p>${escapeHtml(combo.description)}</p>`);
+  }
+
+  parts.push(`<h4>📦 ESTE COMBO INCLUYE:</h4>`);
+  parts.push(`<ul>`);
+  for (const item of items) {
+    const brandStr = item.product.brand ? ` (${escapeHtml(item.product.brand)})` : '';
+    const skuStr = item.product.sku ? ` - Ref: ${escapeHtml(item.product.sku)}` : '';
+    parts.push(`<li><strong>${item.quantity}x</strong> ${escapeHtml(item.product.name)}${brandStr}${skuStr}</li>`);
+  }
+  parts.push(`</ul>`);
+
+  parts.push(
+    '<hr style="border:none;border-top:1px solid #ccc;margin:15px 0;">' +
+    '<p><strong> ✓ Garantía de 90 días en todos nuestros repuestos </strong></p>' +
+    '<p><strong> ✓ Envíos a todo Colombia con Mercado Envíos </strong></p>' +
+    '<p><strong> ✓ Repuestos verificados y 100% compatibles </strong></p>',
+  );
+
+  const plainList = items.map((i) => `• ${i.quantity}x ${i.product.name}`).join('\n');
+  const plainText = `${combo.name}\n\n${combo.description || ''}\n\nESTE COMBO INCLUYE:\n${plainList}\n\nGarantía de 90 días. Envíos a todo Colombia.`;
+
+  return {
+    plain_text: plainText.slice(0, 50000),
+    html: parts.join('\n'),
+  };
+}
+
+export async function publishCombo(comboId: string): Promise<{ meliItemId: string }> {
+  const combo = await prisma.combo.findUniqueOrThrow({
+    where: { id: comboId },
+    include: {
+      items: {
+        include: {
+          product: true,
+        },
+      },
+    },
+  });
+
+  const availableStock = computeCompoundStock(combo.stock, combo.items);
+  if (availableStock <= 0) {
+    throw new Error(`No se puede publicar el combo "${combo.name}": el stock disponible compuesto es 0.`);
+  }
+
+  const primaryProduct = combo.items[0]?.product;
+  if (!primaryProduct) {
+    throw new Error(`El combo "${combo.name}" no tiene repuestos asociados.`);
+  }
+
+  let categoryId: string;
+  try {
+    categoryId = await resolveCategoryId(primaryProduct);
+  } catch {
+    const predictions = await meliApi.predictCategory(`Repuestos Motos Kit Combo ${combo.name}`);
+    categoryId = predictions[0]?.category_id || 'MCO1747';
+  }
+
+  const title = sanitizeComboTitle(combo.meliTitle || combo.name);
+  const listingType = combo.meliListingType || 'gold_special';
+  const { meliPrice } = await calculateMeliPrice(combo.price, listingType);
+
+  const pictures =
+    combo.images?.length
+      ? combo.images.map((url) => ({ source: url }))
+      : combo.imageUrl
+      ? [{ source: combo.imageUrl }]
+      : primaryProduct?.images?.length
+      ? primaryProduct.images.map((url) => ({ source: url }))
+      : [];
+
+  if (pictures.length === 0) {
+    throw new Error(`El combo "${combo.name}" no tiene imágenes.`);
+  }
+
+  const description = buildMeliComboDescription(combo, combo.items);
+  const attributes = await buildAttributes(primaryProduct, categoryId);
+
+  const payload: MeliItemPayload = {
+    family_name: title,
+    category_id: categoryId,
+    price: meliPrice,
+    currency_id: 'COP',
+    available_quantity: availableStock,
+    buying_mode: 'buy_it_now',
+    condition: 'new',
+    listing_type_id: listingType,
+    description,
+    pictures,
+    ...(attributes.length > 0 && { attributes }),
+    sale_terms: [
+      { id: 'WARRANTY_TYPE', value_name: 'Garantía del vendedor' },
+      { id: 'WARRANTY_TIME', value_name: '90 días' },
+    ],
+    shipping: {
+      mode: 'me2',
+      local_pick_up: true,
+      free_shipping: meliPrice >= 60000,
+    },
+  };
+
+  const response = await meliApi.createItem(payload);
+  const categoryLabel = await getCategoryLabel(categoryId);
+
+  await prisma.meliListing.create({
+    data: {
+      comboId,
+      meliItemId: response.id,
+      meliPermalink: response.permalink,
+      status: mapApiStatusToDb(response.status),
+      meliPrice,
+      syncedProductPrice: combo.price,
+      syncedProductStock: availableStock,
+      meliCategoryId: categoryId,
+      meliCategoryName: categoryLabel.name,
+      meliCategoryPath: categoryLabel.path,
+      lastSyncAt: new Date(),
+    },
+  });
+
+  return { meliItemId: response.id };
+}
+
+export async function updateComboStockAndPrice(comboId: string): Promise<void> {
+  const [combo, listing] = await Promise.all([
+    prisma.combo.findUniqueOrThrow({
+      where: { id: comboId },
+      include: {
+        items: { include: { product: true } },
+      },
+    }),
+    prisma.meliListing.findUnique({ where: { comboId } }),
+  ]);
+
+  if (!listing) return;
+
+  const availableStock = computeCompoundStock(combo.stock, combo.items);
+  const { meliPrice } = await calculateMeliPrice(combo.price, combo.meliListingType || 'gold_special');
+
+  try {
+    const desc = buildMeliComboDescription(combo, combo.items);
+    await meliApi.updateItemDescription(listing.meliItemId, desc);
+  } catch (err) {
+    console.warn(`[meli/sync] No se pudo actualizar descripción para combo ${listing.meliItemId}:`, err);
+  }
+
+  let currentMeliStatus: string | undefined;
+  let shouldReactivate = false;
+  try {
+    const meliItem = await meliApi.getItem(listing.meliItemId);
+    currentMeliStatus = meliItem.status;
+    shouldReactivate = meliItem.status === 'paused' && availableStock > 0 && combo.isActive;
+  } catch {}
+
+  const newStatus = !combo.isActive || availableStock <= 0 ? 'paused' : shouldReactivate ? 'active' : undefined;
+
+  await meliApi.updateItem(listing.meliItemId, {
+    price: meliPrice,
+    available_quantity: availableStock,
+    ...(newStatus && { status: newStatus }),
+  });
+
+  await prisma.meliListing.update({
+    where: { comboId },
+    data: {
+      meliPrice,
+      status: newStatus ? mapApiStatusToDb(newStatus) : listing.status,
+      lastSyncAt: new Date(),
+      syncedProductPrice: combo.price,
+      syncedProductStock: availableStock,
+    },
+  });
+}
+
+export async function syncCombo(comboId: string): Promise<{ action: 'published' | 'updated' | 'republished' }> {
+  const listing = await prisma.meliListing.findUnique({ where: { comboId } });
+
+  if (!listing) {
+    await publishCombo(comboId);
+    return { action: 'published' };
+  }
+
+  try {
+    const meliItem = await meliApi.getItem(listing.meliItemId);
+    if (meliItem.status === 'closed' || meliItem.status === 'inactive') {
+      await prisma.meliListing.delete({ where: { comboId } });
+      await publishCombo(comboId);
+      return { action: 'republished' };
+    }
+  } catch {
+    try {
+      await prisma.meliListing.delete({ where: { comboId } });
+      await publishCombo(comboId);
+      return { action: 'republished' };
+    } catch (publishErr) {
+      throw new Error(`Republish fallido para combo ${comboId}: ${publishErr instanceof Error ? publishErr.message : String(publishErr)}`);
+    }
+  }
+
+  await updateComboStockAndPrice(comboId);
+  return { action: 'updated' };
+}
+
+export async function unpublishCombo(comboId: string): Promise<void> {
+  const listing = await prisma.meliListing.findUnique({ where: { comboId } });
+  if (!listing) return;
+
+  await meliApi.closeItem(listing.meliItemId);
+  await prisma.meliListing.update({
+    where: { comboId },
+    data: { status: 'CLOSED', lastSyncAt: new Date() },
+  });
+}
+
+export async function syncCombosContainingProduct(productId: string): Promise<void> {
+  const combos = await prisma.combo.findMany({
+    where: {
+      meliExport: true,
+      items: {
+        some: { productId },
+      },
+    },
+    select: { id: true },
+  });
+
+  for (const c of combos) {
+    try {
+      await updateComboStockAndPrice(c.id);
+    } catch (e) {
+      console.warn(`[meli/sync] Failed to resync combo ${c.id}:`, e);
+    }
+  }
+}
+
 // ─── Process a MeLi order: reduce stock, save record (idempotent) ─────────────
 function computeRealCommission(order: import('./client').MeliOrderResponse): number | null {
   const fromPayments = order.payments
@@ -776,33 +1043,92 @@ export async function processMeliOrder(meliOrderId: string): Promise<void> {
   const isProcessable = (status: string) => processableStatuses.includes(status);
 
   const applyStockDeductions = async () => {
-    // Reduce stock for each item sold
+    // Reduce stock for each item sold (either Product or Combo)
     for (const orderItem of order.order_items) {
       const listing = await prisma.meliListing.findFirst({
         where: { meliItemId: orderItem.item.id },
-        select: { productId: true },
+        select: { productId: true, comboId: true },
       });
       if (!listing) {
-        console.warn(`[meli/order] No local product found for MeLi item ${orderItem.item.id}`);
+        console.warn(`[meli/order] No local product/combo found for MeLi item ${orderItem.item.id}`);
         continue;
       }
 
-      // Decrement local stock (floor at 0)
-      const currentProduct = await prisma.product.findUniqueOrThrow({
-        where: { id: listing.productId },
-        select: { stock: true },
-      });
+      if (listing.productId) {
+        // Decrement local product stock (floor at 0)
+        const currentProduct = await prisma.product.findUniqueOrThrow({
+          where: { id: listing.productId },
+          select: { stock: true },
+        });
 
-      await prisma.product.update({
-        where: { id: listing.productId },
-        data: { stock: Math.max(0, currentProduct.stock - orderItem.quantity) },
-      });
+        await prisma.product.update({
+          where: { id: listing.productId },
+          data: { stock: Math.max(0, currentProduct.stock - orderItem.quantity) },
+        });
 
-      // Push updated stock back to MeLi listing
-      try {
-        await updateStockAndPrice(listing.productId);
-      } catch (err) {
-        console.error(`[meli/order] Failed to sync stock back to MeLi for ${listing.productId}:`, err);
+        // Push updated stock back to MeLi listing
+        try {
+          await updateStockAndPrice(listing.productId);
+        } catch (err) {
+          console.error(`[meli/order] Failed to sync stock back to MeLi for ${listing.productId}:`, err);
+        }
+
+        // Sincronizar combos que contengan este producto
+        try {
+          await syncCombosContainingProduct(listing.productId);
+        } catch (cErr) {
+          console.warn(`[meli/order] Failed to update dependent combos for product ${listing.productId}:`, cErr);
+        }
+      } else if (listing.comboId) {
+        // Venta de un Combo en MeLi
+        const combo = await prisma.combo.findUniqueOrThrow({
+          where: { id: listing.comboId },
+          include: {
+            items: {
+              include: {
+                product: { select: { id: true, stock: true } },
+              },
+            },
+          },
+        });
+
+        // 1) Descontar stock del combo e incrementar vendidos
+        await prisma.combo.update({
+          where: { id: listing.comboId },
+          data: {
+            stock: Math.max(0, combo.stock - orderItem.quantity),
+            soldCount: { increment: orderItem.quantity },
+          },
+        });
+
+        // 2) Descontar stock de cada uno de los productos que componen el combo
+        for (const ci of combo.items) {
+          const qtyDeduct = orderItem.quantity * (ci.quantity || 1);
+          const currentPStock = ci.product?.stock ?? 0;
+          await prisma.product.update({
+            where: { id: ci.productId },
+            data: { stock: Math.max(0, currentPStock - qtyDeduct) },
+          });
+
+          // Si el producto individual también está publicado en MeLi, actualizar su stock en MeLi
+          const prodListing = await prisma.meliListing.findUnique({
+            where: { productId: ci.productId },
+          });
+          if (prodListing) {
+            try {
+              await updateStockAndPrice(ci.productId);
+            } catch (pErr) {
+              console.error(`[meli/order] Failed to update product stock ${ci.productId} on MeLi:`, pErr);
+            }
+          }
+        }
+
+        // 3) Actualizar stock compuesto del combo en MeLi
+        try {
+          await updateComboStockAndPrice(listing.comboId);
+        } catch (combErr) {
+          console.error(`[meli/order] Failed to update combo stock ${listing.comboId} on MeLi:`, combErr);
+        }
       }
     }
   };

@@ -21,7 +21,9 @@ export async function GET() {
   const config = await prisma.meliConfig.findUnique({ where: { id: 1 } });
   return NextResponse.json(config ?? {
     id: 1, extraMarginPercent: 0, fixedCostCOP: 3500,
-    defaultListingType: 'gold_special', categoryMap: {},
+    defaultListingType: 'gold_special', freeInstallments: 3,
+    meliShippingCostCOP: 10000, freeShippingThresholdCOP: 60000,
+    categoryMap: {},
   });
 }
 
@@ -33,10 +35,20 @@ export async function PUT(req: Request) {
     fixedCostCOP?: number;
     defaultListingType?: string;
     freeInstallments?: number;
+    meliShippingCostCOP?: number;
+    freeShippingThresholdCOP?: number;
     categoryMap?: Record<string, string>;
   };
 
-  const { extraMarginPercent, fixedCostCOP, defaultListingType, freeInstallments, categoryMap } = body;
+  const {
+    extraMarginPercent,
+    fixedCostCOP,
+    defaultListingType,
+    freeInstallments,
+    meliShippingCostCOP,
+    freeShippingThresholdCOP,
+    categoryMap,
+  } = body;
 
   // Validate: extra margin can be 0 (none) up to some reasonable max
   if (extraMarginPercent !== undefined && (extraMarginPercent < 0 || extraMarginPercent >= 80)) {
@@ -51,6 +63,8 @@ export async function PUT(req: Request) {
       fixedCostCOP: fixedCostCOP ?? 3500,
       defaultListingType: defaultListingType ?? 'gold_special',
       freeInstallments: freeInstallments ?? 3,
+      meliShippingCostCOP: meliShippingCostCOP ?? 10000,
+      freeShippingThresholdCOP: freeShippingThresholdCOP ?? 60000,
       categoryMap: categoryMap ?? {},
     },
     update: {
@@ -58,6 +72,8 @@ export async function PUT(req: Request) {
       ...(fixedCostCOP !== undefined && { fixedCostCOP }),
       ...(defaultListingType !== undefined && { defaultListingType }),
       ...(freeInstallments !== undefined && { freeInstallments }),
+      ...(meliShippingCostCOP !== undefined && { meliShippingCostCOP }),
+      ...(freeShippingThresholdCOP !== undefined && { freeShippingThresholdCOP }),
       ...(categoryMap !== undefined && { categoryMap }),
     },
   });
