@@ -885,8 +885,8 @@ export default function AdminMeliPage() {
 
         <Divider className="!my-4" />
         <Paragraph type="secondary" className="text-xs">
-          Variables del Sistema: <code>MELI_APP_ID</code>, <code>MELI_SECRET_KEY</code>,{' '}
-          <code>MELI_REDIRECT_URI</code> · Cron programado en Vercel: <code>/api/cron/meli-sync</code>
+          Variables: <code>MELI_APP_ID</code>, <code>MELI_SECRET_KEY</code>,{' '}
+          <code>MELI_REDIRECT_URI</code> · Sincronización automática activa en tiempo real y vía <code>/api/cron/meli-sync</code>
         </Paragraph>
       </div>
 
