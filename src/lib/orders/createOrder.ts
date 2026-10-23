@@ -5,6 +5,7 @@ import { sendOrderCreatedEmail } from '@/lib/email/orderEmails';
 import { buildWompiCheckoutUrl } from '@/lib/payments/wompi';
 import { getShippingConfig } from '@/lib/store/getShippingConfig';
 import { calculateDiscountedTotal, clampPercentage, normalizeAmount, calculateDisplayPrices } from '@/utils/formatCurrency';
+import { updateStockAndPrice, syncCombosContainingProduct, updateComboStockAndPrice } from '@/lib/meli/sync';
 
 export type CreateOrderErrorCode =
   | 'EMPTY_CART'
@@ -550,6 +551,36 @@ export async function createOrderWithStock(input: CreateOrderInput): Promise<Cre
           phone: order.phone,
         })
       : undefined;
+
+  // Sincronización omnicanal automática de inventario con Mercado Libre (en background)
+  void (async () => {
+    try {
+      const affectedProductIds = Array.from(stockQuantities.keys());
+      for (const pId of affectedProductIds) {
+        try {
+          const pListing = await prisma.meliListing.findUnique({ where: { productId: pId } });
+          if (pListing) {
+            await updateStockAndPrice(pId);
+          }
+          await syncCombosContainingProduct(pId);
+        } catch (e) {
+          console.warn(`[createOrder] MeLi auto-sync failed for product ${pId}:`, e);
+        }
+      }
+      for (const cLine of orderComboLines) {
+        try {
+          const cListing = await prisma.meliListing.findUnique({ where: { comboId: cLine.comboId } });
+          if (cListing) {
+            await updateComboStockAndPrice(cLine.comboId);
+          }
+        } catch (e) {
+          console.warn(`[createOrder] MeLi auto-sync failed for combo ${cLine.comboId}:`, e);
+        }
+      }
+    } catch (err) {
+      console.warn('[createOrder] MeLi omnichannel sync failed:', err);
+    }
+  })();
 
   return { order, wompiPaymentUrl };
 }

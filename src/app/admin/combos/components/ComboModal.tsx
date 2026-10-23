@@ -16,6 +16,7 @@ import {
   Layers,
   DollarSign,
   AlertCircle,
+  AlertTriangle,
   Eye,
   Loader2,
   Wand2,
@@ -206,6 +207,34 @@ export default function ComboModal({
   };
 
   // Compute sum of items original prices
+  // ── Costo total de adquisición de los productos del combo ──────────────────
+  const itemsCalculatedCost = useMemo(() => {
+    return items.reduce((acc, item) => {
+      const prod = products.find((p) => p.id === item.productId);
+      return acc + (prod && typeof prod.cost === 'number' && prod.cost > 0 ? prod.cost * item.quantity : 0);
+    }, 0);
+  }, [items, products]);
+
+  // Gross profit & margin in store
+  const comboGrossProfit = price > 0 ? price - itemsCalculatedCost : 0;
+  const comboGrossMarginPct = price > 0 && itemsCalculatedCost > 0
+    ? Math.round(((price - itemsCalculatedCost) / price) * 100)
+    : 0;
+
+  // Apply smart margin preset based on costs (or discount if no costs)
+  const applySmartMarginPreset = (targetMarginPct: number) => {
+    if (itemsCalculatedCost <= 0) {
+      applyDiscountPreset(100 - targetMarginPct);
+      return;
+    }
+    const safeMargin = Math.max(1, Math.min(90, targetMarginPct)) / 100;
+    const targetPrice = Math.ceil((itemsCalculatedCost / (1 - safeMargin)) / 100) * 100;
+    setPrice(targetPrice);
+    if (originalPrice < targetPrice || originalPrice <= 0) {
+      setOriginalPrice(itemsCalculatedSum > targetPrice ? itemsCalculatedSum : Math.round(targetPrice * 1.2));
+    }
+  };
+
   const itemsCalculatedSum = useMemo(() => {
     return items.reduce((acc, item) => {
       const prod = products.find((p) => p.id === item.productId);
@@ -405,6 +434,10 @@ export default function ComboModal({
     : 0;
   const simulatedMeliCommission = Math.round((simulatedMeliPrice * meliCommissionRate) / 100);
   const simulatedNetToSeller = simulatedMeliPrice - simulatedMeliCommission - meliFixedCost - appliedShippingCost;
+  const netProfitOnMeli = simulatedMeliPrice > 0 ? simulatedNetToSeller - itemsCalculatedCost : 0;
+  const netMarginOnMeliPct = simulatedMeliPrice > 0 && itemsCalculatedCost > 0
+    ? Math.round((netProfitOnMeli / simulatedMeliPrice) * 100)
+    : 0;
 
   const handleSyncMeliNow = async () => {
     if (!combo?.id) return;
@@ -869,37 +902,83 @@ export default function ComboModal({
               </div>
             </div>
 
-            {/* Section 5: Smart Pricing & Discounts */}
-            <div className="p-5 rounded-2xl bg-slate-950/60 border border-slate-800/80 space-y-4">
-              <div className="flex items-center gap-2 text-sm font-bold text-white">
-                <DollarSign className="w-4 h-4 text-emerald-400" />
-                <span>Precios & Descuento Inteligente</span>
-              </div>
-
-              {/* Discount Presets Buttons */}
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-400 mb-1.5">
-                  Calcular Descuento Rápido (sobre suma original):
-                </label>
-                <div className="grid grid-cols-6 gap-2">
-                  {DISCOUNT_PRESETS.map((pct) => (
-                    <button
-                      key={pct}
-                      type="button"
-                      onClick={() => applyDiscountPreset(pct)}
-                      className="py-1.5 px-2 rounded-xl text-xs font-black bg-slate-900 hover:bg-slate-800 text-sky-400 hover:text-sky-300 border border-slate-800 hover:border-sky-500/40 transition-all"
-                    >
-                      -{pct}%
-                    </button>
-                  ))}
+            {/* Section 5: Smart Pricing & Margins Calculator */}
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-sky-500/30 space-y-4">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+                <div className="flex items-center gap-2 text-sm font-extrabold text-white">
+                  <div className="w-7 h-7 rounded-lg bg-sky-500/20 border border-sky-500/30 flex items-center justify-center">
+                    <DollarSign className="w-4 h-4 text-sky-400" />
+                  </div>
+                  <span>Calculadora Inteligente de Precios & Margen</span>
                 </div>
+                {itemsCalculatedCost > 0 ? (
+                  <span className="text-[11px] font-mono text-slate-400 bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800">
+                    Costo base repuestos: <strong className="text-amber-300">{formatCurrency(itemsCalculatedCost, 'COP')}</strong>
+                  </span>
+                ) : (
+                  <span className="text-[10px] text-slate-500 italic">
+                    Sin costos configurados en repuestos
+                  </span>
+                )}
               </div>
 
+              {/* Margen inteligente Presets */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-semibold text-slate-300">
+                    {itemsCalculatedCost > 0 ? 'Fijar Margen Neto Deseado:' : 'Descuento Rápido (sobre suma original):'}
+                  </label>
+                  <span className="text-[10px] text-slate-400">
+                    {itemsCalculatedCost > 0 ? 'Calcula el precio óptimo automáticamente' : 'Aplica % de ahorro'}
+                  </span>
+                </div>
+
+                {itemsCalculatedCost > 0 ? (
+                  <div className="grid grid-cols-6 gap-2">
+                    {[20, 25, 30, 35, 40, 50].map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => applySmartMarginPreset(m)}
+                        className="py-1.5 px-2 rounded-xl text-xs font-black bg-slate-900 hover:bg-slate-800 text-sky-400 hover:text-sky-300 border border-slate-800 hover:border-sky-500/40 transition-all text-center"
+                      >
+                        {m}% Margen
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-6 gap-2">
+                    {DISCOUNT_PRESETS.map((pct) => (
+                      <button
+                        key={pct}
+                        type="button"
+                        onClick={() => applyDiscountPreset(pct)}
+                        className="py-1.5 px-2 rounded-xl text-xs font-black bg-slate-900 hover:bg-slate-800 text-sky-400 hover:text-sky-300 border border-slate-800 hover:border-sky-500/40 transition-all"
+                      >
+                        -{pct}%
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Input Prices Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    Precio Original (Tachado en Tienda) <span className="text-rose-400">*</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-slate-300">
+                      Precio Original (Tachado en Tienda) <span className="text-rose-400">*</span>
+                    </label>
+                    {itemsCalculatedSum > 0 && (
+                      <button
+                        type="button"
+                        onClick={handleSyncOriginalPrice}
+                        className="text-[10px] text-sky-400 hover:text-sky-300 underline"
+                      >
+                        Usar suma repuestos
+                      </button>
+                    )}
+                  </div>
                   <input
                     type="number"
                     min="0"
@@ -909,7 +988,7 @@ export default function ComboModal({
                     required
                   />
                   <span className="text-[11px] text-slate-400 mt-1 block">
-                    Suma productos: {formatCurrency(itemsCalculatedSum, 'COP')}
+                    Suma productos individuales: {formatCurrency(itemsCalculatedSum, 'COP')}
                   </span>
                 </div>
 
@@ -932,6 +1011,47 @@ export default function ComboModal({
                   )}
                 </div>
               </div>
+
+              {/* Desglose Contable y Margen en Vivo */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 text-[11px]">
+                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                  <span className="text-slate-500 block">Costo Base Repuestos:</span>
+                  <strong className="text-white font-mono text-xs">
+                    {itemsCalculatedCost > 0 ? formatCurrency(itemsCalculatedCost, 'COP') : 'No configurado'}
+                  </strong>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                  <span className="text-slate-500 block">Ganancia Tienda Web:</span>
+                  <strong className={`font-mono text-xs ${comboGrossProfit <= 0 && itemsCalculatedCost > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                    {itemsCalculatedCost > 0 ? `+${formatCurrency(comboGrossProfit, 'COP')} (${comboGrossMarginPct}%)` : '—'}
+                  </strong>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                  <span className="text-slate-500 block">PVP Mercado Libre:</span>
+                  <strong className="text-amber-400 font-mono text-xs">
+                    {price > 0 ? formatCurrency(simulatedMeliPrice, 'COP') : '—'}
+                  </strong>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
+                  <span className="text-slate-500 block">Ganancia Neta en MeLi:</span>
+                  <strong className={`font-mono text-xs ${netProfitOnMeli <= 0 && itemsCalculatedCost > 0 ? 'text-rose-400' : 'text-amber-300'}`}>
+                    {itemsCalculatedCost > 0 && price > 0 ? `+${formatCurrency(netProfitOnMeli, 'COP')} (${netMarginOnMeliPct}%)` : formatCurrency(simulatedNetToSeller, 'COP')}
+                  </strong>
+                </div>
+              </div>
+
+              {/* Alerta de Pérdida o Margen Crítico */}
+              {itemsCalculatedCost > 0 && price > 0 && (comboGrossProfit <= 0 || netProfitOnMeli <= 0) && (
+                <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/50 text-rose-200 text-xs flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>
+                    <strong>¡Atención!</strong> Con este precio el combo deja margen negativo o nulo frente al costo de los repuestos. Considera aumentar el precio o usar los botones de margen sugerido.
+                  </span>
+                </div>
+              )}
 
               {/* Stock and Expiration Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">

@@ -43,6 +43,33 @@ export default function MeliCombosTab({ status }: MeliCombosTabProps) {
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterState, setFilterState] = useState<'all' | 'synced' | 'pending' | 'unconfigured'>('all');
+  const [syncingAll, setSyncingAll] = useState(false);
+
+  const handleBulkSyncCombos = async (onlyPending = false) => {
+    setSyncingAll(true);
+    message.loading({ content: 'Sincronizando combos con Mercado Libre...', key: 'bulk-combo-sync' });
+    try {
+      const res = await fetch('/api/meli/sync/combo/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ onlyPending }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error en la sincronización masiva');
+      message.success({
+        content: `¡Sincronización completada! ${data.synced} combo(s) sincronizados con éxito. 🚀`,
+        key: 'bulk-combo-sync',
+      });
+      if (data.errors?.length > 0) {
+        message.warning(`${data.errors.length} combo(s) tuvieron advertencias al publicar.`);
+      }
+      await loadCombos();
+    } catch (err) {
+      message.error({ content: (err as Error).message || 'Error en sincronización masiva', key: 'bulk-combo-sync' });
+    } finally {
+      setSyncingAll(false);
+    }
+  };
 
   const loadCombos = useCallback(async () => {
     setLoading(true);
@@ -369,7 +396,26 @@ export default function MeliCombosTab({ status }: MeliCombosTabProps) {
           </div>
         }
         extra={
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap justify-end">
+            <Popconfirm
+              title="¿Sincronizar todos los combos en Mercado Libre?"
+              description="Se calculará el precio blindado y stock compuesto para todos los combos configurados para MeLi."
+              onConfirm={() => handleBulkSyncCombos(false)}
+              okText="Sincronizar Todos"
+              cancelText="Cancelar"
+              disabled={syncingAll || !status?.connected}
+            >
+              <Button
+                type="primary"
+                className="bg-amber-500 hover:bg-amber-600 border-none font-semibold text-slate-900"
+                icon={<SyncOutlined spin={syncingAll} />}
+                loading={syncingAll}
+                disabled={!status?.connected || summary.total === 0}
+              >
+                Sincronizar Masivo MeLi
+              </Button>
+            </Popconfirm>
+
             <Button
               icon={<ReloadOutlined spin={loading} />}
               onClick={loadCombos}

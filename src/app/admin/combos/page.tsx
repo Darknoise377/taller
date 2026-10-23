@@ -82,10 +82,11 @@ export default function AdminCombosPage() {
       const data = await res.json();
       const list = Array.isArray(data) ? data : data.items ?? [];
       setProducts(
-        list.map((p: { id: string; name: string; price: number; stock: number; category?: string; sku?: string }) => ({
+        list.map((p: { id: string; name: string; price: number; cost?: number | null; stock: number; category?: string; sku?: string }) => ({
           id: p.id,
           name: p.name,
           price: p.price,
+          cost: p.cost ?? null,
           stock: p.stock,
           category: p.category,
           sku: p.sku,

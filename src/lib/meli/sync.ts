@@ -731,6 +731,60 @@ export async function bulkSyncPendingProducts(): Promise<{
 }
 
 // ─── Close listing on MeLi ───────────────────────────────────────────────────
+/** Sync all combos marked for MeLi. */
+export async function bulkSyncCombos(): Promise<{
+  synced: number;
+  errors: { comboId: string; error: string }[];
+}> {
+  const combos = await prisma.combo.findMany({
+    where: { meliExport: true, isActive: true },
+    select: { id: true },
+  });
+
+  let synced = 0;
+  const errors: { comboId: string; error: string }[] = [];
+
+  await runInBatches(combos, 3, 1200, async ({ id }) => {
+    try {
+      await syncCombo(id);
+      synced++;
+    } catch (err) {
+      errors.push({ comboId: id, error: err instanceof Error ? err.message : String(err) });
+    }
+  });
+
+  return { synced, errors };
+}
+
+/** Sync only combos marked for MeLi that are pending publication (or in ERROR). */
+export async function bulkSyncPendingCombos(): Promise<{
+  synced: number;
+  errors: { comboId: string; error: string }[];
+}> {
+  const combos = await prisma.combo.findMany({
+    where: {
+      meliExport: true,
+      isActive: true,
+      OR: [{ meliListing: null }, { meliListing: { status: 'ERROR' } }],
+    },
+    select: { id: true },
+  });
+
+  let synced = 0;
+  const errors: { comboId: string; error: string }[] = [];
+
+  await runInBatches(combos, 3, 1200, async ({ id }) => {
+    try {
+      await syncCombo(id);
+      synced++;
+    } catch (err) {
+      errors.push({ comboId: id, error: err instanceof Error ? err.message : String(err) });
+    }
+  });
+
+  return { synced, errors };
+}
+
 export async function unpublishProduct(productId: string): Promise<void> {
   const listing = await prisma.meliListing.findUnique({ where: { productId } });
   if (!listing) return;

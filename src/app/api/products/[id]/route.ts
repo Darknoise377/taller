@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
 import { createAndStoreEmbedding } from '@/lib/embeddings';
 import { generateProductSlug } from '@/lib/seo/slug';
+import { updateStockAndPrice, syncCombosContainingProduct } from '@/lib/meli/sync';
 
 function buildProductText(p: { name: string; description: string; sku?: string | null; tags?: string[]; diagramNumber?: string | null; category: string }): string {
   return [p.name, p.category, p.description, p.sku ? `SKU: ${p.sku}` : '', (p.tags ?? []).join(', '), p.diagramNumber ? `Diagrama: ${p.diagramNumber}` : ''].filter(Boolean).join(' | ');
@@ -121,6 +122,19 @@ export async function PUT(req: Request, context: { params: Promise<{ id: string 
       sourceType: 'product',
       sourceId: updatedProduct.id,
     }).catch((e) => console.error('[embed] product update:', e));
+
+    // Sincronización omnicanal automática con Mercado Libre (en segundo plano)
+    void (async () => {
+      try {
+        const listing = await prisma.meliListing.findUnique({ where: { productId: id } });
+        if (listing || updatedProduct.meliExport) {
+          await updateStockAndPrice(id);
+        }
+        await syncCombosContainingProduct(id);
+      } catch (e) {
+        console.warn(`[products/update] MeLi auto-sync failed for ${id}:`, e);
+      }
+    })();
 
     return NextResponse.json(updatedProduct);
   } catch (error) {

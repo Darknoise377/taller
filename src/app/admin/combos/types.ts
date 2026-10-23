@@ -68,6 +68,7 @@ export interface ProductOption {
   id: string;
   name: string;
   price: number;
+  cost?: number | null;
   stock: number;
   imageUrl?: string | null;
   category?: string;
