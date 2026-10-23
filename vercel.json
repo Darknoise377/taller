@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/expire-pending-orders",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/meli-sync",
+      "schedule": "0 8 * * *"
     }
   ]
 }

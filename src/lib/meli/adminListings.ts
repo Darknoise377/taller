@@ -3,10 +3,12 @@ import { meliApi, type MeliVisitsEntry } from './client';
 import { parseMeliLiveStatus, getSyncState, type MeliSyncFilter } from './listingStatus';
 import { calculateMeliPriceSync, getMeliConfig } from './pricing';
 import { detectResyncReasons, needsResync } from './outOfSync';
+import { auditProductCategory, type CategoryAuditResult } from './categoryAudit';
 
 export type AdminMeliListingRow = {
   productId: string;
   productName: string;
+  productCategory?: string;
   basePrice: number;
   meliPrice: number;
   meliItemId?: string;
@@ -23,6 +25,7 @@ export type AdminMeliListingRow = {
   meliCategoryId?: string | null;
   meliCategoryName?: string | null;
   meliCategoryPath?: string | null;
+  categoryAudit?: CategoryAuditResult;
 };
 
 function visitsDateRange(days = 30): { from: string; to: string } {
@@ -93,6 +96,7 @@ export type AdminMeliListingsSummary = {
   pending: number;
   issues: number;
   outOfSync: number;
+  categoryIssues: number;
 };
 
 export function summarizeListings(items: AdminMeliListingRow[]): AdminMeliListingsSummary {
@@ -102,6 +106,7 @@ export function summarizeListings(items: AdminMeliListingRow[]): AdminMeliListin
     pending: items.filter((i) => i.syncState === 'pending').length,
     issues: items.filter((i) => i.syncState === 'issues').length,
     outOfSync: items.filter((i) => i.syncState === 'out_of_sync').length,
+    categoryIssues: items.filter((i) => Boolean(i.categoryAudit?.needsCorrection)).length,
   };
 }
 
@@ -113,6 +118,9 @@ export function filterBySyncState(
   if (filter === 'synced') {
     return items.filter((row) => Boolean(row.meliItemId) && row.syncState === 'synced');
   }
+  if (filter === 'category_issue') {
+    return items.filter((row) => Boolean(row.categoryAudit?.needsCorrection));
+  }
   return items.filter((row) => row.syncState === filter);
 }
 
@@ -122,12 +130,13 @@ export function filterBySyncState(
 export async function loadAdminMeliListings(options: {
   refreshLive?: boolean;
 }): Promise<AdminMeliListingRow[]> {
-const products = await prisma.product.findMany({
+  const products = await prisma.product.findMany({
     select: {
       id: true,
       name: true,
       price: true,
       stock: true,
+      category: true,
       updatedAt: true,
       meliExport: true,
       meliListingType: true,
@@ -276,9 +285,36 @@ const products = await prisma.product.findMany({
     const visitsFromRefresh =
       meliItemId && visitsMap.has(meliItemId) ? visitsMap.get(meliItemId)! : undefined;
 
+    const meliCategoryId =
+      (meliItemId && categoryIdMap.get(meliItemId)) || p.meliListing?.meliCategoryId || null;
+    const meliCategoryName =
+      (meliItemId &&
+        categoryLabelMap.get(categoryIdMap.get(meliItemId) ?? '')?.name) ||
+      p.meliListing?.meliCategoryName ||
+      null;
+    const meliCategoryPath =
+      (meliItemId &&
+        categoryLabelMap.get(categoryIdMap.get(meliItemId) ?? '')?.path) ||
+      p.meliListing?.meliCategoryPath ||
+      null;
+
+    const configuredCategory =
+      p.category && meliConfig.categoryMap
+        ? (meliConfig.categoryMap as Record<string, string>)[String(p.category).toLowerCase()]
+        : null;
+
+    const categoryAudit = auditProductCategory({
+      productCategory: p.category,
+      meliCategoryId,
+      meliCategoryName,
+      meliCategoryPath,
+      configuredCategoryId: configuredCategory,
+    });
+
     rows.push({
       productId: p.id,
       productName: p.name,
+      productCategory: p.category,
       basePrice: p.price,
       meliPrice: p.meliListing?.meliPrice ?? 0,
       meliItemId,
@@ -296,18 +332,10 @@ const products = await prisma.product.findMany({
         visitsFromRefresh !== undefined
           ? new Date().toISOString()
           : p.meliListing?.meliVisitsCheckedAt?.toISOString() ?? null,
-      meliCategoryId:
-        (meliItemId && categoryIdMap.get(meliItemId)) || p.meliListing?.meliCategoryId || null,
-      meliCategoryName:
-        (meliItemId &&
-          categoryLabelMap.get(categoryIdMap.get(meliItemId) ?? '')?.name) ||
-        p.meliListing?.meliCategoryName ||
-        null,
-      meliCategoryPath:
-        (meliItemId &&
-          categoryLabelMap.get(categoryIdMap.get(meliItemId) ?? '')?.path) ||
-        p.meliListing?.meliCategoryPath ||
-        null,
+      meliCategoryId,
+      meliCategoryName,
+      meliCategoryPath,
+      categoryAudit,
     });
   }
 

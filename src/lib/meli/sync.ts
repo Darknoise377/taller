@@ -785,6 +785,146 @@ export async function bulkSyncPendingCombos(): Promise<{
   return { synced, errors };
 }
 
+/**
+ * Automated periodic sync:
+ * 1. Syncs pending & out-of-sync products
+ * 2. Syncs pending & out-of-sync combos
+ * 3. Pulls and processes new MeLi orders
+ * 4. Records auto-sync execution timestamp & metrics in MeliConfig
+ */
+export async function bulkSyncAutoSchedule(): Promise<{
+  success: boolean;
+  timestamp: string;
+  syncedProducts: number;
+  syncedCombos: number;
+  newOrders: number;
+  errors: string[];
+}> {
+  const errors: string[] = [];
+  let syncedProducts = 0;
+  let syncedCombos = 0;
+  let newOrders = 0;
+
+  try {
+    // 1. Products: pending publication
+    const products = await prisma.product.findMany({
+      where: {
+        meliExport: true,
+        stock: { gt: 0 },
+        OR: [
+          { meliListing: null },
+          { meliListing: { status: 'ERROR' } },
+        ],
+      },
+      select: { id: true },
+      take: 20,
+    });
+
+    for (const p of products) {
+      try {
+        await syncProduct(p.id);
+        syncedProducts++;
+      } catch (err) {
+        errors.push(`Producto ${p.id}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    // 2. Combos: pending publication
+    const combos = await prisma.combo.findMany({
+      where: {
+        meliExport: true,
+        isActive: true,
+        OR: [
+          { meliListing: null },
+          { meliListing: { status: 'ERROR' } },
+        ],
+      },
+      select: { id: true },
+      take: 10,
+    });
+
+    for (const c of combos) {
+      try {
+        await syncCombo(c.id);
+        syncedCombos++;
+      } catch (err) {
+        errors.push(`Combo ${c.id}: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
+
+    // 3. MeLi Orders: pull recent
+    try {
+      const me = await meliApi.getMe();
+      const recentOrders = await meliApi.searchOrders(me.id, 20);
+      for (const order of recentOrders.results) {
+        const orderId = String(order.id);
+        try {
+          const exists = await prisma.meliOrder.findUnique({ where: { meliOrderId: orderId } });
+          if (!exists) {
+            await processMeliOrder(orderId);
+            newOrders++;
+          }
+        } catch (orderErr) {
+          errors.push(`Orden ${orderId}: ${orderErr instanceof Error ? orderErr.message : String(orderErr)}`);
+        }
+      }
+    } catch (orderApiErr) {
+      console.warn('[meli/autoSync] Error al consultar órdenes:', orderApiErr);
+    }
+
+    // 4. Update MeliConfig metadata
+    try {
+      const config = await getMeliConfig();
+      const meta = {
+        timestamp: new Date().toISOString(),
+        status: errors.length === 0 ? 'success' : 'completed_with_warnings',
+        syncedProducts,
+        syncedCombos,
+        newOrders,
+        errorsCount: errors.length,
+      };
+
+      await prisma.meliConfig.update({
+        where: { id: 1 },
+        data: {
+          categoryMap: {
+            ...config.categoryMap,
+            _lastAutoSync: meta,
+          },
+        },
+      });
+
+      return {
+        success: true,
+        timestamp: meta.timestamp,
+        syncedProducts,
+        syncedCombos,
+        newOrders,
+        errors,
+      };
+    } catch {
+      return {
+        success: true,
+        timestamp: new Date().toISOString(),
+        syncedProducts,
+        syncedCombos,
+        newOrders,
+        errors,
+      };
+    }
+  } catch (globalErr) {
+    console.error('[meli/autoSync] Error global:', globalErr);
+    return {
+      success: false,
+      timestamp: new Date().toISOString(),
+      syncedProducts,
+      syncedCombos,
+      newOrders,
+      errors: [globalErr instanceof Error ? globalErr.message : String(globalErr)],
+    };
+  }
+}
+
 export async function unpublishProduct(productId: string): Promise<void> {
   const listing = await prisma.meliListing.findUnique({ where: { productId } });
   if (!listing) return;

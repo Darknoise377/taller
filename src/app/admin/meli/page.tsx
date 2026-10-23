@@ -9,17 +9,18 @@ import {
   ConfigProvider,
   Divider,
   Tag,
-   Tooltip,
-   Button,
-   Modal,
- } from 'antd';
- import {
-   CheckCircleOutlined,
-   CloseCircleOutlined,
-   ExclamationCircleOutlined,
-   SyncOutlined,
-   EditOutlined,
- } from '@ant-design/icons';
+  Tooltip,
+  Button,
+  Modal,
+} from 'antd';
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  ExclamationCircleOutlined,
+  SyncOutlined,
+  EditOutlined,
+  CloudSyncOutlined,
+} from '@ant-design/icons';
 import 'dayjs/locale/es';
 import esES from 'antd/locale/es_ES';
 import type { ColumnsType } from 'antd/es/table';
@@ -34,6 +35,7 @@ import MeliCombosTab from './components/MeliCombosTab';
 import MeliSalesTab from './components/MeliSalesTab';
 import MeliNetReportTab from './components/MeliNetReportTab';
 import MeliConfigTab from './components/MeliConfigTab';
+import MeliCategoryModal from './components/MeliCategoryModal';
 
 import type {
   MeliStatus,
@@ -69,10 +71,15 @@ export default function AdminMeliPage() {
   const [refreshingStatus, setRefreshingStatus] = useState(false);
   const [syncingRow, setSyncingRow] = useState<string | null>(null);
   const [syncingOrders, setSyncingOrders] = useState(false);
+  const [syncingAutoNow, setSyncingAutoNow] = useState(false);
   const [activeTab, setActiveTab] = useState<MeliTabId>('products');
   const [editProductModalOpen, setEditProductModalOpen] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [editProductId, setEditProductId] = useState<string | null>(null);
+
+  // Category Diagnostic Modal
+  const [auditModalOpen, setAuditModalOpen] = useState(false);
+  const [selectedAuditListing, setSelectedAuditListing] = useState<ListingRow | null>(null);
 
   const [form] = Form.useForm<Omit<MeliConfig, 'id' | 'categoryMap'>>();
 
@@ -152,6 +159,34 @@ export default function AdminMeliPage() {
       setSyncingOrders(false);
     }
   }, [status, loadOrders]);
+
+  const handleTriggerAutoSync = async () => {
+    setSyncingAutoNow(true);
+    message.loading({ content: 'Ejecutando sincronización automática integral...', key: 'auto-sync' });
+    try {
+      const res = await fetch('/api/cron/meli-sync', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        message.success({
+          content: `¡Auto-Sync completado! ${data.syncedProducts ?? 0} producto(s), ${data.syncedCombos ?? 0} combo(s) y ${data.newOrders ?? 0} orden(es) sincronizadas. 🚀`,
+          key: 'auto-sync',
+        });
+        await Promise.all([loadListings(false), loadOrders(), loadConfig()]);
+      } else {
+        message.error({
+          content: data.message || 'Error en la sincronización automática',
+          key: 'auto-sync',
+        });
+      }
+    } catch {
+      message.error({
+        content: 'Error de red al ejecutar auto-sync',
+        key: 'auto-sync',
+      });
+    } finally {
+      setSyncingAutoNow(false);
+    }
+  };
 
   const handleConnect = () => {
     window.location.href = '/api/meli/auth';
@@ -263,6 +298,8 @@ export default function AdminMeliPage() {
     let filtered = listings;
     if (syncFilter === 'synced') {
       filtered = filtered.filter((row) => Boolean(row.meliItemId) && row.syncState === 'synced');
+    } else if (syncFilter === 'category_issue') {
+      filtered = filtered.filter((row) => Boolean(row.categoryAudit?.needsCorrection));
     } else if (syncFilter !== 'all') {
       filtered = filtered.filter((row) => row.syncState === syncFilter);
     }
@@ -272,7 +309,9 @@ export default function AdminMeliPage() {
       filtered = filtered.filter(
         (row) =>
           row.productName.toLowerCase().includes(term) ||
-          row?.meliItemId?.toLowerCase().includes(term),
+          row?.meliItemId?.toLowerCase().includes(term) ||
+          row?.meliCategoryName?.toLowerCase().includes(term) ||
+          row?.productCategory?.toLowerCase().includes(term),
       );
     }
     return filtered;
@@ -287,7 +326,7 @@ export default function AdminMeliPage() {
         title: 'Producto',
         dataIndex: 'productName',
         key: 'productName',
-        width: 240,
+        width: 230,
         ellipsis: true,
         render: (name: string, row) => (
           <Tooltip title={name} placement="topLeft">
@@ -299,7 +338,7 @@ export default function AdminMeliPage() {
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  maxWidth: '220px',
+                  maxWidth: '210px',
                   display: 'block',
                 }}
               >
@@ -311,7 +350,7 @@ export default function AdminMeliPage() {
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
-                  maxWidth: '220px',
+                  maxWidth: '210px',
                 }}
               >
                 Stock: {row.stock}
@@ -331,7 +370,7 @@ export default function AdminMeliPage() {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         display: 'inline-block',
-                        maxWidth: '140px',
+                        maxWidth: '130px',
                       }}
                     >
                       Ver en MeLi
@@ -346,33 +385,99 @@ export default function AdminMeliPage() {
       {
         title: 'Categoría MeLi',
         key: 'meliCategory',
-        width: 190,
+        width: 200,
         render: (_: unknown, row) => {
-          if (!row.meliItemId) return <Text type="secondary">—</Text>;
-          if (!row.meliCategoryName) {
+          if (!row.meliItemId) {
             return (
-              <Tooltip title="Pulsa «Actualizar estados» para consultar la categoría en MeLi">
-                <Text type="secondary" className="text-xs">
-                  Sin datos
-                </Text>
-              </Tooltip>
+              <div className="flex items-center gap-1.5">
+                <Text type="secondary" className="text-xs">—</Text>
+                {row.meliExport && (
+                  <Button
+                    size="small"
+                    type="link"
+                    className="p-0 text-[11px] text-blue-600 h-auto"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedAuditListing(row);
+                      setAuditModalOpen(true);
+                    }}
+                  >
+                    Ver categoría
+                  </Button>
+                )}
+              </div>
             );
           }
-          return (
-            <Tooltip title={row.meliCategoryPath ?? row.meliCategoryName}>
-              <Text
-                className="text-xs"
-                style={{
-                  display: 'block',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  maxWidth: '170px',
+
+          const audit = row.categoryAudit;
+          let auditBadge: React.ReactNode = null;
+          if (audit?.status === 'mismatch') {
+            auditBadge = (
+              <Tag
+                color="red"
+                className="text-[10px] m-0 font-bold cursor-pointer hover:opacity-80"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedAuditListing(row);
+                  setAuditModalOpen(true);
                 }}
               >
-                {row.meliCategoryName}
-              </Text>
-            </Tooltip>
+                ⚠️ {audit.label}
+              </Tag>
+            );
+          } else if (audit?.status === 'warning') {
+            auditBadge = (
+              <Tag
+                color="gold"
+                className="text-[10px] m-0 cursor-pointer hover:opacity-80"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedAuditListing(row);
+                  setAuditModalOpen(true);
+                }}
+              >
+                {audit.label}
+              </Tag>
+            );
+          } else if (audit?.status === 'correct') {
+            auditBadge = (
+              <Tag
+                color="green"
+                className="text-[10px] m-0 cursor-pointer hover:opacity-80"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedAuditListing(row);
+                  setAuditModalOpen(true);
+                }}
+              >
+                ✓ Motos
+              </Tag>
+            );
+          }
+
+          return (
+            <div className="flex flex-col gap-1 items-start">
+              <Tooltip title={row.meliCategoryPath ?? row.meliCategoryName ?? 'Sin categoría'}>
+                <Text
+                  className="text-xs hover:text-blue-600 transition-colors cursor-pointer"
+                  style={{
+                    display: 'block',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '180px',
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedAuditListing(row);
+                    setAuditModalOpen(true);
+                  }}
+                >
+                  {row.meliCategoryName || 'Sin datos'}
+                </Text>
+              </Tooltip>
+              {auditBadge}
+            </div>
           );
         },
       },
@@ -421,7 +526,7 @@ export default function AdminMeliPage() {
         title: 'Margen Est.',
         key: 'profit',
         align: 'right',
-        width: 130,
+        width: 125,
         render: (_: unknown, row) => {
           if (!config) return <Text type="secondary">—</Text>;
           let price = row.live?.livePrice || row.meliPrice;
@@ -464,7 +569,7 @@ export default function AdminMeliPage() {
       {
         title: 'Sync',
         key: 'syncState',
-        width: 115,
+        width: 110,
         render: (_: unknown, row) => {
           if (!row.meliExport && !row.meliItemId) {
             return <Tag>No exportado</Tag>;
@@ -475,7 +580,7 @@ export default function AdminMeliPage() {
           if (row.syncState === 'out_of_sync') {
             return (
               <Tooltip title={row.resyncReasons.join(' · ')}>
-                <Tag color="volcano">Re-sincronizar</Tag>
+                <Tag color="volcano">Re-sync</Tag>
               </Tooltip>
             );
           }
@@ -488,7 +593,7 @@ export default function AdminMeliPage() {
       {
         title: 'Visitas (30d)',
         key: 'visits',
-        width: 100,
+        width: 95,
         align: 'center',
         render: (_: unknown, row) => {
           if (!row.meliItemId) return <Text type="secondary">—</Text>;
@@ -517,7 +622,7 @@ export default function AdminMeliPage() {
       {
         title: 'Estado en MeLi',
         key: 'liveStatus',
-        width: 175,
+        width: 165,
         render: (_: unknown, row) => {
           if (!row.meliItemId) {
             return row.meliExport ? (
@@ -561,45 +666,24 @@ export default function AdminMeliPage() {
               <div>
                 <Tag color={tagColor}>{row.live.statusLabel}</Tag>
                 {row.resyncReasons.length > 0 && (
-                  <div className="text-xs text-volcano mt-1 max-w-[220px] leading-snug">
+                  <div className="text-xs text-volcano mt-1 max-w-[200px] leading-snug">
                     {row.resyncReasons[0]}
                   </div>
                 )}
                 {detail && (
-                  <div className="text-xs text-slate-500 mt-1 max-w-[200px] leading-snug">
+                  <div className="text-xs text-slate-500 mt-1 max-w-[190px] leading-snug">
                     {detail}
                   </div>
                 )}
-                {row.live.availableQuantity != null &&
-                  row.live.availableQuantity === 0 && (
-                    <div className="text-xs text-amber-600 mt-0.5">
-                      0 unidades en MeLi
-                    </div>
-                  )}
               </div>
             </div>
           );
         },
       },
       {
-        title: 'Última sync',
-        dataIndex: 'lastSyncAt',
-        key: 'lastSyncAt',
-        width: 130,
-        render: (v?: string) => {
-          if (!v) return '—';
-          const d = new Date(v);
-          return (
-            <Tooltip title={d.toLocaleString('es-CO')}>
-              <span className="text-xs">{d.toLocaleDateString('es-CO')}</span>
-            </Tooltip>
-          );
-        },
-      },
-      {
         title: 'Acciones',
         key: 'actions',
-        width: 110,
+        width: 105,
         render: (_: unknown, row) => (
           <Button
             size="small"
@@ -624,8 +708,18 @@ export default function AdminMeliPage() {
       .then(() => loadListings(false))
       .finally(() => setLoading(false));
 
-    const interval = setInterval(loadStatus, 60_000);
-    
+    // Auto-refresh MeLi status every 60s
+    const statusInterval = setInterval(loadStatus, 60_000);
+
+    // Background auto-sync interval when dashboard is open (every 10 minutes)
+    const autoSyncInterval = setInterval(() => {
+      if (status?.connected) {
+        fetch('/api/cron/meli-sync', { method: 'POST' })
+          .then((res) => (res.ok ? loadListings(false) : null))
+          .catch(() => {});
+      }
+    }, 600_000);
+
     const handleMessage = (e: MessageEvent) => {
       if (e.data?.type === 'PRODUCT_SAVED') {
         setEditProductModalOpen(false);
@@ -639,10 +733,24 @@ export default function AdminMeliPage() {
     window.addEventListener('message', handleMessage);
 
     return () => {
-      clearInterval(interval);
+      clearInterval(statusInterval);
+      clearInterval(autoSyncInterval);
       window.removeEventListener('message', handleMessage);
     };
-  }, [loadStatus, loadConfig, loadListings, loadOrders]);
+  }, [loadStatus, loadConfig, loadListings, loadOrders, status?.connected]);
+
+  // Extract last auto sync metadata
+  const lastAutoSync = (config?.categoryMap as Record<string, unknown> | undefined)?._lastAutoSync as
+    | { timestamp?: string }
+    | undefined;
+  const lastAutoSyncTime = lastAutoSync?.timestamp
+    ? new Date(lastAutoSync.timestamp).toLocaleString('es-CO', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: 'numeric',
+        month: 'short',
+      })
+    : null;
 
   if (loading) {
     return (
@@ -658,19 +766,56 @@ export default function AdminMeliPage() {
 
   return (
     <ConfigProvider locale={esES}>
-      <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-6">
-        <Title level={2} className="!mb-0">
-          Integración Mercado Libre
-        </Title>
-        <Paragraph type="secondary">
-          Conexión OAuth, precios, estado en vivo de cada publicación (activa, pausada y motivo)
-          y sincronización del catálogo con MeLi Colombia (MCO).
-        </Paragraph>
+      <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
+        {/* Modern Header Bar with Connection & Auto-Sync status */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/90 shadow-sm">
+          <div>
+            <div className="flex items-center gap-3">
+              <Title level={2} className="!mb-0 text-xl md:text-2xl font-bold text-slate-900">
+                Mercado Libre Colombia
+              </Title>
+              {status?.connected ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  Conectado {status.nickname ? `@${status.nickname}` : ''}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 border border-red-200">
+                  <CloseCircleOutlined /> Desconectado
+                </span>
+              )}
+            </div>
+            <Paragraph type="secondary" className="!mb-0 mt-1 text-xs sm:text-sm">
+              Sincronización omnicanal en tiempo real, validación inteligente de categorías y rentabilidad blindada.
+            </Paragraph>
+          </div>
 
-         {/* ── Tab Navigation ── */}
+          {/* Quick Actions & Auto-Sync Control */}
+          <div className="flex flex-wrap items-center gap-2">
+            {lastAutoSyncTime && (
+              <span className="text-[11px] text-slate-500 hidden lg:inline-block">
+                Último Auto-Sync: <strong>{lastAutoSyncTime}</strong>
+              </span>
+            )}
+            <Button
+              type="primary"
+              icon={<CloudSyncOutlined spin={syncingAutoNow} />}
+              loading={syncingAutoNow}
+              disabled={!status?.connected}
+              onClick={handleTriggerAutoSync}
+              className="bg-slate-900 hover:!bg-slate-800 font-medium text-xs sm:text-sm shadow-sm"
+            >
+              Sincronizar Todo Ahora
+            </Button>
+          </div>
+        </div>
+
+        {/* ── Tab Navigation ── */}
         <MeliTabBar
           activeTab={activeTab}
           onChange={setActiveTab}
+          categoryIssuesCount={summary?.categoryIssues || 0}
+          outOfSyncCount={outOfSyncCount}
         />
 
         {/* ── Tab Content (only active tab renders) ── */}
@@ -692,6 +837,10 @@ export default function AdminMeliPage() {
             onListingClick={(productId) => {
               setEditProductId(productId);
               setEditProductModalOpen(true);
+            }}
+            onAuditCategory={(row) => {
+              setSelectedAuditListing(row);
+              setAuditModalOpen(true);
             }}
           />
         )}
@@ -734,12 +883,14 @@ export default function AdminMeliPage() {
           />
         )}
 
-        <Divider />
+        <Divider className="!my-4" />
         <Paragraph type="secondary" className="text-xs">
-          Variables: <code>MELI_APP_ID</code>, <code>MELI_SECRET_KEY</code>,{' '}
-          <code>MELI_REDIRECT_URI</code>
+          Variables del Sistema: <code>MELI_APP_ID</code>, <code>MELI_SECRET_KEY</code>,{' '}
+          <code>MELI_REDIRECT_URI</code> · Cron programado en Vercel: <code>/api/cron/meli-sync</code>
         </Paragraph>
       </div>
+
+      {/* Product Edit Iframe Modal */}
       <Modal
         title={
           <div className="flex items-center gap-3 py-1">
@@ -760,9 +911,9 @@ export default function AdminMeliPage() {
         }}
         footer={null}
         width="min(950px, 95vw)"
-        styles={{ 
+        styles={{
           body: { padding: 0, height: '78vh', position: 'relative', background: '#f8fafc' },
-          header: { padding: '16px 24px', borderBottom: '1px solid #e2e8f0', margin: 0 }
+          header: { padding: '16px 24px', borderBottom: '1px solid #e2e8f0', margin: 0 },
         }}
         closeIcon={<CloseCircleOutlined className="text-xl text-slate-400 hover:text-red-500 transition-colors" />}
         destroyOnClose
@@ -776,18 +927,31 @@ export default function AdminMeliPage() {
         {editProductId && (
           <iframe
             src={`/admin/products?edit=${editProductId}&iframe=true`}
-            style={{ 
-              width: '100%', 
-              height: '100%', 
-              border: 'none', 
-              opacity: iframeLoaded ? 1 : 0, 
-              transition: 'opacity 0.4s ease-in-out' 
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              opacity: iframeLoaded ? 1 : 0,
+              transition: 'opacity 0.4s ease-in-out',
             }}
             title={`Editar ${editProductId}`}
             onLoad={() => setIframeLoaded(true)}
           />
         )}
       </Modal>
+
+      {/* Category Diagnostic & Correction Modal */}
+      <MeliCategoryModal
+        listing={selectedAuditListing}
+        open={auditModalOpen}
+        onClose={() => {
+          setAuditModalOpen(false);
+          setSelectedAuditListing(null);
+        }}
+        onCategoryFixed={() => {
+          loadListings(false);
+        }}
+      />
     </ConfigProvider>
   );
 }

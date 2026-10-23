@@ -19,13 +19,11 @@ import {
 import {
   SyncOutlined,
   CheckCircleOutlined,
-  CloseCircleOutlined,
   ReloadOutlined,
   ExportOutlined,
   EditOutlined,
   PlusOutlined,
   ShopOutlined,
-  AlertOutlined,
 } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { formatCurrency } from '@/utils/formatCurrency';
@@ -457,7 +455,9 @@ export default function MeliCombosTab({ status }: MeliCombosTabProps) {
           columns={columns}
           dataSource={filteredCombos}
           rowKey="id"
+          size="small"
           loading={loading}
+          scroll={{ x: 950 }}
           pagination={{ pageSize: 10, showSizeChanger: true }}
           locale={{
             emptyText: (

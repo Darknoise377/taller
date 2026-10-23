@@ -1,7 +1,13 @@
 import { MeliListingStatus } from '@prisma/client';
 import type { MeliItemDetail } from './client';
 
-export type MeliSyncFilter = 'all' | 'synced' | 'pending' | 'issues' | 'out_of_sync';
+export type MeliSyncFilter =
+  | 'all'
+  | 'synced'
+  | 'pending'
+  | 'issues'
+  | 'out_of_sync'
+  | 'category_issue';
 
 export type MeliListingHealth = 'ok' | 'warning' | 'error' | 'unknown';
 
