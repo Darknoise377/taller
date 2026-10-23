@@ -14,9 +14,7 @@ import {
 } from '@/lib/orders/createOrder';
 import { calculateDisplayPrices, formatCurrency } from '@/utils/formatCurrency';
 
-const WHATSAPP_TOKEN = process.env.WHATSAPP_API_TOKEN;
-const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
-const GRAPH_API_VERSION = (process.env.WHATSAPP_GRAPH_API_VERSION && process.env.WHATSAPP_GRAPH_API_VERSION !== 'v17.0') ? process.env.WHATSAPP_GRAPH_API_VERSION : 'v21.0';
+
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://www.motoservicioayr.com';
 
 const WA_SYSTEM_PROMPT = `Eres Criss, la asesora digital de Almacén y Taller Motoservicio A&R — La Ceja, Antioquia.

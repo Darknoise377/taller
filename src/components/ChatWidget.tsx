@@ -405,15 +405,16 @@ export default function ChatWidget() {
                   const isUser = msg.role === "user";
                   // v6 UIMessage: content comes from parts (type: 'text')
                   type TextPart = { type: string; text?: string };
+                  const rawMsg = msg as unknown as Record<string, unknown>;
                   const textContent = Array.isArray(msg.parts)
                     ? (msg.parts as TextPart[])
                         .filter((p) => p.type === "text")
                         .map((p) => p.text ?? "")
                         .join("")
-                    : typeof (msg as any).content === "string"
-                    ? (msg as any).content
-                    : typeof (msg as any).text === "string"
-                    ? (msg as any).text
+                    : typeof rawMsg.content === "string"
+                    ? rawMsg.content
+                    : typeof rawMsg.text === "string"
+                    ? rawMsg.text
                     : "";
 
                   if (!textContent && !isUser) return null;
