@@ -12,7 +12,7 @@ import {
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_API_TOKEN;
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
-const GRAPH_API_VERSION = process.env.WHATSAPP_GRAPH_API_VERSION ?? 'v17.0';
+const GRAPH_API_VERSION = (process.env.WHATSAPP_GRAPH_API_VERSION && process.env.WHATSAPP_GRAPH_API_VERSION !== 'v17.0') ? process.env.WHATSAPP_GRAPH_API_VERSION : 'v21.0';
 
 async function sendWhatsAppText(to: string, text: string) {
   if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {

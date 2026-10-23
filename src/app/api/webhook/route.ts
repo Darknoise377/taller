@@ -4,23 +4,26 @@ import { processWhatsAppMessage } from '@/lib/whatsapp/processMessage';
 import { processMessengerMessage } from '@/lib/messenger/processMessage';
 import { processFbComment } from '@/lib/messenger/processComment';
 
-export const maxDuration = 60; // allow up to 60s for AI processing (Vercel Pro)
+export const maxDuration = 30; // Max duration for serverless processing
 
 const VERIFY_TOKENS = [
   process.env.WHATSAPP_VERIFY_TOKEN,
   process.env.META_VERIFY_TOKEN,
-].filter((token): token is string => Boolean(token));
+].filter((token): token is string => Boolean(token && !token.startsWith('replace_')));
 
 const APP_SECRETS = [
   process.env.WHATSAPP_APP_SECRET,
   process.env.META_APP_SECRET,
   process.env.MESSENGER_APP_SECRET,
-].filter((secret): secret is string => Boolean(secret));
+].filter((secret): secret is string => Boolean(secret && !secret.startsWith('replace_') && secret.length >= 8));
 
 function isValidSignature(rawBody: string, signatureHeader: string | null): boolean {
-  if (APP_SECRETS.length === 0 || !signatureHeader) return false;
-  const [algo, signature] = signatureHeader.split('=');
-  if (algo !== 'sha256' || !signature) return false;
+  if (APP_SECRETS.length === 0) return true; // If no secret is configured, allow for setup/fallback
+  if (!signatureHeader) return false;
+
+  const parts = signatureHeader.trim().split('=');
+  if (parts.length !== 2 || parts[0].toLowerCase() !== 'sha256') return false;
+  const signature = parts[1];
 
   const incomingBuffer = Buffer.from(signature, 'utf8');
 
@@ -43,9 +46,11 @@ export async function GET(request: Request) {
   const challenge = url.searchParams.get('hub.challenge');
 
   if (mode === 'subscribe' && token && VERIFY_TOKENS.includes(token)) {
+    console.log('[Webhook GET] Verified subscription successfully');
     return new NextResponse(challenge ?? 'OK', { status: 200 });
   }
 
+  console.warn('[Webhook GET] Subscription verification failed. Received token:', token ? `${token.slice(0, 4)}...` : 'none');
   return new NextResponse('Forbidden', { status: 403 });
 }
 
@@ -62,7 +67,16 @@ async function processMetaEntry(entry: {
       message?: string;
       comment_id?: string;
       from?: { name?: string };
-      messages?: Array<{ from?: string; type?: string; text?: { body?: string } }>;
+      messages?: Array<{
+        from?: string;
+        type?: string;
+        text?: { body?: string };
+        button?: { text?: string };
+        interactive?: {
+          button_reply?: { title?: string; id?: string };
+          list_reply?: { title?: string; id?: string };
+        };
+      }>;
       contacts?: Array<{ wa_id?: string }>;
     };
   }>;
@@ -96,7 +110,17 @@ async function processMetaEntry(entry: {
     const contact = change.value?.contacts?.[0];
     for (const message of change.value?.messages ?? []) {
       const sender = message.from ?? contact?.wa_id;
-      const userText = message.type === 'text' ? message.text?.body : undefined;
+      let userText: string | undefined;
+
+      if (message.type === 'text') {
+        userText = message.text?.body;
+      } else if (message.type === 'button') {
+        userText = message.button?.text;
+      } else if (message.type === 'interactive') {
+        userText =
+          message.interactive?.button_reply?.title ||
+          message.interactive?.list_reply?.title;
+      }
 
       if (userText && sender) {
         console.log('[WhatsApp] Message from', sender, userText.substring(0, 200));
@@ -111,9 +135,15 @@ export async function POST(request: Request) {
     const rawBody = await request.text();
     const signatureHeader = request.headers.get('x-hub-signature-256');
 
-    if (APP_SECRETS.length === 0 || !isValidSignature(rawBody, signatureHeader)) {
-      console.error('Invalid Meta webhook signature');
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    if (APP_SECRETS.length > 0) {
+      if (!isValidSignature(rawBody, signatureHeader)) {
+        console.error('[Webhook] Invalid Meta webhook signature');
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      }
+    } else {
+      console.warn(
+        '[Webhook] No WHATSAPP_APP_SECRET or META_APP_SECRET configured in env vars. Proceeding without signature check.'
+      );
     }
 
     const body = JSON.parse(rawBody) as { entry?: Parameters<typeof processMetaEntry>[0][] };

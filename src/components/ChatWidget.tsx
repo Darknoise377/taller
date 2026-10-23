@@ -410,6 +410,10 @@ export default function ChatWidget() {
                         .filter((p) => p.type === "text")
                         .map((p) => p.text ?? "")
                         .join("")
+                    : typeof (msg as any).content === "string"
+                    ? (msg as any).content
+                    : typeof (msg as any).text === "string"
+                    ? (msg as any).text
                     : "";
 
                   if (!textContent && !isUser) return null;

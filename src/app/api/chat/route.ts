@@ -319,6 +319,25 @@ const createOrderTool: Tool<CreateOrderParams, CreateOrderResult> = {
   },
 };
 
+function extractMessageText(msg: unknown): string {
+  if (!msg || typeof msg !== 'object') return '';
+  const m = msg as Record<string, unknown>;
+  if (Array.isArray(m.parts)) {
+    const textParts = m.parts
+      .filter((p): p is { type: string; text?: string } => Boolean(p && typeof p === 'object' && (p as { type: string }).type === 'text'))
+      .map((p) => p.text ?? '')
+      .join('');
+    if (textParts.trim()) return textParts.trim();
+  }
+  if (typeof m.content === 'string' && m.content.trim()) {
+    return m.content.trim();
+  }
+  if (typeof m.text === 'string' && m.text.trim()) {
+    return m.text.trim();
+  }
+  return '';
+}
+
 export async function POST(req: Request) {
   const ip = getClientIp(req);
   const rl = await rateLimit(req, { keyPrefix: 'chat', windowMs: 60_000, max: 12 });
@@ -356,48 +375,60 @@ export async function POST(req: Request) {
     );
   }
 
+  // Find or create session for this client IP (within 3h active window)
+  const lastUserMsg = [...uiMessages].reverse().find((m) => m.role === 'user');
+  const userText = extractMessageText(lastUserMsg);
+
+  let activeSessionId: number | null = null;
+  if (userText) {
+    try {
+      const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
+      let session = await prisma.chatSession.findFirst({
+        where: {
+          userId: `ip:${ip}`,
+          createdAt: { gte: new Date(Date.now() - THREE_HOURS_MS) },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (!session) {
+        session = await prisma.chatSession.create({ data: { userId: `ip:${ip}` } });
+      }
+      activeSessionId = session.id;
+
+      await prisma.chatMessage.create({
+        data: { sessionId: session.id, role: 'user', content: userText },
+      });
+    } catch (dbErr) {
+      console.warn('[/api/chat] Could not persist user message:', dbErr);
+    }
+  }
+
   const result = streamText({
     model,
     system: SYSTEM_PROMPT,
     messages: [...FEW_SHOT_MESSAGES, ...messages],
     stopWhen: stepCountIs(8),
     tools: { searchProducts: searchProductsTool, createOrder: createOrderTool },
+    onFinish: async ({ text }) => {
+      if (activeSessionId && text?.trim()) {
+        try {
+          await prisma.chatMessage.create({
+            data: {
+              sessionId: activeSessionId,
+              role: 'assistant',
+              content: text.trim(),
+            },
+          });
+
+        } catch (dbErr) {
+          console.warn('[/api/chat] Could not persist assistant message:', dbErr);
+        }
+      }
+    },
     onError: (err) => {
       console.error('[/api/chat] streamText error:', err);
     },
   });
-
-  // Log conversation (best-effort, non-blocking)
-  void (async () => {
-    try {
-      // uiMessages is the original array of UIMessage from the request
-      const lastUserMsg = [...uiMessages].reverse().find((m) => m.role === 'user');
-      if (lastUserMsg) {
-        // Extract text content from parts (v6 UIMessage format)
-        type TextPart = { type: string; text?: string };
-        const textContent = Array.isArray(lastUserMsg.parts)
-          ? (lastUserMsg.parts as TextPart[])
-              .filter((p) => p.type === 'text')
-              .map((p) => p.text ?? '')
-              .join('')
-          : '';
-        if (textContent) {
-          let session = await prisma.chatSession.findFirst({
-            where: { userId: `ip:${ip}` },
-            orderBy: { createdAt: 'desc' },
-          });
-          if (!session) {
-            session = await prisma.chatSession.create({ data: { userId: `ip:${ip}` } });
-          }
-          await prisma.chatMessage.create({
-            data: { sessionId: session.id, role: 'user', content: textContent },
-          });
-        }
-      }
-    } catch {
-      // Non-critical — don't block the response
-    }
-  })();
 
   return result.toUIMessageStreamResponse();
 }

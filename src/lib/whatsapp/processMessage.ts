@@ -16,7 +16,7 @@ import { calculateDisplayPrices, formatCurrency } from '@/utils/formatCurrency';
 
 const WHATSAPP_TOKEN = process.env.WHATSAPP_API_TOKEN;
 const PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_ID;
-const GRAPH_API_VERSION = process.env.WHATSAPP_GRAPH_API_VERSION ?? 'v17.0';
+const GRAPH_API_VERSION = (process.env.WHATSAPP_GRAPH_API_VERSION && process.env.WHATSAPP_GRAPH_API_VERSION !== 'v17.0') ? process.env.WHATSAPP_GRAPH_API_VERSION : 'v21.0';
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://www.motoservicioayr.com';
 
 const WA_SYSTEM_PROMPT = `Eres Criss, la asesora digital de Almacén y Taller Motoservicio A&R — La Ceja, Antioquia.
@@ -352,16 +352,26 @@ export const WA_FEW_SHOT: Array<{ role: 'user' | 'assistant'; content: string }>
 export const FALLBACK_MSG = 'Tuve un problema procesando tu mensaje. Por favor intenta de nuevo.';
 
 async function sendWhatsAppText(to: string, text: string): Promise<void> {
-  if (!WHATSAPP_TOKEN || !PHONE_NUMBER_ID) {
-    console.warn('[WhatsApp] token or phone id not configured');
+  const token = (process.env.WHATSAPP_API_TOKEN || process.env.WHATSAPP_TOKEN)?.trim();
+  const phoneId = (process.env.WHATSAPP_PHONE_ID || process.env.WHATSAPP_PHONE_NUMBER_ID)?.trim();
+  let version = (process.env.WHATSAPP_GRAPH_API_VERSION ?? 'v21.0').trim();
+  if (version === 'v17.0' || version === 'v18.0') {
+    version = 'v21.0';
+  }
+
+  if (!token || token.startsWith('replace_') || !phoneId) {
+    console.warn('[WhatsApp] Token or Phone ID not properly configured:', {
+      hasToken: Boolean(token && !token.startsWith('replace_')),
+      hasPhoneId: Boolean(phoneId),
+    });
     return;
   }
 
-  const url = `https://graph.facebook.com/${GRAPH_API_VERSION}/${PHONE_NUMBER_ID}/messages`;
+  const url = `https://graph.facebook.com/${version}/${phoneId}/messages`;
   const res = await fetch(url, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${WHATSAPP_TOKEN}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -373,6 +383,7 @@ async function sendWhatsAppText(to: string, text: string): Promise<void> {
 
   if (!res.ok) {
     const txt = await res.text();
+    console.error(`[WhatsApp] Send failed (${res.status}): ${txt}`);
     throw new Error(`WhatsApp send failed: ${res.status} ${txt}`);
   }
 }
@@ -474,31 +485,32 @@ export async function processWhatsAppMessage(
     }
   }
 
-  // Prepend few-shot examples so the model sees correct tool-usage patterns
-  // before the real conversation history.
-  const stream = streamText({
-    model: getAIModel(),
-    system: systemPrompt,
-    messages: [...WA_FEW_SHOT, ...history],
-    tools: { searchProducts: searchProductsTool, createOrder: makeCreateOrderTool(session.id) },
-    stopWhen: stepCountIs(8),
-  });
+  // Execute AI generation with resilient fallback handling
+  let cleanedReply = '';
+  try {
+    const stream = streamText({
+      model: getAIModel(),
+      system: systemPrompt,
+      messages: [...WA_FEW_SHOT, ...history],
+      tools: { searchProducts: searchProductsTool, createOrder: makeCreateOrderTool(session.id) },
+      stopWhen: stepCountIs(5),
+    });
 
-  // streamText.text resolves to the full accumulated text after all tool steps complete.
-  // generateText was returning empty text when the last step was a tool call in AI SDK v6.
-  const rawReply = await stream.text;
-
-  const aiReply =
-    rawReply.trim() ||
-    FALLBACK_MSG;
-
-  // Strip trailing ) the model sometimes adds after product URLs (markdown artifact)
-  const cleanedReply = aiReply.replace(/^(👉\s+https?:\/\/[^\s)]+)\)*\s*$/gm, '$1');
+    const rawReply = await stream.text;
+    const aiReply = rawReply.trim() || FALLBACK_MSG;
+    cleanedReply = aiReply.replace(/^(👉\s+https?:\/\/[^\s)]+)\)*\s*$/gm, '$1');
+  } catch (err) {
+    console.error('[WhatsApp] AI generation error:', err);
+    cleanedReply =
+      'Hola, en este momento tengo una breve interrupción en mi sistema de consulta automática. Con gusto te atiendo directamente en nuestro WhatsApp del taller: 301 527 1104 o en la Calle 27 #14-29, La Ceja.';
+  }
 
   // Save assistant reply
   await prisma.chatMessage.create({
     data: { sessionId: session.id, role: 'assistant', content: cleanedReply },
   });
+
+
 
   // Send reply via WhatsApp
   await sendWhatsAppText(sender, cleanedReply);

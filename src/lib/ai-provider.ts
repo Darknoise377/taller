@@ -7,7 +7,7 @@ import type { LanguageModel, ImageModel } from 'ai';
  * Parses and returns the Google service account credentials from env vars.
  * Supports VERTEX_SA_JSON_BASE64 (preferred) or VERTEX_SA_JSON (raw JSON string).
  */
-function getVertexCredentials(): { client_email: string; private_key: string } | null {
+function getVertexCredentials(): { client_email: string; private_key: string; project_id?: string } | null {
   const raw =
     process.env.VERTEX_SA_JSON_BASE64
       ? Buffer.from(process.env.VERTEX_SA_JSON_BASE64, 'base64').toString('utf-8')
@@ -19,16 +19,65 @@ function getVertexCredentials(): { client_email: string; private_key: string } |
     const parsed = JSON.parse(raw) as {
       client_email?: string;
       private_key?: string;
+      project_id?: string;
     };
     if (!parsed.client_email || !parsed.private_key) {
-      console.error('[ai-provider] SA JSON parsed but missing client_email or private_key');
+      console.warn('[ai-provider] SA JSON parsed but missing client_email or private_key');
       return null;
     }
-    return { client_email: parsed.client_email, private_key: parsed.private_key };
+    return {
+      client_email: parsed.client_email,
+      private_key: parsed.private_key,
+      project_id: parsed.project_id,
+    };
   } catch (e) {
-    console.error('[ai-provider] Failed to parse SA JSON:', e instanceof Error ? e.message : e);
+    console.warn('[ai-provider] Failed to parse SA JSON:', e instanceof Error ? e.message : e);
     return null;
   }
+}
+
+export function getAIStatus(): {
+  configured: boolean;
+  provider: 'vertex' | 'gemini' | 'openai' | 'none';
+  model: string;
+  details: string;
+} {
+  const vtxCreds = getVertexCredentials();
+  const vertexProject = process.env.VERTEX_PROJECT_ID || vtxCreds?.project_id;
+  if (vtxCreds && vertexProject) {
+    return {
+      configured: true,
+      provider: 'vertex',
+      model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
+      details: `Vertex AI (${vertexProject})`,
+    };
+  }
+
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  if (geminiKey) {
+    return {
+      configured: true,
+      provider: 'gemini',
+      model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
+      details: 'Google Gemini API',
+    };
+  }
+
+  if (process.env.OPENAI_API_KEY) {
+    return {
+      configured: true,
+      provider: 'openai',
+      model: process.env.OPENAI_MODEL ?? 'gpt-4o-mini',
+      details: 'OpenAI API',
+    };
+  }
+
+  return {
+    configured: false,
+    provider: 'none',
+    model: 'none',
+    details: 'Sin proveedor configurado. Agrega GEMINI_API_KEY o VERTEX_SA_JSON_BASE64 en las variables de entorno.',
+  };
 }
 
 /**
@@ -38,9 +87,10 @@ function getVertexCredentials(): { client_email: string; private_key: string } |
 export function getAIModel(): LanguageModel {
   // 1. Vertex AI via service account JSON (recommended for GCP)
   const vtxCreds = getVertexCredentials();
-  if (vtxCreds) {
+  const vertexProject = process.env.VERTEX_PROJECT_ID || vtxCreds?.project_id;
+  if (vtxCreds && vertexProject) {
     const vertexProvider = createVertex({
-      project: process.env.VERTEX_PROJECT_ID,
+      project: vertexProject,
       location: process.env.VERTEX_LOCATION ?? 'us-central1',
       googleAuthOptions: {
         credentials: {
@@ -53,8 +103,9 @@ export function getAIModel(): LanguageModel {
   }
 
   // 2. Google Gemini via API key
-  if (process.env.GEMINI_API_KEY) {
-    const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  if (geminiKey) {
+    const google = createGoogleGenerativeAI({ apiKey: geminiKey });
     return google(process.env.GEMINI_MODEL ?? 'gemini-2.5-flash');
   }
 
@@ -76,9 +127,10 @@ export function getAIModel(): LanguageModel {
 export function getAIImageModel(): ImageModel {
   // 1. Vertex AI via service account (same credentials as getAIModel)
   const vtxCreds = getVertexCredentials();
-  if (vtxCreds) {
+  const vertexProject = process.env.VERTEX_PROJECT_ID || vtxCreds?.project_id;
+  if (vtxCreds && vertexProject) {
     const vertexProvider = createVertex({
-      project: process.env.VERTEX_PROJECT_ID,
+      project: vertexProject,
       location: process.env.VERTEX_LOCATION ?? 'us-central1',
       googleAuthOptions: {
         credentials: {
@@ -91,8 +143,9 @@ export function getAIImageModel(): ImageModel {
   }
 
   // 2. Google Gemini API key
-  if (process.env.GEMINI_API_KEY) {
-    const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  if (geminiKey) {
+    const google = createGoogleGenerativeAI({ apiKey: geminiKey });
     return google.image(process.env.IMAGEN_MODEL ?? 'imagen-3.0-generate-002');
   }
 
