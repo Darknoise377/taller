@@ -121,21 +121,21 @@ export const SEASON_THEME_META: Record<SeasonalThemeKey, SeasonThemeMeta> = {
     comboCta: 'bg-amber-400 text-black hover:bg-amber-300 font-extrabold',
   },
   navidad: {
-    label: 'Navidad',
+    label: 'Edición Navidad',
     icon: '🎄',
     heroBg:
-      'bg-gradient-to-br from-[#e8f7ea] via-[#fff3f3] to-[#ecf4ff] dark:from-[#06210F] dark:via-[#112f14] dark:to-[#3A0C0C]',
-    badgeBg: 'bg-[#1E8E3E]/18 dark:bg-[#1E8E3E]/25 border-emerald-300/35',
-    badgeText: 'text-[#0F5A24] dark:text-[#A7F0B3]',
-    glowPrimary: 'bg-[#1E8E3E]/24 dark:bg-[#1E8E3E]/30',
-    glowSecondary: 'bg-[#C62828]/22 dark:bg-[#E53935]/26',
-    pulseOne: 'bg-[#1E8E3E]/34 dark:bg-[#1E8E3E]/32',
-    pulseTwo: 'bg-[#C62828]/30 dark:bg-[#C62828]/34',
+      'bg-gradient-to-br from-[#faf6ef] via-[#f4eee2] to-[#eee5d3] dark:from-[#05140f] dark:via-[#092218] dark:to-[#123329]',
+    badgeBg: 'bg-[#841627]/12 dark:bg-[#e5b842]/15 border-[#cf9e33]/30',
+    badgeText: 'text-[#6a101f] dark:text-[#f3cf65]',
+    glowPrimary: 'bg-[#124c3a]/25 dark:bg-[#2fc28d]/20',
+    glowSecondary: 'bg-[#841627]/22 dark:bg-[#ba253c]/22',
+    pulseOne: 'bg-[#cf9e33]/25 dark:bg-[#e5b842]/20',
+    pulseTwo: 'bg-[#124c3a]/28 dark:bg-[#0c3327]/30',
     comboGradient:
-      'from-[#1E8E3E] via-[#2e7d32] to-[#C62828] dark:from-[#0F5A24] dark:via-[#1B5E20] dark:to-[#8B1020]',
-    comboGlow: 'bg-emerald-400/22',
-    comboBadge: 'bg-white/20 text-white border-emerald-200/30',
-    comboCta: 'bg-[#C62828] text-white hover:bg-red-700',
+      'from-[#0e3d2f] via-[#124c3a] to-[#841627] dark:from-[#071f17] dark:via-[#0e3d2f] dark:to-[#500b16]',
+    comboGlow: 'bg-[#cf9e33]/25',
+    comboBadge: 'bg-[#cf9e33]/20 text-[#fbf9f5] border-[#e5b842]/40',
+    comboCta: 'bg-gradient-to-r from-[#cf9e33] to-[#e5b842] text-[#05140f] hover:brightness-105 font-bold shadow-md shadow-[#cf9e33]/20',
   },
 };
 

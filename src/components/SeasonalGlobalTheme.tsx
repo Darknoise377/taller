@@ -10,42 +10,33 @@ import {
 
 export default function SeasonalGlobalTheme() {
   const [campaign, setCampaign] = useState<SeasonalCampaignConfig>(DEFAULT_SEASONAL_CAMPAIGN);
+  const [userChoice, setUserChoice] = useState<SeasonalThemeKey | null>(null);
   const [showEntrance, setShowEntrance] = useState(true);
 
-  const intensity: SeasonalVisualIntensity = campaign.intensity ?? "full";
-  const multiplier = intensity === "subtle" ? 0.45 : intensity === "medium" ? 0.72 : 1;
+  // Load user preference from localStorage or listen to theme change event
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("ar-season-theme");
+      if (stored === "navidad" || stored === "none") {
+        setUserChoice(stored as SeasonalThemeKey);
+      }
+    } catch {
+      // ignore
+    }
 
-  const confetti = useMemo(
-    () => Array.from({ length: Math.max(16, Math.round(72 * multiplier)) }, (_, idx) => idx),
-    [multiplier],
-  );
-  const snow = useMemo(
-    () => Array.from({ length: Math.max(20, Math.round(84 * multiplier)) }, (_, idx) => idx),
-    [multiplier],
-  );
-  const bats = useMemo(
-    () => Array.from({ length: Math.max(10, Math.round(28 * multiplier)) }, (_, idx) => idx),
-    [multiplier],
-  );
-  const ghosts = useMemo(
-    () => Array.from({ length: Math.max(6, Math.round(16 * multiplier)) }, (_, idx) => idx),
-    [multiplier],
-  );
-  const hearts = useMemo(
-    () => Array.from({ length: Math.max(12, Math.round(36 * multiplier)) }, (_, idx) => idx),
-    [multiplier],
-  );
-  const streamers = useMemo(
-    () => Array.from({ length: Math.max(14, Math.round(42 * multiplier)) }, (_, idx) => idx),
-    [multiplier],
-  );
-  const offers = useMemo(
-    () => Array.from({ length: Math.max(9, Math.round(26 * multiplier)) }, (_, idx) => idx),
-    [multiplier],
-  );
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ key: SeasonalThemeKey }>).detail;
+      if (detail && detail.key !== undefined) {
+        setUserChoice(detail.key);
+      }
+    };
+
+    window.addEventListener("ar-season-theme-change", handler);
+    return () => window.removeEventListener("ar-season-theme-change", handler);
+  }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setShowEntrance(false), 6800);
+    const timer = window.setTimeout(() => setShowEntrance(false), 5000);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -62,7 +53,47 @@ export default function SeasonalGlobalTheme() {
       });
   }, []);
 
-  const activeKey: SeasonalThemeKey = campaign.enabled && campaign.key ? campaign.key : "none";
+  // Priority: user manual toggle > campaign from server > default (navidad)
+  const activeKey: SeasonalThemeKey =
+    userChoice !== null
+      ? userChoice
+      : campaign.enabled && campaign.key
+      ? campaign.key
+      : "navidad";
+
+  const intensity: SeasonalVisualIntensity = campaign.intensity ?? "full";
+  const multiplier = intensity === "subtle" ? 0.45 : intensity === "medium" ? 0.72 : 1;
+
+  // Gentle holiday stardust & crystalline snow particles
+  const particles = useMemo(
+    () => Array.from({ length: Math.max(14, Math.round(36 * multiplier)) }, (_, idx) => idx),
+    [multiplier]
+  );
+
+  const confetti = useMemo(
+    () => Array.from({ length: Math.max(16, Math.round(50 * multiplier)) }, (_, idx) => idx),
+    [multiplier]
+  );
+  const bats = useMemo(
+    () => Array.from({ length: Math.max(8, Math.round(20 * multiplier)) }, (_, idx) => idx),
+    [multiplier]
+  );
+  const ghosts = useMemo(
+    () => Array.from({ length: Math.max(4, Math.round(12 * multiplier)) }, (_, idx) => idx),
+    [multiplier]
+  );
+  const hearts = useMemo(
+    () => Array.from({ length: Math.max(10, Math.round(24 * multiplier)) }, (_, idx) => idx),
+    [multiplier]
+  );
+  const streamers = useMemo(
+    () => Array.from({ length: Math.max(10, Math.round(28 * multiplier)) }, (_, idx) => idx),
+    [multiplier]
+  );
+  const offers = useMemo(
+    () => Array.from({ length: Math.max(8, Math.round(18 * multiplier)) }, (_, idx) => idx),
+    [multiplier]
+  );
 
   useEffect(() => {
     document.documentElement.setAttribute("data-season-theme", activeKey);
@@ -76,23 +107,44 @@ export default function SeasonalGlobalTheme() {
   if (activeKey === "none") return null;
 
   return (
-        <div
+    <div
       className={`seasonal-overlay seasonal-overlay-${intensity} ${showEntrance ? "seasonal-overlay-entrance" : ""}`}
       aria-hidden="true"
     >
-      {/* Artistic Liquid Blobs Background */}
-      <div className="seasonal-art-blob seasonal-blob-1"></div>
-      <div className="seasonal-art-blob seasonal-blob-2"></div>
-      <div className="seasonal-art-blob seasonal-blob-3"></div>
+      {/* Luxurious Liquid Ambient Lighting */}
+      <div className="seasonal-art-blob seasonal-blob-1" />
+      <div className="seasonal-art-blob seasonal-blob-2" />
+      <div className="seasonal-art-blob seasonal-blob-3" />
 
+      {/* ── EDICIÓN ESPECIAL NAVIDAD PREMIUM ── */}
+      {activeKey === "navidad" && (
+        <>
+          {/* Subtle Golden Horizon Line at Top */}
+          <div className="seasonal-navidad-glow-line" />
+
+          {/* Elegant Stardust & Micro-Crystalline Snow Dust */}
+          <div className="seasonal-navidad-particles" aria-hidden="true">
+            {particles.map((item) => (
+              <span
+                key={item}
+                className={`seasonal-navidad-particle seasonal-navidad-p-${item % 8}`}
+              />
+            ))}
+          </div>
+
+          {/* Luxury Champagne Corner Accents */}
+          <div className="seasonal-navidad-corner seasonal-navidad-corner-left" />
+          <div className="seasonal-navidad-corner seasonal-navidad-corner-right" />
+        </>
+      )}
+
+      {/* Other seasonal campaigns retained cleanly */}
       {activeKey === "mundial_2026" && (
         <>
-                    <div className="seasonal-top-wave-banner" />
+          <div className="seasonal-top-wave-banner" />
           <div className="seasonal-top-banner-glow" />
           <div className="seasonal-ribbon seasonal-ribbon-left" />
           <div className="seasonal-ribbon seasonal-ribbon-right" />
-          <div className="seasonal-ball">⚽</div>
-          <div className="seasonal-cup">A&R CUP</div>
           {showEntrance && intensity !== "subtle" && (
             <div className="seasonal-confetti-layer">
               {confetti.map((item) => (
@@ -108,13 +160,10 @@ export default function SeasonalGlobalTheme() {
 
       {activeKey === "halloween" && (
         <>
-                    <div className="seasonal-top-wave-banner seasonal-halloween-wave" />
+          <div className="seasonal-top-wave-banner seasonal-halloween-wave" />
           <div className="seasonal-web seasonal-web-left" />
           <div className="seasonal-web seasonal-web-right" />
           <div className="seasonal-moon" />
-          <div className="seasonal-lantern seasonal-lantern-left" />
-          <div className="seasonal-lantern seasonal-lantern-center" />
-          <div className="seasonal-lantern seasonal-lantern-right" />
           <div className="seasonal-bat-layer">
             {bats.map((item) => (
               <span key={item} className="seasonal-bat">
@@ -127,21 +176,6 @@ export default function SeasonalGlobalTheme() {
               <span key={item} className="seasonal-ghost">
                 👻
               </span>
-            ))}
-          </div>
-        </>
-      )}
-
-      {activeKey === "navidad" && (
-        <>
-          <div className="seasonal-tree" />
-          <div className="seasonal-star">⭐</div>
-          <div className="seasonal-gift seasonal-gift-left" />
-          <div className="seasonal-gift seasonal-gift-right" />
-          <div className="seasonal-lights" />
-          <div className="seasonal-snow-layer">
-            {snow.map((item) => (
-              <span key={item} className="seasonal-snow" />
             ))}
           </div>
         </>
@@ -165,9 +199,8 @@ export default function SeasonalGlobalTheme() {
 
       {activeKey === "amor_amistad" && (
         <>
-                    <div className="seasonal-top-wave-banner seasonal-love-wave" />
+          <div className="seasonal-top-wave-banner seasonal-love-wave" />
           <div className="seasonal-love-glow" />
-          <div className="seasonal-love-title">Amor y Amistad</div>
           <div className="seasonal-heart-layer">
             {hearts.map((item) => (
               <span key={item} className={`seasonal-heart seasonal-heart-${item % 4}`}>
@@ -181,7 +214,6 @@ export default function SeasonalGlobalTheme() {
       {activeKey === "black_week" && (
         <>
           <div className="seasonal-blackweek-border" />
-          <div className="seasonal-blackweek-title">BLACK WEEK</div>
           <div className="seasonal-offer-layer">
             {offers.map((item) => (
               <span key={item} className="seasonal-offer-badge">

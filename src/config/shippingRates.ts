@@ -45,12 +45,12 @@ export interface ShippingConfig {
 export const CONTRAENTREGA_SURCHARGE = 8_000;
 
 export const DEFAULT_SEASONAL_CAMPAIGN: SeasonalCampaignConfig = {
-  enabled: false,
-  key: "none",
+  enabled: true,
+  key: "navidad",
   intensity: "full",
-  title: "",
-  subtitle: "",
-  ctaLabel: "Ver ofertas",
+  title: "Edición Especial de Navidad",
+  subtitle: "Calidad premium, ofertas de temporada y envíos rápidos a todo el país",
+  ctaLabel: "Ver combos navideños",
   ctaHref: "/combos",
 };
 

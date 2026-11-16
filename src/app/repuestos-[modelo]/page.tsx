@@ -157,7 +157,7 @@ export default async function MotorcycleModelPage({ params }: PageProps) {
       <header className="relative overflow-hidden bg-gradient-to-br from-[#050F2C] via-[#0A2A66] to-[#0d3580] py-6 sm:py-8 md:py-12 px-4">
         <div className="absolute inset-0 opacity-[0.04] bg-[radial-gradient(circle,_#fff_1px,_transparent_1px)] [background-size:20px_20px]" aria-hidden />
         <div className="relative max-w-7xl mx-auto z-10">
-          <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#7BA4D9' }}>
+          <p className="text-xs font-bold uppercase tracking-widest mb-2 text-[#7BA4D9]">
             Repuestos por modelo
           </p>
           <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">

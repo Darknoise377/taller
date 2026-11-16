@@ -17,6 +17,7 @@ export interface QuickFilter {
 }
 
 const FILTERS: QuickFilter[] = [
+  { id: 'navidad-deals', label: '🎄 Especial Navidad', icon: <SparklesIcon className="w-4 h-4 text-amber-500" /> },
   { id: 'envio-gratis', label: 'Envío gratis', icon: <TruckIcon className="w-4 h-4" /> },
   { id: 'ofertas', label: 'Ofertas', icon: <FireIcon className="w-4 h-4" /> },
   { id: 'nuevos', label: 'Nuevos', icon: <SparklesIcon className="w-4 h-4" /> },

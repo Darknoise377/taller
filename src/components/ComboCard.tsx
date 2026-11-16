@@ -205,7 +205,7 @@ export default function ComboCard({ combo, idx = 0, showDescription = false }: C
                 ? "bg-emerald-500 text-white scale-95"
                 : isOutOfStock
                   ? "bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700 active:scale-95 text-white shadow-md hover:shadow-lg"
+                  : "bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] hover:opacity-95 active:scale-95 text-white shadow-md hover:shadow-lg"
               }`}
           >
             {added ? (

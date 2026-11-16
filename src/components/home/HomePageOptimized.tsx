@@ -159,6 +159,8 @@ export default function HomePageOptimized({
     return initialFeaturedProducts.filter((product) => {
       return activeFilters.every((filter) => {
         switch (filter) {
+          case 'navidad-deals':
+            return product.stock > 0 && (product.price >= 50000 || (product.rating ? product.rating >= 4 : true));
           case 'envio-gratis':
             return product.price >= 100000; // Umbral de envío gratis
           case 'ofertas':
