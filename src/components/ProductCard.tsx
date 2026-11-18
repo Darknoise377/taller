@@ -95,6 +95,23 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
   const isLowStock = product.stock > 0 && product.stock <= 5;
   const isOutOfStock = product.stock <= 0;
 
+  // Single prioritized badge to prevent visual clutter
+  const primaryBadge = useMemo(() => {
+    if (isOutOfStock) {
+      return { text: "Agotado", className: "bg-slate-700 text-white" };
+    }
+    if (hasDiscount && discountPercentage > 0) {
+      return { text: `-${discountPercentage}%`, className: "bg-[#8B1E2F] text-white font-black shadow-sm" };
+    }
+    if (isLowStock) {
+      return { text: `¡Últimas ${product.stock}!`, className: "bg-amber-600 text-white font-bold shadow-sm" };
+    }
+    if (isNew) {
+      return { text: "Nuevo", className: "bg-[#173D32] text-[#F5F1E8] font-bold border border-[#D6B46A]/40 shadow-sm" };
+    }
+    return null;
+  }, [isOutOfStock, hasDiscount, discountPercentage, isLowStock, product.stock, isNew]);
+
   useEffect(() => {
     if (quantity > (product.stock || 0)) setQuantity(Math.max(1, product.stock || 1));
   }, [product.stock, quantity]);
@@ -160,29 +177,14 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
         {/* Overlay gradiente sutil */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-        {/* Badges superiores izquierdos */}
-        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 z-10">
-          {hasDiscount && (
-            <span className="bg-red-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-md animate-pulse">
-              -{discountPercentage}%
+        {/* Badge superior único priorizado */}
+        {primaryBadge && (
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10">
+            <span className={`${primaryBadge.className} text-[10px] sm:text-xs uppercase tracking-wider px-2 py-0.5 rounded-md shadow`}>
+              {primaryBadge.text}
             </span>
-          )}
-          {isNew && (
-            <span className="bg-[#0A2A66] text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow">
-              Nuevo
-            </span>
-          )}
-          {isLowStock && (
-            <span className="bg-amber-500 text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow ring-1 ring-amber-300/40">
-              ¡Últimas {product.stock}!
-            </span>
-          )}
-          {isOutOfStock && (
-            <span className="bg-red-500 text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow">
-              Agotado
-            </span>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Botón favoritos con target táctil accesible */}
         <button
@@ -331,20 +333,20 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Cantidad + botón */}
-        <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 xl:flex-row xl:items-center">
-          {/* Qty con objetivos táctiles accesibles */}
-          <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-50 dark:bg-slate-900 shrink-0 mx-auto w-full xl:w-auto">
+        {/* Acción de compra */}
+        <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+          {/* Qty en pantallas amplias */}
+          <div className="hidden xl:flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-50 dark:bg-slate-900 shrink-0">
             <button
               type="button"
               aria-label="Disminuir cantidad"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               disabled={isOutOfStock || quantity <= 1}
-              className="w-10 h-10 sm:w-9 sm:h-9 min-w-[40px] min-h-[40px] flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors active:scale-95"
+              className="w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors active:scale-95"
             >
               −
             </button>
-            <span className="w-8 text-center text-xs font-bold text-slate-800 dark:text-slate-200 tabular-nums">
+            <span className="w-7 text-center text-xs font-bold text-slate-800 dark:text-slate-200 tabular-nums">
               {quantity}
             </span>
             <button
@@ -352,18 +354,18 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
               aria-label="Aumentar cantidad"
               onClick={() => setQuantity((q) => Math.min(product.stock || 99, q + 1))}
               disabled={isOutOfStock || quantity >= (product.stock || 99)}
-              className="w-10 h-10 sm:w-9 sm:h-9 min-w-[40px] min-h-[40px] flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors active:scale-95"
+              className="w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors active:scale-95"
             >
               +
             </button>
           </div>
 
-          {/* CTA con altura táctil ergonómica */}
+          {/* CTA principal prominente con altura táctil ergonómica */}
           <button
             type="button"
             disabled={isOutOfStock}
             onClick={handleAddToCart}
-            className={`w-full xl:flex-1 h-10 sm:h-9 min-h-[40px] flex items-center justify-center gap-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 shadow-sm ${
+            className={`flex-1 h-10 sm:h-9 min-h-[40px] flex items-center justify-center gap-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 shadow-sm ${
               added
                 ? "bg-green-500 text-white shadow-green-200 dark:shadow-green-900/20 scale-[0.97]"
                 : isOutOfStock

@@ -5,6 +5,7 @@ import { ChevronUpIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import { isCheckoutPath } from "@/utils/routeUtils";
 import { AnimatePresence, motion } from "framer-motion";
+import { useCart } from "@/context/CartContext";
 
 const WHATSAPP_NUMBER = "573015271104";
 const WHATSAPP_MESSAGE = "Hola, estoy interesado en los repuestos de Motoservicio A&R";
@@ -33,6 +34,7 @@ function BotIcon({ className = "w-5 h-5" }: { className?: string }) {
 }
 
 export default function FloatingButtons() {
+  const { isCartModalOpen } = useCart();
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -69,7 +71,9 @@ export default function FloatingButtons() {
     <div
       className={`fixed ${
         isProductDetail ? "bottom-[calc(8.5rem+env(safe-area-inset-bottom))]" : "bottom-20"
-      } md:bottom-6 right-4 z-40 flex flex-col items-end gap-3`}
+      } md:bottom-6 right-4 z-40 flex flex-col items-end gap-3 transition-opacity duration-200 ${
+        isCartModalOpen ? "opacity-0 pointer-events-none" : "opacity-100"
+      }`}
     >
       {/* Back to top */}
       <button

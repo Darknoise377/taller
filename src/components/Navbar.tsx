@@ -101,7 +101,7 @@ const Navbar = () => {
   return (
     <>
       {/* --- NAVBAR SUPERIOR --- */}
-      <header className="w-full flex items-center justify-between px-3 sm:px-6 md:px-12 py-2.5 sm:py-3 sticky top-0 z-50 bg-white/85 dark:bg-[#07122e]/90 backdrop-blur-lg border-b border-slate-200/80 dark:border-slate-800 transition-colors duration-300">
+      <header className="w-full max-w-full flex items-center justify-between px-3 sm:px-4 md:px-5 lg:px-8 xl:px-12 py-2.5 sm:py-3 sticky top-0 z-50 bg-white/85 dark:bg-[#07122e]/90 backdrop-blur-lg border-b border-slate-200/80 dark:border-slate-800 transition-colors duration-300">
         {/* Logo y Nombre */}
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-3 group">
@@ -138,7 +138,7 @@ const Navbar = () => {
         </div>
 
         {/* Navegación (Desktop) */}
-        <nav className="flex items-center gap-3 md:gap-5">
+        <nav className="flex items-center gap-2 md:gap-3 lg:gap-4 xl:gap-5">
           {links.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
@@ -179,7 +179,7 @@ const Navbar = () => {
             <>
               <Link
                 href="/seguimiento"
-                className={`hidden md:flex items-center gap-2 text-sm font-medium transition-colors pb-0.5 border-b-2 ${
+                className={`hidden lg:flex items-center gap-2 text-sm font-medium transition-colors pb-0.5 border-b-2 ${
                   pathname === '/seguimiento'
                     ? isNavidad
                       ? 'text-[#0e3d2f] dark:text-[#f3cf65] border-[#cf9e33] font-bold'
@@ -192,7 +192,7 @@ const Navbar = () => {
               </Link>
               <Link
                 href="/cuenta/login"
-                className="hidden md:flex items-center gap-2 text-sm font-medium transition-colors text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cf9e33] focus-visible:ring-offset-2 rounded"
+                className="hidden lg:flex items-center gap-2 text-sm font-medium transition-colors text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cf9e33] focus-visible:ring-offset-2 rounded"
               >
                 <UserIcon className="w-5 h-5" />
                 Cuenta
@@ -200,13 +200,13 @@ const Navbar = () => {
             </>
           )}
 
-          {/* WhatsApp rápido (desktop) */}
+          {/* WhatsApp rápido (desktop grande) */}
           <a
             href="https://wa.me/573015271104?text=Hola%2C%20quiero%20informaci%C3%B3n"
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Contactar por WhatsApp"
-            className="hidden md:flex items-center gap-1.5 text-xs font-semibold text-white bg-[#25D366] hover:bg-[#1ebe5d] transition-colors px-3 py-1.5 rounded-full shadow-sm"
+            className="hidden xl:flex items-center gap-1.5 text-xs font-semibold text-white bg-[#25D366] hover:bg-[#1ebe5d] transition-colors px-3 py-1.5 rounded-full shadow-sm"
           >
             <PhoneIcon className="w-4 h-4" />
             WhatsApp

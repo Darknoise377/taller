@@ -170,10 +170,9 @@ export default function FloatingCombos({
   if (isCheckoutPath(pathname) || pathname?.startsWith("/admin")) return null;
 
   const isProductDetail = !!pathname?.match(/^\/products\/[^/]+$/);
-  // Mobile: Placed at left-4 to completely avoid collision with WhatsApp and BackToTop at right-4
-  const fabBottom = isProductDetail
-    ? "bottom-[calc(8.5rem+env(safe-area-inset-bottom))] md:bottom-24"
-    : "bottom-[calc(5.25rem+env(safe-area-inset-bottom))] md:bottom-24";
+  // Desktop: Placed to the left of WhatsApp (right-24) to avoid collision.
+  // Mobile: Hidden from floating layer as requested; integrated into navigation and promos.
+  const fabPosition = "hidden md:inline-flex fixed right-24 bottom-6 z-[35]";
 
   const sheet = (
     <AnimatePresence>
@@ -313,7 +312,7 @@ export default function FloatingCombos({
         aria-expanded={open}
         aria-haspopup="dialog"
         whileTap={{ scale: 0.96 }}
-        className={`fixed left-4 md:left-auto md:right-4 z-[75] inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] px-4 py-2.5 text-white shadow-[0_8px_32px_rgba(10,42,102,0.45)] ring-2 ring-white/20 transition hover:shadow-[0_12px_40px_rgba(10,42,102,0.55)] ${fabBottom} ${open || isCartModalOpen || waMenuOpen || aiChatOpen ? "pointer-events-none opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}
+        className={`${fabPosition} items-center gap-2 rounded-full bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] px-4 py-2.5 text-white shadow-[0_8px_32px_rgba(10,42,102,0.45)] ring-2 ring-white/20 transition hover:shadow-[0_12px_40px_rgba(10,42,102,0.55)] ${open || isCartModalOpen || waMenuOpen || aiChatOpen ? "pointer-events-none opacity-0 translate-y-4" : "opacity-100 translate-y-0"}`}
               >
         <span className="relative flex h-6 w-6 items-center justify-center">
           <SparklesIcon className="h-5 w-5" />

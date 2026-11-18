@@ -144,7 +144,7 @@ export default function InstantSearch({ products }: InstantSearchProps) {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onKeyDown={handleKeyDown}
-          placeholder="Busca por modelo, repuesto o marca: CR5, NKD, frenos..."
+          placeholder="Busca por modelo (ej. Pulsar, NKD, CR5), marca o repuesto..."
           className={`w-full rounded-2xl pl-12 pr-14 py-4 bg-white dark:bg-white/10 backdrop-blur-md border-2 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 text-base focus:outline-none transition-all duration-300 ${
             isFocused
               ? 'border-[#0A2A66] dark:border-[#5B9BD5] shadow-lg shadow-[#0A2A66]/10 dark:shadow-[#5B9BD5]/10'

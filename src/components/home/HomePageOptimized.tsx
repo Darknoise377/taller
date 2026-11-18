@@ -135,6 +135,29 @@ export default function HomePageOptimized({
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [quickViewProduct, setQuickViewProduct] = useState<ProductType | null>(null);
 
+  const priorityCategorySlugs = useMemo(() => [
+    'cilindros',
+    'frenos',
+    'transmision',
+    'aceites_lubricantes',
+    'filtros',
+    'accesorios',
+  ], []);
+
+  const featuredCategories = useMemo(() => {
+    const list: CategoryItem[] = [];
+    priorityCategorySlugs.forEach((slug) => {
+      const found = categories.find((c) => c.slug === slug);
+      if (found) list.push(found);
+    });
+    categories.forEach((c) => {
+      if (!list.some((it) => it.slug === c.slug) && list.length < 6) {
+        list.push(c);
+      }
+    });
+    return list;
+  }, [categories, priorityCategorySlugs]);
+
   useEffect(() => {
     fetch('/api/store-settings')
       .then((res) => (res.ok ? res.json() : null))
@@ -249,15 +272,24 @@ export default function HomePageOptimized({
             </Link>
           </motion.div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {categories.slice(0, 8).map((item, i) => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+            {featuredCategories.map((item) => (
               <CategoryCard
                 key={item.name}
                 item={item}
                 config={item.slug ? categoryConfig[item.slug as keyof typeof categoryConfig] : undefined}
-                highlight={i < 3}
               />
             ))}
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <Link
+              href="/products"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 hover:border-[#2E5FA7] dark:hover:border-[#D6B46A] hover:text-[#0A2A66] dark:hover:text-[#D6B46A] transition-all shadow-sm"
+            >
+              <span>Ver todas las categorías ({categories.length})</span>
+              <ArrowRightIcon className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </section>
       </div>
@@ -464,14 +496,10 @@ export default function HomePageOptimized({
  * SUBCOMPONENTES
  * --------------------------- */
 
-function CategoryCard({ item, config, highlight }: {
+function CategoryCard({ item, config }: {
   item: CategoryItem;
   config?: { icon: React.ReactNode; colorFrom: string; colorTo: string };
-  highlight?: boolean;
 }) {
-  const URGENCY_LABELS = ["Alta demanda 🔥", "Últimas unidades", "Muy buscado"];
-  const urgencyLabel = highlight ? URGENCY_LABELS[Math.abs(item.name.charCodeAt(0)) % URGENCY_LABELS.length] : null;
-
   return (
     <Link
       href={`/products/category/${encodeURIComponent(item.slug)}`}
@@ -486,13 +514,6 @@ function CategoryCard({ item, config, highlight }: {
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           className="object-cover group-hover:scale-105 transition-transform duration-500"
         />
-  
-        {urgencyLabel && (
-          <div className="absolute top-2 right-2 z-20 flex items-center gap-1 rounded-full bg-orange-500 px-2 py-0.5 text-[9px] font-bold text-white shadow-md">
-            <FireIcon className="w-3 h-3" />
-            {urgencyLabel}
-          </div>
-        )}
       </div>
 
       <div className="p-3">

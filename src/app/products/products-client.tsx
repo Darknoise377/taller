@@ -18,7 +18,6 @@ import {
   getProductCategoryLabel,
 } from "@/constants/productCategories";
 import { ProductCard } from "../../components/ProductCard";
-import FloatingCombos from "@/components/FloatingCombos";
 
 // --- Constants ---
 const PAGE_SIZE = 20;
@@ -363,9 +362,9 @@ export default function ProductsClient({
                 className="pl-3 pr-8 py-2.5 text-sm rounded-xl bg-slate-100 dark:bg-slate-800 border border-transparent text-slate-700 dark:text-slate-300 appearance-none cursor-pointer outline-none hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
               >
                 <option value="relevance">Relevancia</option>
-                <option value="price-asc">Precio ?</option>
-                <option value="price-desc">Precio ?</option>
-                <option value="newest">Recientes</option>
+                <option value="price-asc">Precio: menor a mayor</option>
+                <option value="price-desc">Precio: mayor a menor</option>
+                <option value="newest">Más recientes</option>
               </select>
               <ChevronDownIcon className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             </div>
@@ -409,9 +408,9 @@ export default function ProductsClient({
           <FilterSelect label="Modelo" value={selectedModel} onChange={(e) => handleFilterChange("model", e.target.value)} options={modelSuggestions} />
           <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl px-3 py-2 border border-transparent text-sm">
             <span className="text-slate-400 text-xs mr-1">$</span>
-            <input type="number" aria-label="Precio m�nimo" placeholder="M�n" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onBlur={() => handlePriceChange(minPrice, maxPrice)} className="w-16 text-xs bg-transparent outline-none text-slate-700 dark:text-slate-300 placeholder-slate-400" />
-            <span className="text-slate-400 mx-1">�</span>
-            <input type="number" aria-label="Precio m�ximo" placeholder="M�x" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} onBlur={() => handlePriceChange(minPrice, maxPrice)} className="w-16 text-xs bg-transparent outline-none text-slate-700 dark:text-slate-300 placeholder-slate-400" />
+            <input type="number" aria-label="Precio mínimo" placeholder="Mín" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onBlur={() => handlePriceChange(minPrice, maxPrice)} className="w-16 text-xs bg-transparent outline-none text-slate-700 dark:text-slate-300 placeholder-slate-400" />
+            <span className="text-slate-400 mx-1">–</span>
+            <input type="number" aria-label="Precio máximo" placeholder="Máx" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} onBlur={() => handlePriceChange(minPrice, maxPrice)} className="w-16 text-xs bg-transparent outline-none text-slate-700 dark:text-slate-300 placeholder-slate-400" />
           </div>
           {areFiltersActive && (
             <button onClick={handleResetFilters} className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 hover:bg-red-500 hover:text-white transition-all">
@@ -441,7 +440,7 @@ export default function ProductsClient({
             {searchTerm && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/15 dark:border-[#2E5FA7]/25">
                 &ldquo;{searchTerm}&rdquo;
-                <button type="button" aria-label="Quitar b�squeda" onClick={() => updateURLParams({ q: "" })}><XMarkIcon className="w-3 h-3 hover:text-red-500" /></button>
+                <button type="button" aria-label="Quitar búsqueda" onClick={() => updateURLParams({ q: "" })}><XMarkIcon className="w-3 h-3 hover:text-red-500" /></button>
               </span>
             )}
             {selectedSize !== "all" && (
@@ -458,13 +457,13 @@ export default function ProductsClient({
             )}
             {sortBy !== "relevance" && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 text-xs font-semibold border border-amber-200 dark:border-amber-800">
-                {({ "price-asc": "Precio ?", "price-desc": "Precio ?", newest: "Recientes" } as Record<string, string>)[sortBy] ?? sortBy}
+                {({ "price-asc": "Menor precio", "price-desc": "Mayor precio", newest: "Más recientes" } as Record<string, string>)[sortBy] ?? sortBy}
                 <button type="button" aria-label="Quitar orden" onClick={() => updateURLParams({ sort: "relevance" })}><XMarkIcon className="w-3 h-3 hover:text-red-500" /></button>
               </span>
             )}
             {(minPrice || maxPrice) && (
               <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#0A2A66]/10 dark:bg-[#2E5FA7]/20 text-[#0A2A66] dark:text-[#5B9BD5] text-xs font-semibold border border-[#0A2A66]/15 dark:border-[#2E5FA7]/25">
-                ${minPrice || "0"}�${maxPrice || "8"}
+                ${minPrice || "0"} – ${maxPrice || "..."}
                 <button type="button" aria-label="Quitar precio" onClick={() => handlePriceChange("", "")}><XMarkIcon className="w-3 h-3 hover:text-red-500" /></button>
               </span>
             )}
@@ -537,7 +536,7 @@ export default function ProductsClient({
                     </svg>
                   </div>
                   <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Has visto los {products.length} productos del cat�logo
+                    Has visto los {products.length} productos del catálogo
                   </p>
                 </div>
               )}
@@ -555,7 +554,7 @@ export default function ProductsClient({
               </div>
               <p className="text-xl font-black text-slate-800 dark:text-slate-200">Sin resultados</p>
               <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-sm text-sm leading-relaxed">
-                Prueba cambiando los filtros o el t�rmino de b�squeda.
+                Prueba cambiando los filtros o el término de búsqueda.
               </p>
               {areFiltersActive && (
                 <button
@@ -611,13 +610,13 @@ export default function ProductsClient({
                   onChange={(e) => handleSortChange(e.target.value)}
                   options={["relevance", "price-asc", "price-desc", "newest"]}
                   isMobile
-                  formatOptionLabel={(v) => ({ relevance: "Relevancia", "price-asc": "Menor precio", "price-desc": "Mayor precio", newest: "M�s recientes" } as Record<string, string>)[v] ?? v}
+                  formatOptionLabel={(v) => ({ relevance: "Relevancia", "price-asc": "Menor precio", "price-desc": "Mayor precio", newest: "Más recientes" } as Record<string, string>)[v] ?? v}
                 />
                 <div>
                   <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Rango de precio</p>
                   <div className="flex gap-2">
-                    <input type="number" aria-label="Precio m�nimo" placeholder="M�nimo" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onBlur={() => handlePriceChange(minPrice, maxPrice)} className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-[#0A2A66] dark:focus:border-[#2E5FA7]" />
-                    <input type="number" aria-label="Precio m�ximo" placeholder="M�ximo" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} onBlur={() => handlePriceChange(minPrice, maxPrice)} className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-[#0A2A66] dark:focus:border-[#2E5FA7]" />
+                    <input type="number" aria-label="Precio mínimo" placeholder="Mínimo" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} onBlur={() => handlePriceChange(minPrice, maxPrice)} className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-[#0A2A66] dark:focus:border-[#2E5FA7]" />
+                    <input type="number" aria-label="Precio máximo" placeholder="Máximo" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} onBlur={() => handlePriceChange(minPrice, maxPrice)} className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-200 outline-none focus:border-[#0A2A66] dark:focus:border-[#2E5FA7]" />
                   </div>
                 </div>
               </div>
@@ -639,8 +638,6 @@ export default function ProductsClient({
           </>
         )}
       </AnimatePresence>
-
-      <FloatingCombos />
     </div>
   );
 }

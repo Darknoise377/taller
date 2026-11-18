@@ -741,41 +741,55 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
             )}
 
             {/* Desktop: cantidad + botón añadir */}
-            <div className="hidden md:flex items-center gap-3 pt-2">
-              <div className="flex items-center border-2 border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shrink-0">
+            <div className="hidden md:flex flex-col gap-2.5 pt-2">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center border-2 border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-900 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    disabled={quantity <= 1}
+                    className="px-4 py-3 text-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
+                  >
+                    −
+                  </button>
+                  <span className="text-lg font-bold w-10 text-center" aria-live="polite">{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
+                    disabled={quantity >= product.stock}
+                    className="px-4 py-3 text-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
+                  >
+                    +
+                  </button>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={quantity <= 1}
-                  className="px-4 py-3 text-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
+                  disabled={product.stock <= 0}
+                  onClick={handleAddToCart}
+                  aria-describedby="stock-status"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-bold text-base shadow-lg shadow-[#0A2A66]/25 hover:opacity-95 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  −
-                </button>
-                <span className="text-lg font-bold w-10 text-center" aria-live="polite">{quantity}</span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                  disabled={quantity >= product.stock}
-                  className="px-4 py-3 text-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition disabled:opacity-40"
-                >
-                  +
+                  <ShoppingCartIcon className="w-5 h-5" />
+                  {product.stock > 0 ? "Añadir al carrito" : "Agotado"}
                 </button>
               </div>
-              <button
-                type="button"
-                disabled={product.stock <= 0}
-                onClick={handleAddToCart}
-                aria-describedby="stock-status"
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7] text-white font-bold text-base shadow-lg shadow-[#0A2A66]/25 hover:opacity-95 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+
+              {/* Botón directo de asesoría de compatibilidad */}
+              <a
+                href={`https://wa.me/573015271104?text=${encodeURIComponent(`Hola, quiero confirmar si este repuesto es compatible con mi moto: "${product.name}" (SKU: ${product.sku ?? product.id.slice(0, 8)})`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-[#25D366]/40 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E] dark:text-[#25D366] font-semibold text-xs sm:text-sm transition-all"
               >
-                <ShoppingCartIcon className="w-5 h-5" />
-                {product.stock > 0 ? "Añadir al carrito" : "Agotado"}
-              </button>
+                <span>💬 ¿Dudas con tu moto? Consultar compatibilidad por WhatsApp</span>
+              </a>
             </div>
 
-            <p className="hidden md:flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-              <span>💡</span> Confirma compatibilidad con tu moto antes de comprar.
-            </p>
+            {/* Aviso de envío claro */}
+            <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
+              <span className="text-sm">📦</span>
+              <span><strong>Despachos rápidos:</strong> Envíos a toda Colombia · Gratis en compras desde $100.000</span>
+            </div>
 
             {/* Trust badges */}
             <div className="grid grid-cols-3 gap-2 py-4 border-t border-slate-100 dark:border-slate-800">

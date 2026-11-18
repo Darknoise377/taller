@@ -179,7 +179,19 @@ export default function ChatWidget() {
     if (!readCsrfCookie()) {
       fetch("/api/csrf").catch(() => undefined);
     }
+    const handleOpen = () => setOpen(true);
+    const handleToggle = () => setOpen((v) => !v);
+    window.addEventListener('open-ai-chat', handleOpen);
+    window.addEventListener('toggle-ai-chat', handleToggle);
+    return () => {
+      window.removeEventListener('open-ai-chat', handleOpen);
+      window.removeEventListener('toggle-ai-chat', handleToggle);
+    };
   }, []);
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('ai-chat-change', { detail: { open } }));
+  }, [open]);
 
   const { messages, sendMessage, stop, status, setMessages } = useChat({
     transport: new DefaultChatTransport({
@@ -248,8 +260,8 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* ── Floating button ── */}
-      <div className={`fixed ${isProductDetail ? 'bottom-[calc(8.5rem+env(safe-area-inset-bottom))]' : 'bottom-20'} md:bottom-6 left-4 z-40 flex flex-col items-start gap-2`}>
+      {/* ── Floating button (Desktop only, mobile opens via unified support hub) ── */}
+      <div className="hidden md:flex fixed md:bottom-6 left-6 z-40 flex-col items-start gap-2">
         {/* Tooltip bubble */}
         <AnimatePresence>
           {showLabel && !open && (

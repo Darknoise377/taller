@@ -118,23 +118,23 @@ export default function SearchHero({
             </div>
           </div>
 
-          {/* ── Caja Flotante de Búsqueda Escarchada de Lujo ── */}
+          {/* ── Caja Flotante de Búsqueda Protagonista ── */}
           <div className="mt-8 rounded-2xl bg-white/95 dark:bg-[#10243B]/95 backdrop-blur-xl border border-[#D6B46A]/35 shadow-[0_12px_40px_rgba(7,18,46,0.4)] p-3.5 sm:p-5">
             <div className="flex items-center justify-between pb-2.5 mb-2 border-b border-slate-200/60 dark:border-white/10">
               <div className="flex items-center gap-2">
                 <MagnifyingGlassIcon className="w-4 h-4 text-[#D6B46A]" />
-                <span className="text-xs font-bold text-[#07122E] dark:text-[#F5F1E8]">
-                  Buscador de Repuestos en Tiempo Real
+                <span className="text-xs sm:text-sm font-bold text-[#07122E] dark:text-[#F5F1E8]">
+                  Encuentra el repuesto exacto para tu moto
                 </span>
               </div>
               <span className="text-[11px] font-medium text-slate-500 dark:text-[#D6B46A]/80 hidden sm:inline">
-                Stock garantizado en La Ceja y envíos a Colombia
+                Stock garantizado y compatibilidad verificada
               </span>
             </div>
 
             <InstantSearch products={searchCatalog} />
 
-            {/* Filtros rápidos debajo del buscador */}
+            {/* Accesos rápidos de compatibilidad guiada */}
             <div className="mt-3">
               <QuickFilters onFilterChange={onFilterChange} activeFilters={activeFilters} />
             </div>
@@ -179,22 +179,6 @@ export default function SearchHero({
 
         </div>
       </section>
-
-      {/* ─── Sticky Search Bar Compacta (Aparece al scrollear) ─── */}
-      <div
-        className={`fixed top-[58px] sm:top-[64px] left-0 right-0 z-40 bg-white/95 dark:bg-[#07122e]/95 backdrop-blur-md shadow-lg border-b border-[#D6B46A]/25 py-2 sm:py-3 transition-transform duration-300 ${
-          showStickyBar ? 'translate-y-0' : '-translate-y-full'
-        }`}
-        aria-hidden={!showStickyBar}
-      >
-        <div className="max-w-4xl mx-auto px-3 sm:px-6">
-          <InstantSearch products={searchCatalog} />
-          {/* QuickFilters visibles en desktop, ocultos en móvil para no saturar altura */}
-          <div className="mt-2 hidden sm:block">
-            <QuickFilters onFilterChange={onFilterChange} activeFilters={activeFilters} />
-          </div>
-        </div>
-      </div>
     </>
   );
 }

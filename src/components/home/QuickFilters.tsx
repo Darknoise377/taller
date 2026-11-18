@@ -17,17 +17,13 @@ export interface QuickFilter {
 }
 
 const FILTERS: QuickFilter[] = [
-  { id: 'navidad-deals', label: '🎄 Especial Navidad', icon: <SparklesIcon className="w-4 h-4 text-amber-500" /> },
+  { id: 'navidad-deals', label: '✦ Especial Navidad', icon: <SparklesIcon className="w-4 h-4 text-[#D6B46A]" /> },
   { id: 'envio-gratis', label: 'Envío gratis', icon: <TruckIcon className="w-4 h-4" /> },
-  { id: 'ofertas', label: 'Ofertas', icon: <FireIcon className="w-4 h-4" /> },
-  { id: 'nuevos', label: 'Nuevos', icon: <SparklesIcon className="w-4 h-4" /> },
   { id: 'en-stock', label: 'En stock', icon: <CheckBadgeIcon className="w-4 h-4" /> },
+  { id: 'pulsar', label: 'Pulsar / Bajaj', icon: <TagIcon className="w-4 h-4" /> },
+  { id: 'ktm', label: 'KTM / Yamaha', icon: <TagIcon className="w-4 h-4" /> },
   { id: 'menos-50k', label: '<$50.000', icon: <CurrencyDollarIcon className="w-4 h-4" /> },
-  { id: '50k-100k', label: '$50k - $100k', icon: <CurrencyDollarIcon className="w-4 h-4" /> },
   { id: 'mas-100k', label: '>$100.000', icon: <CurrencyDollarIcon className="w-4 h-4" /> },
-  { id: 'bajaj', label: 'Bajaj', icon: <TagIcon className="w-4 h-4" /> },
-  { id: 'ktm', label: 'KTM', icon: <TagIcon className="w-4 h-4" /> },
-  { id: 'pulsar', label: 'Pulsar', icon: <TagIcon className="w-4 h-4" /> },
 ];
 
 interface QuickFiltersProps {
