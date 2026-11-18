@@ -12,10 +12,10 @@ const BASE_MESSAGES = [
 ];
 
 const NAVIDAD_MESSAGES = [
-  "🎄 Edición Especial de Navidad · Envíos prioritarios a toda Colombia",
-  "🎁 Combos navideños con regalo sorpresa incluido en cada pedido",
-  "✨ Stock garantizado y calidad verificada para tu moto esta temporada",
-  "🚚 Despachos el mismo día hábil · Compra segura online o contraentrega",
+  "✨ Navidad Sobre Ruedas · Envíos prioritarios y combos especiales en Motoservicio A&R",
+  "🎁 Combos de mantenimiento con regalo sorpresa incluido en cada pedido",
+  "🚚 Despachos el mismo día hábil a toda Colombia · Stock 100% verificado",
+  "🏍️ Taller especializado y repuestos originales · Más de 10 años en La Ceja",
 ];
 
 export default function AnnouncementBar() {
@@ -66,10 +66,10 @@ export default function AnnouncementBar() {
 
   return (
     <div
-      className={`relative text-xs font-medium py-2 px-10 text-center select-none z-50 transition-colors duration-300 ${
+      className={`relative text-xs font-semibold py-2.5 px-10 text-center select-none z-50 transition-colors duration-300 ${
         isNavidad
-          ? "bg-gradient-to-r from-[#420a14] via-[#5c0f1c] to-[#420a14] text-[#fffdf8] border-b border-[#e5b842]/40 shadow-sm"
-          : "bg-[#07122E] text-white/85"
+          ? "bg-gradient-to-r from-[#07122E] via-[#173D32] to-[#07122E] text-[#F5F1E8] border-b border-[#D6B46A]/35 shadow-sm"
+          : "bg-[#07122E] text-white/90 border-b border-white/10"
       }`}
     >
       <span

@@ -107,7 +107,7 @@ const Navbar = () => {
           <Link href="/" className="flex items-center gap-3 group">
             <div className={`relative h-11 w-11 overflow-hidden rounded-full ring-2 shadow-md transition-all duration-300 ${
               isNavidad
-                ? "ring-[#e5b842] shadow-[0_0_12px_rgba(229,184,66,0.35)]"
+                ? "ring-[#D6B46A] shadow-[0_0_12px_rgba(214,180,106,0.35)]"
                 : "ring-slate-200 dark:ring-slate-700"
             }`}>
               <Image
@@ -125,8 +125,8 @@ const Navbar = () => {
                   Motoservicio A&amp;R
                 </h1>
                 {isNavidad && (
-                  <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-gradient-to-r from-[#891a2b] to-[#b38827] text-white shadow-sm">
-                    Navidad
+                  <span className="hidden lg:inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-[#173D32] text-[#D6B46A] border border-[#D6B46A]/45 shadow-sm">
+                    Navidad Sobre Ruedas
                   </span>
                 )}
               </div>
@@ -231,21 +231,21 @@ const Navbar = () => {
             )}
           </button>
 
-          {/* Botón Edición Navidad */}
+          {/* Botón Edición Navidad Sobre Ruedas */}
           <button
             type="button"
             onClick={toggleNavidad}
             aria-label={isNavidad ? "Desactivar edición navideña" : "Activar edición especial de Navidad"}
-            title={isNavidad ? "Edición Navidad activa (Clic para volver a tema clásico)" : "Activar Edición Especial de Navidad"}
-            className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-full text-xs font-bold transition-all duration-300 shadow-sm hover:scale-105 focus-visible:outline-none focus-visible:ring-2 ${
+            title={isNavidad ? "Campaña Navidad activa (Clic para volver a tema clásico)" : "Activar Edición Especial de Navidad"}
+            className={`flex items-center gap-2 px-3 py-1.5 min-h-[38px] rounded-full text-xs font-bold transition-all duration-300 shadow-sm hover:scale-105 focus-visible:outline-none focus-visible:ring-2 ${
               isNavidad
-                ? "bg-gradient-to-r from-[#0e3d2f] via-[#165640] to-[#721422] text-[#fffdfa] border border-[#e5b842]/50 shadow-[0_2px_12px_rgba(207,158,51,0.3)] ring-1 ring-[#e5b842]/40 focus-visible:ring-[#cf9e33]"
+                ? "bg-[#173D32] text-[#F5F1E8] border border-[#D6B46A]/60 shadow-[0_2px_14px_rgba(214,180,106,0.25)] ring-1 ring-[#D6B46A]/40 focus-visible:ring-[#D6B46A]"
                 : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-[#2E5FA7] dark:hover:border-[#5B8DD9] focus-visible:ring-[#2E5FA7]"
             }`}
           >
-            <span className="text-sm leading-none">🎄</span>
-            <span className="hidden sm:inline">
-              {isNavidad ? "Navidad" : "Navidad"}
+            <span className="w-2 h-2 rounded-full bg-[#D6B46A] animate-pulse" />
+            <span>
+              {isNavidad ? "Navidad" : "Tema Clásico"}
             </span>
           </button>
 

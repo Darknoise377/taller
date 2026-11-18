@@ -40,7 +40,7 @@ export default function DynamicFooter() {
     <footer
       className={`relative z-20 text-slate-700 dark:text-gray-300 border-t transition-colors duration-300 ${
         isNavidad
-          ? "bg-gradient-to-t from-[#f2ece0] via-[#faf7f2] to-[#f7f2e7] dark:from-[#030d0a] dark:via-[#061711] dark:to-[#0a2219] border-[#cf9e33]/30 dark:border-[#e5b842]/20"
+          ? "bg-gradient-to-t from-[#F5F1E8] via-[#FAF7F2] to-[#F5F1E8] dark:from-[#050D20] dark:via-[#07122E] dark:to-[#10243B] border-[#D6B46A]/30 dark:border-[#D6B46A]/20"
           : "bg-gradient-to-t from-[#eaf1fb] via-white to-[#f4f7fb] dark:from-[#07122e] dark:via-[#0a1838] dark:to-[#10234a] border-slate-200 dark:border-[#1d3258]"
       }`}
     >
@@ -59,9 +59,11 @@ export default function DynamicFooter() {
             </div>
             <p className="text-sm text-slate-600 dark:text-gray-300 mt-2 font-medium">
               {isNavidad ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="text-amber-500">🎄</span>
-                  Edición Especial de Navidad · Motoservicio A&amp;R
+                <span className="inline-flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#D6B46A]/20 text-[#D6B46A] text-xs">✦</span>
+                  <span className="font-semibold text-slate-800 dark:text-[#F5F1E8]">Navidad Sobre Ruedas</span>
+                  <span className="text-slate-400 dark:text-slate-500">·</span>
+                  <span>Motoservicio A&amp;R</span>
                 </span>
               ) : (
                 "Taller y almacén de repuestos para motos. La Ceja, Antioquia."
@@ -76,43 +78,43 @@ export default function DynamicFooter() {
           <div className="flex flex-wrap justify-center md:justify-end gap-6 text-sm font-medium">
             <Link
               href="/"
-              className={isNavidad ? "hover:text-[#cf9e33] dark:hover:text-[#e5b842] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
+              className={isNavidad ? "hover:text-[#D6B46A] dark:hover:text-[#D6B46A] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
             >
               Inicio
             </Link>
             <Link
               href="/products"
-              className={isNavidad ? "hover:text-[#cf9e33] dark:hover:text-[#e5b842] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
+              className={isNavidad ? "hover:text-[#D6B46A] dark:hover:text-[#D6B46A] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
             >
               Productos
             </Link>
             <Link
               href="/combos"
-              className={isNavidad ? "hover:text-[#cf9e33] dark:hover:text-[#e5b842] transition-colors font-bold text-[#891a2b] dark:text-[#f3cf65]" : "hover:text-[#0A2A66] transition-colors"}
+              className={isNavidad ? "hover:text-[#D6B46A] dark:hover:text-[#D6B46A] transition-colors font-bold text-[#8B1E2F] dark:text-[#D6B46A]" : "hover:text-[#0A2A66] transition-colors"}
             >
               Combos Navideños
             </Link>
             <Link
               href="/about"
-              className={isNavidad ? "hover:text-[#cf9e33] dark:hover:text-[#e5b842] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
+              className={isNavidad ? "hover:text-[#D6B46A] dark:hover:text-[#D6B46A] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
             >
               Sobre Nosotros
             </Link>
             <Link
               href="/contact"
-              className={isNavidad ? "hover:text-[#cf9e33] dark:hover:text-[#e5b842] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
+              className={isNavidad ? "hover:text-[#D6B46A] dark:hover:text-[#D6B46A] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
             >
               Contacto
             </Link>
             <Link
               href="/privacy"
-              className={isNavidad ? "hover:text-[#cf9e33] dark:hover:text-[#e5b842] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
+              className={isNavidad ? "hover:text-[#D6B46A] dark:hover:text-[#D6B46A] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
             >
               Privacidad
             </Link>
             <Link
               href="/terms"
-              className={isNavidad ? "hover:text-[#cf9e33] dark:hover:text-[#e5b842] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
+              className={isNavidad ? "hover:text-[#D6B46A] dark:hover:text-[#D6B46A] transition-colors" : "hover:text-[#0A2A66] transition-colors"}
             >
               Términos
             </Link>
@@ -126,7 +128,7 @@ export default function DynamicFooter() {
               aria-label="Facebook"
               className={`p-2 rounded-full transition-colors ${
                 isNavidad
-                  ? "bg-stone-200/80 dark:bg-[#0d271f] hover:bg-[#891a2b] hover:text-white"
+                  ? "bg-[#07122E]/10 dark:bg-[#10243B] hover:bg-[#8B1E2F] hover:text-white"
                   : "bg-slate-200 dark:bg-gray-700 hover:bg-[#0A2A66] hover:text-white"
               }`}
             >
@@ -138,7 +140,7 @@ export default function DynamicFooter() {
               aria-label="Instagram"
               className={`p-2 rounded-full transition-colors ${
                 isNavidad
-                  ? "bg-stone-200/80 dark:bg-[#0d271f] hover:bg-[#cf9e33] hover:text-white"
+                  ? "bg-[#07122E]/10 dark:bg-[#10243B] hover:bg-[#D6B46A] hover:text-[#07122E]"
                   : "bg-slate-200 dark:bg-gray-700 hover:bg-[#2E5FA7] hover:text-white"
               }`}
             >
@@ -151,7 +153,7 @@ export default function DynamicFooter() {
               aria-label="WhatsApp"
               className={`p-2 rounded-full transition-colors ${
                 isNavidad
-                  ? "bg-stone-200/80 dark:bg-[#0d271f] hover:bg-[#1a634b] hover:text-white"
+                  ? "bg-[#07122E]/10 dark:bg-[#10243B] hover:bg-[#173D32] hover:text-white"
                   : "bg-slate-200 dark:bg-gray-700 hover:bg-[#25D366] hover:text-white"
               }`}
             >
@@ -163,7 +165,7 @@ export default function DynamicFooter() {
         {/* Métodos de pago */}
         <div
           className={`border-t mt-8 pt-6 ${
-            isNavidad ? "border-[#cf9e33]/25 dark:border-[#e5b842]/15" : "border-slate-200 dark:border-gray-700"
+            isNavidad ? "border-[#D6B46A]/20 dark:border-[#D6B46A]/15" : "border-slate-200 dark:border-gray-700"
           }`}
         >
           <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400 text-center mb-4">
@@ -180,7 +182,7 @@ export default function DynamicFooter() {
                 key={label}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border transition-all ${
                   isNavidad
-                    ? "bg-white/80 dark:bg-[#092218] border-[#cf9e33]/25 dark:border-[#e5b842]/20 shadow-sm"
+                    ? "bg-white/80 dark:bg-[#10243B] border-[#D6B46A]/25 dark:border-[#D6B46A]/20 shadow-sm"
                     : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
                 }`}
               >
@@ -197,7 +199,7 @@ export default function DynamicFooter() {
         {/* Línea divisoria */}
         <div
           className={`border-t mt-6 pt-6 flex flex-col items-center gap-2 text-sm text-slate-500 dark:text-gray-400 text-center ${
-            isNavidad ? "border-[#cf9e33]/20 dark:border-[#e5b842]/15" : "border-slate-200 dark:border-gray-700"
+            isNavidad ? "border-[#D6B46A]/20 dark:border-[#D6B46A]/15" : "border-slate-200 dark:border-gray-700"
           }`}
         >
           <p>© {new Date().getFullYear()} Almacén y Taller Motoservicio A&amp;R. Todos los derechos reservados.</p>
@@ -206,7 +208,7 @@ export default function DynamicFooter() {
             <span
               className={`font-black tracking-[0.18em] cursor-default select-none text-[13px] ${
                 isNavidad
-                  ? "bg-gradient-to-r from-[#cf9e33] via-[#e5b842] to-[#1a634b] bg-clip-text text-transparent"
+                  ? "bg-gradient-to-r from-[#D6B46A] via-[#F5F1E8] to-[#D6B46A] bg-clip-text text-transparent"
                   : "bg-gradient-to-r from-[#0A2A66] via-[#2E5FA7] to-[#5B8DD9] dark:from-[#5B8DD9] dark:to-blue-400 bg-clip-text text-transparent"
               }`}
             >

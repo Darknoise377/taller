@@ -148,46 +148,46 @@ body {
     --season-pulse-one: rgba(92, 45, 14, 0.4);
   }
 
-  /* ─── EDICIÓN ESPECIAL NAVIDAD PREMIUM DESIGN TOKENS ─── */
+  /* ─── EDICIÓN ESPECIAL NAVIDAD SOBRE RUEDAS DESIGN TOKENS ─── */
   :root[data-season-theme="navidad"] {
-    --primary: #0e3d2f;
-    --primary-light: #165640;
-    --secondary: #eee5d3;
-    --accent: #cf9e33;
+    --primary: #173D32;
+    --primary-light: #235446;
+    --secondary: #F5F1E8;
+    --accent: #D6B46A;
 
-    --navidad-forest-deep: #071f17;
-    --navidad-forest: #0e3d2f;
-    --navidad-forest-light: #165640;
-    --navidad-emerald: #1a634b;
+    --navidad-forest-deep: #0e261f;
+    --navidad-forest: #173D32;
+    --navidad-forest-light: #235446;
+    --navidad-emerald: #1e4b3d;
     --navidad-emerald-glow: #2ea879;
-    --navidad-wine-deep: #420a14;
-    --navidad-wine: #721422;
-    --navidad-wine-light: #891a2b;
-    --navidad-gold-dark: #b38827;
-    --navidad-gold: #cf9e33;
-    --navidad-gold-light: #e5b842;
-    --navidad-gold-shimmer: #fae39b;
-    --navidad-cream: #faf7f2;
-    --navidad-cream-card: #fcfaf6;
-    --navidad-cream-border: rgba(207, 158, 51, 0.28);
+    --navidad-wine-deep: #4a0f19;
+    --navidad-wine: #8B1E2F;
+    --navidad-wine-light: #ad273b;
+    --navidad-gold-dark: #b89547;
+    --navidad-gold: #D6B46A;
+    --navidad-gold-light: #e5cb8c;
+    --navidad-gold-shimmer: #fdf3d7;
+    --navidad-cream: #F5F1E8;
+    --navidad-cream-card: #FAF7F2;
+    --navidad-cream-border: rgba(214, 180, 106, 0.32);
 
-    --season-glow-primary: rgba(26, 99, 75, 0.35);
-    --season-glow-secondary: rgba(114, 20, 34, 0.28);
-    --season-pulse-one: rgba(207, 158, 51, 0.28);
+    --season-glow-primary: rgba(23, 61, 50, 0.32);
+    --season-glow-secondary: rgba(139, 30, 47, 0.20);
+    --season-pulse-one: rgba(214, 180, 106, 0.25);
   }
 
   :root[data-season-theme="navidad"].dark,
   :root[data-season-theme="navidad"] .dark {
-    --background: #05140f;
-    --foreground: #fcfaf6;
-    --primary: #1a634b;
-    --primary-light: #2ea879;
-    --secondary: #0d271f;
-    --accent: #e5b842;
+    --background: #07122E;
+    --foreground: #F5F1E8;
+    --primary: #173D32;
+    --primary-light: #235446;
+    --secondary: #10243B;
+    --accent: #D6B46A;
 
-    --season-glow-primary: rgba(46, 168, 121, 0.26);
-    --season-glow-secondary: rgba(137, 26, 43, 0.24);
-    --season-pulse-one: rgba(229, 184, 66, 0.24);
+    --season-glow-primary: rgba(35, 84, 70, 0.26);
+    --season-glow-secondary: rgba(139, 30, 47, 0.18);
+    --season-pulse-one: rgba(214, 180, 106, 0.20);
   }
 
   :root[data-season-theme="independencia"] {
@@ -217,26 +217,26 @@ body {
 }
 
 :root[data-season-theme="navidad"] body {
-  background-color: #faf7f2;
+  background-color: #F5F1E8;
   background-image:
-    radial-gradient(circle at 86% 6%, rgba(229, 184, 66, 0.12), transparent 42%),
-    radial-gradient(circle at 14% 12%, rgba(26, 99, 75, 0.1), transparent 46%),
-    radial-gradient(circle at 50% 98%, rgba(114, 20, 34, 0.08), transparent 42%),
-    linear-gradient(180deg, #fdfbf7 0%, #f7f2e7 100%);
+    radial-gradient(circle at 86% 6%, rgba(214, 180, 106, 0.12), transparent 42%),
+    radial-gradient(circle at 14% 12%, rgba(23, 61, 50, 0.08), transparent 46%),
+    radial-gradient(circle at 50% 98%, rgba(139, 30, 47, 0.06), transparent 42%),
+    linear-gradient(180deg, #FAF7F2 0%, #F5F1E8 100%);
   background-attachment: fixed;
-  color: #111e18;
+  color: #07122E;
 }
 
 :root[data-season-theme="navidad"].dark body,
 :root[data-season-theme="navidad"] .dark body {
-  background-color: #05140f;
+  background-color: #07122E;
   background-image:
-    radial-gradient(circle at 88% 6%, rgba(229, 184, 66, 0.15), transparent 42%),
-    radial-gradient(circle at 12% 10%, rgba(26, 99, 75, 0.2), transparent 45%),
-    radial-gradient(circle at 50% 96%, rgba(114, 20, 34, 0.14), transparent 44%),
-    linear-gradient(180deg, #05140f 0%, #071913 50%, #030d0a 100%);
+    radial-gradient(circle at 88% 6%, rgba(214, 180, 106, 0.12), transparent 42%),
+    radial-gradient(circle at 12% 10%, rgba(23, 61, 50, 0.16), transparent 45%),
+    radial-gradient(circle at 50% 96%, rgba(139, 30, 47, 0.10), transparent 44%),
+    linear-gradient(180deg, #07122E 0%, #0C1A38 50%, #07122E 100%);
   background-attachment: fixed;
-  color: #fcfaf6;
+  color: #F5F1E8;
 }
 
 :root[data-season-theme="independencia"] body {
@@ -986,20 +986,21 @@ body {
 
 /* ── 4. Solid Brand Backgrounds ──────────────────────────────────────────── */
 :root[data-season-theme="navidad"] .bg-\[\#0A2A66\] {
-  background-color: #0e3d2f !important;
+  background-color: #173D32 !important;
 }
 
 :root[data-season-theme="navidad"] .bg-\[\#2E5FA7\] {
-  background-color: #165640 !important;
+  background-color: #10243B !important;
 }
 
 :root[data-season-theme="navidad"] .hover\:bg-\[\#0A2A66\]:hover,
 :root[data-season-theme="navidad"] .hover\:bg-\[\#081F4D\]:hover {
-  background-color: #891a2b !important;
+  background-color: #8B1E2F !important;
 }
 
 :root[data-season-theme="navidad"] .hover\:bg-\[\#2E5FA7\]:hover {
-  background-color: #cf9e33 !important;
+  background-color: #D6B46A !important;
+  color: #07122E !important;
 }
 
 /* Dark mode specific backgrounds */
@@ -1010,39 +1011,39 @@ body {
 :root[data-season-theme="navidad"].dark .bg-\[\#070617\],
 :root[data-season-theme="navidad"].dark .bg-\[\#060D1F\],
 :root[data-season-theme="navidad"].dark .bg-\[\#07122e\] {
-  background-color: #05140f !important;
+  background-color: #07122E !important;
 }
 
 :root[data-season-theme="navidad"] .dark\:bg-\[\#0b0a1f\],
 :root[data-season-theme="navidad"].dark .bg-\[\#0b0a1f\] {
-  background-color: #092218 !important;
+  background-color: #10243B !important;
 }
 
 /* ── 5. Text & Typography ────────────────────────────────────────────────── */
 :root[data-season-theme="navidad"] .text-\[\#0A2A66\] {
-  color: #0e3d2f !important;
+  color: #173D32 !important;
 }
 
 :root[data-season-theme="navidad"] .text-\[\#2E5FA7\] {
-  color: #165640 !important;
+  color: #10243B !important;
 }
 
 :root[data-season-theme="navidad"].dark .text-\[\#0A2A66\],
 :root[data-season-theme="navidad"] .dark .text-\[\#0A2A66\] {
-  color: #f3cf65 !important;
+  color: #D6B46A !important;
 }
 
 :root[data-season-theme="navidad"].dark .text-\[\#2E5FA7\],
 :root[data-season-theme="navidad"] .dark .text-\[\#2E5FA7\] {
-  color: #e5b842 !important;
+  color: #F5F1E8 !important;
 }
 
 :root[data-season-theme="navidad"] .dark\:text-\[\#5B9BD5\] {
-  color: #f3cf65 !important;
+  color: #D6B46A !important;
 }
 
 :root[data-season-theme="navidad"] .dark\:text-\[\#5B8DD9\] {
-  color: #fae39b !important;
+  color: #FDF3D7 !important;
 }
 
 :root[data-season-theme="navidad"] .dark\:text-\[\#7AAEFF\],
@@ -1050,85 +1051,93 @@ body {
 :root[data-season-theme="navidad"] .text-\[\#9DC0E8\],
 :root[data-season-theme="navidad"] .text-\[\#C8DCEF\],
 :root[data-season-theme="navidad"] .text-\[\#4A8FE2\] {
-  color: #fae39b !important;
+  color: #D6B46A !important;
 }
 
 :root[data-season-theme="navidad"] .hover\:text-\[\#0A2A66\]:hover {
-  color: #891a2b !important;
+  color: #8B1E2F !important;
 }
 
 :root[data-season-theme="navidad"] .hover\:text-\[\#2E5FA7\]:hover {
-  color: #cf9e33 !important;
+  color: #D6B46A !important;
 }
 
 /* ── 6. Borders & Outlines ───────────────────────────────────────────────── */
 :root[data-season-theme="navidad"] .border-\[\#0A2A66\] {
-  border-color: #cf9e33 !important;
+  border-color: #D6B46A !important;
 }
 
 :root[data-season-theme="navidad"] .border-\[\#2E5FA7\] {
-  border-color: #1a634b !important;
+  border-color: #173D32 !important;
 }
 
 :root[data-season-theme="navidad"].dark .border-slate-800,
 :root[data-season-theme="navidad"] .dark .border-slate-800,
 :root[data-season-theme="navidad"].dark .border-slate-700,
 :root[data-season-theme="navidad"] .dark .border-slate-700 {
-  border-color: rgba(229, 184, 66, 0.18) !important;
+  border-color: rgba(214, 180, 106, 0.22) !important;
 }
 
 /* Focus Rings */
 :root[data-season-theme="navidad"] .focus\:ring-\[\#0A2A66\]:focus,
 :root[data-season-theme="navidad"] .focus-visible\:ring-\[\#0A2A66\]:focus-visible {
-  --tw-ring-color: #cf9e33 !important;
-  outline-color: #cf9e33 !important;
+  --tw-ring-color: #D6B46A !important;
+  outline-color: #D6B46A !important;
 }
 
 /* Selection */
 :root[data-season-theme="navidad"] ::selection {
-  background-color: rgba(207, 158, 51, 0.28) !important;
-  color: #0e3d2f !important;
+  background-color: rgba(214, 180, 106, 0.28) !important;
+  color: #07122E !important;
 }
 
 :root[data-season-theme="navidad"].dark ::selection,
 :root[data-season-theme="navidad"] .dark ::selection {
-  background-color: rgba(229, 184, 66, 0.35) !important;
-  color: #fae39b !important;
+  background-color: rgba(214, 180, 106, 0.35) !important;
+  color: #F5F1E8 !important;
 }
 
 /* ── 7. Buttons & CTAs ───────────────────────────────────────────────────── */
 :root[data-season-theme="navidad"] .btn-primary {
-  background: linear-gradient(135deg, #0e3d2f 0%, #165640 45%, #721422 100%) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(229, 184, 66, 0.35) !important;
-  box-shadow: 0 4px 18px rgba(14, 61, 47, 0.35), inset 0 1px 0 rgba(250, 227, 155, 0.3) !important;
+  background: linear-gradient(135deg, #07122E 0%, #173D32 50%, #10243B 100%) !important;
+  color: #F5F1E8 !important;
+  border: 1px solid rgba(214, 180, 106, 0.45) !important;
+  box-shadow: 0 4px 18px rgba(7, 18, 46, 0.35), inset 0 1px 0 rgba(214, 180, 106, 0.3) !important;
 }
 
 :root[data-season-theme="navidad"] .btn-primary:hover {
   transform: translateY(-2px);
-  background: linear-gradient(135deg, #124c3a 0%, #1a634b 45%, #891a2b 100%) !important;
-  box-shadow: 0 6px 26px rgba(114, 20, 34, 0.4), 0 0 16px rgba(229, 184, 66, 0.3) !important;
+  background: linear-gradient(135deg, #10243B 0%, #173D32 50%, #07122E 100%) !important;
+  border-color: #D6B46A !important;
+  box-shadow: 0 6px 26px rgba(214, 180, 106, 0.35), 0 0 16px rgba(214, 180, 106, 0.25) !important;
 }
 
 :root[data-season-theme="navidad"] .btn-secondary {
-  background: linear-gradient(135deg, #fffdfa 0%, #eee3ce 100%) !important;
-  color: #0e3d2f !important;
-  border: 1px solid rgba(207, 158, 51, 0.45) !important;
-  box-shadow: 0 3px 12px rgba(14, 61, 47, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+  background: linear-gradient(135deg, #FAF7F2 0%, #F5F1E8 100%) !important;
+  color: #07122E !important;
+  border: 1px solid rgba(214, 180, 106, 0.45) !important;
+  box-shadow: 0 3px 12px rgba(7, 18, 46, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
 }
 
 :root[data-season-theme="navidad"] .btn-secondary:hover {
-  background: linear-gradient(135deg, #ffffff 0%, #fae39b 100%) !important;
-  color: #071f17 !important;
-  border-color: rgba(207, 158, 51, 0.7) !important;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FDF3D7 100%) !important;
+  color: #07122E !important;
+  border-color: #D6B46A !important;
 }
 
 :root[data-season-theme="navidad"].dark .btn-secondary,
 :root[data-season-theme="navidad"] .dark .btn-secondary {
-  background: linear-gradient(135deg, #092218 0%, #12382b 100%) !important;
-  color: #fae39b !important;
-  border: 1px solid rgba(229, 184, 66, 0.35) !important;
+  background: linear-gradient(135deg, #07122E 0%, #10243B 100%) !important;
+  color: #F5F1E8 !important;
+  border: 1px solid rgba(214, 180, 106, 0.35) !important;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important;
+}
+
+:root[data-season-theme="navidad"].dark .btn-secondary:hover,
+:root[data-season-theme="navidad"] .dark .btn-secondary:hover {
+  background: linear-gradient(135deg, #10243B 0%, #173D32 100%) !important;
+  color: #D6B46A !important;
+  border-color: #D6B46A !important;
 }
 
 /* ── 8. Cards, Products & Combos ─────────────────────────────────────────── */

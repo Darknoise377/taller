@@ -429,16 +429,16 @@ export default function HomePageOptimized({
             <div className="flex flex-wrap gap-3 shrink-0">
               <Link
                 href="/products"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0A2A66] dark:bg-white text-white dark:text-[#0A2A66] font-bold text-sm shadow-lg hover:bg-[#081F4D] dark:hover:bg-slate-100 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#D6B46A] via-[#E8CF8C] to-[#C49E4A] text-[#07122E] font-extrabold text-sm shadow-lg hover:brightness-105 active:scale-[0.98] transition-all"
               >
-                <ShoppingCartIcon className="w-5 h-5" />
+                <ShoppingCartIcon className="w-5 h-5 text-[#07122E]" />
                 Ver productos
               </Link>
               <a
                 href="https://wa.me/573015271104?text=Hola,%20quiero%20hacer%20un%20pedido"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[#0A2A66]/30 dark:border-white/25 text-[#0A2A66] dark:text-white font-semibold text-sm hover:bg-[#0A2A66]/10 dark:hover:bg-white/10 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-[#D6B46A]/40 text-slate-800 dark:text-[#F5F1E8] bg-white/40 dark:bg-white/5 backdrop-blur-sm font-semibold text-sm hover:bg-[#D6B46A]/10 transition-colors"
               >
                 <ChatBubbleLeftRightIcon className="w-5 h-5" />
                 WhatsApp
