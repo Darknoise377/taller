@@ -7,12 +7,8 @@ import { usePathname } from "next/navigation";
 import { Facebook, Instagram, MessageCircle } from "lucide-react";
 import { isCheckoutPath } from "@/utils/routeUtils";
 
-const BASE_BRAND_COLORS = ["#0A2A66", "#2E5FA7", "#3b82f6", "#1d4ed8", "#60a5fa", "#2563eb"];
-const NAVIDAD_BRAND_COLORS = ["#cf9e33", "#1a634b", "#891a2b", "#e5b842", "#2ea879", "#f3cf65"];
-
 export default function DynamicFooter() {
   const pathname = usePathname();
-  const [colorIdx, setColorIdx] = useState(0);
   const [isNavidad, setIsNavidad] = useState(true);
 
   useEffect(() => {
@@ -36,15 +32,6 @@ export default function DynamicFooter() {
     window.addEventListener("ar-season-theme-change", handler);
     return () => window.removeEventListener("ar-season-theme-change", handler);
   }, []);
-
-  const activeColors = isNavidad ? NAVIDAD_BRAND_COLORS : BASE_BRAND_COLORS;
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setColorIdx((i) => (i + 1) % activeColors.length);
-    }, 1800);
-    return () => clearInterval(interval);
-  }, [activeColors.length]);
 
   // En checkout y admin no mostramos footer
   if (isCheckoutPath(pathname) || pathname?.startsWith("/admin")) return null;
@@ -217,8 +204,11 @@ export default function DynamicFooter() {
           <p className="flex items-center gap-2">
             <span className="text-slate-400 dark:text-slate-500">Diseño web por</span>
             <span
-              className="brand-text-animate font-black tracking-[0.18em] cursor-default select-none text-[13px]"
-              style={{ color: activeColors[colorIdx], transition: "color 1.4s ease-in-out" }}
+              className={`font-black tracking-[0.18em] cursor-default select-none text-[13px] ${
+                isNavidad
+                  ? "bg-gradient-to-r from-[#cf9e33] via-[#e5b842] to-[#1a634b] bg-clip-text text-transparent"
+                  : "bg-gradient-to-r from-[#0A2A66] via-[#2E5FA7] to-[#5B8DD9] dark:from-[#5B8DD9] dark:to-blue-400 bg-clip-text text-transparent"
+              }`}
             >
               FACRISCD
             </span>

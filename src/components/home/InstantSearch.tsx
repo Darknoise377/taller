@@ -145,7 +145,7 @@ export default function InstantSearch({ products }: InstantSearchProps) {
           onFocus={() => setIsFocused(true)}
           onKeyDown={handleKeyDown}
           placeholder="Busca por modelo, repuesto o marca: CR5, NKD, frenos..."
-          className={`w-full rounded-2xl pl-12 pr-14 py-4 bg-white dark:bg-white/10 backdrop-blur-md border-2 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 text-sm sm:text-base focus:outline-none transition-all duration-300 ${
+          className={`w-full rounded-2xl pl-12 pr-14 py-4 bg-white dark:bg-white/10 backdrop-blur-md border-2 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 text-base focus:outline-none transition-all duration-300 ${
             isFocused
               ? 'border-[#0A2A66] dark:border-[#5B9BD5] shadow-lg shadow-[#0A2A66]/10 dark:shadow-[#5B9BD5]/10'
               : 'border-slate-200 dark:border-white/15 shadow-md'
@@ -162,7 +162,7 @@ export default function InstantSearch({ products }: InstantSearchProps) {
           <button
             type="button"
             onClick={() => setQuery('')}
-            className="absolute right-12 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+            className="absolute right-12 top-1/2 -translate-y-1/2 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
             aria-label="Limpiar búsqueda"
           >
             <XMarkIcon className="w-4 h-4" />
@@ -172,9 +172,9 @@ export default function InstantSearch({ products }: InstantSearchProps) {
           type="button"
           onClick={() => doSearch(query)}
           aria-label="Buscar"
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#0A2A66] dark:bg-[#2E5FA7] text-white p-2.5 rounded-xl hover:bg-[#081F4D] dark:hover:bg-[#5B9BD5] transition-colors shadow-sm"
+          className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#0A2A66] dark:bg-[#2E5FA7] text-white min-w-[42px] min-h-[42px] flex items-center justify-center rounded-xl hover:bg-[#081F4D] dark:hover:bg-[#5B9BD5] transition-colors shadow-sm"
         >
-          <MagnifyingGlassIcon className="w-4 h-4" />
+          <MagnifyingGlassIcon className="w-5 h-5" />
         </button>
       </div>
 
@@ -203,6 +203,7 @@ export default function InstantSearch({ products }: InstantSearchProps) {
                     onClick={() => goToProduct(item.slug, item.id)}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left group"
                     role="option"
+                    aria-selected={false}
                   >
                     <div className="relative w-12 h-12 shrink-0 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-800">
                       <Image

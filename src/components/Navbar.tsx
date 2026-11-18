@@ -18,9 +18,12 @@ import {
   UserIcon,
   PhoneIcon,
   TruckIcon,
+  Squares2X2Icon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { Package } from 'lucide-react';
 import MegaMenu from '@/components/home/MegaMenu';
+import { PRODUCT_CATEGORIES, PRODUCT_CATEGORY_LABELS } from '@/constants/productCategories';
 
 const Navbar = () => {
   const { totalItems, openCartModal } = useCart();
@@ -30,6 +33,7 @@ const Navbar = () => {
   const [mounted, setMounted] = useState(false);
   const [badgeBounce, setBadgeBounce] = useState(false);
   const [isNavidad, setIsNavidad] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const prevTotalRef = useRef(totalItems);
 
   useEffect(() => {
@@ -97,7 +101,7 @@ const Navbar = () => {
   return (
     <>
       {/* --- NAVBAR SUPERIOR --- */}
-      <header className="w-full flex items-center justify-between px-6 md:px-12 py-3 sticky top-0 z-50 bg-white/80 dark:bg-[#070617]/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800 transition-colors duration-300">
+      <header className="w-full flex items-center justify-between px-3 sm:px-6 md:px-12 py-2.5 sm:py-3 sticky top-0 z-50 bg-white/85 dark:bg-[#07122e]/90 backdrop-blur-lg border-b border-slate-200/80 dark:border-slate-800 transition-colors duration-300">
         {/* Logo y Nombre */}
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center gap-3 group">
@@ -208,16 +212,16 @@ const Navbar = () => {
             WhatsApp
           </a>
 
-          {/* Carrito */}
+          {/* Carrito (Desktop - en móvil está en la barra inferior) */}
           <button
             type="button"
             onClick={openCartModal}
-            className="relative flex items-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+            className="hidden md:flex relative items-center text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"
             aria-label="Abrir carrito"
           >
-            <ShoppingCartIcon className="w-7 h-7" />
+            <ShoppingCartIcon className="w-6 h-6" />
             {totalItems > 0 && (
-              <span className={`absolute -top-1.5 -right-1.5 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md transition-transform duration-300 ${badgeBounce ? "scale-125" : "scale-100"} ${
+              <span className={`absolute -top-1 -right-1 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md transition-transform duration-300 ${badgeBounce ? "scale-125" : "scale-100"} ${
                 isNavidad
                   ? "bg-gradient-to-r from-[#891a2b] to-[#cf9e33] text-white ring-1 ring-white/30"
                   : "bg-gradient-to-r from-[#0A2A66] to-[#2E5FA7]"
@@ -233,24 +237,26 @@ const Navbar = () => {
             onClick={toggleNavidad}
             aria-label={isNavidad ? "Desactivar edición navideña" : "Activar edición especial de Navidad"}
             title={isNavidad ? "Edición Navidad activa (Clic para volver a tema clásico)" : "Activar Edición Especial de Navidad"}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 shadow-sm hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cf9e33] ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[38px] rounded-full text-xs font-bold transition-all duration-300 shadow-sm hover:scale-105 focus-visible:outline-none focus-visible:ring-2 ${
               isNavidad
-                ? "bg-gradient-to-r from-[#0e3d2f] via-[#165640] to-[#721422] text-[#fffdfa] border border-[#e5b842]/50 shadow-[0_2px_12px_rgba(207,158,51,0.3)] ring-1 ring-[#e5b842]/40"
-                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-[#cf9e33]"
+                ? "bg-gradient-to-r from-[#0e3d2f] via-[#165640] to-[#721422] text-[#fffdfa] border border-[#e5b842]/50 shadow-[0_2px_12px_rgba(207,158,51,0.3)] ring-1 ring-[#e5b842]/40 focus-visible:ring-[#cf9e33]"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:border-[#2E5FA7] dark:hover:border-[#5B8DD9] focus-visible:ring-[#2E5FA7]"
             }`}
           >
-            <span className="text-sm leading-none animate-pulse">🎄</span>
+            <span className="text-sm leading-none">🎄</span>
             <span className="hidden sm:inline">
               {isNavidad ? "Navidad" : "Navidad"}
             </span>
           </button>
 
-          {/* Botón de Tema (Claro / Oscuro) */}
+          {/* Botón de Tema (Claro / Oscuro) con tamaño accesible */}
           <button
             type="button"
             onClick={toggleTheme}
             aria-label="Cambiar tema claro u oscuro"
-            className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#cf9e33] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#070617]"
+            className={`w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:scale-105 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#07122e] ${
+              isNavidad ? "focus-visible:ring-[#cf9e33]" : "focus-visible:ring-[#2E5FA7] dark:focus-visible:ring-[#5B8DD9]"
+            }`}
           >
             {!mounted ? null : isDark ? (
               <SunIcon className={`w-5 h-5 ${isNavidad ? "text-[#f3cf65]" : "text-[#C7D2E0]"}`} />
@@ -281,42 +287,28 @@ const Navbar = () => {
           </Link>
         ))}
 
-        {/* Rastrear / Mis pedidos (móvil) */}
-        {user ? (
-          <Link
-            href="/cuenta/pedidos"
-            className={`flex flex-col items-center text-xs ${
-              pathname === '/cuenta/pedidos'
-                ? isNavidad
-                  ? 'text-[#0e3d2f] dark:text-[#f3cf65] font-bold'
-                  : 'text-[#0A2A66] dark:text-white font-semibold'
-                : 'text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            <Package className="w-6 h-6" />
-            Pedidos
-          </Link>
-        ) : (
-          <Link
-            href="/seguimiento"
-            className={`flex flex-col items-center text-xs ${
-              pathname === '/seguimiento'
-                ? isNavidad
-                  ? 'text-[#0e3d2f] dark:text-[#f3cf65] font-bold'
-                  : 'text-[#0A2A66] dark:text-white font-semibold'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <TruckIcon className="w-6 h-6" />
-            Rastrear
-          </Link>
-        )}
+        {/* Categorías (móvil drawer trigger) */}
+        <button
+          type="button"
+          onClick={() => setMobileMenuOpen(true)}
+          className={`flex flex-col items-center text-xs ${
+            mobileMenuOpen
+              ? isNavidad
+                ? 'text-[#0e3d2f] dark:text-[#f3cf65] font-bold'
+                : 'text-[#0A2A66] dark:text-white font-semibold'
+              : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+          }`}
+          aria-label="Abrir categorías"
+        >
+          <Squares2X2Icon className="w-6 h-6" />
+          Categorías
+        </button>
 
         {/* Cuenta (móvil) */}
         <Link
           href={user ? '/cuenta' : '/cuenta/login'}
           className={`flex flex-col items-center text-xs ${
-            pathname.startsWith('/cuenta') && pathname !== '/cuenta/pedidos'
+            pathname.startsWith('/cuenta')
               ? isNavidad
                 ? 'text-[#0e3d2f] dark:text-[#f3cf65] font-bold'
                 : 'text-[#0A2A66] dark:text-white font-semibold'
@@ -346,6 +338,62 @@ const Navbar = () => {
           Carrito
         </button>
       </nav>
+
+      {/* ─── DRAWER MÓVIL DE CATEGORÍAS ─── */}
+      {mobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-[100] flex">
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="relative w-[85%] max-w-xs bg-white dark:bg-[#07122e] h-full shadow-2xl flex flex-col z-10 overflow-y-auto">
+            {/* Header del Drawer */}
+            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0a1838]">
+              <div className="flex items-center gap-2">
+                <Squares2X2Icon className="w-5 h-5 text-[#0A2A66] dark:text-[#5B8DD9]" />
+                <span className="font-bold text-slate-900 dark:text-white text-sm">Categorías de Repuestos</span>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-1.5 rounded-full text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-700/50"
+                aria-label="Cerrar menú"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Lista de Categorías */}
+            <nav className="p-3 space-y-1 flex-1">
+              {PRODUCT_CATEGORIES.map((cat) => (
+                <Link
+                  key={cat}
+                  href={`/products/category/${cat}`}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 active:bg-slate-200 transition-colors"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <span className="w-2 h-2 rounded-full bg-[#2E5FA7] dark:bg-[#5B8DD9]" />
+                    {PRODUCT_CATEGORY_LABELS[cat]}
+                  </span>
+                  <span className="text-slate-400 text-xs">→</span>
+                </Link>
+              ))}
+            </nav>
+
+            {/* Footer del Drawer */}
+            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0a1838]">
+              <Link
+                href="/products"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full py-2.5 block text-center text-xs font-bold bg-[#0A2A66] dark:bg-[#2E5FA7] text-white rounded-xl shadow-sm hover:opacity-95 transition-opacity"
+              >
+                Ver todos los repuestos
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

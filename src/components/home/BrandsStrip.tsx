@@ -81,7 +81,6 @@ export default function BrandsStrip({ brands = DEFAULT_BRANDS }: BrandsStripProp
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-500"
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
-                    unoptimized
                   />
                   {/* Overlay gradiente */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />

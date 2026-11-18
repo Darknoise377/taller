@@ -67,7 +67,7 @@ export default function ComboCard({ combo, idx = 0, showDescription = false }: C
             toast.success("Enlace del combo copiado");
           }
         }}
-        className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 shadow border border-slate-200/80 dark:border-slate-700 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-10 text-slate-500 hover:text-slate-800 dark:hover:text-white"
+        className="absolute top-3 right-3 w-9 h-9 sm:w-8 sm:h-8 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 shadow border border-slate-200/80 dark:border-slate-700 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-10 text-slate-500 hover:text-slate-800 dark:hover:text-white active:scale-95"
         title="Compartir combo"
       >
         <ShareIcon className="w-4 h-4" />
@@ -146,15 +146,15 @@ export default function ComboCard({ combo, idx = 0, showDescription = false }: C
 
         {/* Surprise gift teaser */}
         {combo.surpriseGift && (
-          <div className="flex items-start gap-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-100 dark:border-purple-800 rounded-xl px-3 py-2">
-            <SparklesIcon className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/25 dark:to-orange-950/25 border border-amber-200/80 dark:border-amber-800/40 rounded-xl px-3 py-2">
+            <SparklesIcon className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
             <div>
-              <p className="text-xs font-semibold text-purple-700 dark:text-purple-300">🎁 Regalo sorpresa incluido</p>
+              <p className="text-xs font-semibold text-amber-800 dark:text-amber-200">🎁 Regalo sorpresa incluido</p>
               {combo.surpriseGift.hint && (
-                <p className="text-xs text-purple-600 dark:text-purple-400 mt-0.5 italic">{combo.surpriseGift.hint}</p>
+                <p className="text-xs text-amber-700/80 dark:text-amber-300/80 mt-0.5 italic">{combo.surpriseGift.hint}</p>
               )}
               {combo.surpriseGift.giftValue && (
-                <p className="text-xs text-purple-500 dark:text-purple-400">Valor aprox. {formatCOP(combo.surpriseGift.giftValue)}</p>
+                <p className="text-xs text-amber-600 dark:text-amber-400">Valor aprox. {formatCOP(combo.surpriseGift.giftValue)}</p>
               )}
             </div>
           </div>

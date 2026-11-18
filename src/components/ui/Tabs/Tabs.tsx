@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, ReactNode } from 'react';
 import { TabsContext } from './TabsContext';
 import type { TabValue } from './types';

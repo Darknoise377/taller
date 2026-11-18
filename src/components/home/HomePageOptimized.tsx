@@ -28,7 +28,6 @@ import {
   type SeasonalCampaignConfig,
   type SeasonalThemeKey,
 } from '@/config/shippingRates';
-import { getSeasonMeta } from '@/config/seasonTheme';
 import { PRODUCT_CATEGORIES } from "@/constants/productCategories";
 
 // ── Lazy-loaded components (code splitting for below-the-fold) ──
@@ -147,8 +146,6 @@ export default function HomePageOptimized({
       .catch(() => {/* Keep default visual if settings are unavailable */});
   }, []);
 
-  const activeSeasonKey: SeasonalThemeKey =
-    seasonalCampaign.enabled && seasonalCampaign.key ? seasonalCampaign.key : 'none';
   const campaignHref = seasonalCampaign.ctaHref.trim() || '/combos';
   const campaignCtaLabel = seasonalCampaign.ctaLabel.trim() || 'Ver campaña';
 

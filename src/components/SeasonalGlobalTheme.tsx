@@ -64,9 +64,9 @@ export default function SeasonalGlobalTheme() {
   const intensity: SeasonalVisualIntensity = campaign.intensity ?? "full";
   const multiplier = intensity === "subtle" ? 0.45 : intensity === "medium" ? 0.72 : 1;
 
-  // Gentle holiday stardust & crystalline snow particles
+  // Gentle holiday stardust & crystalline snow particles (capped to 24 max for silky 60fps)
   const particles = useMemo(
-    () => Array.from({ length: Math.max(14, Math.round(36 * multiplier)) }, (_, idx) => idx),
+    () => Array.from({ length: Math.max(10, Math.round(24 * multiplier)) }, (_, idx) => idx),
     [multiplier]
   );
 

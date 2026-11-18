@@ -3,7 +3,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Tag } from 'antd';
 import {
   ShoppingCartIcon,
   CheckCircleIcon,
@@ -25,7 +24,6 @@ import { Facebook, Instagram } from 'lucide-react';
 import ProductReviews from "@/components/ProductReviews";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { BLUR_DATA_URL } from "@/lib/placeholder";
-import FloatingCombos from '@/components/FloatingCombos';
 import { FlashSale } from '@/types/flash-sale';
 import { formatCurrency, formatCurrencyStrikethrough, calculateDisplayPrices } from '@/utils/formatCurrency';
 
@@ -606,9 +604,9 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
             <div className="flex items-baseline gap-3 py-1">
               {flashSale && originalPrice ? (
                 <>
-                  <Tag color="red" className="text-sm font-bold px-2 py-0.5">
+                  <span className="inline-flex items-center text-xs sm:text-sm font-bold px-2.5 py-0.5 rounded-full bg-red-100 text-red-700 dark:bg-red-950/70 dark:text-red-300 border border-red-200 dark:border-red-800/40">
                     -{flashSale.discount}%
-                  </Tag>
+                  </span>
                   <span className="text-lg text-slate-400 dark:text-slate-500 line-through">
                     {formatCurrencyStrikethrough(originalPrice, product.currency)}
                   </span>
@@ -1083,10 +1081,6 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ product, rela
           </span>
         </button>
       </div>
-
-      {/* Floating combos panel (reusable) */}
-      <FloatingCombos excludeProductId={product.id} />
-
     </div>
   );
 };

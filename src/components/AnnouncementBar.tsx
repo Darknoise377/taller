@@ -79,10 +79,10 @@ export default function AnnouncementBar() {
       </span>
       <button
         onClick={() => setVisible(false)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100 transition-opacity p-1 rounded"
+        className="absolute right-2 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 transition-opacity min-w-[40px] min-h-[40px] flex items-center justify-center rounded-full"
         aria-label="Cerrar anuncio"
       >
-        <XMarkIcon className="w-3.5 h-3.5 text-white/90" />
+        <XMarkIcon className="w-4 h-4 text-white/90" />
       </button>
     </div>
   );

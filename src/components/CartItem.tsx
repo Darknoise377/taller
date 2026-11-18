@@ -63,20 +63,20 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
             <button
               onClick={() => handleQuantityChange(-1)}
               aria-label="Disminuir cantidad"
-              className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-8 h-8 min-w-[34px] min-h-[34px] flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
               disabled={item.quantity <= 1}
             >
               <MinusIcon className="w-3.5 h-3.5" />
             </button>
 
-            <span className="text-slate-900 dark:text-slate-100 text-sm font-semibold w-6 text-center">
+            <span className="text-slate-900 dark:text-slate-100 text-sm font-semibold w-6 text-center tabular-nums">
               {item.quantity}
             </span>
 
             <button
               onClick={() => handleQuantityChange(1)}
               aria-label="Aumentar cantidad"
-              className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-8 h-8 min-w-[34px] min-h-[34px] flex items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
               disabled={item.product.stock !== undefined && item.quantity >= item.product.stock}
             >
               <PlusIcon className="w-3.5 h-3.5" />
@@ -99,7 +99,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
       <button
         onClick={handleRemove}
         aria-label={`Remover ${item.product.name} del carrito`}
-        className="flex-shrink-0 mt-0.5 p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors duration-200"
+        className="flex-shrink-0 mt-0.5 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors duration-200"
       >
         <TrashIcon className="w-4 h-4" />
       </button>

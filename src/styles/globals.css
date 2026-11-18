@@ -271,53 +271,47 @@ body {
     overflow: hidden;
   }
 
-  /* Artistic Liquid Blobs Background */
+  /* Artistic Liquid Blobs Background (Hardware-accelerated, composite-friendly) */
   .seasonal-art-blob {
     position: absolute;
-    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-    filter: blur(80px);
-    opacity: 0.5;
-    animation: seasonal-blob-morph 15s ease-in-out infinite alternate, seasonal-blob-move 20s ease-in-out infinite alternate;
+    border-radius: 50%;
+    filter: blur(48px);
+    opacity: 0.42;
+    will-change: transform;
+    animation: seasonal-blob-move 22s ease-in-out infinite alternate;
   }
 
   .seasonal-blob-1 {
     top: -10%;
     left: -10%;
-    width: 50vw;
-    height: 50vw;
+    width: 48vw;
+    height: 48vw;
     background: var(--season-glow-primary, rgba(255,255,255,0.1));
-    animation-delay: 0s, 0s;
+    animation-delay: 0s;
   }
 
   .seasonal-blob-2 {
     bottom: -20%;
     right: -10%;
-    width: 60vw;
-    height: 60vw;
+    width: 52vw;
+    height: 52vw;
     background: var(--season-glow-secondary, rgba(255,255,255,0.1));
-    animation-delay: -5s, -2s;
+    animation-delay: -6s;
   }
 
   .seasonal-blob-3 {
     top: 30%;
     left: 40%;
-    width: 40vw;
-    height: 40vw;
+    width: 36vw;
+    height: 36vw;
     background: var(--season-pulse-one, rgba(255,255,255,0.1));
-    animation-delay: -10s, -7s;
-  }
-
-  @keyframes seasonal-blob-morph {
-    0% { border-radius: 40% 60% 70% 30% / 40% 40% 60% 50%; }
-    34% { border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%; }
-    67% { border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%; }
-    100% { border-radius: 40% 60% 70% 30% / 40% 40% 60% 50%; }
+    animation-delay: -11s;
   }
 
   @keyframes seasonal-blob-move {
-    0% { transform: translate(0, 0) scale(1) rotate(0deg); }
-    50% { transform: translate(5vw, 10vh) scale(1.1) rotate(90deg); }
-    100% { transform: translate(-5vw, -5vh) scale(0.9) rotate(180deg); }
+    0% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+    50% { transform: translate3d(3vw, 6vh, 0) scale(1.06) rotate(60deg); }
+    100% { transform: translate3d(-3vw, -4vh, 0) scale(0.94) rotate(120deg); }
   }
 
 @media (max-width: 767px) {
@@ -620,6 +614,7 @@ body {
   animation-name: seasonal-navidad-drift;
   animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
   animation-iteration-count: infinite;
+  will-change: transform, opacity;
   pointer-events: none;
 }
 
@@ -791,7 +786,8 @@ body {
 :root[data-season-intensity="subtle"] .seasonal-heart-layer .seasonal-heart:nth-child(n + 12),
 :root[data-season-intensity="subtle"] .seasonal-streamer-layer .seasonal-streamer:nth-child(n + 12),
 :root[data-season-intensity="subtle"] .seasonal-offer-layer .seasonal-offer-badge:nth-child(n + 9),
-:root[data-season-intensity="subtle"] .seasonal-ghost-layer .seasonal-ghost:nth-child(n + 6) {
+:root[data-season-intensity="subtle"] .seasonal-ghost-layer .seasonal-ghost:nth-child(n + 6),
+:root[data-season-intensity="subtle"] .seasonal-navidad-particles .seasonal-navidad-particle:nth-child(n + 11) {
   display: none;
 }
 
@@ -801,7 +797,8 @@ body {
 :root[data-season-intensity="medium"] .seasonal-heart-layer .seasonal-heart:nth-child(n + 22),
 :root[data-season-intensity="medium"] .seasonal-streamer-layer .seasonal-streamer:nth-child(n + 26),
 :root[data-season-intensity="medium"] .seasonal-offer-layer .seasonal-offer-badge:nth-child(n + 17),
-:root[data-season-intensity="medium"] .seasonal-ghost-layer .seasonal-ghost:nth-child(n + 10) {
+:root[data-season-intensity="medium"] .seasonal-ghost-layer .seasonal-ghost:nth-child(n + 10),
+:root[data-season-intensity="medium"] .seasonal-navidad-particles .seasonal-navidad-particle:nth-child(n + 18) {
   display: none;
 }
 
@@ -851,6 +848,40 @@ body {
 }
 
 @media (max-width: 768px) {
+  /* Prevent continuous scroll repaints on mobile browsers across all themes */
+  body,
+  .dark body,
+  :root[data-season-theme="mundial_2026"] body,
+  :root[data-season-theme="halloween"] body,
+  :root[data-season-theme="navidad"] body,
+  :root[data-season-theme="navidad"].dark body,
+  :root[data-season-theme="navidad"] .dark body,
+  :root[data-season-theme="independencia"] body,
+  :root[data-season-theme="amor_amistad"] body,
+  :root[data-season-theme="black_week"] body {
+    background-attachment: scroll !important;
+  }
+
+  /* Limit mobile navidad particles to max 12 (meets mobile performance budget) */
+  .seasonal-navidad-particles .seasonal-navidad-particle:nth-child(n + 13) {
+    display: none !important;
+  }
+
+  /* Deactivate 3rd ambient blob and soften blur on mobile for smooth 60fps */
+  .seasonal-blob-3 {
+    display: none !important;
+  }
+  .seasonal-art-blob {
+    filter: blur(24px) !important;
+    opacity: 0.3 !important;
+  }
+
+  .seasonal-navidad-corner {
+    width: 48px;
+    height: 48px;
+    opacity: 0.25;
+  }
+
   .seasonal-ribbon { width: 44px; height: 20px; top: 12px; }
   .seasonal-ball { top: 66px; right: 16px; font-size: 34px; }
   .seasonal-cup { top: 62px; left: 14px; font-size: 9px; padding: 6px 8px; }
@@ -869,8 +900,13 @@ body {
   .seasonal-lantern,
   .seasonal-ball,
   .seasonal-cup,
-  .seasonal-navidad-particle {
+  .seasonal-navidad-particle,
+  .seasonal-overlay-entrance::after {
     animation: none !important;
+    transition: none !important;
+  }
+  .seasonal-art-blob {
+    display: none !important;
   }
 }
 
@@ -1126,4 +1162,112 @@ body {
 :root[data-season-theme="navidad"] .dark footer {
   border-top-color: rgba(229, 184, 66, 0.22) !important;
 }
+
+/* ── 11. Skeleton Shimmer & Loading States ────────────────────────────────── */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.35) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+.dark .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,255,255,0.08) 50%,
+    transparent 100%
+  );
+}
+.skeleton-line {
+  height: 0.75rem;
+  border-radius: 9999px;
+  background-color: rgb(226 232 240);
+  position: relative;
+  overflow: hidden;
+}
+.dark .skeleton-line {
+  background-color: rgb(30 41 59);
+}
+
+/* ── 12. Custom Tabs Component ───────────────────────────────────────────── */
+.tabs-list {
+  position: relative;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: #e5e7eb;
+}
+.dark .tabs-list {
+  border-bottom-color: #1e293b;
+}
+
+.tabs-list--horizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.tabs-list--vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  border-bottom: none;
+  border-right-width: 1px;
+  border-right-style: solid;
+  border-right-color: #e5e7eb;
+}
+.dark .tabs-list--vertical {
+  border-right-color: #1e293b;
+}
+
+.tab-trigger {
+  background: transparent;
+  border: none;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  position: relative;
+  outline: none;
+}
+
+.tab-trigger[data-state="active"]::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--primary, #0A2A66);
+  border-radius: 3px 3px 0 0;
+  pointer-events: none;
+}
+
+.tab-content {
+  animation-duration: 0.15s;
+  animation-timing-function: ease-out;
+}
+
+@keyframes tab-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.tab-content[data-state="active"] {
+  animation: tab-fade-in 0.15s ease-out;
+}
+
 

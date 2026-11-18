@@ -76,7 +76,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
        hasDiscount: true,
        discountPercentage: safeDiscount,
      };
-   }, [flashSale]);
+   }, [flashSale, product.price, product.id]);
 
   const hasFreeShipping = isFreeShippingAll || displayPrice >= freeShippingThreshold;
 
@@ -163,28 +163,28 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
         {/* Badges superiores izquierdos */}
         <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1 z-10">
           {hasDiscount && (
-            <span className="bg-red-600 text-white text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-md animate-pulse">
+            <span className="bg-red-600 text-white text-[10px] sm:text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-md shadow-md animate-pulse">
               -{discountPercentage}%
             </span>
           )}
           {isNew && (
-            <span className="bg-[#0A2A66] text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow">
+            <span className="bg-[#0A2A66] text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow">
               Nuevo
             </span>
           )}
           {isLowStock && (
-            <span className="bg-amber-500 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow ring-1 ring-amber-300/40">
+            <span className="bg-amber-500 text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow ring-1 ring-amber-300/40">
               ¡Últimas {product.stock}!
             </span>
           )}
           {isOutOfStock && (
-            <span className="bg-red-500 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow">
+            <span className="bg-red-500 text-white text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shadow">
               Agotado
             </span>
           )}
         </div>
 
-        {/* Botón favoritos */}
+        {/* Botón favoritos con target táctil accesible */}
         <button
           type="button"
           aria-label={liked ? "Quitar de favoritos" : "Añadir a favoritos"}
@@ -192,7 +192,7 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
             e.preventDefault();
             toggleWishlist(product.id);
           }}
-          className="absolute top-2 right-2 sm:top-3 sm:right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 dark:bg-slate-900/90 shadow border border-slate-200/80 dark:border-slate-700 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-10"
+          className="absolute top-2 right-2 sm:top-3 sm:right-3 w-9 h-9 sm:w-8 sm:h-8 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-full bg-white/95 dark:bg-slate-900/95 shadow border border-slate-200/80 dark:border-slate-700 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 hover:scale-110 z-10 active:scale-95"
         >
           {liked ? (
             <HeartSolid className="w-4 h-4 text-red-500" />
@@ -333,14 +333,14 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
 
         {/* Cantidad + botón */}
         <div className="flex flex-col gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 xl:flex-row xl:items-center">
-          {/* Qty */}
-          <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-50 dark:bg-slate-900 shrink-0 mx-auto w-full xl:w-auto">
+          {/* Qty con objetivos táctiles accesibles */}
+          <div className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-slate-50 dark:bg-slate-900 shrink-0 mx-auto w-full xl:w-auto">
             <button
               type="button"
               aria-label="Disminuir cantidad"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               disabled={isOutOfStock || quantity <= 1}
-              className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
+              className="w-10 h-10 sm:w-9 sm:h-9 min-w-[40px] min-h-[40px] flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors active:scale-95"
             >
               −
             </button>
@@ -352,18 +352,18 @@ export const ProductCard = React.memo(function ProductCard({ product, idx }: Pro
               aria-label="Aumentar cantidad"
               onClick={() => setQuantity((q) => Math.min(product.stock || 99, q + 1))}
               disabled={isOutOfStock || quantity >= (product.stock || 99)}
-              className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors"
+              className="w-10 h-10 sm:w-9 sm:h-9 min-w-[40px] min-h-[40px] flex items-center justify-center text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 disabled:opacity-30 transition-colors active:scale-95"
             >
               +
             </button>
           </div>
 
-          {/* CTA */}
+          {/* CTA con altura táctil ergonómica */}
           <button
             type="button"
             disabled={isOutOfStock}
             onClick={handleAddToCart}
-            className={`w-full xl:flex-1 h-8 sm:h-9 flex items-center justify-center gap-1 rounded-lg text-xs font-bold transition-all duration-300 shadow-sm ${
+            className={`w-full xl:flex-1 h-10 sm:h-9 min-h-[40px] flex items-center justify-center gap-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all duration-300 shadow-sm ${
               added
                 ? "bg-green-500 text-white shadow-green-200 dark:shadow-green-900/20 scale-[0.97]"
                 : isOutOfStock
